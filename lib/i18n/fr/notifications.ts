@@ -284,6 +284,20 @@ export const notifications = {
     // Sent through a public link: no actor, the project names it.
     legal_form_received: (_actor: string, project: string) =>
       `Une fiche de renseignements de « ${project} » est arrivée : elle est à vérifier.`,
+    // A guest of a collective (retours d'Ibé du 18/11/2026), when the
+    // participation is no longer readable (else `participation` below).
+    participation_confirmed: (_actor: string, project: string) =>
+      `Un artiste invité est d'accord pour un titre de « ${project} ».`,
+    participation_declined: (_actor: string, project: string) =>
+      `Un artiste invité a refusé un titre de « ${project} ».`,
+  },
+  // The same, the artist and the title named: « Jay est d'accord pour
+  // Titre de Jay (à nommer) · Assurance 30. »
+  participation: {
+    participation_confirmed: (artist: string, title: string, project: string) =>
+      `${artist} est d'accord pour ${title} · ${project}.`,
+    participation_declined: (artist: string, title: string, project: string) =>
+      `${artist} a refusé ${title} · ${project}.`,
   },
   open: "Ouvrir",
   push: {

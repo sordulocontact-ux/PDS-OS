@@ -1,10 +1,7 @@
-import Link from "next/link";
-
 import { Avatar } from "@/components/ui/avatar";
 import { StatusDot } from "@/components/ui/status-dot";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
-import type { StepIssue } from "@/lib/plan/steps";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
@@ -18,8 +15,7 @@ export const stepAnchor = (key: string) => `plan-step-${key}`;
 /**
  * A step of the plan, one card on its group's stop (Akili, 05/11/2026: a
  * visual plan; proto « Suite du Cadrage », PROJ-UX-07): « **Stratégie** ·
- * Marketing », why it is there, its real state once it runs and what does
- * not hold; under it its pilot and due date, `actions` on the right
+ * Marketing », why it is there, its real state once it runs; under it its pilot and due date, `actions` on the right
  * (« Modifier », « Lancer maintenant »); `below`: the step's editor. A note
  * of « À anticiper » (`muted`) is a quiet line, no pilot nor frame.
  */
@@ -32,7 +28,6 @@ export function PlanStepCard({
   status,
   pilot,
   dueDate,
-  issues,
   actions,
   below,
   muted = false,
@@ -47,7 +42,6 @@ export function PlanStepCard({
   status: CommonStatus | null;
   pilot: string | null;
   dueDate: string | null;
-  issues: StepIssue[];
   actions?: React.ReactNode;
   below?: React.ReactNode;
   // A note of « À anticiper »: no pilot, no status.
@@ -98,24 +92,6 @@ export function PlanStepCard({
           </div>
         )}
       </div>
-      {issues.length > 0 && (
-        <ul className="flex flex-col gap-1 rounded-lg bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
-          {issues.map((issue) => (
-            <li key={issue.text}>
-              {issue.href ? (
-                <Link
-                  href={issue.href}
-                  className="underline underline-offset-4"
-                >
-                  {issue.text}
-                </Link>
-              ) : (
-                issue.text
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
       {!muted && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">

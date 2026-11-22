@@ -19,7 +19,7 @@ import {
   type PlanColumn,
 } from "@/lib/plan/propose";
 import { loadLaunchedPlan } from "@/lib/plan/queries";
-import { stepStatus, workflowsToReview } from "@/lib/plan/steps";
+import { stepStatus } from "@/lib/plan/steps";
 import { formatShortInstant } from "@/lib/utils/day";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 import { applicableWorkflows } from "@/lib/workflow-status/rules";
@@ -69,8 +69,6 @@ export default async function FramingPlanPage({
         context={{
           states: flows.states,
           targetDate: target,
-          review: Object.fromEntries(workflowsToReview(drift)),
-          dependencies: flows.dependencies,
         }}
       />
     );
@@ -106,7 +104,6 @@ export default async function FramingPlanPage({
               status={stepStatus(i, flows.states)}
               pilot={i.ownerName}
               dueDate={i.dueDate}
-              issues={[]}
               muted={i.workflow === null && i.column === "anticipate"}
               actions={
                 // A workflow a plan launched before « Lancer le plan »
@@ -168,8 +165,6 @@ export default async function FramingPlanPage({
             projectId={projectId}
             plan={plan}
             flows={flows}
-            drift={drift}
-            targetDate={target}
             members={k.framing.members}
             editable={canEdit}
           />

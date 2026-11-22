@@ -1,5 +1,6 @@
 import { MappingPanel } from "@/components/legal/contracts/mapping-panel";
 import { TemplateRequestCard } from "@/components/legal/contracts/template-request-card";
+import { TitleContractsRecap } from "@/components/legal/title-contracts/title-contracts-recap";
 import { LaunchedDemarches } from "@/components/legal/demarches/launched-demarches";
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
 import { PlanView } from "@/components/legal/plan/plan-view";
@@ -22,6 +23,7 @@ const fr = { legalContracts, legalDemarches, legalJourney };
  */
 export async function PlanStep({ projectId }: { projectId: string }) {
   const {
+    project,
     plan,
     tracking,
     agreements,
@@ -53,6 +55,15 @@ export async function PlanStep({ projectId }: { projectId: string }) {
       ))}
     </div>
   );
+  // A collective: the contracts each title needs, reminded above the
+  // people's (confirmed in the title's step).
+  const titleContracts = project.collective &&
+    plan.state !== "needs_confirmation" && (
+      <TitleContractsRecap
+        projectId={projectId}
+        masterIds={project.masters.map((m) => m.id)}
+      />
+    );
   const contracts = agreements.rows.length > 0 &&
     plan.state !== "needs_confirmation" && (
       <StepSection
@@ -80,6 +91,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
           {tracking.state === "tracking" && tracking.added > 0 && (
             <AddedActions projectId={projectId} count={tracking.added} />
           )}
+          {titleContracts}
           {contracts}
           <LaunchedDemarches
             projectId={projectId}
@@ -92,6 +104,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
         // 28 px between sections, as between the plan's own (StepSection).
         <div className="flex flex-col gap-7">
           {decisions}
+          {titleContracts}
           {contracts}
           <PlanView projectId={projectId} plan={plan} />
         </div>

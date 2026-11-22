@@ -17,6 +17,7 @@ import {
 import { groupOf } from "@/lib/facts/types";
 import { legal } from "@/lib/i18n/fr/legal";
 import { masterPage } from "@/lib/i18n/fr/master-page";
+import { isMainArtist, type MainArtist } from "@/lib/legal/main-artist";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
 import type { LegalFact } from "@/lib/legal/types";
 import type { NetworkRole } from "@/lib/network/types";
@@ -121,9 +122,26 @@ function contributorFact(
   };
 }
 
+/** A collective's main artist, once at the head of Personnes, for every
+ * title (§ 3.3 of Ibé's 18/11/2026). */
+export function mainArtistFact(main: MainArtist): LegalFact {
+  return {
+    key: `main-artist-${main.id ?? main.name}`,
+    label: main.name,
+    detail: t.facts.mainArtist,
+    source: t.sources.artist,
+    status: "known",
+    statusLabel: t.states.catalogArtist,
+    href: main.id ? routes.artist(main.id) : null,
+    ...(main.id && { peek: { kind: "artist" as const, id: main.id } }),
+  };
+}
+
 /**
  * Who worked on a title: its performers first (as on the title's Crédits),
- * then its other credits; one "no credit" fact when there is none.
+ * then its other credits; one "no credit" fact when there is none. A
+ * collective's main artist (`main`) is said once for every title
+ * (mainArtistFact), not on each.
  */
 export function peopleFacts(
   master: InventoryMaster,
@@ -134,6 +152,7 @@ export function peopleFacts(
   // The project's unlinked credits by name: adding or linking a person links
   // every credit of that name, on every title (unlinkedCreditsByName).
   sameName: Map<string, CreditLink[]>,
+  main: MainArtist | null = null,
 ): LegalFact[] {
   if (performers.length === 0 && contributors.length === 0)
     return [
@@ -154,7 +173,9 @@ export function peopleFacts(
     ),
   );
   return [
-    ...performers.map((p) => performerFact(master, p)),
+    ...performers
+      .filter((p) => !isMainArtist(main, p))
+      .map((p) => performerFact(master, p)),
     ...contributors.map((c) =>
       contributorFact(master, c, network, rights, sameName, personOf.get(c.id)),
     ),

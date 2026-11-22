@@ -10,10 +10,34 @@ import {
   IconTriangleWarning,
 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import {
+  Fragment,
+  useOptimistic,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 
-import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { IconArrowUpRight, IconDisc, IconUserPlus } from "@/components/icons";
+import {
+  ContactFacts,
+  NoteLine,
+  PlanCallButton,
+  ReleaseChoice,
+  plansCall,
+  releaseValueOf,
+  type ReleaseValue,
+} from "@/components/projects/titles/recap-edits";
+import {
+  AccordFacts,
+  ContactStatePill,
+  FichePill,
+  LegalFacts,
+  MixPill,
+  PILL_LINK,
+  caption,
+  muted,
+} from "@/components/projects/titles/recap-facts";
 import {
   AddParticipationForm,
   AttachCatalogTitleForm,
@@ -22,7 +46,7 @@ import {
   type ArtistChoices,
 } from "@/components/projects/titles/title-forms";
 import { WaiverLines } from "@/components/legal/waiver-lines";
-import { EmptyState } from "@/components/shell/empty-state";
+import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -34,19 +58,20 @@ import {
   DataTableGroupRow,
   DataTableHead,
   DataTableHeader,
-  DataTableLink,
-  DataTableRow,
   EMPTY_CELL,
+  ROW_INSET,
 } from "@/components/ui/data-table";
+import { FilterChip } from "@/components/ui/filter-chip";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { contracts } from "@/lib/i18n/fr/contracts";
-import { deals } from "@/lib/i18n/fr/deals";
+import { todayInParis } from "@/lib/contracts/types";
+import type { SharedNegotiationCall } from "@/lib/deals/negotiation-call-rules";
 import { demos } from "@/lib/i18n/fr/demos";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { participationWaivers } from "@/lib/i18n/fr/participation-waivers";
@@ -54,47 +79,30 @@ import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import { setTitleParticipationStatus } from "@/lib/projects/participation-actions";
 import { isActiveParticipation } from "@/lib/projects/participation-rules";
 import {
+  CONTACT_STATES,
+  type ContactState,
+  type RecapParticipation,
+  type RecapTitle,
+  type TitleRecap,
+} from "@/lib/projects/recap-rules";
+import {
   abandonProjectTitle,
   reactivateProjectTitle,
+  setTitleRelease,
   startTitleWork,
 } from "@/lib/projects/title-actions";
-import {
-  contractGap,
-  titleMasterLabel,
-  titleMasterStatus,
-  type BoardParticipation,
-  type BoardTitle,
-  type DealReach,
-  type ParticipationContract,
-} from "@/lib/projects/title-board-rules";
-import {
-  creditModeOf,
-  masterNameOf,
-  projectTitleLabel,
-} from "@/lib/projects/title-rules";
-import {
-  contractStateTone,
-  participationStatusTone,
-  projectTitleTone,
-  workflowStatusTone,
-} from "@/lib/ui/state-tones";
-import { todayInParis } from "@/lib/contracts/types";
-import { formatShortDay } from "@/lib/utils/day";
+import { contractGap, titleMixFact } from "@/lib/projects/title-board-rules";
+import { creditModeOf, masterNameOf } from "@/lib/projects/title-rules";
+import { projectTitleTone, type Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
-import type { Tone } from "@/lib/ui/state-tones";
+import { formatShortDay } from "@/lib/utils/day";
 
 const fr = {
-  contracts,
-  deals,
   demos,
   dialogs,
   participationWaivers,
   projectTitles,
 };
-
-const caption =
-  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
-const muted = "text-[color:var(--text-tertiary)]";
 
 /** Where a row leads: the project's Master (a title with a master), its
  * release's deposit in the Distribution (lot 15, by title: its own release,
@@ -105,19 +113,22 @@ export type BoardLinks = {
   distribution: Record<string, TitleDepositLink> | null;
 };
 
-const labelOf = (title: BoardTitle) =>
-  projectTitleLabel({
-    position: title.position,
-    workingTitle: title.workingTitle,
-    masterTitle: masterNameOf(title.master),
-  });
+/** Which artists' columns the table has: Artiste and Statut always; Accord
+ * when the reader sees deals (dealReach, lot 6); Juridique with
+ * manage_legal; « ⋯ » of the artists for whoever writes the titles (none
+ * for a reader: no empty column on the right). */
+type Columns = { accord: boolean; legal: boolean; actions: boolean };
+
+// The artists' columns at full width (Artiste, Statut, Accord, Juridique).
+const dataColumnCount = (columns: Columns) =>
+  2 + Number(columns.accord) + Number(columns.legal);
 
 /** How a confirmation credits the title (creditModeOf), and the warning of
  * a title a simple project shares (« Crédits à vérifier au Catalogue : ce
  * titre est aussi dans le projet … », décision 10). */
 type Credit = { mode: "now" | "later" | "manual"; shared: string };
 
-function creditOf(title: BoardTitle): Credit {
+function creditOf(title: RecapTitle): Credit {
   return {
     mode: creditModeOf(title),
     shared: title.sharedWith
@@ -129,18 +140,25 @@ function creditOf(title: BoardTitle): Credit {
   };
 }
 
+/** A title without a name of its own (its label says its guests). */
+const isUnnamed = (title: RecapTitle) =>
+  !title.workingTitle && !masterNameOf(title.master);
+
 /** Under the name: why it was abandoned, else where it stands in the
- * Catalogue (its maquette's status when it is one). */
-function detailOf(title: BoardTitle, label: string): string {
+ * Catalogue (its maquette's status when it is one); the number first for a
+ * title still to name (two « Titre de Jay (à nommer) » stay apart). */
+function detailOf(title: RecapTitle, label: string): string {
   const t = fr.projectTitles;
   if (title.status === "abandoned" && title.abandonedAt && title.abandonReason)
     return t.abandonedOn(
       formatShortDay(title.abandonedAt, { bare: true }),
       title.abandonReason,
     );
-  if (!title.master) return t.notInCatalog;
+  const number = isUnnamed(title) ? `${t.number(title.position)} · ` : "";
+  if (!title.master) return `${number}${t.notInCatalog}`;
   // Lot 7: its title in the Catalogue waits for its name.
-  if (title.master.provisional) return t.catalogProvisional(title.master.title);
+  if (title.master.provisional)
+    return `${number}${t.catalogProvisional(title.master.title)}`;
   const demo = title.master.demoStatus
     ? fr.demos.badge(fr.demos.statuses[title.master.demoStatus])
     : null;
@@ -150,141 +168,142 @@ function detailOf(title: BoardTitle, label: string): string {
     : t.catalog(title.master.title);
 }
 
-/** The words of a participation's contract; null: not expected (« — »). */
-function contractLabel(contract: ParticipationContract): string | null {
-  const t = fr.projectTitles.board.contract;
-  switch (contract.kind) {
-    case "contract":
-      return fr.contracts.states[contract.state];
-    case "hidden":
-      return t.hidden;
-    case "missing":
-      return t.missing;
-    case "none":
-      return null;
-  }
-}
+/** The title's Master, open on this title (lot 8), once it has a master; an
+ * abandoned title is out of it (lot 9). */
+const masterHrefOf = (title: RecapTitle, links: BoardLinks) =>
+  title.master && links.master && title.status !== "abandoned"
+    ? `${links.master}?titre=${title.master.id}`
+    : null;
 
-/** The words of a participation's negotiation, by what the viewer knows of
- * the project's deals (DealReach); null: unknown (« — »). */
-function negotiationLabel(
-  participation: BoardParticipation,
-  reach: DealReach,
-): string | null {
-  const deal = participation.deal;
-  if (deal)
-    return deal.stage === "agreement" && deal.agreementStatus
-      ? fr.deals.agreement[deal.agreementStatus]
-      : fr.deals.stages[deal.stage];
-  return reach === "all" ? fr.projectTitles.board.negotiation.none : null;
-}
-
-function ownerLabel(
-  participation: BoardParticipation,
-  reach: DealReach,
-): string | null {
-  const deal = participation.deal;
-  if (deal)
-    return deal.assignee ?? fr.projectTitles.board.negotiation.unassigned;
-  return reach === "all" ? EMPTY_CELL : null;
-}
-
-// The columns (a project's content is 1180 px at most): those of the
-// participations, shown from 1280 px; under it, said under the name.
-const COLUMN = {
-  status: "w-28",
-  contract: "w-40",
-  negotiation: "w-56",
-  owner: "w-32",
+// The table's tiers, read on its own width (`@container` on its frame), not
+// the window's: what a 1280 px window leaves it depends on the sidebars
+// (932 px with both, the main one folded to icons; 782 with it open). Fixed
+// columns: Titre 248, Statut 128, Accord 176, Juridique 176, « ⋯ » 48;
+// Artiste takes the rest, never under 200 while the title's cell is merged.
+// - From 976 px, every column (776 fixed): Artiste 200 at 976, 404 in a
+//   project's 1180 (a window from 1528 px).
+// - From 624 px, Titre, Artiste, Statut (424 fixed): Artiste 200 at 624,
+//   508 in the 932 of a 1280 px window with both sidebars; Accord and
+//   Juridique under the name (still links and buttons).
+// - Under 624 (a phone, a tablet beside the sidebars): no merged cell; the
+//   title's own row across the table, then its artists, their status under
+//   the name too.
+// Every row has as many visible cells as the header at each tier, « ⋯ » of
+// an artist always last: a colSpan being the same at every width, a cell
+// whose span changes is written once per tier (the row « Aucun artiste »).
+// `min-w-*`: the artist's `w-full` would otherwise squeeze the fixed
+// columns to their longest word. The cells wrap (their pills too,
+// recap-facts): nothing widens a column, the table never scrolls sideways.
+// Literal classes: Tailwind only generates what it reads in full.
+const TIER = {
+  // The title's merged cell, Statut: from 624 px.
+  merged: "hidden @min-[624px]:table-cell",
+  // Accord, Juridique: from 976 px.
+  full: "hidden @min-[976px]:table-cell",
+  // From 624 to 976 px only.
+  between: "hidden @min-[624px]:table-cell @min-[976px]:hidden",
+  // Under 624 px only: the title's own row, a cell.
+  stacked: "@min-[624px]:hidden",
 } as const;
 
-// The name's cell wraps (the table's cells do not): its lines under the
-// name — detail, warning, the hidden columns — never widen the table past
-// a phone's screen; the name itself stays on one line (DataTableLink).
-const NAME_CELL = "whitespace-normal";
+const COLUMN = {
+  title: "w-62 min-w-62",
+  status: "w-32 min-w-32",
+  accord: "w-44 min-w-44 whitespace-normal",
+  legal: "w-44 min-w-44 whitespace-normal",
+} as const;
 
-/** Under 1280 px, what the hidden columns say, under the name. */
-type HiddenFact = { key: string; label: string; value: string };
+// The artist's cell takes what the fixed columns leave (`max-w-0` with
+// `w-full`: its content cut or wrapped, never pushing the table wider than
+// its frame). 16 px from the edge or from the title's cell, at every tier:
+// the row's inset (ROW_INSET) only reaches the first cell of a row, which is
+// the title's in the first row of a group and the artist's in the others.
+const ARTIST_CELL = "w-full max-w-0 whitespace-normal pl-4";
 
-function HiddenFacts({ facts }: { facts: HiddenFact[] }) {
-  if (facts.length === 0) return null;
+// The title's cell: a block on the soft ground, its facts stacked, from the
+// top of its artists' rows.
+const TITLE_CELL = "whitespace-normal align-top bg-[var(--surface-soft)]";
+
+// A row of the board. Not DataTableRow: no link covers a row here (the
+// title's cell, in the first row of its group, spans the others, which a
+// covering link would lie over), so nothing lights up under the pointer and
+// no row is made a containing block. Every title in one body: the table's
+// own hairline (DataTableBody) sets two titles apart, at the top of a
+// group's first artist row (`data-lead`) from 624 px, where the title's own
+// row above it is hidden; under 624 px that row carries it and the first
+// artist row has none (the soft ground of the title already sets it apart).
+// None under the header (`data-first`).
+const ROW = cn(
+  "border-0 hover:bg-transparent has-aria-expanded:bg-transparent @max-[624px]:[&[data-lead]>*]:border-t-0 [&[data-first]>*]:border-t-0",
+  ROW_INSET,
+);
+
+function Row({
+  lead = false,
+  first = false,
+  className,
+  children,
+}: {
+  lead?: boolean;
+  // The first title's first artist row: no hairline under the header.
+  first?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <span className="flex flex-wrap gap-x-3 gap-y-0.5 xl:hidden">
-      {facts.map((fact) => (
-        <span key={fact.key} className={caption}>
-          {`${fact.label} : `}
-          <span className="text-[color:var(--text-secondary)]">
-            {fact.value}
-          </span>
-        </span>
-      ))}
-    </span>
+    <TableRow
+      data-lead={lead ? "" : undefined}
+      data-first={lead && first ? "" : undefined}
+      className={cn(ROW, className)}
+    >
+      {children}
+    </TableRow>
   );
 }
 
-/** A title's facts in the space of its participations' columns: its
- * Master, then its Distribution, each named. */
-function TitleFacts({
-  master,
-  masterStatus,
-  distribution,
+// A name that opens its page (the title's Master, the artist's démarche):
+// the link is the name itself.
+const NAME_LINK =
+  "rounded-sm outline-none hover:underline focus-visible:underline";
+
+/** Under the name, a column folded there: its label, its facts (still
+ * links and buttons). */
+function StackedFact({
+  label,
+  children,
 }: {
-  master: string | null;
-  masterStatus: ReturnType<typeof titleMasterStatus>;
-  distribution: TitleDepositLink | null;
+  label: string;
+  children: ReactNode;
 }) {
-  const t = fr.projectTitles.board;
   return (
-    <span className="flex flex-wrap items-center gap-x-6 gap-y-1.5">
-      <span className="flex items-center gap-2">
-        <span className={caption}>{t.columns.master}</span>
-        {master && masterStatus ? (
-          <StatusBadge tone={workflowStatusTone[masterStatus]} size="sm">
-            {master}
-          </StatusBadge>
-        ) : (
-          <span className={muted}>{EMPTY_CELL}</span>
-        )}
-      </span>
-      <span className="flex items-center gap-2">
-        <span className={caption}>{t.columns.distribution}</span>
-        {distribution ? (
-          <ViewLink
-            href={distribution.href}
-            className="relative z-10 rounded-full focus-visible:outline-2"
-          >
-            <StatusBadge tone={distribution.tone} size="sm">
-              {distribution.label}
-            </StatusBadge>
-          </ViewLink>
-        ) : (
-          <span className={muted}>{EMPTY_CELL}</span>
-        )}
-      </span>
+    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+      <span className={caption}>{label}</span>
+      {children}
     </span>
   );
 }
 
 /**
- * « Titres et artistes » of a collective project (docs/pds-mic-plan.md,
- * lot 6), replacing the minimal list of lots 2 and 3: one DataTable, one row
- * per title and, under it, one row per participation (indented). A title
- * row says its status, where it stands in the Master, and its Distribution
- * (with the project's until lot 15); a participation row its status, its
- * contract, its deal's stage and who negotiates it (Business module, read
- * under its rights: the two columns only when the viewer reads deals). The
- * abandoned titles come last, under « Abandonnés », their artists greyed.
- * A title row opens the project's Master, a participation row its contract.
- * For whoever writes the project, each « ⋯ »: add an artist, rename,
- * abandon or reactivate a title; change the status of a participation,
- * withdraw it (détacher) or bring it back (rattacher). Every state is
- * computed (lib/projects/title-board-rules.ts), never two titles mixed.
- * On a phone: the name and the status; the other columns under the name.
+ * « Titres et artistes » of a collective project, read as the team's Excel
+ * (retours d'Ibé du 18/11/2026, lot 2; lot 6 of docs/pds-mic-plan.md): one
+ * DataTable, one group per title, « Titre à gauche » — the title's cell on
+ * the left over all its artists' rows (its label and status, « Nommer »
+ * while it has no name, its place in the Catalogue, then Mix, Beatmaker,
+ * Sortie, Distribution, one under the other; its « ⋯ » at the top right),
+ * then one row per artist, every column aligned: Artiste (name and role,
+ * note, contact: number, « Appeler », « WhatsApp »), Statut (« À contacter
+ * », « Contacté », « D'accord »), Accord (deal, rate, call; « Caler le call
+ * »), Juridique (fiche, contract). Space between two groups, no rule. « Le
+ * tableau lit, les modules font »: each name and pill leads to its module;
+ * only the contact, the release and the note are edited here. Counters on
+ * top filter the artists by status. The abandoned titles come last, under «
+ * Abandonnés ». For whoever writes the project, each « ⋯ » as in lot 6.
+ * Narrower, Accord and Juridique under the artist's name, then the title on
+ * its own row (TIER).
  */
 export function TitlesBoard({
   projectId,
-  titles,
-  dealReach,
+  recap,
   canManage,
   artists,
   masterOptions = {},
@@ -292,8 +311,7 @@ export function TitlesBoard({
   today = todayInParis(new Date()),
 }: {
   projectId: string;
-  titles: BoardTitle[];
-  dealReach: DealReach;
+  recap: TitleRecap;
   canManage: boolean;
   artists: ArtistChoices;
   // The Catalogue's titles not in the project yet (« Rattacher un titre du
@@ -304,7 +322,9 @@ export function TitlesBoard({
   today?: string;
 }) {
   const t = fr.projectTitles.board;
-  if (titles.length === 0)
+  const r = fr.projectTitles.recap;
+  const [filter, setFilter] = useState<ContactState[]>([]);
+  if (recap.titles.length === 0)
     return (
       <EmptyState
         icon={IconDisc}
@@ -313,97 +333,303 @@ export function TitlesBoard({
       />
     );
 
-  const deals = dealReach !== "none";
-  // Every column, hidden ones included (the group row spans them all).
-  const columns = deals ? 6 : 4;
-  const live = titles.filter((title) => title.status !== "abandoned");
-  const abandoned = titles.filter((title) => title.status === "abandoned");
-  const rows = (list: BoardTitle[]) =>
-    list.map((title) => (
-      <TitleRows
-        key={title.id}
-        projectId={projectId}
-        title={title}
-        dealReach={dealReach}
-        canManage={canManage}
-        artists={artists}
-        masterOptions={masterOptions}
-        links={links}
-        today={today}
-      />
+  const columns: Columns = {
+    accord: recap.dealReach !== "none",
+    legal: recap.canReadLegal,
+    actions: canManage,
+  };
+  // Every column, hidden ones included (a group row spans them): the
+  // title's, the artists', « ⋯ » when there is one.
+  const allColumns = dataColumnCount(columns) + 1 + Number(columns.actions);
+
+  // The counters filter the artists; a title stays while one of its
+  // artists does (titles abandoned are out of the counts, so of the
+  // filter too). None chosen: everything.
+  const filtering = filter.length > 0;
+  const groups = recap.titles
+    .map((title) => ({
+      title,
+      participations: filtering
+        ? title.participations.filter(
+            (p) =>
+              p.recap.contactState !== null &&
+              filter.includes(p.recap.contactState),
+          )
+        : title.participations,
+    }))
+    .filter(
+      (group) =>
+        !filtering ||
+        (group.title.status !== "abandoned" && group.participations.length > 0),
+    );
+  const live = groups.filter((g) => g.title.status !== "abandoned");
+  const abandoned = groups.filter((g) => g.title.status === "abandoned");
+
+  // Décision 4.1: where each artist is already invited (a participation in
+  // play, on a title not abandoned), for « Ajouter un artiste ».
+  const invited = new Map<string, Array<{ titleId: string; label: string }>>();
+  for (const title of recap.titles) {
+    if (title.status === "abandoned") continue;
+    for (const p of title.participations)
+      if (isActiveParticipation(p.status))
+        invited.set(p.artist.id, [
+          ...(invited.get(p.artist.id) ?? []),
+          { titleId: title.id, label: title.recap.label },
+        ]);
+  }
+  const invitedOn = (titleId: string) =>
+    Object.fromEntries(
+      [...invited]
+        .map(
+          ([artistId, list]) =>
+            [
+              artistId,
+              list.filter((i) => i.titleId !== titleId).map((i) => i.label),
+            ] as const,
+        )
+        .filter(([, labels]) => labels.length > 0),
+    );
+
+  const total = CONTACT_STATES.reduce((sum, s) => sum + recap.counts[s], 0);
+  const rows = (list: typeof groups, first: boolean) =>
+    list.map(({ title, participations }, index) => (
+      <Fragment key={title.id}>
+        <TitleGroup
+          first={first && index === 0}
+          projectId={projectId}
+          title={title}
+          participations={participations}
+          columns={columns}
+          canManage={canManage}
+          canReadLegal={recap.canReadLegal}
+          canEditNetwork={recap.canEditNetwork}
+          call={recap.call}
+          artists={artists}
+          invitedOn={invitedOn(title.id)}
+          masterOptions={masterOptions}
+          links={links}
+          today={today}
+        />
+      </Fragment>
     ));
 
   return (
-    <DataTable>
-      <DataTableHeader>
-        <DataTableHead fill>{t.columns.title}</DataTableHead>
-        <DataTableHead className={COLUMN.status}>
-          {t.columns.status}
-        </DataTableHead>
-        <DataTableHead hideBelow="xl" className={COLUMN.contract}>
-          {t.columns.contract}
-        </DataTableHead>
-        {deals && (
-          <DataTableHead hideBelow="xl" className={COLUMN.negotiation}>
-            {t.columns.negotiation}
-          </DataTableHead>
-        )}
-        {deals && (
-          <DataTableHead hideBelow="xl" className={COLUMN.owner}>
-            {t.columns.owner}
-          </DataTableHead>
-        )}
-        <DataTableActionsHead label={t.columns.actions} />
-      </DataTableHeader>
-      <DataTableBody>
-        {rows(live)}
-        {abandoned.length > 0 && (
-          <DataTableGroupRow columns={columns}>
-            <span className="text-[length:var(--type-body-md)] font-semibold">
-              {t.abandonedGroup}
-              <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
-                {abandoned.length}
+    <div className="flex flex-col gap-3">
+      {total > 0 && (
+        <div
+          role="group"
+          aria-label={r.filters}
+          className="flex flex-wrap gap-2"
+        >
+          {CONTACT_STATES.map((state) => (
+            <FilterChip
+              key={state}
+              pressed={filter.includes(state)}
+              disabled={recap.counts[state] === 0}
+              onClick={() =>
+                setFilter((current) =>
+                  current.includes(state)
+                    ? current.filter((s) => s !== state)
+                    : [...current, state],
+                )
+              }
+            >
+              {r.contactStates[state]}
+              <span className="tabular-nums opacity-60">
+                {recap.counts[state]}
               </span>
-            </span>
-          </DataTableGroupRow>
-        )}
-        {rows(abandoned)}
-      </DataTableBody>
-    </DataTable>
+            </FilterChip>
+          ))}
+        </div>
+      )}
+      {groups.length === 0 ? (
+        <EmptyNote>{r.filteredEmpty}</EmptyNote>
+      ) : (
+        // The tiers read this frame's width (TIER); `isolate`: what stands
+        // above a row (`relative z-10`) stays inside the table.
+        <div className="@container isolate">
+          <DataTable>
+            <DataTableHeader>
+              <DataTableHead className={cn(COLUMN.title, TIER.merged)}>
+                {t.columns.title}
+              </DataTableHead>
+              <DataTableHead fill className="w-full max-w-0 pl-4">
+                {r.columns.artist}
+              </DataTableHead>
+              <DataTableHead className={cn(COLUMN.status, TIER.merged)}>
+                {r.columns.status}
+              </DataTableHead>
+              {columns.accord && (
+                <DataTableHead className={cn(COLUMN.accord, TIER.full)}>
+                  {r.columns.accord}
+                </DataTableHead>
+              )}
+              {columns.legal && (
+                <DataTableHead className={cn(COLUMN.legal, TIER.full)}>
+                  {r.columns.legal}
+                </DataTableHead>
+              )}
+              {columns.actions && (
+                <DataTableActionsHead label={t.columns.actions} />
+              )}
+            </DataTableHeader>
+            <DataTableBody>
+              {rows(live, true)}
+              {abandoned.length > 0 && (
+                <DataTableGroupRow columns={allColumns}>
+                  <span className="text-[length:var(--type-body-md)] font-semibold">
+                    {t.abandonedGroup}
+                    <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
+                      {abandoned.length}
+                    </span>
+                  </span>
+                </DataTableGroupRow>
+              )}
+              {rows(abandoned, live.length === 0)}
+            </DataTableBody>
+          </DataTable>
+        </div>
+      )}
+    </div>
   );
 }
 
-type RowProps = {
+type Dialog = "add" | "rename" | "name" | "abandon" | "attach";
+
+type GroupProps = {
   projectId: string;
-  title: BoardTitle;
-  dealReach: DealReach;
+  title: RecapTitle;
+  // Its artists shown (the counters may filter them).
+  participations: RecapParticipation[];
+  columns: Columns;
   canManage: boolean;
+  canReadLegal: boolean;
+  canEditNetwork: boolean;
+  call: SharedNegotiationCall | null;
   artists: ArtistChoices;
+  invitedOn: Record<string, string[]>;
   masterOptions: Record<string, string>;
   links: BoardLinks;
   today: string;
+  // The table's first title (no hairline under the header).
+  first: boolean;
 };
 
-/** A title's rows: its own, then its participations, or « Aucun artiste
- * invité » (with « Ajouter un artiste » for whoever writes). */
-function TitleRows(props: RowProps) {
-  const { projectId, title, dealReach, canManage, artists } = props;
-  const label = labelOf(title);
+/** A title's group, its rows in the board's body: the title's cell (a <th> over the
+ * group, `rowgroup`) in its first row, spanning its artists' rows, or «
+ * Aucun artiste invité » (with « Ajouter un artiste » for whoever writes).
+ * Under 624 px the same cell on a row of its own above them. Holds the
+ * title's dialogs (« ⋯ », « Nommer »), once, and its release, saved at the
+ * choice and shown at once. */
+function TitleGroup(props: GroupProps) {
+  const { projectId, title, participations, columns, canManage } = props;
+  const label = title.recap.label;
   const abandoned = title.status === "abandoned";
-  const [adding, setAdding] = useState(false);
-  const deals = dealReach !== "none";
+  const [dialog, setDialog] = useState<Dialog | null>(null);
+  const [release, setRelease] = useOptimistic(title.recap.releaseDecision);
+  const [releasePending, startRelease] = useTransition();
   const credit = creditOf(title);
+  const pickRelease = (value: ReleaseValue) =>
+    startRelease(async () => {
+      const next = value === "yes" ? true : value === "no" ? false : null;
+      setRelease(next);
+      const result = await setTitleRelease({
+        projectId,
+        titleId: title.id,
+        release: next,
+      });
+      if (!result.ok) toast.error(result.error);
+    });
+
+  // Rendered twice (the merged cell, the row of its own under 624 px), one
+  // shown: its menu and buttons open the dialogs held once below.
+  const block = (
+    <TitleBlock
+      title={title}
+      label={label}
+      links={props.links}
+      canManage={canManage}
+      canReadLegal={props.canReadLegal}
+      today={props.today}
+      release={releaseValueOf(release)}
+      releasePending={releasePending}
+      onRelease={pickRelease}
+      onDialog={setDialog}
+      menu={
+        <TitleMenu
+          projectId={projectId}
+          title={title}
+          label={label}
+          canManage={canManage}
+          onDialog={setDialog}
+        />
+      }
+    />
+  );
+  const titleCell = (
+    <DataTableCell
+      scope="rowgroup"
+      rowSpan={Math.max(participations.length, 1)}
+      className={cn(COLUMN.title, TIER.merged, TITLE_CELL)}
+    >
+      {block}
+      <TitleDialogs
+        projectId={projectId}
+        title={title}
+        label={label}
+        artists={props.artists}
+        invitedOn={props.invitedOn}
+        masterOptions={props.masterOptions}
+        canManage={canManage}
+        credit={credit}
+        dialog={dialog}
+        onDialog={setDialog}
+      />
+    </DataTableCell>
+  );
+
+  const noArtist = (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span className={muted}>{fr.projectTitles.board.noArtist}</span>
+      {canManage &&
+        !abandoned &&
+        Object.keys(props.artists.options).length > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setDialog("add")}
+          >
+            {fr.projectTitles.participations.add.action}
+          </Button>
+        )}
+    </span>
+  );
+
   return (
     <>
-      <TitleRow {...props} label={label} adding={adding} onAdding={setAdding} />
-      {title.participations.map((participation) => (
+      <Row className={TIER.stacked}>
+        {/* Across the table's columns there (Artiste, « ⋯ » if any). */}
+        <DataTableCell
+          scope="rowgroup"
+          colSpan={columns.actions ? 2 : 1}
+          className={TITLE_CELL}
+        >
+          {block}
+        </DataTableCell>
+      </Row>
+      {participations.map((participation, index) => (
         <ParticipationRow
           key={participation.id}
           projectId={projectId}
           participation={participation}
+          titleCell={index === 0 ? titleCell : null}
+          first={props.first}
           label={label}
           credit={credit}
-          dealReach={dealReach}
+          columns={columns}
+          call={props.call}
+          canEditNetwork={props.canEditNetwork && !abandoned}
           today={props.today}
           // Its title abandoned: greyed and not edited (reactivate it first).
           dimmed={abandoned}
@@ -417,272 +643,328 @@ function TitleRows(props: RowProps) {
           }
         />
       ))}
-      {title.participations.length === 0 && !abandoned && (
-        <DataTableRow>
-          {/* Over the status column too (no participation, no status):
-              the button never widens the table past a phone's screen. */}
-          <DataTableCell fill className={NAME_CELL} colSpan={2}>
-            <span className="flex flex-wrap items-center gap-x-3 gap-y-2 pl-6">
-              <span className={muted}>{fr.projectTitles.board.noArtist}</span>
-              {canManage && Object.keys(artists.options).length > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAdding(true)}
-                >
-                  {fr.projectTitles.participations.add.action}
-                </Button>
-              )}
-            </span>
+      {participations.length === 0 && (
+        <Row lead first={props.first}>
+          {titleCell}
+          {/* Over the artists' columns shown at each tier (TIER): 1 under
+              624 px, Artiste and Statut to 976, then all of them. */}
+          <DataTableCell className={cn(ARTIST_CELL, TIER.stacked)}>
+            {noArtist}
           </DataTableCell>
-          <DataTableCell hideBelow="xl" colSpan={deals ? 3 : 1}>
-            {null}
+          <DataTableCell
+            colSpan={2}
+            className={cn("pl-4 whitespace-normal", TIER.between)}
+          >
+            {noArtist}
           </DataTableCell>
-          <DataTableActionsCell>{null}</DataTableActionsCell>
-        </DataTableRow>
+          <DataTableCell
+            colSpan={dataColumnCount(columns)}
+            className={cn("pl-4 whitespace-normal", TIER.full)}
+          >
+            {noArtist}
+          </DataTableCell>
+          {columns.actions && (
+            <DataTableActionsCell>{null}</DataTableActionsCell>
+          )}
+        </Row>
       )}
     </>
   );
 }
 
-function TitleRow({
-  projectId,
+/** A label and its value in the title's cell, aligned with the others. */
+function TitleFact({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    <>
+      <dt className={caption}>{name}</dt>
+      <dd className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+        {children}
+      </dd>
+    </>
+  );
+}
+
+/** The title's cell, one under the other: its label (to its Master) and
+ * status, « ⋯ » at the top right; its number and place in the Catalogue
+ * (why it was abandoned); « Nommer » while it has no name (Ibé 18/11, 37:03:
+ * « il faut les mettre dans le catalogue d'abord ? »); then Mix (its
+ * Master), Beatmaker (their fiche; no line without one), Sortie (oui / non
+ * / pas décidé, edited here), Distribution (once the project has one); the
+ * warnings of a shared master and, for whoever does not read the
+ * Juridique, of contracts not signed. */
+function TitleBlock({
   title,
-  dealReach,
-  canManage,
-  artists,
-  masterOptions,
-  links,
-  today,
   label,
-  adding,
-  onAdding,
-}: RowProps & {
+  links,
+  canManage,
+  canReadLegal,
+  today,
+  release,
+  releasePending,
+  onRelease,
+  onDialog,
+  menu,
+}: {
+  title: RecapTitle;
   label: string;
-  adding: boolean;
-  onAdding: (open: boolean) => void;
+  links: BoardLinks;
+  canManage: boolean;
+  canReadLegal: boolean;
+  today: string;
+  release: ReleaseValue;
+  releasePending: boolean;
+  onRelease: (value: ReleaseValue) => void;
+  onDialog: (dialog: Dialog) => void;
+  menu: ReactNode;
 }) {
   const t = fr.projectTitles;
+  const f = t.recap.facts;
   const abandoned = title.status === "abandoned";
-  const deals = dealReach !== "none";
+  const masterHref = masterHrefOf(title, links);
   // An abandoned title is out of the Master (lot 9): no state there.
-  const master = abandoned ? null : titleMasterLabel(title.masterState);
-  const masterStatus = abandoned ? null : titleMasterStatus(title.masterState);
+  const mixFact = abandoned ? null : titleMixFact(title.masterState);
+  const mix = mixFact?.label ?? null;
+  const mixStatus = mixFact?.status ?? null;
+  const distribution = links.distribution?.[title.id] ?? null;
   const shared =
     title.sharedWith && !abandoned
       ? t.participations.shared(title.sharedWith.names, title.sharedWith.hidden)
       : null;
   // Lot 12: its confirmed artists without their contract signed (the shoot
-  // and the release wait for them, or for a waiver).
-  const missing = title.participations
-    .filter((p) => contractGap(title, p, today) !== null)
-    .map((p) => p.artist.name);
+  // and the release wait for them, or for a waiver). Said by each artist's
+  // row once the reader reads the Juridique: only for the others here.
+  const missing = canReadLegal
+    ? []
+    : title.participations
+        .filter((p) => contractGap(title, p, today) !== null)
+        .map((p) => p.artist.name);
+  const warning = cn(
+    caption,
+    "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
+  );
+
   return (
-    <DataTableRow>
-      <DataTableCell fill className={NAME_CELL}>
-        <span className="flex min-w-0 flex-col gap-0.5">
+    <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <span
             className={cn(
-              "flex min-w-0 font-semibold",
+              "min-w-0 font-semibold [overflow-wrap:anywhere]",
               abandoned && "text-[color:var(--text-secondary)]",
             )}
           >
-            {/* The title's Master, once it has a master, open on this
-                title (lot 8); an abandoned title is out of it (lot 9). */}
-            <DataTableLink
-              href={
-                title.master && links.master && !abandoned
-                  ? `${links.master}?titre=${title.master.id}`
-                  : null
-              }
-            >
-              {label}
-            </DataTableLink>
+            {masterHref ? (
+              <ViewLink href={masterHref} className={NAME_LINK}>
+                {label}
+              </ViewLink>
+            ) : (
+              label
+            )}
           </span>
-          {/* Wraps rather than cut: on a phone « Maquette · En
-              développement » lost its status. */}
-          <span
-            className={cn(caption, "line-clamp-2 break-words")}
-            // The whole reason of an abandonment, when two lines cut it.
-            title={abandoned ? (title.abandonReason ?? undefined) : undefined}
-          >
-            {detailOf(title, label)}
-          </span>
-          {/* A simple project shares its master: no automatic credit,
-              said where the title is (décision 10). */}
-          {shared && (
-            <span
-              className={cn(
-                caption,
-                "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
-              )}
-            >
-              <IconTriangleWarning
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0"
-              />
-              {`${shared}.`}
+          <StatusBadge tone={projectTitleTone[title.status]} size="sm">
+            {t.statuses[title.status]}
+          </StatusBadge>
+        </div>
+        <span className="-my-1.5 -mr-1.5 shrink-0">{menu}</span>
+      </div>
+      {/* Wraps rather than cut: « Maquette · En développement » keeps its
+          status. */}
+      <span
+        className={cn(caption, "line-clamp-2 break-words")}
+        // The whole reason of an abandonment, when two lines cut it.
+        title={abandoned ? (title.abandonReason ?? undefined) : undefined}
+      >
+        {detailOf(title, label)}
+      </span>
+      {canManage && !abandoned && isUnnamed(title) && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-1 self-start"
+          aria-label={t.recap.name.title(label)}
+          onClick={() => onDialog("name")}
+        >
+          {t.recap.name.action}
+        </Button>
+      )}
+      <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2">
+        <TitleFact name={f.mix}>
+          <MixPill label={mix} status={mixStatus} href={masterHref} />
+        </TitleFact>
+        {title.recap.beatmakers.length > 0 && (
+          <TitleFact name={f.beatmaker}>
+            <span className="flex min-w-0 flex-col items-start gap-1">
+              {title.recap.beatmakers.map((person) => (
+                <span
+                  key={person.contactId ?? person.name}
+                  className="flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1"
+                >
+                  <span className="min-w-0 break-words text-[color:var(--text-secondary)]">
+                    {person.name}
+                  </span>
+                  {person.fiche && <FichePill fiche={person.fiche} />}
+                </span>
+              ))}
             </span>
-          )}
-          {missing.length > 0 && (
-            <span
-              className={cn(
-                caption,
-                "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
-              )}
-            >
-              <IconTriangleWarning
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0"
-              />
-              {fr.participationWaivers.titleMissing(missing.join(", "))}
-            </span>
-          )}
-          <HiddenFacts
-            facts={[
-              ...(master
-                ? [
-                    {
-                      key: "master",
-                      label: t.board.caption.master,
-                      value: master,
-                    },
-                  ]
-                : []),
-              // Its release's deposit (lot 15).
-              ...(links.distribution?.[title.id]
-                ? [
-                    {
-                      key: "distribution",
-                      label: t.board.caption.distribution,
-                      value: links.distribution[title.id].label,
-                    },
-                  ]
-                : []),
-            ]}
+          </TitleFact>
+        )}
+        <TitleFact name={f.release}>
+          <ReleaseChoice
+            label={label}
+            value={release}
+            canEdit={canManage && !abandoned}
+            pending={releasePending}
+            onPick={onRelease}
           />
+        </TitleFact>
+        {links.distribution !== null && (
+          <TitleFact name={f.distribution}>
+            {distribution ? (
+              <ViewLink href={distribution.href} className={PILL_LINK}>
+                <StatusBadge
+                  tone={distribution.tone}
+                  size="sm"
+                  className="h-auto min-h-5 max-w-full py-0.5 text-left whitespace-normal"
+                >
+                  {distribution.label}
+                </StatusBadge>
+              </ViewLink>
+            ) : (
+              <span className={muted}>{EMPTY_CELL}</span>
+            )}
+          </TitleFact>
+        )}
+      </dl>
+      {/* A simple project shares its master: no automatic credit, said
+          where the title is (décision 10). */}
+      {shared && (
+        <span className={cn(warning, "mt-2")}>
+          <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {`${shared}.`}
         </span>
-      </DataTableCell>
-      <DataTableCell className={COLUMN.status}>
-        <StatusBadge tone={projectTitleTone[title.status]} size="sm">
-          {t.statuses[title.status]}
-        </StatusBadge>
-      </DataTableCell>
-      {/* A title has no contract nor deal: its own facts in their space. */}
-      <DataTableCell hideBelow="xl" colSpan={deals ? 3 : 1}>
-        <TitleFacts
-          master={master}
-          masterStatus={masterStatus}
-          distribution={links.distribution?.[title.id] ?? null}
-        />
-      </DataTableCell>
-      <DataTableActionsCell>
-        <TitleActions
-          projectId={projectId}
-          title={title}
-          label={label}
-          artists={artists}
-          masterOptions={masterOptions}
-          canManage={canManage}
-          adding={adding}
-          onAdding={onAdding}
-        />
-      </DataTableActionsCell>
-    </DataTableRow>
+      )}
+      {missing.length > 0 && (
+        <span className={cn(warning, "mt-2")}>
+          <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {fr.participationWaivers.titleMissing(missing.join(", "))}
+        </span>
+      )}
+    </div>
   );
 }
 
-/** An artist on a title, indented under it: name and role, status,
- * contract, negotiation and who negotiates. */
+/** An artist on a title, beside the title's cell (`titleCell`, given to
+ * the group's first row): name and role, note, contact; Statut, Accord,
+ * Juridique; « ⋯ ». The name opens the person's démarche in the Juridique,
+ * else the deal. */
 function ParticipationRow({
   projectId,
   participation,
+  titleCell,
+  first,
   label,
   credit,
-  dealReach,
+  columns,
+  call,
+  canEditNetwork,
   today,
   dimmed,
   canManage,
   toCheck,
 }: {
   projectId: string;
-  participation: BoardParticipation;
+  participation: RecapParticipation;
+  titleCell: ReactNode;
+  first: boolean;
   label: string;
   credit: Credit;
-  dealReach: DealReach;
+  columns: Columns;
+  call: SharedNegotiationCall | null;
+  canEditNetwork: boolean;
   today: string;
   dimmed: boolean;
   canManage: boolean;
   toCheck: boolean;
 }) {
   const t = fr.projectTitles;
-  const deals = dealReach !== "none";
+  const r = t.recap;
   const active = isActiveParticipation(participation.status) && !dimmed;
-  const contract = participation.contract;
-  const contractWords = contractLabel(contract);
-  const negotiation = negotiationLabel(participation, dealReach);
-  const owner = ownerLabel(participation, dealReach);
-  const deal = participation.deal;
-  const hidden: HiddenFact[] = [
-    ...(contractWords
-      ? [
-          {
-            key: "contract",
-            label: t.board.caption.contract,
-            value: contractWords,
-          },
-        ]
-      : []),
-    ...(deals && negotiation
-      ? [
-          {
-            key: "negotiation",
-            label: t.board.caption.negotiation,
-            // Who negotiates, with it.
-            value:
-              deal && owner && owner !== EMPTY_CELL
-                ? `${negotiation} · ${owner}`
-                : negotiation,
-          },
-        ]
-      : []),
-  ];
+  const facts = participation.recap;
+  const artist = participation.artist.name;
+  const href = facts.contract?.href ?? facts.accord?.href ?? null;
+  const accord = (inline: boolean) =>
+    facts.accord ? (
+      <AccordFacts
+        accord={facts.accord}
+        artist={artist}
+        inline={inline}
+        planCall={
+          !dimmed && plansCall(call, facts.accord) ? (
+            <PlanCallButton shared={call} accord={facts.accord} />
+          ) : undefined
+        }
+      />
+    ) : (
+      <span className={muted}>{EMPTY_CELL}</span>
+    );
+  const legal = (inline: boolean) => (
+    <LegalFacts fiche={facts.fiche} contract={facts.contract} inline={inline} />
+  );
+
   return (
-    <DataTableRow>
-      <DataTableCell fill className={NAME_CELL}>
-        {/* Indented under its title (the row's inset holds the cell's own
-            padding). */}
-        <span className="flex min-w-0 flex-col gap-0.5 pl-6">
-          {/* The role goes under the name when the line is too short (a
-              phone), rather than cutting the name. */}
+    <Row lead={titleCell !== null} first={first}>
+      {titleCell}
+      <DataTableCell fill className={ARTIST_CELL}>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          {/* The role goes under the name when the table is narrow, rather
+              than cutting the name. */}
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
-            {/* The participation's contract, in the Juridique, when the
-                viewer reads it. */}
             <span
               className={cn(
                 "flex min-w-0",
                 !active && "text-[color:var(--text-secondary)]",
               )}
             >
-              <DataTableLink
-                href={
-                  contract.kind === "contract"
-                    ? routes.contract(contract.id)
-                    : null
-                }
-              >
-                {participation.artist.name}
-              </DataTableLink>
+              {href ? (
+                <ViewLink href={href} className={cn(NAME_LINK, "truncate")}>
+                  {artist}
+                </ViewLink>
+              ) : (
+                <span className="truncate">{artist}</span>
+              )}
             </span>
-            <span className={cn(muted, "hidden shrink-0 sm:inline")}>
+            <span className={cn(muted, "hidden shrink-0 @min-[624px]:inline")}>
               {`· ${t.participations.roles[participation.role]}`}
             </span>
           </span>
-          {/* On a phone, the role under the name. */}
-          <span className={cn(caption, "sm:hidden")}>
-            {t.participations.roles[participation.role]}
+          {/* Under 624 px, the role and the status under the name. */}
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1 @min-[624px]:hidden">
+            <span className={caption}>
+              {t.participations.roles[participation.role]}
+            </span>
+            <ContactStatePill status={participation.status} />
           </span>
+          <NoteLine
+            projectId={projectId}
+            participationId={participation.id}
+            artist={artist}
+            note={facts.note}
+            canEdit={canManage}
+          />
+          {/* None and nothing to do: no line (ContactFacts says nothing). */}
+          {(facts.contact !== null || canManage) && (
+            <span className="mt-1 flex min-w-0 flex-col">
+              <ContactFacts
+                projectId={projectId}
+                participationId={participation.id}
+                artist={artist}
+                contact={facts.contact}
+                canManage={canManage}
+                canEditNetwork={canEditNetwork}
+              />
+            </span>
+          )}
           {toCheck && (
             <span className={cn(caption, "flex items-start gap-1.5")}>
               <IconTriangleWarning
@@ -695,106 +977,71 @@ function ParticipationRow({
           {!dimmed && (
             <WaiverLines waivers={participation.waivers} today={today} />
           )}
-          <HiddenFacts facts={hidden} />
+          {/* Under 976 px, Accord and Juridique, still links and buttons. */}
+          {(columns.accord || columns.legal) && (
+            <span className="mt-1.5 flex flex-col gap-1.5 @min-[976px]:hidden">
+              {columns.accord && (
+                <StackedFact label={r.columns.accord}>
+                  {accord(true)}
+                </StackedFact>
+              )}
+              {columns.legal && (
+                <StackedFact label={r.columns.legal}>{legal(true)}</StackedFact>
+              )}
+            </span>
+          )}
         </span>
       </DataTableCell>
-      <DataTableCell className={COLUMN.status}>
-        <StatusBadge
-          tone={participationStatusTone[participation.status]}
-          size="sm"
-        >
-          {t.participations.statuses[participation.status]}
-        </StatusBadge>
+      <DataTableCell className={cn(COLUMN.status, TIER.merged)}>
+        <ContactStatePill status={participation.status} />
       </DataTableCell>
-      <DataTableCell hideBelow="xl" className={COLUMN.contract}>
-        {contract.kind === "contract" ? (
-          <StatusBadge tone={contractStateTone[contract.state]} size="sm">
-            {contractWords}
-          </StatusBadge>
-        ) : contract.kind === "missing" ? (
-          <StatusBadge tone="warning" size="sm">
-            {contractWords}
-          </StatusBadge>
-        ) : contract.kind === "hidden" ? (
-          <StatusBadge tone="neutral" size="sm">
-            {contractWords}
-          </StatusBadge>
-        ) : (
-          <span className={muted}>{EMPTY_CELL}</span>
-        )}
-      </DataTableCell>
-      {deals && (
-        <DataTableCell hideBelow="xl" className={COLUMN.negotiation}>
-          {deal ? (
-            <ViewLink
-              href={routes.deal(deal.id)}
-              className="relative z-10 inline-flex rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
-              // Who and where, never « Négociation : Négociation ».
-              aria-label={t.board.negotiation.link(
-                participation.artist.name,
-                negotiation ?? "",
-              )}
-            >
-              <DealStageBadge deal={deal} />
-            </ViewLink>
-          ) : (
-            <span className={muted}>{negotiation ?? EMPTY_CELL}</span>
+      {columns.accord && (
+        <DataTableCell className={cn(COLUMN.accord, TIER.full)}>
+          {accord(false)}
+        </DataTableCell>
+      )}
+      {columns.legal && (
+        <DataTableCell className={cn(COLUMN.legal, TIER.full)}>
+          {legal(false)}
+        </DataTableCell>
+      )}
+      {columns.actions && (
+        <DataTableActionsCell>
+          {canManage && (
+            <ParticipationActions
+              projectId={projectId}
+              participation={participation}
+              label={label}
+              credit={credit}
+            />
           )}
-        </DataTableCell>
+        </DataTableActionsCell>
       )}
-      {deals && (
-        <DataTableCell hideBelow="xl" className={COLUMN.owner}>
-          <span
-            className={cn("line-clamp-2 break-words", !deal?.assignee && muted)}
-          >
-            {owner ?? EMPTY_CELL}
-          </span>
-        </DataTableCell>
-      )}
-      <DataTableActionsCell>
-        {canManage && (
-          <ParticipationActions
-            projectId={projectId}
-            participation={participation}
-            label={label}
-            credit={credit}
-          />
-        )}
-      </DataTableActionsCell>
-    </DataTableRow>
+    </Row>
   );
 }
 
 /** « ⋯ » of a title: add an artist, rename and abandon in a modal (a
- * gesture that asks a saisie opens one), reactivate at once (nothing to
- * ask); its page in the Catalogue for everyone, once it has a master. */
-function TitleActions({
+ * gesture that asks a saisie opens one, TitleDialogs), reactivate at once
+ * (nothing to ask); its page in the Catalogue for everyone, once it has a
+ * master. Lot 7: a title not in the Catalogue yet gets its title there,
+ * provisional, at its first audio; or takes one the Catalogue has. */
+function TitleMenu({
   projectId,
   title,
   label,
-  artists,
-  masterOptions,
   canManage,
-  adding,
-  onAdding,
+  onDialog,
 }: {
   projectId: string;
-  title: BoardTitle;
+  title: RecapTitle;
   label: string;
-  artists: ArtistChoices;
-  masterOptions: Record<string, string>;
   canManage: boolean;
-  adding: boolean;
-  onAdding: (open: boolean) => void;
+  onDialog: (dialog: Dialog) => void;
 }) {
   const t = fr.projectTitles;
   const router = useRouter();
-  const credit = creditOf(title);
-  const [open, setOpen] = useState<"rename" | "abandon" | "attach" | null>(
-    null,
-  );
   const [, startTransition] = useTransition();
-  const close = () => setOpen(null);
   const catalog: RowAction[] = title.master
     ? [
         {
@@ -805,8 +1052,6 @@ function TitleActions({
         },
       ]
     : [];
-  // Lot 7: a title not in the Catalogue yet gets its title there,
-  // provisional, at its first audio; or takes one the Catalogue has.
   const start: RowAction[] = title.master
     ? []
     : [
@@ -829,7 +1074,7 @@ function TitleActions({
           key: "attach",
           label: t.catalogAttach.action,
           icon: IconLink,
-          onSelect: () => setOpen("attach"),
+          onSelect: () => onDialog("attach"),
         },
       ];
 
@@ -858,13 +1103,13 @@ function TitleActions({
             key: "artist",
             label: t.participations.add.action,
             icon: IconUserPlus,
-            onSelect: () => onAdding(true),
+            onSelect: () => onDialog("add"),
           },
           {
             key: "rename",
             label: t.rename.action,
             icon: IconPenWriting2,
-            onSelect: () => setOpen("rename"),
+            onSelect: () => onDialog("rename"),
           },
           ...start,
           ...catalog,
@@ -872,101 +1117,141 @@ function TitleActions({
             key: "abandon",
             label: t.abandon.action,
             icon: IconBoxArchive,
-            onSelect: () => setOpen("abandon"),
+            onSelect: () => onDialog("abandon"),
           },
         ];
 
+  return <RowActions label={t.menu(label)} actions={actions} />;
+}
+
+/** The title's dialogs, once per title whichever of its cells is shown:
+ * add an artist, rename, name (« Nommer », in its own words, with «
+ * Rattacher un titre du Catalogue » under the field), attach, abandon. */
+function TitleDialogs({
+  projectId,
+  title,
+  label,
+  artists,
+  invitedOn,
+  masterOptions,
+  canManage,
+  credit,
+  dialog,
+  onDialog,
+}: {
+  projectId: string;
+  title: RecapTitle;
+  label: string;
+  artists: ArtistChoices;
+  invitedOn: Record<string, string[]>;
+  masterOptions: Record<string, string>;
+  canManage: boolean;
+  credit: Credit;
+  dialog: Dialog | null;
+  onDialog: (dialog: Dialog | null) => void;
+}) {
+  const t = fr.projectTitles;
+  if (!canManage) return null;
+  const close = () => onDialog(null);
+  const provisional = title.master?.provisional
+    ? t.rename.descriptionProvisional
+    : undefined;
+
   return (
     <>
-      <RowActions label={t.menu(label)} actions={actions} />
-      {canManage && (
-        <>
-          <FormDialog
-            open={adding}
-            onOpenChange={(next) => !next && onAdding(false)}
-            title={t.participations.add.title(label)}
-            description={t.participations.add.description(
-              artists.mainArtistId
-                ? (artists.options[artists.mainArtistId] ?? null)
-                : null,
-              credit.mode,
-              credit.shared,
-            )}
-            closeLabel={fr.dialogs.close}
-          >
-            <AddParticipationForm
-              projectId={projectId}
-              title={title}
-              artists={artists}
-              onDone={() => onAdding(false)}
-            />
-          </FormDialog>
-          <FormDialog
-            open={open === "rename"}
-            onOpenChange={(next) => !next && close()}
-            title={t.rename.title}
-            description={
-              title.master?.provisional
-                ? t.rename.descriptionProvisional
-                : t.rename.description
-            }
-            closeLabel={fr.dialogs.close}
-          >
-            <RenameTitleForm
-              projectId={projectId}
-              title={title}
-              onDone={close}
-            />
-          </FormDialog>
-          {!title.master && (
-            <FormDialog
-              open={open === "attach"}
-              onOpenChange={(next) => !next && close()}
-              title={t.catalogAttach.title(label)}
-              description={t.catalogAttach.description}
-              closeLabel={fr.dialogs.close}
-            >
-              <AttachCatalogTitleForm
-                projectId={projectId}
-                titleId={title.id}
-                masterOptions={masterOptions}
-                onDone={close}
-              />
-            </FormDialog>
-          )}
-          <FormDialog
-            open={open === "abandon"}
-            onOpenChange={(next) => !next && close()}
-            title={t.abandon.title(label)}
-            // Only a maquette in draft or in development becomes
-            // « abandonnée »; a validated one keeps its status (décision 8).
-            description={
-              title.master?.demoStatus === "draft" ||
-              title.master?.demoStatus === "developing"
-                ? `${t.abandon.description} ${t.abandon.demoNote}`
-                : t.abandon.description
-            }
-            closeLabel={fr.dialogs.close}
-          >
-            <ReasonForm
-              label={t.abandon.reason}
-              submitLabel={t.abandon.submit}
-              doneMessage={t.abandon.done}
-              run={(reason) =>
-                abandonProjectTitle({ projectId, titleId: title.id, reason })
-              }
-              onDone={close}
-            />
-          </FormDialog>
-        </>
+      <FormDialog
+        open={dialog === "add"}
+        onOpenChange={(next) => !next && close()}
+        title={t.participations.add.title(label)}
+        description={t.participations.add.description(
+          credit.mode,
+          credit.shared,
+        )}
+        closeLabel={fr.dialogs.close}
+      >
+        <AddParticipationForm
+          projectId={projectId}
+          title={title}
+          artists={artists}
+          invitedOn={invitedOn}
+          onDone={close}
+        />
+      </FormDialog>
+      <FormDialog
+        open={dialog === "rename"}
+        onOpenChange={(next) => !next && close()}
+        title={t.rename.title}
+        description={provisional}
+        closeLabel={fr.dialogs.close}
+      >
+        <RenameTitleForm projectId={projectId} title={title} onDone={close} />
+      </FormDialog>
+      <FormDialog
+        open={dialog === "name"}
+        onOpenChange={(next) => !next && close()}
+        title={t.recap.name.title(label)}
+        description={provisional}
+        closeLabel={fr.dialogs.close}
+      >
+        <RenameTitleForm
+          projectId={projectId}
+          title={title}
+          submitLabel={t.recap.name.submit}
+          doneMessage={t.recap.name.done}
+          onAttach={
+            !title.master && Object.keys(masterOptions).length > 0
+              ? () => onDialog("attach")
+              : undefined
+          }
+          onDone={close}
+        />
+      </FormDialog>
+      {!title.master && (
+        <FormDialog
+          open={dialog === "attach"}
+          onOpenChange={(next) => !next && close()}
+          title={t.catalogAttach.title(label)}
+          closeLabel={fr.dialogs.close}
+        >
+          <AttachCatalogTitleForm
+            projectId={projectId}
+            titleId={title.id}
+            masterOptions={masterOptions}
+            onDone={close}
+          />
+        </FormDialog>
       )}
+      <FormDialog
+        open={dialog === "abandon"}
+        onOpenChange={(next) => !next && close()}
+        title={t.abandon.title(label)}
+        // Only a maquette in draft or in development becomes
+        // « abandonnée »; a validated one keeps its status (décision 8).
+        description={
+          title.master?.demoStatus === "draft" ||
+          title.master?.demoStatus === "developing"
+            ? t.abandon.demoNote
+            : undefined
+        }
+        closeLabel={fr.dialogs.close}
+      >
+        <ReasonForm
+          label={t.abandon.reason}
+          submitLabel={t.abandon.submit}
+          doneMessage={t.abandon.done}
+          run={(reason) =>
+            abandonProjectTitle({ projectId, titleId: title.id, reason })
+          }
+          onDone={close}
+        />
+      </FormDialog>
     </>
   );
 }
 
 /** « ⋯ » of an artist on a title: change its status (modal), withdraw it
  * from the title (détacher, confirmed) or bring a declined or withdrawn
- * one back (rattacher, at once, proposed again). */
+ * one back (rattacher, at once, « À contacter » again). */
 function ParticipationActions({
   projectId,
   participation,
@@ -974,7 +1259,7 @@ function ParticipationActions({
   credit,
 }: {
   projectId: string;
-  participation: BoardParticipation;
+  participation: RecapParticipation;
   label: string;
   credit: Credit;
 }) {

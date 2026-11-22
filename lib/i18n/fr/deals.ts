@@ -318,11 +318,11 @@ export const deals = {
       assignSubmit: "Confier le deal",
     },
     participationStatuses: {
-      proposed: "Proposée",
-      invited: "Invitée",
-      confirmed: "Confirmée",
-      declined: "Refusée",
-      withdrawn: "Retirée",
+      proposed: "À contacter",
+      invited: "Contacté",
+      confirmed: "D'accord",
+      declined: "A refusé",
+      withdrawn: "Retiré",
     } as Record<string, string>,
     history: {
       created: "Deal créé",

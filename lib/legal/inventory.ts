@@ -6,7 +6,8 @@ import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { splitStates, type SplitState } from "@/lib/legal/splits/queries";
 import { unlinkedCreditsByName } from "@/lib/facts/credit-contact";
-import { peopleFacts } from "@/lib/legal/people-facts";
+import { isMainArtist, mainArtistOf } from "@/lib/legal/main-artist";
+import { mainArtistFact, peopleFacts } from "@/lib/legal/people-facts";
 import { agreementFacts, flagFacts } from "@/lib/legal/project-facts";
 import {
   declarationFacts,
@@ -29,7 +30,14 @@ import {
  * may read them (manage_catalog).
  */
 export async function loadLegalInventory(
-  project: { id: string; masters: Array<{ id: string; artists: string }> },
+  project: {
+    id: string;
+    masters: Array<{ id: string; artists: string }>;
+    // A collective's main artist: said once in Personnes (main-artist.ts).
+    collective?: boolean;
+    artistId?: string | null;
+    artistName?: string | null;
+  },
   access: Access,
 ): Promise<LegalInventory> {
   // manage_catalog reads the splits and writes everything of a title
@@ -71,14 +79,24 @@ export async function loadLegalInventory(
     ),
   );
 
+  // A collective's main artist, once for every title it is credited on.
+  const main = mainArtistOf(project);
+  const credited =
+    main !== null &&
+    rows.titles.some((master) =>
+      (rows.performersOf.get(master.id) ?? []).some((p) =>
+        isMainArtist(main, p),
+      ),
+    );
+
   const sections: LegalSection[] = [
     section(
       "titles",
       titles.flatMap((row) => titleFacts(row, canEditCatalog)),
     ),
-    section(
-      "people",
-      perTitle((master) =>
+    section("people", [
+      ...(main && credited ? [mainArtistFact(main)] : []),
+      ...perTitle((master) =>
         peopleFacts(
           master,
           rows.performersOf.get(master.id) ?? [],
@@ -86,9 +104,10 @@ export async function loadLegalInventory(
           rows.network,
           { addToNetwork: can(access, "manage_network"), link: canEditCatalog },
           sameName,
+          main,
         ),
       ),
-    ),
+    ]),
     ...(readSplits
       ? [
           section(

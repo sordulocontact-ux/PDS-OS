@@ -3,9 +3,10 @@
 
 import type { DemoStatus } from "@/lib/catalog/demo-rules";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
-import type {
-  ParticipationRole,
-  TitleParticipation,
+import {
+  joinArtistNames,
+  type ParticipationRole,
+  type TitleParticipation,
 } from "@/lib/projects/participation-rules";
 
 const fr = { projectTitles };
@@ -74,18 +75,36 @@ export function masterNameOf(
 }
 
 /** What a title is called in the project: its working title, else its
- * master's title, else « Titre 3 · sans nom » (same rule for the history,
- * which keeps these three values as they were). */
+ * master's title, else, still to be named, its guests (« Titre de Jay (à
+ * nommer) », Ibé 18/11) or its number when it has none (« Titre 3 (à
+ * nommer) »). `artists` = the names of its guests still in play
+ * (`titleGuestNames`); the history, which keeps the values as they were,
+ * passes none. */
 export function projectTitleLabel(title: {
   position: number;
   workingTitle: string | null;
   masterTitle: string | null;
+  artists?: readonly string[];
 }): string {
-  return (
-    title.workingTitle ??
-    title.masterTitle ??
-    fr.projectTitles.unnamed(title.position)
-  );
+  if (title.workingTitle) return title.workingTitle;
+  if (title.masterTitle) return title.masterTitle;
+  const artists = title.artists ?? [];
+  return artists.length
+    ? fr.projectTitles.unnamedOf(joinArtistNames(artists))
+    : fr.projectTitles.unnamed(title.position);
+}
+
+/** The guests that name a title still to be named: its participations
+ * neither declined nor withdrawn, in their order. */
+export function titleGuestNames(
+  participations: readonly {
+    status: string;
+    artist: { name: string };
+  }[],
+): string[] {
+  return participations
+    .filter((p) => p.status !== "declined" && p.status !== "withdrawn")
+    .map((p) => p.artist.name);
 }
 
 /** Active and planned titles first, in their order, the abandoned ones

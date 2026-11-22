@@ -363,8 +363,6 @@ export const shell = {
       // Under the selection chosen: who comes, and how.
       guests: (count: number) =>
         count === 1 ? "1 artiste importé" : `${count} artistes importés`,
-      guestsHint:
-        "Chacun reçoit un titre sans nom et une participation proposée. Les titres se nomment ensuite dans le projet, où d'autres s'ajoutent.",
       mainInSelection: (name: string) =>
         `${name}, artiste principal, n'est pas ajouté comme invité.`,
       emptySelection:
@@ -382,14 +380,8 @@ export const shell = {
       // The guests named in the form (test UX du 12/11/2026: a collective
       // was created without them), beside or instead of a selection.
       guestsField: "Artistes invités",
-      guestsSearch: "Ajouter un artiste invité",
-      guestsPlaceholder: "Rechercher un artiste…",
-      guestsNoResult: (query: string) =>
-        `Aucun artiste ne s'appelle « ${query} ».`,
-      guestsAllSelected: "Tous les artistes sont déjà invités.",
-      guestRemove: (name: string) => `Retirer ${name}`,
-      guestsFieldHint:
-        "Chacun reçoit un titre sans nom et une participation proposée : sa négociation s'ouvre ensuite depuis Deals.",
+      guestAlready: (name: string) => `${name} est déjà invité.`,
+      guestIsMain: (name: string) => `${name} est l'artiste principal.`,
     },
     // Creating transmits it to the chosen project manager (submitHint).
     submit: "Créer le projet",

@@ -26,7 +26,8 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // looks for it rather than as a loose button under the field.
 // `uniqueLabels`: the options are unique by name (artists, as the database
 // holds them: case aside, spaces trimmed), so no create shortcut for a name
-// that already exists; the existing one is listed instead.
+// that already exists; the existing one is listed instead. When it is one of
+// the `excludedIds` (already chosen), `excludedNote` says so in the list.
 export function SearchPicker({
   label,
   placeholder,
@@ -46,6 +47,7 @@ export function SearchPicker({
   keepName,
   openOnFocus = true,
   uniqueLabels = false,
+  excludedNote,
 }: {
   label: string;
   placeholder: string;
@@ -72,6 +74,9 @@ export function SearchPicker({
   // buttons the list would cover: « Ajouter des artistes »).
   openOnFocus?: boolean;
   uniqueLabels?: boolean;
+  // With `uniqueLabels`: what the list says when the typed name is that of
+  // an excluded option (already chosen, or kept out).
+  excludedNote?: (option: PickerOption) => string;
 }) {
   const id = useId();
   const listId = `${id}-list`;
@@ -111,6 +116,14 @@ export function SearchPicker({
       options.some((o) => sameName(o.label) === typed)
     );
   }, [uniqueLabels, options, query]);
+  const held = useMemo(() => {
+    const typed = sameName(query);
+    return !uniqueLabels || typed === ""
+      ? undefined
+      : options.find(
+          (o) => sameName(o.label) === typed && excludedIds.has(o.id),
+        );
+  }, [uniqueLabels, options, excludedIds, query]);
   const canCreate = Boolean(onCreate) && !named;
   const createRow = canCreate ? results.length : null;
   const keepRow =
@@ -159,15 +172,17 @@ export function SearchPicker({
   }
 
   const emptyMessage =
-    results.length === 0
-      ? query.trim()
-        ? noResultLabel(query.trim())
-        : available.length === 0
-          ? options.length > 0
-            ? allSelectedLabel
-            : null
-          : (noSuggestionLabel ?? null)
-      : null;
+    held && excludedNote
+      ? excludedNote(held)
+      : results.length === 0
+        ? query.trim()
+          ? noResultLabel(query.trim())
+          : available.length === 0
+            ? options.length > 0
+              ? allSelectedLabel
+              : null
+            : (noSuggestionLabel ?? null)
+        : null;
 
   return (
     <div ref={anchor} className="relative flex flex-col">

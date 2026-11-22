@@ -141,6 +141,21 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
     const same = artist.contact
       ? all.find((p) => p.contactId === artist.contact!.id)
       : undefined;
+    // A collective (Ibé, 18/11/2026): a guest artist not in the Réseau who
+    // is also credited by name (a composer who is the artist featured) is
+    // one person, not two démarches « fiche et contrat ». Their page waits
+    // to be added to the Réseau, unless the credit already has a contact.
+    const named =
+      rows.collective && !artist.contact
+        ? all.find((p) => p.key === normalizeSearch(artist.name))
+        : undefined;
+    if (named) {
+      addOnce(named.formRoles, "performer");
+      addOnce(named.networkRoles, "artist");
+      named.performer = { name: artist.name, featuring: true };
+      if (!named.contactId) named.artistId = artist.artistId;
+      continue;
+    }
     if (same) {
       addOnce(same.formRoles, "performer");
       addOnce(same.networkRoles, "artist");

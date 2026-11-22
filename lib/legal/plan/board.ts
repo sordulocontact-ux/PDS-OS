@@ -31,6 +31,7 @@ import {
   splitVersionTone,
   type Tone,
 } from "@/lib/ui/state-tones";
+import { isAwaitingAgreement } from "@/lib/legal/title-contracts-rules";
 import { formatInstant } from "@/lib/utils/instant";
 import { ficheBadge } from "@/lib/legal/forms/state";
 
@@ -273,6 +274,8 @@ function ficheRow(row: FormRow, item: TrackedItem | null): BoardRow {
 
 // The action a contract's verb does at once, if any.
 function contractAction(row: AgreementRow): RowAction | undefined {
+  // A guest's contract waits for their accord: nothing to generate.
+  if (isAwaitingAgreement(row)) return undefined;
   if (row.state === "ready_to_generate" && row.needId)
     return { kind: "generateContract", needId: row.needId };
   if (row.state === "draft" && row.contract)
@@ -288,7 +291,7 @@ function contractVerb(row: AgreementRow, canValidate: boolean) {
     case "needs_info":
       return v.missing;
     case "ready_to_generate":
-      return v.generate;
+      return isAwaitingAgreement(row) ? v.open : v.generate;
     case "draft":
       return v.submit;
     case "review_required":
@@ -437,10 +440,15 @@ export function planBoard(input: {
         badge: blockedByFiche
           ? { label: t.waitsFiche(form.name), tone: "neutral" }
           : agreement
-            ? {
-                label: fr.legalContracts.agreements.states[agreement.state],
-                tone: agreementTone[agreement.state],
-              }
+            ? isAwaitingAgreement(agreement)
+              ? {
+                  label: fr.legalContracts.agreements.awaiting,
+                  tone: "warning",
+                }
+              : {
+                  label: fr.legalContracts.agreements.states[agreement.state],
+                  tone: agreementTone[agreement.state],
+                }
             : waiting(item, { label: item.reason, tone: "neutral" }),
         verb: agreement
           ? contractVerb(agreement, input.canValidate)

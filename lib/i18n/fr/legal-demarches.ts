@@ -2,6 +2,8 @@
 // complet », juridique-v2.html): their titles, why, what is expected now,
 // what a done one gave, and « Prêt pour la sortie ». Words of the proto.
 
+import { contracts } from "@/lib/i18n/fr/contracts";
+
 const lower = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
 // « de » elides before a vowel: « Fiche d'Owen Delacroix ».
 const de = (name: string) =>
@@ -31,6 +33,50 @@ export const legalDemarches = {
     tracking: "Suivi",
     proposed: "Suivi · démarches proposées",
     release: "Sortie",
+    // A collective (Ibé, 18/11/2026): what is the whole project's, then one
+    // group per title (« Néons · Jay »), the abandoned ones last.
+    project: "Projet",
+    titleWith: (title: string, artists: string) => `${title} · ${artists}`,
+    abandoned: (label: string) => `${label} (abandonné)`,
+  },
+  // In a title's group of a collective, the title is not said again.
+  inTitle: {
+    split: "Répartition de l'édition",
+    sacem: "Déclaration SACEM",
+  },
+  // A collective's title not in the Catalogue yet (§ 3.6 of Ibé's 18/11).
+  attach: {
+    title: "Rattacher le titre au Catalogue",
+    inCatalogue: "Déjà au Catalogue",
+    audio: "Pas encore au Catalogue",
+    onlyOwner: (name: string) =>
+      `${name}, responsable du projet, peut rattacher ce titre.`,
+  },
+  // The contracts a collective's title needs (Ibé, 18/11/2026, § 3.4): one
+  // step in the title's group, a reminder in the Plan d'action.
+  titleContracts: {
+    title: "Contrats du titre",
+    recapTitle: "Contrats des titres",
+    // Production and Beatmaker have no contract type of their own.
+    kinds: {
+      production: "Production",
+      image_rights: contracts.types.image_rights,
+      publishing: contracts.types.publishing,
+      beatmaker: "Beatmaker",
+    },
+    groupLabel: "Contrats nécessaires",
+    confirm: "Confirmer les contrats nécessaires",
+    confirming: "Confirmation…",
+    edit: "Modifier",
+    cancel: "Annuler",
+    toConfirm: "À confirmer",
+    none: "Aucun contrat nécessaire",
+    done: "Contrats du titre confirmés",
+    errors: {
+      abandoned: "Ce titre est abandonné.",
+      invalid: "Choisissez parmi les contrats proposés.",
+      failed: "La confirmation n'a pas pu être faite. Réessayez.",
+    },
   },
   titles: {
     person: (name: string) => `${name} · fiche et contrat`,

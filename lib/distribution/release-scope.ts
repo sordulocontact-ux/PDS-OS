@@ -8,6 +8,7 @@ import type {
 } from "@/lib/distribution/scope";
 import {
   projectTitleLabel,
+  titleGuestNames,
   type ProjectTitle,
 } from "@/lib/projects/title-rules";
 import { loadProjectTitles } from "@/lib/projects/titles";
@@ -68,6 +69,7 @@ export const scopeDistribution = trackedCache(async function scope(
             title.master && !title.master.provisional
               ? title.master.title
               : null,
+          artists: titleGuestNames(title.participations),
         })
       : row.title,
     date: row.planned_release_date,

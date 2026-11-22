@@ -43,6 +43,8 @@ export type IntakeKnowledge = {
   cadrage: Map<string, string>;
   // Who each title and the Cadrage already name, by title.
   known: Map<string, KnownPerson[]>;
+  // A collective's main artist, left out of `known`: said once.
+  mainArtist?: string | null;
 };
 
 export const answerKey = (key: QuestionKey, masterId: string | null) =>
@@ -110,6 +112,18 @@ export function notAskedQuestions(k: IntakeKnowledge): NotAskedQuestion[] {
   const unanswered = (key: QuestionKey, masterId: string | null) =>
     !k.answers.has(answerKey(key, masterId));
   return [
+    ...(k.mainArtist && k.titles.length > 0
+      ? [
+          {
+            key: "contributors" as const,
+            masterId: null,
+            title: null,
+            label: k.mainArtist,
+            value: fr.legal.inventory.facts.mainArtist,
+            source: fr.legal.inventory.sources.artist,
+          },
+        ]
+      : []),
     ...k.titles
       .filter(
         (title) =>

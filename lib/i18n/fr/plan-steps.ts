@@ -1,5 +1,5 @@
 // The steps of the Plan du projet, made pilotable (PROJ-UX-07): real state,
-// pilot and executor, due date, dependencies, inconsistencies, history.
+// pilot and executor, due date, dependencies, history.
 export const planSteps = {
   pilot: "Pilote",
   executor: "Exécutant",
@@ -13,20 +13,6 @@ export const planSteps = {
   added: "Étape ajoutée",
   addedStatus: { open: "À faire", done: "Faite" },
   noStatus: "Accès restreint",
-  issues: {
-    runningLater: "Déjà en cours : sa colonne ne dit pas l'avancement réel.",
-    doneLater: "Déjà terminé : sa colonne ne dit pas l'avancement réel.",
-    dependencyLater: (name: string) =>
-      `Dépend de ${name}, placé plus tard dans le plan.`,
-    dependencyRemoved: (name: string) => `Dépend de ${name}, retiré du plan.`,
-    dueAfterTarget: (date: string) =>
-      `Échéance après la date cible du projet (${date}).`,
-    dueBeforeDependency: (name: string) =>
-      `Échéance avant celle de ${name}, dont elle dépend.`,
-    blocked: (what: string) => `Bloqué : ${what}`,
-    toReview: (labels: string) =>
-      `À revoir : le cadrage a changé depuis le Brief validé (${labels}).`,
-  },
   edit: "Modifier l'étape",
   editTitle: "Modifier l'étape",
   editBody:
@@ -51,10 +37,6 @@ export const planSteps = {
   reopenedToast: "Étape rouverte.",
   missingTitle: "Donnez un nom à l'étape.",
   dueInvalid: "Date invalide.",
-  review: {
-    issues: (n: number) =>
-      `${n} ${n === 1 ? "incohérence signalée" : "incohérences signalées"} : vous pouvez lancer quand même, ou corriger d'abord.`,
-  },
   launchOne: {
     title: (name: string) => `Lancer ${name} ?`,
     body: (name: string, pilot: string) =>

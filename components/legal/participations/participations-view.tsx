@@ -3,6 +3,7 @@
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { IconUserPlus } from "@/components/icons";
 import { OpenDealButton } from "@/components/legal/participations/open-deal-button";
+import { contractStatePill } from "@/components/projects/titles/recap-facts";
 import { WaiverActions } from "@/components/legal/participations/waiver-actions";
 import { WaiverLines } from "@/components/legal/waiver-lines";
 import { EmptyState } from "@/components/shell/empty-state";
@@ -22,7 +23,6 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { contracts } from "@/lib/i18n/fr/contracts";
 import { deals } from "@/lib/i18n/fr/deals";
 import { legalParticipations } from "@/lib/i18n/fr/legal-participations";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
@@ -38,19 +38,22 @@ import {
   type BoardParticipation,
   type BoardTitle,
   type DealReach,
-  type ParticipationContract,
 } from "@/lib/projects/title-board-rules";
-import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import type { RecapContract } from "@/lib/projects/recap-rules";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import { formatShortDate } from "@/lib/release/format";
 import {
-  contractStateTone,
   overdueTone,
   participationStatusTone,
   projectTitleTone,
 } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
-const fr = { contracts, deals, legalParticipations, projectTitles };
+const fr = { deals, legalParticipations, projectTitles };
 
 const caption =
   "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
@@ -70,22 +73,8 @@ const labelOf = (title: BoardTitle) =>
     position: title.position,
     workingTitle: title.workingTitle,
     masterTitle: masterNameOf(title.master),
+    artists: titleGuestNames(title.participations),
   });
-
-/** The words of a participation's contract; null: not expected (« — »). */
-function contractLabel(contract: ParticipationContract): string | null {
-  const t = fr.legalParticipations.contract;
-  switch (contract.kind) {
-    case "contract":
-      return fr.contracts.states[contract.state];
-    case "missing":
-      return t.missing;
-    case "hidden":
-      return t.hidden;
-    case "none":
-      return null;
-  }
-}
 
 /** The deal's stage in words (the accord de principe says whether it is
  * proposed or validated); null: unknown to the viewer. */
@@ -128,17 +117,19 @@ function nextOf(
 /**
  * « Participations et contrats » of a collective's Juridique (lot 11): one
  * group per title (the project's order), one row per participation — the
- * artist and role, the participation's status, its contract (signed, in
- * progress, missing), its deal's stage and who negotiates it, the deal's
+ * artist and role, the participation's status, its contract (in the
+ * recap's words, contractStatePill), its deal's stage and who negotiates it, the deal's
  * next action. A row opens its deal (Business module) when the viewer reads
  * it; the contract's pill opens the contract. Without a live deal, « Ouvrir
  * un dossier » for whoever may create one (create_deal). The same artist on
- * two titles: two rows, two deals, two contracts. No contact is shown.
+ * two titles: two rows and two deals, one contract (the person's). No
+ * contact is shown.
  */
 export function ParticipationsView({
   projectId,
   titles,
   dealReach,
+  contracts,
   canCreate,
   canWaive,
   negotiators,
@@ -147,6 +138,8 @@ export function ParticipationsView({
   projectId: string;
   titles: BoardTitle[];
   dealReach: DealReach;
+  // Each participation's contract in the recap's words, by id.
+  contracts: Record<string, RecapContract>;
   canCreate: boolean;
   // The direction (« validate »): grants and revokes waivers (lot 12).
   canWaive: boolean;
@@ -227,6 +220,9 @@ export function ParticipationsView({
                     title={title}
                     titleLabel={label}
                     participation={participation}
+                    contractState={
+                      contracts[participation.id] ?? { kind: "none" }
+                    }
                     dealReach={dealReach}
                     projectId={projectId}
                     canCreate={canCreate}
@@ -247,6 +243,7 @@ function ParticipationRow({
   title,
   titleLabel,
   participation,
+  contractState,
   dealReach,
   canCreate,
   canWaive,
@@ -258,6 +255,7 @@ function ParticipationRow({
   title: BoardTitle;
   titleLabel: string;
   participation: BoardParticipation;
+  contractState: RecapContract;
   dealReach: DealReach;
   canCreate: boolean;
   negotiators: Array<{ id: string; name: string }>;
@@ -269,7 +267,10 @@ function ParticipationRow({
     title.status === "abandoned" ||
     !isActiveParticipation(participation.status);
   const contract = participation.contract;
-  const contractWords = contractLabel(contract);
+  // The same words and tone as the recap's (« Envoyé · en attente de
+  // retour », « À rédiger », « En attente de l'accord »…).
+  const pill = contractStatePill(contractState);
+  const contractWords = pill?.words ?? null;
   const stage = stageLabel(participation, dealReach);
   const next = nextOf(participation, today);
   const deal = participation.deal;
@@ -368,22 +369,18 @@ function ParticipationRow({
         className={cn(COLUMN.contract, "whitespace-normal")}
       >
         <span className="flex flex-col items-start gap-1">
-          {contract.kind === "contract" ? (
+          {pill && contract.kind === "contract" ? (
             <ViewLink
               href={routes.contract(contract.id)}
               className="relative z-10 inline-flex rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
             >
-              <StatusBadge tone={contractStateTone[contract.state]} size="sm">
-                {contractWords}
+              <StatusBadge tone={pill.tone} size="sm">
+                {pill.words}
               </StatusBadge>
             </ViewLink>
-          ) : contract.kind === "missing" ? (
-            <StatusBadge tone="warning" size="sm">
-              {contractWords}
-            </StatusBadge>
-          ) : contract.kind === "hidden" ? (
-            <StatusBadge tone="neutral" size="sm">
-              {contractWords}
+          ) : pill ? (
+            <StatusBadge tone={pill.tone} size="sm">
+              {pill.words}
             </StatusBadge>
           ) : (
             <span className={muted}>{EMPTY_CELL}</span>

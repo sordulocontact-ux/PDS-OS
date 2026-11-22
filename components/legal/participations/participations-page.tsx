@@ -65,7 +65,6 @@ export async function ParticipationsPage({ projectId }: { projectId: string }) {
       <ProjectHeader
         projectId={projectId}
         title={t.title}
-        subtitle={t.description}
         back={{
           href: routes.projectLegal(projectId),
           label: fr.shell.project.sidebar.legal,
@@ -76,6 +75,7 @@ export async function ParticipationsPage({ projectId }: { projectId: string }) {
         projectId={projectId}
         titles={tracking.titles}
         dealReach={tracking.dealReach}
+        contracts={tracking.contracts}
         canCreate={tracking.canCreate}
         canWaive={can(access, "validate")}
         negotiators={tracking.negotiators}

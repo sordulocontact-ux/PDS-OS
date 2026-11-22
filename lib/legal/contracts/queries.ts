@@ -7,6 +7,7 @@ import {
   agreementRows,
   type AgreementRow,
 } from "@/lib/legal/contracts/mapping";
+import { loadAwaitingAgreements } from "@/lib/legal/title-contracts";
 import { listTemplates } from "@/lib/legal/contracts/templates";
 import type { ValueContext } from "@/lib/legal/contracts/values";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
@@ -31,6 +32,8 @@ export type Agreements = {
 
 type Project = {
   id: string;
+  // A collective's guests wait for their accord (§ 3.5); absent: not.
+  collective?: boolean;
   title: string;
   artistName: string | null;
   masters: Array<{ id: string; title: string; artists: string }>;
@@ -182,7 +185,10 @@ export async function loadAgreements(
   for (const artist of featuredArtists(rows)) {
     const key =
       people.find((p) => artist.contact && p.contactId === artist.contact.id)
-        ?.key ?? featuredKey(artist);
+        ?.key ??
+      // A collective's guest merged with the credit of the same name.
+      people.find((p) => p.artistId === artist.artistId)?.key ??
+      featuredKey(artist);
     for (const title of artist.titles) addTitle(key, title);
   }
 
@@ -218,36 +224,49 @@ export async function loadAgreements(
   }
 
   const today = todayInParis(new Date());
+  // A guest artist whose accord is not validated: the contract of their
+  // person is not drafted before (the database refuses it too).
+  const awaiting: Record<string, string[]> = project.collective
+    ? (await loadAwaitingAgreements(project.id)).titlesByContact
+    : {};
+  const agreed = agreementRows({
+    people,
+    needs: (needs.data ?? []).map((n) => ({
+      id: n.id,
+      contactId: n.contact_id,
+      roles: n.roles,
+      templateId: n.template_id,
+      feeCents: n.fee_cents,
+      contractId: n.contract_id,
+    })),
+    templates,
+    contracts: rows.contracts.map((c) => ({
+      id: c.id,
+      title: c.title,
+      state: contractStateOf(c, today),
+      partyIds: c.partyIds,
+      returned: c.returned,
+      countersigned: c.countersigned,
+    })),
+    contextOf,
+    ficheFeeOf,
+    financialNeedOf: new Map(
+      (money.data ?? []).map((m) => [m.contract_id, m.amount_cents]),
+    ),
+    mappingApproved: approval.data !== null,
+    ficheWaitingOf,
+    noAgreementOf: new Map(
+      (noAgreement.data ?? []).map((r) => [r.contact_id, r.reason]),
+    ),
+  });
   return {
-    rows: agreementRows({
-      people,
-      needs: (needs.data ?? []).map((n) => ({
-        id: n.id,
-        contactId: n.contact_id,
-        roles: n.roles,
-        templateId: n.template_id,
-        feeCents: n.fee_cents,
-        contractId: n.contract_id,
-      })),
-      templates,
-      contracts: rows.contracts.map((c) => ({
-        id: c.id,
-        title: c.title,
-        state: contractStateOf(c, today),
-        partyIds: c.partyIds,
-        returned: c.returned,
-        countersigned: c.countersigned,
-      })),
-      contextOf,
-      ficheFeeOf,
-      financialNeedOf: new Map(
-        (money.data ?? []).map((m) => [m.contract_id, m.amount_cents]),
-      ),
-      mappingApproved: approval.data !== null,
-      ficheWaitingOf,
-      noAgreementOf: new Map(
-        (noAgreement.data ?? []).map((r) => [r.contact_id, r.reason]),
-      ),
+    rows: agreed.map((row) => {
+      const titles =
+        row.contactId && !row.contract ? awaiting[row.contactId] : undefined;
+      return titles &&
+        (row.state === "needs_info" || row.state === "ready_to_generate")
+        ? { ...row, awaitingAgreement: titles }
+        : row;
     }),
     hasValidatedTemplate: templates.some((t) => t.status === "validated"),
     approval: approval.data

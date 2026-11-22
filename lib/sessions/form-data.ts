@@ -7,7 +7,7 @@ import { listArtistOptions } from "@/lib/catalog/queries";
 import { loadMembers } from "@/lib/framing/related";
 import { demos } from "@/lib/i18n/fr/demos";
 import { sessions } from "@/lib/i18n/fr/sessions";
-import { projectTitleLabel } from "@/lib/projects/title-rules";
+import { projectTitleLabel, titleGuestNames } from "@/lib/projects/title-rules";
 import { createClient } from "@/lib/supabase/server";
 
 /** What the session form chooses from: artists, titles, projects, people. */
@@ -46,7 +46,7 @@ export async function loadSessionFormData(): Promise<SessionFormData> {
       supabase
         .from("project_titles")
         .select(
-          "id, position, working_title, project:projects!project_titles_project_same_org(title, collective, archived_at)",
+          "id, position, working_title, participations:title_participations!title_participations_title(status, created_at, artist:artists!title_participations_artist_same_org(name)), project:projects!project_titles_project_same_org(title, collective, archived_at)",
         )
         .is("master_id", null)
         .neq("status", "abandoned")
@@ -71,6 +71,17 @@ export async function loadSessionFormData(): Promise<SessionFormData> {
                     position: t.position,
                     workingTitle: t.working_title,
                     masterTitle: null,
+                    artists: titleGuestNames(
+                      [...t.participations]
+                        .sort((a, b) =>
+                          a.created_at.localeCompare(b.created_at),
+                        )
+                        .flatMap((p) =>
+                          p.artist
+                            ? [{ status: p.status, artist: p.artist }]
+                            : [],
+                        ),
+                    ),
                   }),
                   t.project.title,
                 ),

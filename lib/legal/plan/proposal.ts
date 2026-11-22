@@ -117,7 +117,11 @@ export function proposePlan(input: {
     const performer = fr.legalForms.roles.performer;
     const same = artist.contact
       ? [...people.values()].find((p) => p.contactId === artist.contact!.id)
-      : undefined;
+      : // A collective: the guest artist credited by name is one person
+        // (same rule as formPeople).
+        rows.collective
+        ? people.get(normalizeSearch(artist.name))
+        : undefined;
     if (same) {
       same.roles.add(performer);
       continue;

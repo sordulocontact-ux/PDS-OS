@@ -1,6 +1,10 @@
 import "server-only";
 
-import { isDealStage, type DealStage } from "@/lib/deals/types";
+import {
+  isDealStage,
+  type AgreementStatus,
+  type DealStage,
+} from "@/lib/deals/types";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -14,6 +18,9 @@ import { createClient } from "@/lib/supabase/server";
 export type ParticipationDealState = {
   dealId: string | null;
   stage: DealStage | null;
+  // The accord de principe proposed or validated, as DealStageBadge says it
+  // (« Accord à valider » at the agreement stage).
+  agreementStatus: AgreementStatus | null;
   // The accord de principe validated by the direction: the contracts may go.
   agreementValidated: boolean;
   // The next call still to hold, the latest one held.
@@ -40,6 +47,11 @@ export async function loadParticipationDealStates(
       {
         dealId: row.deal_id,
         stage: isDealStage(row.stage) ? row.stage : null,
+        agreementStatus:
+          row.agreement_status === "pending" ||
+          row.agreement_status === "validated"
+            ? row.agreement_status
+            : null,
         agreementValidated: row.agreement_validated,
         nextCallAt: row.next_call_at,
         lastCallAt: row.last_call_at,

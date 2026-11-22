@@ -19,7 +19,11 @@ import {
 } from "@/lib/projects/title-plan/model";
 import { scopeOf, loadTitleScopes } from "@/lib/projects/title-scopes";
 import { titleScopeCovers } from "@/lib/projects/title-scope-rules";
-import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import { loadProjectTitles } from "@/lib/projects/titles";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
@@ -165,6 +169,7 @@ const labelOf = (t: Awaited<ReturnType<typeof loadProjectTitles>>[number]) =>
     position: t.position,
     workingTitle: t.workingTitle,
     masterTitle: masterNameOf(t.master),
+    artists: titleGuestNames(t.participations),
   });
 
 // ---------------------------------------------------------------------------

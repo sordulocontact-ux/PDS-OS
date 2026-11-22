@@ -7,7 +7,6 @@ import {
   IconPenWriting2,
   IconPlus,
 } from "nucleo-sharp-essential";
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
@@ -41,7 +40,6 @@ import {
   updatePlanStep,
   type PlanStepValues,
 } from "@/lib/plan/step-actions";
-import type { StepIssue } from "@/lib/plan/steps";
 
 const fr = { dialogs, framingIntel, planSteps };
 
@@ -58,7 +56,6 @@ export type StepRow = {
   executor: string | null;
   dueDate: string | null;
   dependsOn: string[];
-  issues: StepIssue[];
   values: PlanStepValues;
   first: boolean;
   last: boolean;
@@ -69,7 +66,7 @@ const VIEWS = ["all", "active", "next", "blocked", "done"] as const;
 
 /**
  * The launched plan, step by step (PROJ-UX-07): real state, pilot,
- * executor, due date, dependencies and what does not hold, filtered by
+ * executor, due date, dependencies, filtered by
  * state. The owner changes, adds, moves or marks an added step done; every
  * change goes to the plan's history.
  */
@@ -207,28 +204,8 @@ export function PlanStepsTable({
               {shown.map((row) => (
                 <DataTableRow key={row.id}>
                   <DataTableCell className="align-top">
-                    <span className="flex flex-col gap-1">
-                      <span className="font-semibold break-words">
-                        {row.title}
-                      </span>
-                      {row.issues.map((issue) =>
-                        issue.href ? (
-                          <Link
-                            key={issue.text}
-                            href={issue.href}
-                            className="text-caption text-[color:var(--tone-warning-fg)] underline underline-offset-4"
-                          >
-                            {issue.text}
-                          </Link>
-                        ) : (
-                          <span
-                            key={issue.text}
-                            className="text-caption text-[color:var(--tone-warning-fg)]"
-                          >
-                            {issue.text}
-                          </span>
-                        ),
-                      )}
+                    <span className="font-semibold break-words">
+                      {row.title}
                     </span>
                   </DataTableCell>
                   <DataTableCell className="align-top">

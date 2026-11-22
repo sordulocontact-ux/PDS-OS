@@ -219,3 +219,36 @@ export async function attachCatalogTitle(input: {
   revalidatePath(routes.master(masterId.data), "layout");
   return { ok: true };
 }
+
+/** « Sortie » of a title (retours d'Ibé du 18/11/2026, lot 2): it comes
+ * out (true), it does not (false), not decided (null). Nothing follows from
+ * it; the Activité keeps it (release_decided). */
+export async function setTitleRelease(input: {
+  projectId: string;
+  titleId: string;
+  release: boolean | null;
+}): Promise<WriteResult> {
+  const t = fr.projectTitles.errors;
+  await requireApproved();
+  const projectId = idSchema.safeParse(input.projectId);
+  const titleId = idSchema.safeParse(input.titleId);
+  const release = z.boolean().nullable().safeParse(input.release);
+  if (!projectId.success || !titleId.success || !release.success)
+    return { ok: false, error: t.failed };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_project_title_release", {
+    p_title_id: titleId.data,
+    p_release: release.data,
+  });
+  if (error) {
+    if (error.message.includes("release_unchanged"))
+      return {
+        ok: false,
+        error: fr.projectTitles.recap.errors.releaseUnchanged,
+      };
+    return { ok: false, error: titleError("setTitleRelease", error) };
+  }
+  refresh(projectId.data);
+  return { ok: true };
+}

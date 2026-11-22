@@ -5479,6 +5479,70 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   Prêt pour la sortie, liste « À payer » sous le Maintenant de la direction, reflet des
   factures dans le Budget (`budget_lines`).
 
+### Retours d'Ibé du 18/11/2026 : Juridique d'un collectif par titre et récap des titres (21/11/2026, branche `pre-prod`)
+
+Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_recap.sql` et
+`20261121210101_collective_title_contracts.sql` (**à pousser en prod par Sacha**). Résumé du domaine :
+`docs/pds-mic-resume.md` ; « Caler le call » et l'accord du deal : § 8 quaterdecies.
+
+- **Groupes par titre** : `lib/legal/title-groups.ts` (pur) et `lib/legal/title-layout.ts` (lecture serveur, `null` hors
+  collectif). Règle : un split, une SACEM ou un emprunt va au titre de son master ; une personne va au titre dont elle
+  est le seul invité (clé `artist:<id>` : artiste de la fiche, `network_contacts.artist_id`), sinon au groupe « Projet » ;
+  les titres abandonnés passent en dernier, « (abandonné) ». `layoutByTitle(…, extra)` ajoute en tête de groupe les
+  étapes propres à un titre (rattacher, contrats du titre) ; `TitleLayout.titleIds`, `titleOf[stepKey]`. Routes
+  `/legal/attach/<titleId>` et `/legal/title-contracts/<titleId>` (404 si inconnues), étapes propres à la colonne, sans
+  outils de blocage ni note. `JourneySpine foldable` replie les groupes.
+- **Artiste principal une fois** (`lib/legal/main-artist.ts`) : à l'État des lieux, à la Confirmation et au Cadrage
+  (« PDS · Artiste principal · tous les titres »).
+- **Noms de titre** : `withProjectTitleNames` (`journey-context.ts`) donne aux titres d'un collectif le libellé du projet
+  dans tout le Juridique ; `readInventoryRows.collective`. Fusion, collectif seulement, d'un invité sans contact Réseau
+  et d'un contributeur crédité du même nom normalisé (`formPeople`, `proposePlan`) : une ligne de plan déjà lancée
+  `contract:artist:<id>` devient orpheline (non migré).
+- **Contrats du titre** : table `title_contract_needs` (une ligne par titre et par type : `production`, `image_rights`,
+  `publishing`, `beatmaker`, nécessaire ou non, qui a confirmé et quand) et `confirm_title_contract_needs` (les quatre
+  lignes d'un coup, remplace la confirmation précédente, collectif seulement, jamais un titre abandonné ; journal
+  `contract_needs_confirmed`). RLS `manage_legal` sur un projet visible (`visible_project_ids()`), `zz_project_live`,
+  vidée par `delete_project_row`. Code : `lib/legal/title-contracts(-rules|-actions).ts` ; rappel par titre dans
+  « Plan d'action ». La rédaction reste un contrat par personne (`legal_agreement_needs`).
+- **En attente de l'accord** : garde SQL `agreement_not_validated` (P0001) dans `generate_legal_contract` pour le besoin
+  d'un invité (`network_contacts.artist_id`) dont une participation en jeu n'a pas d'accord validé
+  (`participation_agreement_validated`, `artist_pending_participations`, `artist_agreement_pending`), et sur l'écriture de
+  `title_participations.contract_id` (déclencheur `b_agreement_before_contract`). Rien n'en revient aux écrans : l'app
+  calcule sous RLS `loadAwaitingAgreements` (participations en jeu sans accord validé, personne via
+  `network_contacts.artist_id`), `awaitingAgreement` sur `AgreementRow`, filtre de `generateReadyAgreements` (le saut
+  est attendu), erreur traduite au geste manuel.
+- **Rattacher au Catalogue** : `AttachTitleStep` / `AttachTitlePanel` (`components/legal/steps/`), titre courant en
+  pastille avant le h1 (`ModuleHeader media`) et dans le fil d'Ariane.
+- **Récap des titres** : `loadTitleRecap` (`lib/projects/recap.ts`, règles dans `recap-rules.ts`), lu par la page Titres
+  et par la Vue d'ensemble (`planCalls: false` pour la Vue d'ensemble). Contact retenu : celui de la participation, sinon
+  le manager principal de l'artiste au Catalogue ; lu sous RLS, un contact privé est masqué (aucune fonction
+  SECURITY DEFINER ne lit `network_contacts`). `personKeyOf` s'aligne sur `formPeople`. Contrat de la personne et « En
+  attente de l'accord » (dès qu'une participation de l'artiste est sans accord, règle de la base) ; taux = terme
+  `master_split` du deal. Collectif accepté : récap compact (`TitlesRecapCompact`) en tête de la Vue d'ensemble,
+  blocages dessous ; collectif non accepté : tableau complet en tête d'`UnlaunchedOverview` (après l'encart de réponse
+  reçue), la page Titres y est 404.
+- **Actions** (`lib/projects/participation-actions.ts`, `title-actions.ts`) : `setParticipationContact`,
+  `createParticipationContact`, `setContactPhone` (change le numéro dans le Réseau ; contact privé : propriétaire ou
+  direction), `setParticipationNote`, `setTitleRelease` ; revalidation du projet en `"layout"`. SQL :
+  `project_titles.release_decision` (oui / non / nul, sans conséquence ailleurs), `set_project_title_release`,
+  `set_title_participation_contact`, `set_title_participation_note`.
+- **« Caler le call » chargé une fois** : `loadSharedNegotiationCall` + `negotiationCallData`
+  (`lib/deals/negotiation-call-rules.ts`) ; `planNegotiationCall` revalide le projet ; `agreementStatus` dans
+  `loadParticipationDealStates`.
+- **Notifications** `participation_confirmed` / `participation_declined` : déclencheur sur `title_participations`
+  (fonction `title_participations_notify_owner`), au responsable du projet (`projects.owner_person_id`) ; jamais à
+  l'auteur ; `loadParticipationSubjects` dans `lib/notifications/subjects.ts`. Activité : `release_decided`,
+  `contract_needs_confirmed` (nom du titre au moment de l'événement).
+- **Libellés SQL** : `project_title_label` (+ `join_artist_names`, `french_of`), lu par `contract_gaps_text`,
+  `release_contract_gaps_text`, `release_provisional_titles_text` et `title_release_name`. Ce dernier est stocké dans
+  `releases.title` : les noms existants ne changent qu'au prochain `ensure_title_release`.
+- **Pas d'homonyme au Catalogue** : garde `b_name_taken` sur `artists` (`artist_name_key` : trim, minuscules, espaces
+  réduits, accents gardés ; archivés exclus ; 23505 `artist_name_taken`). Les homonymes déjà présents ne sont pas touchés.
+- **Plan du projet** : `stepIssues` et ses textes sont supprimés (4.2).
+- Tests : `collective-recap.test.sql` (42), `collective-title-contracts.test.sql` (39).
+- **Pas fait** : les vrais contrats par titre (besoins par type, plusieurs contrats par personne, contrat de production
+  relié à la participation), prochain chantier à valider avec Ibé après le 23/11.
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 ### Parcours du Master sur le patron commun (lot 8 du proto « Projet complet », 19/10/2026)

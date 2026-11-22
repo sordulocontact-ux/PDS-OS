@@ -1,7 +1,8 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 14/11/2026, après les lots 12 bis et 13 et leur passe Chrome
+de chaque lot. Dernière mise à jour : 21/11/2026, après les retours d'Ibé du 18/11 (ticket
+`PDSMIC-retours-ibe-18-11.md`, lots L0 à L5, branche `pre-prod`) ; avant : 14/11/2026, lots 12 bis et 13 et leur passe Chrome
 (`docs/pds-mic-rapports/recap-12bis-13.md`).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
@@ -41,7 +42,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | --- | --- | --- |
 | 1 – 4 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste ; sélections d'artistes | faits |
 | 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait, validé |
-| 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3), raccord Négociation | fait |
+| 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3) ; depuis le 21/11 son tableau est le récap (retours d'Ibé) | fait |
 | 7 | Titre provisoire (voie A) | fait |
 | 8 | Master : sélecteur de titre | fait |
 | 9 | Master : vue consolidée, abandonnés hors des comptes ; « Demander des fichiers » (9 bis) | fait |
@@ -51,6 +52,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 13 | Sorties individuelles et compilation (données, page « Sorties ») | fait |
 | 14 | Plan de sortie éditorial par titre (versions, lien de partage, PDF 16:9 style Jeho) | fait |
 | 15 | Distribution par sortie | fait |
+| Retours d'Ibé 18/11 | Création (invités en pastilles, pas d'homonyme), « Titre de X (à nommer) », récap des titres et des artistes, Juridique par titre, contrats d'un titre, pas de contrat avant l'accord, rattacher au Catalogue, nettoyage du Plan | fait le 21/11, migrations **à pousser en prod par Sacha** ; reste : vrais contrats par titre, questions pour Ibé le 23/11 |
 
 ## Déjà en base (migrations `20261111…`)
 
@@ -102,14 +104,12 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   sinon ; collectif non lancé : le même tableau dans la Vue d'ensemble, sous « Ce qui est
   transmis »). La liste minimale `ProjectTitles` est supprimée (la Vue d'ensemble lancée n'a plus
   de bloc Titres). Un `DataTable` : une ligne par titre, ses participations en retrait dessous.
-  Colonnes des participations : Statut, Contrat (`title_participations.contract_id` ; « À faire »
-  si confirmée sans contrat, « Lié » si le lecteur ne lit pas le contrat), **Négociation**
-  (étape du deal de la participation, `deals.participation_id`, lien vers le deal ; le deal
-  vivant, sinon le dernier abandonné ; « Pas de dossier ») et **Négocié par** (personne affectée,
-  « À affecter ») : lus sous la RLS des deals ; les deux colonnes ne paraissent que si le lecteur
-  lit tous les deals du projet (direction, responsable : `dealReach = all`) ou en voit au moins
-  un (`partial`, « — » sur une ligne sans deal visible), jamais « Pas de dossier » à tort. La ligne
-  d'un titre porte son **Master** (calculé sur `master_mix_versions` du projet et
+  Depuis le 21/11/2026 (retours d'Ibé du 18/11) les colonnes Contrat, Négociation et Négocié par
+  n'existent plus : c'est le **récap** (`loadTitleRecap`). Sur la ligne d'un artiste : Statut
+  (À contacter, Contacté, D'accord, A refusé, Retiré), Accord (étape du deal, taux, jour du call,
+  négociateur), Contact, Juridique (fiche, contrat) ; notes sous le nom. Un deal est toujours
+  lu sous la RLS : jamais « Pas de dossier » à tort. La ligne
+  d'un titre porte (récap : Mix, fiche beatmaker, Sortie, Distribution) son **Master** (calculé sur `master_mix_versions` du projet et
   `masters.audio_state` : À mixer, Mix Vn à valider, Mix/Master Vn+1 attendu, Mix validé,
   Master final) et sa **Distribution** (lot 15 : le dépôt de la sortie du titre, ou « Avec la
   compilation · … »). Ligne d'un
@@ -254,6 +254,21 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Adresse `?sortie=` (`lib/distribution/scope.ts`), sortie et pistes `release-scope.ts`.
   « Sorties » et « Titres et artistes » lisent `release_distribution_states`. La Distribution
   s'applique à tout collectif (décision 9). Compte rendu : `docs/pds-mic-rapports/lot-15.md`.
+- **Retours d'Ibé du 18/11** (`20261121200101_collective_recap`, `20261121210101_collective_title_contracts`,
+  **à pousser en prod par Sacha** ; détail : `docs/ARCHITECTURE.md` § 8 sexies). Récap : `project_titles.release_decision`
+  (sortie oui / non / nul, par titre, sans conséquence) et `set_project_title_release` (journal `release_decided`) ;
+  `set_title_participation_contact` et `set_title_participation_note` (écrits, jamais lus : aucun contact privé
+  retourné) ; notifications `participation_confirmed` / `participation_declined` au responsable du projet, quel que soit
+  le chemin (déclencheur sur `title_participations`) ; garde `artists` `artist_name_taken` (23505, nom normalisé : pas
+  d'homonyme vivant) ; `project_title_label` (« Titre de X (à nommer) ») lu par les textes SQL des contrats manquants et
+  des sorties (`title_release_name` stocké : les noms déjà là changent au prochain `ensure_title_release`).
+  Contrats : `title_contract_needs` (production, `image_rights`, `publishing`, `beatmaker` par titre ; RLS
+  `manage_legal`, `zz_project_live`, `delete_project_row`) écrite par `confirm_title_contract_needs` (journal
+  `contract_needs_confirmed`) ; garde `agreement_not_validated` (P0001) dans `generate_legal_contract` pour un invité dont
+  une participation en jeu n'a pas d'accord validé, et sur `title_participations.contract_id`
+  (`participation_agreement_validated`, `artist_agreement_pending`). Rédaction : toujours un contrat par personne.
+  Tests : `collective-recap` (42), `collective-title-contracts` (39). Données de démo « Assurance 30 » :
+  `supabase/preprod/showcase-assurance-30.sql`, à jouer à la main en pré-prod après `showcase-business.sql`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
@@ -279,7 +294,7 @@ Lu après le pull du 13/11/2026 ; ses tests : `deals-collective`, `deals-bm-open
 - **Le deal suit la participation confirmée** (`20261112140101_bm_opens_deals`) : le deal d'une
   participation confirmée démarre en négociation ; un deal ouvert avant y passe quand sa
   participation est confirmée (depuis « À contacter » ou « Call prévu » seulement), avec sa ligne
-  de journal (`deal_follows_participation`). La colonne Négociation de « Titres et artistes » le
+  de journal (`deal_follows_participation`). La cellule Accord du récap de « Titres et artistes » le
   montre aussitôt.
 - **Le business manager ouvre des deals** (`open_deals`, son poste seul) sur un artiste sans
   projet ; celui d'un projet ou d'un collectif est ouvert par la direction ou le responsable,
@@ -352,6 +367,11 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
 
 ## Règles à tenir à chaque lot
 
+- Le récap suit l'Excel d'Ibé (21/11) : fiche « À envoyer / En attente / Remplie », contrat envoyé / retour reçu /
+  signé, « Son reçu » lu au Master (jamais un champ en double), rôle du contact (« Producteur » = libellé libre
+  `title_participations.contact_label`, migration `20261121220101`, pas le rôle `producer` du Réseau). Il ne lit
+  **jamais** les données personnelles d'une fiche (naissance, sécu, adresse, RIB) : garde-fou `privateReadsOf`.
+
 - Toute règle nouvelle ne joue que si `projects.collective = true` ; un projet simple ne change pas
   (y compris quand il partage un master avec un collectif : aucun crédit automatique).
 - « Artistes du projet » = participations ni refusées ni retirées des titres non abandonnés, plus
@@ -361,6 +381,11 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
 - Nouvelle table liée à un projet : RLS forcée, écriture par fonctions, `zz_project_live`, entrée
   dans `delete_project_row`. Calculé, jamais stocké : artistes du projet, état d'un titre, d'un contrat.
 - Rien ne se supprime : un titre s'abandonne, une participation se refuse ou se retire.
+- Un titre sans nom se lit « Titre de X (à nommer) » (« Titre 3 (à nommer) » sans invité), partout, en SQL
+  comme dans l'app (`project_title_label`, `projectTitleLabel`).
+- Au Juridique d'un collectif, un invité et un contributeur de même nom sont une seule personne.
+- Le contrat d'un invité n'est rédigé qu'après l'accord validé (« En attente de l'accord »).
+- Le même artiste sur deux titres est permis, avec confirmation ; jamais d'homonyme au Catalogue.
 - L'artiste principal n'est jamais invité du projet (participation ni refusée ni retirée), dans un
   sens comme dans l'autre.
 - Garder verts `project-types` et `visible-project-ids` ; régénérer les types Supabase. Tests sur

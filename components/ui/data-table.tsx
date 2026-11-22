@@ -117,12 +117,13 @@ export function DataTableHead({
   );
 }
 
-// A hairline between rows, none under the last (the frame closes it). On the
+// A hairline between rows, none under the last (the frame closes it); on a
+// merged <th scope="rowgroup"> too (« Titres et artistes »). On the
 // cells: the shadcn body strips every border of its last row, the one above
 // it included.
 export function DataTableBody({ children }: { children: React.ReactNode }) {
   return (
-    <TableBody className="[&>tr+tr>td]:border-t [&>tr+tr>td]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>td]:border-transparent">
+    <TableBody className="[&>tr+tr>:is(td,th)]:border-t [&>tr+tr>:is(td,th)]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>:is(td,th)]:border-transparent">
       {children}
     </TableBody>
   );
@@ -154,20 +155,29 @@ export function DataTableRow({
 }
 
 // `colSpan`: a cell over several columns (a row of another kind in the same
-// table: a title's facts across its participations' columns).
+// table). `rowSpan` and `scope`: a cell over several rows that heads them, a
+// <th> (« Titres et artistes »: a title's cell beside its artists' rows,
+// `scope="rowgroup"` over its <tbody>), drawn as the other cells.
 export function DataTableCell({
   children,
   className,
   colSpan,
+  rowSpan,
+  scope,
   ...columnProps
 }: ColumnProps & {
   children: React.ReactNode;
   className?: string;
   colSpan?: number;
+  rowSpan?: number;
+  scope?: "row" | "rowgroup";
 }) {
+  const Cell = scope ? TableHead : TableCell;
   return (
-    <TableCell
+    <Cell
       colSpan={colSpan}
+      rowSpan={rowSpan}
+      scope={scope}
       className={cn(
         // 48 px a row in the new style (docs/STYLE-FINANCE-PARTOUT.md § 4.2).
         "px-3.5 py-3 text-[length:var(--type-body-md)] font-medium modern:h-12",
@@ -176,7 +186,7 @@ export function DataTableCell({
       )}
     >
       {children}
-    </TableCell>
+    </Cell>
   );
 }
 

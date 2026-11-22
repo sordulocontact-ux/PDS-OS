@@ -1,6 +1,7 @@
 import "server-only";
 
-import { projectTitleLabel } from "@/lib/projects/title-rules";
+import { projectTitleLabel, titleGuestNames } from "@/lib/projects/title-rules";
+import { loadProjectTitles } from "@/lib/projects/titles";
 import { trackedCache } from "@/lib/projects/live-deps";
 import { createClient } from "@/lib/supabase/server";
 import type { WaiverScope } from "@/lib/projects/title-board-rules";
@@ -13,6 +14,9 @@ export type ContractGap = {
   titleId: string;
   artist: string;
   title: string;
+  // The title has a name of its own (a working title or a named master):
+  // else `title` only repeats its guests (« Titre de Jay (à nommer) »).
+  named: boolean;
 };
 
 /**
@@ -38,19 +42,41 @@ export const loadContractGaps = trackedCache(
       console.error("loadContractGaps:", error.message);
       return [];
     }
-    return (data ?? []).map((row) => ({
+    if (!data?.length) return [];
+    // A title still to be named is called by its guests (Ibé 18/11): the
+    // title's, not only the gap's artist; one read for every title.
+    // Unread titles: the labels fall back to their number, never a crash of
+    // the page that shows the callout.
+    const titles = await loadProjectTitles(projectId).catch((cause) => {
+      console.error("loadContractGaps titles:", cause);
+      return [];
+    });
+    const guests = new Map(
+      titles.map((t) => [t.id, titleGuestNames(t.participations)]),
+    );
+    return data.map((row) => ({
       participationId: row.participation_id,
       titleId: row.title_id,
       artist: row.artist_name,
+      named: Boolean(row.working_title || row.master_title),
       title: projectTitleLabel({
         position: row.title_position,
         workingTitle: row.working_title,
         masterTitle: row.master_title,
+        artists: guests.get(row.title_id),
       }),
     }));
   },
 );
 
-/** « Nadia Benali (Titre 2 · Néons), Lou (Titre 3 · sans nom) ». */
+/** « Nadia Benali (Titre 2 · Néons), Lou »: the title only when it has a
+ * name (a title still to be named is its guests: nothing to add), each
+ * entry once. */
 export const gapNames = (gaps: ContractGap[]) =>
-  gaps.map((gap) => `${gap.artist} (${gap.title})`).join(", ");
+  [
+    ...new Set(
+      gaps.map((gap) =>
+        gap.named ? `${gap.artist} (${gap.title})` : gap.artist,
+      ),
+    ),
+  ].join(", ");

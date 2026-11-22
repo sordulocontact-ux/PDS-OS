@@ -23,6 +23,7 @@ import { loadIntake } from "@/lib/legal/intake/queries";
 import { loadLegalInventory } from "@/lib/legal/inventory";
 import { legalJourney } from "@/lib/legal/journey";
 import { planBoard } from "@/lib/legal/plan/board";
+import { withProjectTitleNames } from "@/lib/legal/title-contracts";
 import { legalReadiness } from "@/lib/legal/readiness/controls";
 import { loadReadinessInputs } from "@/lib/legal/readiness/queries";
 import { loadLegalPlan, proposeLegalPlan } from "@/lib/legal/plan/queries";
@@ -55,11 +56,13 @@ async function validatorName(organizationId: string | null) {
  */
 export const legalJourneyContext = trackedCache(
   byProjectVersion("legal-context", async (projectId: string) => {
-    const [access, project] = await allInOrder([
+    const [access, launched] = await allInOrder([
       requireApproved(),
       requireLaunchedProject(projectId),
     ]);
     if (!can(access, "manage_legal")) notFound();
+    // A collective's titles go by the project's names, not their masters'.
+    const project = await withProjectTitleNames(launched);
     const viewerName =
       personName(access.firstName ?? "", access.lastName ?? "") || null;
     const [

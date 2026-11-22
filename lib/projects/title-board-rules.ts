@@ -29,12 +29,15 @@ export type TitleVersion = {
  * - final: its master final, validated here or already in the Catalogue;
  * - round: its latest version of the round it is in, and what was decided;
  * - mixed: its Mix final validated, the mastering not started;
- * - todo: in the Catalogue, no version yet.
+ * - todo: in the Catalogue, no version yet; `sourced`: its source is
+ *   confirmed in the Master (master_flow_sources, the rule of the Master's
+ *   « Attendent leur source »), undefined when not read (the Master's own
+ *   switcher, which keeps « À mixer »).
  * Only this title's versions are read (principle 1: never two titles).
  */
 export type TitleMasterState =
   | { kind: "none" }
-  | { kind: "todo" }
+  | { kind: "todo"; sourced?: boolean }
   | { kind: "mixed" }
   | { kind: "final"; before: boolean }
   | {
@@ -50,6 +53,7 @@ export function titleMasterState(input: {
   // audio_state): it had it before the workflow, or the workflow put it.
   finalInCatalogue: boolean;
   versions: TitleVersion[];
+  sourced?: boolean;
 }): TitleMasterState {
   if (!input.hasMaster) return { kind: "none" };
   const latest = (stage: TitleVersion["stage"]) =>
@@ -88,7 +92,7 @@ export function titleMasterState(input: {
       decision:
         mix.decision === "changes_requested" ? "changes_requested" : "pending",
     };
-  return { kind: "todo" };
+  return { kind: "todo", sourced: input.sourced };
 }
 
 /** The common status a title's Master state reads as (its pill's tone,
@@ -115,6 +119,27 @@ export function titleMasterLabel(state: TitleMasterState): string | null {
   }
 }
 
+/**
+ * What the recap's Mix cell says of a title (the Excel's « Son reçu »):
+ * its Master state's words, except before its first mix, where it says
+ * whether the source is there (« Son reçu », « Son attendu »: the Master's
+ * own rule). No master in the Catalogue: nothing, as the Master says
+ * nothing of a title it does not hold.
+ */
+export function titleMixFact(state: TitleMasterState): {
+  label: string;
+  status: NonNullable<ReturnType<typeof titleMasterStatus>>;
+} | null {
+  const t = fr.projectTitles.board.master;
+  if (state.kind === "todo" && state.sourced !== undefined)
+    return state.sourced
+      ? { label: t.sourceReceived, status: "in_progress" }
+      : { label: t.sourceExpected, status: "waiting" };
+  const label = titleMasterLabel(state);
+  const status = titleMasterStatus(state);
+  return label && status ? { label, status } : null;
+}
+
 export function titleMasterStatus(
   state: TitleMasterState,
 ): "not_started" | "in_progress" | "waiting" | "done" | null {
@@ -135,9 +160,32 @@ export function titleMasterStatus(
 // ---------------------------------------------------------------- Contract
 
 /**
+ * What a contract's copies say (the table CONTRATS of Ibé's Excel): the
+ * person's signed copies (contract_files, category signed: how many, and
+ * whether one came by the person's link), the proof « signé autrement »
+ * (category evidence), and whether PDS has countersigned (pds_signed_at).
+ */
+export type ContractProof = {
+  signedFiles: number;
+  signedViaLink: boolean;
+  evidence: boolean;
+  countersigned: boolean;
+};
+
+export const NO_PROOF: ContractProof = {
+  signedFiles: 0,
+  signedViaLink: false,
+  evidence: false,
+  countersigned: false,
+};
+
+/**
  * A participation's contract (title_participations.contract_id, the only
- * source, plan § 0 ter):
- * - contract: linked and readable by the viewer, with its shown state;
+ * source, plan § 0 ter; set from the person's contract by the database once
+ * the accord is validated, migration 20261121230101: the recap, the banner,
+ * the locks and the deals read the same one):
+ * - contract: linked and readable by the viewer, with its shown state and
+ *   what its copies say;
  * - hidden: linked, but the viewer may not read contracts (RLS): said as
  *   linked, never as missing;
  * - missing: a confirmed participation without one (décision 6: shown as to
@@ -147,7 +195,13 @@ export function titleMasterStatus(
  * Waivers: participation_waivers (lot 12), beside it.
  */
 export type ParticipationContract =
-  | { kind: "contract"; id: string; title: string; state: ContractState }
+  | {
+      kind: "contract";
+      id: string;
+      title: string;
+      state: ContractState;
+      proof: ContractProof;
+    }
   | { kind: "hidden" }
   | { kind: "missing" }
   | { kind: "none" };
@@ -155,7 +209,12 @@ export type ParticipationContract =
 export function participationContract(input: {
   status: TitleParticipation["status"];
   contractId: string | null;
-  contract: { id: string; title: string; state: ContractState } | null;
+  contract: {
+    id: string;
+    title: string;
+    state: ContractState;
+    proof: ContractProof;
+  } | null;
 }): ParticipationContract {
   if (input.contractId)
     return input.contract
@@ -174,6 +233,8 @@ export type ParticipationDeal = {
   // The accord de principe proposed or validated (its pill says which).
   agreementStatus: AgreementStatus | null;
   assignee: string | null;
+  // Who it is given to (« Caler le call » plans on his free slots).
+  assigneeId: string | null;
   stageChangedAt: string;
   // The next action and its date, the follow-up date (lot 11: the
   // Juridique's follow-up, as the Deals page says them).

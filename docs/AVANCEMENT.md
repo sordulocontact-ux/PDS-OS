@@ -2602,3 +2602,104 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
   `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; textes des 5 notifications et lignes d'historique
   des nouveaux types (fichiers partagés, à faire) ; dépôt à la main d'un memo reçu ailleurs (WhatsApp) : aujourd'hui,
   le transférer par e-mail à l'adresse du deal.
+
+
+## Retours d'Ibé du 18/11 : parcours PDS Mic (21/11/2026, branche `pre-prod`)
+
+Ticket `PDSMIC-retours-ibe-18-11.md`, traité en lots commités sur `pre-prod` (rien de poussé). Test avec Ibé prévu le
+lundi 23/11/2026. Ne touche pas aux projets classiques.
+
+- **1.1 Créer un collectif, invités** : les artistes invités s'affichent en pastilles sous le champ, chacune avec son ✕,
+  sous « Artistes invités · 3 » (`ArtistChoiceField`, `NameChip onRemove`). Cause de l'homonyme « Jay » : le champ
+  masquait l'artiste déjà choisi puis proposait « Créer l'artiste Jay » ; il dit maintenant « déjà invité »
+  (`SearchPicker excludedNote`).
+- **1.2 Titres sans nom** : un titre sans nom se lit « Titre de Jay (à nommer) » (« Titre 3 (à nommer) » sans invité),
+  partout : Titres, Juridique, contrats manquants, sorties, texte SQL (`project_title_label`).
+- **1.3 Bouton « Nouveau projet »** : vérifié dans le navigateur (bureau), sans changement de code (déjà revenu avec
+  `c53e1e28`).
+- **2 Récap « Titres et artistes »** : le tableau de l'équipe devient le récap. Par titre : Mix, fiche beatmaker, Sortie
+  (oui / non / pas décidé, par titre, sans conséquence), Distribution. Par artiste : Statut (À contacter, Contacté,
+  D'accord, A refusé, Retiré), Accord (étape, taux, jour du call, négociateur), Contact (modifiable sur place, lié au
+  Réseau, Appeler / WhatsApp), Juridique (fiche, contrat) et Notes. Compteurs filtrants en tête, « Caler le call » sur un
+  artiste d'accord sans call, version compacte en lecture seule en tête de la Vue d'ensemble d'un collectif accepté
+  (« Tout voir »). Le responsable du projet est prévenu quand un artiste passe « D'accord » ou « A refusé » (et déjà
+  quand l'accord est validé), et l'Activité garde « Sortie décidée » et « Contrats confirmés ».
+- **3.1 Juridique par titre** : les démarches d'un collectif sont groupées par titre (groupes repliables, celui de
+  l'étape ouverte déplié, libellé avec l'artiste), puis un groupe « Projet » ; le titre courant est en tête de l'étape
+  et le nom du son n'est plus répété.
+- **3.3 Artiste principal** : une seule fois à l'État des lieux, à la Confirmation et au Cadrage (« PDS · Artiste
+  principal · tous les titres »).
+- **3.4 Contrats d'un titre** : « Confirmer les contrats nécessaires » propose par titre production, droit à l'image,
+  édition (décochable) et beatmaker, pré-cochés ; la confirmation est enregistrée (`title_contract_needs`). La rédaction
+  reste un contrat par personne.
+- **3.5 Pas de contrat avant l'accord** : le contrat d'un invité n'est rédigé qu'une fois l'accord validé (garde SQL
+  `agreement_not_validated`, aussi sur `title_participations.contract_id`) ; le parcours dit « En attente de l'accord ».
+  Un invité et un contributeur de même nom ne font plus qu'une personne au Juridique d'un collectif.
+- **3.6 Rattacher au Catalogue** : « Rattacher un titre du Catalogue » dans la démarche du Juridique qui en a besoin
+  (`/legal/attach/<titleId>`).
+- **4.1 Homonymes** : plus d'artiste en double créé depuis le champ des invités (formulaire et garde SQL
+  `artist_name_taken`) ; le même artiste sur deux titres reste permis, avec une confirmation (« déjà invité sur … »,
+  « L'inviter aussi »).
+- **4.2 Paragraphes de développement** : les incohérences calculées du Plan du projet (« À revoir : le cadrage a
+  changé… ») et les aides du formulaire sont retirées.
+- **À pousser en prod par Sacha** : migrations `20261121200101_collective_recap.sql` et
+  `20261121210101_collective_title_contracts.sql` ; tests `supabase/tests/collective-recap.test.sql` (42) et
+  `supabase/tests/collective-title-contracts.test.sql` (39). Détail : `docs/ARCHITECTURE.md` § 8 sexies et
+  `docs/pds-mic-resume.md`.
+- **Démo pré-prod** : `supabase/preprod/showcase-assurance-30.sql` (le collectif « Assurance 30 » d'Ibé du 18/11) est à
+  jouer à la main après `showcase-business.sql` ; `preprod-reset.sh` ne le charge pas.
+- **Prochain chantier** : les vrais contrats par titre (besoins par titre et par type, plusieurs contrats par personne,
+  contrat de production relié à la participation), à valider avec Ibé après le test du 23/11.
+- **Questions ouvertes pour Ibé (23/11)** : l'Excel de suivi, fiche globale ou par titre (aujourd'hui par personne et par
+  projet) ; « Sortie oui / non » : qui décide, que faire si non ; récap en tête de la Vue d'ensemble, est-ce bien là ;
+  le taux affiché est-il « Part du master » ?
+- Reste / limites connues : un contrat « nécessaire » n'a pas de « prêt à générer » (la rédaction reste par personne) ;
+  un contact créé depuis le récap n'est pas relié aux crédits ; une ligne de plan déjà lancée `contract:artist:<id>`
+  devient orpheline après la fusion invité / contributeur ; les noms de sorties déjà stockés (`releases.title`) ne
+  changent qu'au prochain `ensure_title_release` ; les homonymes déjà au Catalogue restent tels quels.
+
+## Récap des titres comparé à l'Excel de suivi d'Ibé (21/11/2026, branche `pre-prod`)
+
+Excel d'Ibé (onglet Cast : nom, tél, sortie label, taux, mix, questionnaire rempli, notes, questionnaire beatmaker… ;
+tableau CONTRATS : contrat coproduction 50/50, envoyé ?, en attente de retour, upload du son, signé) comparé au récap
+« Titres et artistes » ; un commit par point :
+
+- **Disposition « Titre à gauche »** (Maël : « pas aligné avec les colonnes, c'est bizarre ») : colonne Titre fusionnée
+  à gauche (nom, Catalogue, Nommer, Mix / Beatmaker / Sortie / Distribution empilés), une ligne par artiste à droite ;
+  un seul corps de tableau, filet entre deux titres, colonne « ⋯ » seulement pour qui écrit (`ceb5a8d5`, `2233c7a0`).
+- **Fiche en trois mots** comme l'Excel (Oui / Non / En attente) : « Fiche · À envoyer », « En attente », « Remplie »
+  (« Remplie, à valider » au survol) ; fiche révoquée ou lien expiré = « À envoyer » (`2de58dc5`).
+- **Contrat** : « Envoyé · en attente de retour », « Retour reçu · à contresigner », puis « Signé » dès que PDS a
+  contresigné (la vérification de signature reste dans le Juridique) (`45fe46fd`, `fc9f72a2`).
+- **Son reçu** : la cellule Mix dit « Son reçu » / « Son attendu » d'après la source confirmée au Master
+  (`master_flow_sources`), sans champ en plus ; un titre sans master reste « — » (`49f6df1e`).
+- **Qui est le contact** : « Manager · … », « Producteur · … » (`3200bb95`, `2ebcf7d3`). Le « Producteur » d'Ibé est le
+  producteur côté label (celui qui négocie le 50/50) : aucun rôle de personne du Réseau ne convient (`producer` =
+  réalisateur·rice ; `label` et `production_company` sont des rôles d'organisation), c'est donc un **libellé libre de la
+  participation** (`title_participations.contact_label`, 40 caractères, `set_title_participation_contact(…, p_label)`) ;
+  « Nouveau contact » et « Autre contact » demandent Manager / Producteur / Autre ; modale « Contact de l'artiste ».
+  Migration `20261121220101_participation_contact_label.sql` **à pousser en prod par Sacha** (tests dans
+  `collective-recap.test.sql`, 56).
+- **« Participations et contrats »** : bouton en contour dans l'en-tête de chaque étape du Juridique d'un collectif
+  (avant : caché en pied de colonne, introuvable en réunion) (`39f8c459`).
+- **Confidentialité** : le récap ne lit plus la soumission complète d'une fiche (seulement de quoi calculer son état,
+  aussitôt réduit à « champs requis remplis ou non ») ; aucune donnée personnelle de fiche (naissance, sécu, adresse,
+  RIB) n'est lue ni envoyée au navigateur ; garde-fou `privateReadsOf` (`2acd78d5`).
+- **À décider (hors récap)** : `loadCallContacts` (`lib/calls/invite.ts`) envoie au navigateur l'e-mail de jusqu'à
+  1000 contacts du Réseau pour « Caler le call » (aussi sur la page d'un deal) ; `privateDetailsOf` lit `city` et
+  `notes` côté serveur ; une fonction SQL qui renvoie l'état d'une fiche éviterait toute lecture de la soumission.
+- Attendent la réponse d'Ibé (23/11) : Lyrics, Réseaux, « personnes sur place ».
+- **Démo « Assurance 30 »** (`0771fa0e`) : le script ajoute, rejouable sur un projet déjà créé, de quoi voir chaque
+  état : fiche « En attente » (Selma), « Remplie » (Elio, Ysolde, Tiago) ; contrat « Envoyé · en attente de retour »
+  (Elio), « Retour reçu · à contresigner » (Ysolde Marnay, titre « Marée haute »), « Signé » (Tiago Lestrel, « Dernier
+  métro ») ; « Son reçu » (« Cap sur demain »), « Son attendu » (« Marée haute »). Deux invités inventés ajoutés, un
+  modèle « Contrat d'artiste invité » créé s'il n'y en a pas de validé ; les copies signées n'ont pas de fichier derrière.
+- **« Voir comme » (barre de pré-prod, hors PDS Mic, non corrigé)** : bascule parfois sans effet. Constat : lors des
+  essais ratés, aucune connexion n'arrive à Supabase Auth ; `switchPreprodAccount` (`lib/preprod/actions.ts`) sort en
+  silence quand `getClaims()` ne rend rien (session en cours de renouvellement : un jeton de Claire a été révoqué pendant
+  ces essais) et la barre ne dit rien. Piste : ne pas exiger la session courante (la barre n'existe qu'en pré-prod) et
+  afficher une erreur si la connexion échoue.
+- **Pour Sacha — badge d'un deal** : « Accord de principe validé » était orange (`dealStageTone.agreement = warning`, quel que
+  soit `agreementStatus`). `DealStageBadge` lit maintenant `dealStageToneOf(deal)` (`lib/ui/state-tones.ts`) : accord à
+  valider = orange, **accord validé = vert** ; les autres étapes gardent leur ton. Partout où le badge s'affiche (Deals,
+  page d'un deal, récap des titres).

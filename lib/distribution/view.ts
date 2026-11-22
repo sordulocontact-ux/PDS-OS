@@ -37,6 +37,11 @@ import {
 } from "@/lib/distribution/validation";
 import { loadMembers, loadValidators } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
 import {
@@ -160,7 +165,14 @@ export async function loadDistributionView(
   const provisional = release
     ? ((project as Partial<DistributionProject>).distributionTitles ?? [])
         .filter((t) => t.master?.provisional)
-        .map((t) => fr.projectTitles.unnamed(t.position))
+        .map((t) =>
+          projectTitleLabel({
+            position: t.position,
+            workingTitle: t.workingTitle,
+            masterTitle: masterNameOf(t.master),
+            artists: titleGuestNames(t.participations),
+          }),
+        )
     : [];
   const nameOf = (personId: string | null) =>
     personId

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { projectTitleLabel } from "@/lib/projects/title-rules";
+import { projectTitleLabel, titleGuestNames } from "@/lib/projects/title-rules";
 import type { createClient } from "@/lib/supabase/server";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -8,7 +8,7 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 /**
  * The titles where an artist takes part in a collective (a participation
  * neither declined nor withdrawn, the rule of set_project_main_artist), in
- * their order, named as the project names them (« Titre 4 · sans nom »):
+ * their order, named as the project names them (« Titre de Jay (à nommer) »):
  * what the refusal « main_artist_is_guest » names (lot 5 of
  * docs/pds-mic-plan.md). Read under RLS; none read: the message says it in
  * general.
@@ -21,7 +21,7 @@ export async function guestTitles(
   const { data, error } = await supabase
     .from("title_participations")
     .select(
-      "title:project_titles!title_participations_title(position, working_title, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(title, title_is_provisional)))",
+      "title:project_titles!title_participations_title(position, working_title, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(title, title_is_provisional)), participations:title_participations!title_participations_title(status, created_at, artist:artists!title_participations_artist_same_org(name)))",
     )
     .eq("project_id", projectId)
     .eq("artist_id", artistId)
@@ -41,6 +41,13 @@ export async function guestTitles(
         masterTitle: title.link?.master?.title_is_provisional
           ? null
           : (title.link?.master?.title ?? null),
+        artists: titleGuestNames(
+          [...title.participations]
+            .sort((a, b) => a.created_at.localeCompare(b.created_at))
+            .flatMap((p) =>
+              p.artist ? [{ status: p.status, artist: p.artist }] : [],
+            ),
+        ),
       }),
     );
 }

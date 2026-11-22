@@ -81,6 +81,10 @@ export type AgreementRow = {
   financialNeedCents: number | null;
   // « Pas d'accord nécessaire », with why (legal_no_agreement_reasons).
   noAgreementReason: string | null;
+  // A collective's guest artist whose accord is not validated (§ 3.5 of
+  // Ibé's 18/11/2026): the titles awaited. The contract is not drafted
+  // before (lib/legal/title-contracts-rules.ts); set by loadAgreements.
+  awaitingAgreement?: string[] | null;
 };
 
 export type MappingInput = {

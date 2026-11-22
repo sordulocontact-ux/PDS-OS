@@ -217,7 +217,7 @@ export async function loadFormalities(
       const master = (masters.data ?? []).find((x) => x.id === m.id);
       const f = (formalities.data ?? []).find((x) => x.master_id === m.id);
       const prefill = prefillSacem725({
-        title: master?.title ?? m.title,
+        title: m.title,
         durationSeconds: master?.duration_seconds ?? null,
         audioState: master?.audio_state ?? null,
         iswc: master?.iswc ?? null,

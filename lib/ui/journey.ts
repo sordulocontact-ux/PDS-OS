@@ -137,6 +137,9 @@ export type JourneyStep = {
   clipSummary?: boolean;
   // Intertitle of the journey this step sits under (« Dossier »).
   group?: string;
+  // The group's identity when two groups may read alike (a collective's
+  // titles in the Juridique: two « Titre de Jay (à nommer) »); else `group`.
+  groupKey?: string;
   // Subtitle in the journey: red for a missed due date or sources that block
   // it (the subtitle is then its summary alone), warning for a decision
   // required (a wait, not an error).

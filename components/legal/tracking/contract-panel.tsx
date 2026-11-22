@@ -141,8 +141,18 @@ export function ContractPanel({
   const fromFiche = row.fields.filter(
     (f) => f.status === "missing" && f.home === "fiche",
   );
+  // A guest artist whose accord is awaited (§ 3.5 of Ibé's 18/11/2026): the
+  // contract is not drafted before, so no gesture of drafting, only the wait.
+  const awaiting = row.awaitingAgreement && (
+    <ToneCallout tone="info">
+      {fr.legalContracts.agreements.awaitingOf(
+        row.awaitingAgreement.join(", "),
+      )}
+    </ToneCallout>
+  );
   const toGenerate = (
     <>
+      {awaiting}
       {fromFiche.length > 0 && (
         <ToneCallout tone="warning">
           {t.missingFromFiche(
@@ -196,6 +206,7 @@ export function ContractPanel({
     case "needs_info":
       return toGenerate;
     case "ready_to_generate":
+      if (row.awaitingAgreement) return toGenerate;
       return (
         <>
           {toGenerate}

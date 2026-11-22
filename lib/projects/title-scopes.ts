@@ -6,7 +6,11 @@ import {
   type ActionTitleScope,
   type ScopeTitle,
 } from "@/lib/projects/title-scope-rules";
-import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import { loadProjectTitles } from "@/lib/projects/titles";
 import { createClient } from "@/lib/supabase/server";
 import { trackedCache } from "@/lib/projects/live-deps";
@@ -66,6 +70,7 @@ export const loadTitleScopes = trackedCache(
           position: title.position,
           workingTitle: title.workingTitle,
           masterTitle: masterNameOf(title.master),
+          artists: titleGuestNames(title.participations),
         }),
         abandoned: title.status === "abandoned",
       })),

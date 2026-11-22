@@ -13,7 +13,8 @@ import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { projectArtists } from "@/lib/projects/participation-rules";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { loadTitleBoard, titleBoardChoices } from "@/lib/projects/title-board";
+import { loadTitleRecap } from "@/lib/projects/recap";
+import { titleBoardChoices } from "@/lib/projects/title-board";
 import { titleCounts } from "@/lib/projects/title-board-rules";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -26,7 +27,8 @@ export const metadata = { title: fr.projectTitles.title };
 
 /**
  * « Titres et artistes » of a launched collective project
- * (docs/pds-mic-plan.md, lot 6): its titles (in progress, planned,
+ * (docs/pds-mic-plan.md, lot 6), the team's recap since the retours d'Ibé
+ * du 18/11/2026 (lot 2, loadTitleRecap): its titles (in progress, planned,
  * abandoned), their artists and where each one stands, computed by code.
  * Never shown for another project (404, no entry in its navigation). Facts:
  * the main artist, the titles by status, the artists of the project. Only
@@ -46,7 +48,7 @@ export default async function ProjectTitlesPage({
   const canManage = canEditProject(access, project);
   const canOpenLegal = can(access, "manage_legal");
   const [board, flows, deposits] = await Promise.all([
-    loadTitleBoard(project, access),
+    loadTitleRecap(project, access),
     loadWorkflowStates(project.id),
     // Each title's release deposit (lot 15).
     loadTitleDeposits(project.id),
@@ -107,8 +109,7 @@ export default async function ProjectTitlesPage({
       />
       <TitlesBoard
         projectId={project.id}
-        titles={board.titles}
-        dealReach={board.dealReach}
+        recap={board}
         canManage={canManage}
         artists={artists}
         masterOptions={masterOptions}

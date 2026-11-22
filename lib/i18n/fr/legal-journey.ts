@@ -64,7 +64,7 @@ export const legalJourney = {
   steps: {
     inventory: {
       title: "État des lieux",
-      why: "Ce que le projet sait déjà, classé connu, à confirmer ou manquant. Lu par le code à chaque ouverture : rien ne s'y coche à la main.",
+      why: "Ce que le projet sait déjà, classé connu, à confirmer ou manquant.",
     },
     framing: {
       title: "Cadrage juridique",

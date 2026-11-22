@@ -18,6 +18,7 @@ import type {
   IntakeQuestion,
   QuestionKey,
 } from "@/lib/legal/intake/types";
+import { isMainArtist, type MainArtist } from "@/lib/legal/main-artist";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
 import type { Tone } from "@/lib/ui/state-tones";
 
@@ -92,6 +93,9 @@ type Build = {
   questions: IntakeQuestion[];
   answers: AnswerFact[];
   today: string;
+  // A collective's main artist: one line for every title (§ 3.3 of Ibé's
+  // 18/11/2026), not one per title.
+  mainArtist?: MainArtist | null;
 };
 
 export function buildSynthesis(b: Build): SynthesisSection[] {
@@ -164,9 +168,32 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
         },
       }));
 
+  const main = b.mainArtist ?? null;
+  const mainCredited =
+    main !== null &&
+    b.rows.titles.some((master) =>
+      (b.rows.performersOf.get(master.id) ?? []).some((p) =>
+        isMainArtist(main, p),
+      ),
+    );
+  const mainLine: SynthesisFact[] =
+    main && mainCredited
+      ? [
+          {
+            key: `main-artist-${main.id ?? main.name}`,
+            label: main.name,
+            detail: fr.legal.inventory.facts.mainArtist,
+            source: fr.legal.inventory.sources.artist,
+            status: "known",
+            statusLabel: t.states.credited,
+            href: main.id ? routes.artist(main.id) : null,
+          },
+        ]
+      : [];
   const people = b.rows.titles.flatMap((master): SynthesisFact[] => {
-    const performers = b.rows.performersOf.get(master.id) ?? [];
-    const credited = new Set(performers.map((p) => p.name.toLowerCase()));
+    const all = b.rows.performersOf.get(master.id) ?? [];
+    const credited = new Set(all.map((p) => p.name.toLowerCase()));
+    const performers = all.filter((p) => !isMainArtist(main, p));
     // One line per person and title, every role together.
     const byName = new Map<string, { name: string; roles: string[] }>();
     for (const c of b.rows.creditsOf.get(master.id) ?? []) {
@@ -253,7 +280,7 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
   ]);
 
   return [
-    { key: "people", facts: people },
+    { key: "people", facts: [...mainLine, ...people] },
     { key: "third_party", facts: thirdParty },
     { key: "agreements", facts: agreements },
     { key: "publishers", facts: publishers },

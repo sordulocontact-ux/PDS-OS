@@ -266,7 +266,8 @@ export const catalog = {
     submitting: "Création…",
     cancel: "Annuler",
     close: "Fermer",
-    duplicate: "Cet artiste existe déjà.",
+    nameTaken: (name: string) =>
+      `Un artiste nommé ${name} existe déjà au Catalogue.`,
     openExisting: "Voir sa fiche",
     selectExisting: "Le sélectionner",
     deezerDuplicate: "Ce profil Deezer est déjà au catalogue.",

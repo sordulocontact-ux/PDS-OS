@@ -62,6 +62,11 @@ export const artistSelections = {
     placeholder: "Nom de l'artiste",
     chosen: "Artistes choisis",
     remove: (name: string) => `Retirer ${name}`,
+    // The legend with how many are chosen: « Artistes · 3 ».
+    counted: (legend: string, count: number) => `${legend} · ${count}`,
+    // The typed name is one already chosen, or kept out of the field.
+    alreadyChosen: (name: string) => `${name} est déjà choisi.`,
+    alreadyInSelection: (name: string) => `${name} est déjà dans la sélection.`,
     create: "Créer un artiste",
     createNamed: (query: string) => `Créer l'artiste « ${query} »`,
     noResult: (query: string) => `Aucun artiste ne correspond à « ${query} ».`,

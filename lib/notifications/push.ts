@@ -8,6 +8,7 @@ import { fetchAccess } from "@/lib/auth/access";
 import { getPublicEnv } from "@/lib/env-public";
 import { getServerEnv } from "@/lib/env";
 import { fr } from "@/lib/i18n/fr";
+import { loadParticipationSubjects } from "@/lib/notifications/subjects";
 import {
   isNotificationKind,
   notificationHref,
@@ -59,7 +60,7 @@ export async function sendPendingPushes(
         ),
       ),
     ];
-    const [{ data: projects }, access, { data: validations }] =
+    const [{ data: projects }, access, { data: validations }, participations] =
       await Promise.all([
         supabase.from("projects").select("id, title").in("id", projectIds),
         fetchAccess(supabase),
@@ -69,6 +70,8 @@ export async function sendPendingPushes(
               .select("id, project_stages!inner(stage_definitions!inner(key))")
               .in("id", validationIds)
           : Promise.resolve({ data: [] }),
+        // A collective's participation: its artist and title, named.
+        loadParticipationSubjects(supabase, deliveries),
       ]);
     const titles = new Map((projects ?? []).map((p) => [p.id, p.title]));
     const actor = personName(access.firstName, access.lastName) || null;
@@ -89,6 +92,7 @@ export async function sendPendingPushes(
             d.kind,
             actor,
             d.project_id ? (titles.get(d.project_id) ?? null) : null,
+            d.subject_id ? participations.get(d.subject_id) : null,
           ),
           url: notificationHref(
             d.kind,

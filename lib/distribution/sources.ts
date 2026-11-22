@@ -36,6 +36,11 @@ import type {
 } from "@/lib/distribution/readiness";
 import { fr as frAll } from "@/lib/i18n/fr";
 import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
+import {
   getProjectRelease,
   PROJECT_RELEASE,
   type ReleaseRow,
@@ -220,6 +225,13 @@ export const loadDistributionSources = trackedCache(async function load(
   });
   const ownTitles = new Set(releaseTitles.map((t) => t.id));
   const releaseGaps = gaps.filter((g) => ownTitles.has(g.titleId));
+  const titleLabelOf = (t: (typeof releaseTitles)[number]) =>
+    projectTitleLabel({
+      position: t.position,
+      workingTitle: t.workingTitle,
+      masterTitle: masterNameOf(t.master),
+      artists: titleGuestNames(t.participations),
+    });
   const collective: ReadinessCollective | null = scoped
     ? {
         kind: scoped.kind,
@@ -228,15 +240,10 @@ export const loadDistributionSources = trackedCache(async function load(
         contracts: releaseGaps.length ? gapNames(releaseGaps) : null,
         provisional: releaseTitles
           .filter((t) => t.master?.provisional)
-          .map((t) => frAll.projectTitles.unnamed(t.position)),
+          .map(titleLabelOf),
         withoutMaster:
           scoped.kind === "compilation"
-            ? releaseTitles
-                .filter((t) => !t.master)
-                .map(
-                  (t) =>
-                    t.workingTitle ?? frAll.projectTitles.unnamed(t.position),
-                )
+            ? releaseTitles.filter((t) => !t.master).map(titleLabelOf)
             : [],
         catalogCover: titleCoverMaster
           ? {

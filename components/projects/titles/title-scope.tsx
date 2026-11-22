@@ -126,7 +126,6 @@ function TitleScopeDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={t.title(props.action.name)}
-      description={t.description}
       closeLabel={fr.dialogs.close}
     >
       {open && <TitleScopeForm {...props} onDone={() => onOpenChange(false)} />}
