@@ -77,8 +77,15 @@ export function ContractNowActions({
     />
   );
   // Back signed outside the link, or already signed (a contract by hand).
+  // Sent by e-mail (not on the link): it comes back by e-mail, so dropping
+  // the signed copy is the next gesture, named so (Sacha 22/11/2026).
+  const byMail = proof?.sent?.via === "other";
   const otherwise = contract.can.sign && (
-    <Fold summary={generated ? team.otherwise : t.signedBack}>
+    <Fold
+      summary={
+        !generated ? t.signedBack : byMail ? t.depositSigned : team.otherwise
+      }
+    >
       {signStep("otherwise")}
     </Fold>
   );

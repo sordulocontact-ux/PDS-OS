@@ -12,24 +12,6 @@ import { ContractNowActions } from "./contract-now-actions";
 
 const fr = { contracts, legalDocuments };
 
-const WHY: Record<ContractNowKind, keyof typeof fr.contracts.now.why> = {
-  deposit: "deposit",
-  decide: "in_review",
-  await_decide: "in_review",
-  submit: "draft",
-  await_submit: "draft",
-  send: "approved",
-  await_send: "approved",
-  await_signer: "sent",
-  countersign: "returned",
-  await_countersign: "returned",
-  mark_signed: "mark_signed",
-  await_mark_signed: "mark_signed",
-  signed: "signed",
-  expired: "expired",
-  terminated: "terminated",
-};
-
 /**
  * « Maintenant » of a contract (proto « Contrats », 29/10/2026), by role
  * and state: the direction validates or asks for changes; the owner submits
@@ -92,20 +74,22 @@ export function ContractNow({
                 signer ? f.sentToValue(signer.name, signer.email) : f.noParty,
               ],
             ]
-          : kind === "await_signer" && sent
-            ? [
-                [f.sentOn, f.sentOnValue(formatDate(sent.on), data.sentBy)],
-                sent.via === "other" && sent.how ? [f.how, sent.how] : null,
-                sent.via === "link"
-                  ? [
-                      f.opened,
-                      signer?.link?.openedAt
-                        ? formatDate(signer.link.openedAt)
-                        : f.notOpened,
-                    ]
-                  : null,
-              ]
-            : [];
+          : [];
+
+  // Sent: when, by whom and how, in one line (Sacha 22/11/2026).
+  const line =
+    kind === "await_signer" && sent
+      ? sent.via === "link"
+        ? f.linkLine(
+            formatDate(sent.on),
+            signer?.link?.openedAt ? formatDate(signer.link.openedAt) : null,
+          )
+        : f.sentLine(
+            formatDate(sent.on),
+            data.sentBy ?? "",
+            sent.how ? (f.hows[sent.how] ?? sent.how.toLowerCase()) : "",
+          )
+      : null;
 
   return (
     <>
@@ -125,12 +109,14 @@ export function ContractNow({
               }
             : mine
               ? { tone: "info", label: t.mine }
-              : { tone: "neutral", label: t.nothing }
+              : kind === "await_signer" && contract.can.sign
+                ? { tone: "neutral", label: t.awaiting }
+                : { tone: "neutral", label: t.nothing }
         }
         validate={kind === "decide"}
         eyebrow={contract.title}
         title={title}
-        why={t.why[WHY[kind]]}
+        line={line}
         facts={facts}
       >
         <ContractNowActions contract={contract} data={data} />

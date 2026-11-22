@@ -193,6 +193,8 @@ export const contracts = {
     label: "Maintenant",
     mine: "À vous",
     nothing: "Rien à faire pour vous",
+    // Waiting for the party, with a gesture left (remind, drop the signed).
+    awaiting: "En attente",
     toValidate: "À valider",
     direction: "la direction",
     titles: {
@@ -217,23 +219,6 @@ export const contracts = {
     greeting: (name: string | null) => (name ? `Bonjour ${name},` : "Bonjour,"),
     // The party who signs, when none is named yet.
     theParty: "la partie qui signe",
-    why: {
-      deposit:
-        "Le contrat n'a pas encore de document : déposez son PDF, puis envoyez-le à valider.",
-      draft: "Le responsable prépare le contrat, puis l'envoie à valider.",
-      in_review:
-        "Le business manager ou la direction relit le contrat : il le valide ou demande des modifications.",
-      approved:
-        "Validé : il part à la partie qui signe, avec son lien privé quand elle en a un.",
-      sent: "Envoyé pour signature : il revient signé par le lien privé de la partie, ou autrement.",
-      returned:
-        "Revenu signé : la direction signe pour PDS, et le contrat est conclu.",
-      mark_signed:
-        "Signé par les deux parties : vérifiez la signature, puis marquez-le comme signé.",
-      signed: "Signé. Il pourra être résilié s'il prend fin avant son terme.",
-      expired: "Signé, et sa date de fin est passée.",
-      terminated: "Résilié : le contrat est figé.",
-    },
     signedTitle: (date: string) => `Signé le ${date}`,
     expiredTitle: (date: string) => `Expiré le ${date}`,
     terminatedTitle: "Résilié",
@@ -246,12 +231,18 @@ export const contracts = {
       sentToValue: (name: string, email: string | null) =>
         `${name} · ${email ?? "adresse manquante"}`,
       noParty: "aucune partie : ajoutez-la dans « Parties »",
-      sentOn: "Envoyé le",
-      sentOnValue: (date: string, by: string) =>
-        by ? `${date} par ${by}` : date,
-      how: "Comment",
-      opened: "Lien ouvert",
-      notOpened: "pas encore",
+      // One line, as a mail app says it (Sacha 22/11/2026).
+      sentLine: (date: string, by: string, how: string) =>
+        `Envoyé le ${date}${by ? ` par ${by}` : ""}${how ? `, ${how}` : ""}.`,
+      linkLine: (date: string, opened: string | null) =>
+        `Mis sur son lien privé le ${date} · ${opened ? `ouvert le ${opened}` : "pas encore ouvert"}.`,
+      // The ways of sending as said after « Envoyé le … par … ».
+      hows: {
+        "Envoyé depuis ma messagerie": "depuis sa messagerie",
+        "Envoyé par PDS OS": "par e-mail depuis PDS OS",
+        "Envoyé par un outil de signature": "par un outil de signature",
+        "Remis en main propre": "remis en main propre",
+      } as Record<string, string>,
     },
     // Validated by the business manager or the direction since 18/11/2026
     // (validate_contracts).
@@ -378,6 +369,8 @@ export const contracts = {
     },
     // A contract back signed outside its link, or one already signed.
     signedBack: "Le contrat vous est déjà revenu signé ?",
+    // Sent by e-mail: the signed copy comes back by e-mail, dropped here.
+    depositSigned: "Déposer le contrat signé",
     sign: "Enregistrer la signature",
     signedOnLabel: "Date de signature",
     signedOnHint: "Aujourd'hui ou avant.",

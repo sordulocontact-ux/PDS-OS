@@ -13,14 +13,14 @@ const secondary =
 /**
  * The frame of a contract's « Maintenant » (the same `NowFrame` as the home,
  * Travail and a title): who it is for, the contract as eyebrow, what to do
- * or who is awaited, why, its facts, then the gestures.
+ * or who is awaited, its line or facts, then the gestures.
  */
 export function ContractNowFrame({
   badge,
   validate = false,
   eyebrow,
   title,
-  why,
+  line,
   facts = [],
   children,
 }: {
@@ -29,7 +29,8 @@ export function ContractNowFrame({
   validate?: boolean;
   eyebrow: string;
   title: string;
-  why: string;
+  // When, by whom, how: one quiet line under the title.
+  line?: string | null;
   facts?: Array<[string, string] | null | false>;
   children?: React.ReactNode;
 }) {
@@ -49,7 +50,7 @@ export function ContractNowFrame({
       <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
         {title}
       </h2>
-      <p className={cn(secondary, "text-pretty")}>{why}</p>
+      {line && <p className={cn(secondary, "text-pretty")}>{line}</p>}
       {shown.length > 0 && (
         <dl className={cn(secondary, "flex flex-col gap-1")}>
           {shown.map(([label, value]) => (
