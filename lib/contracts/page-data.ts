@@ -5,6 +5,7 @@ import { siteUrl } from "@/lib/auth/site-url";
 import { listCatalogFiles } from "@/lib/catalog/files";
 import { loadContractJournal } from "@/lib/contracts/journal";
 import { legalOriginOf } from "@/lib/contracts/legal-origin";
+import { routes } from "@/lib/auth/redirects";
 import { contractNowOf } from "@/lib/contracts/now";
 import { contractProofOf } from "@/lib/contracts/proof";
 import type { ContractDetail, ContractParty } from "@/lib/contracts/types";
@@ -99,6 +100,13 @@ export async function loadContractPage(
     sentBy: sentBy ?? "",
     direction: direction?.name ?? null,
     me: personName(access.firstName, access.lastName),
+    // The viewer follows it: « Ensuite » says « vous ».
+    mine: contract.ownerPersonId === access.personId,
+    // What to read before deciding (Sacha 22/11/2026): its document in the
+    // browser, else its latest draft filed.
+    pdf: generated
+      ? `${routes.contractDocumentPdf(contract.id)}?view=1`
+      : (library.files.find((f) => f.category === "draft")?.openUrl ?? null),
   };
 }
 

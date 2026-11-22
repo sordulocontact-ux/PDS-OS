@@ -82,7 +82,7 @@ export function ContractNow({
   const f = t.facts;
   const facts: Array<[string, string] | null> =
     kind === "decide"
-      ? [[f.then, f.thenSend(contract.ownerName)]]
+      ? [[f.then, data.mine ? f.thenSendYou : f.thenSend(contract.ownerName)]]
       : kind === "submit"
         ? [[f.validation, directionName]]
         : kind === "send"

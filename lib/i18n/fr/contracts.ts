@@ -240,6 +240,7 @@ export const contracts = {
     facts: {
       then: "Ensuite",
       thenSend: (owner: string) => `Envoi pour signature par ${owner}`,
+      thenSendYou: "Vous l'envoyez pour signature",
       validation: "Validation",
       sentTo: "Envoyé à",
       sentToValue: (name: string, email: string | null) =>
@@ -255,6 +256,7 @@ export const contracts = {
     // Validated by the business manager or the direction since 18/11/2026
     // (validate_contracts).
     submit: "Envoyer à valider",
+    openPdf: "Ouvrir le PDF",
     decide: {
       approve: "Valider",
       requestChanges: "Demander des modifications",

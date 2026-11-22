@@ -92,6 +92,19 @@ export function ContractNowActions({
     </Fold>
   );
 
+  // Read before deciding, submitting or sending (Sacha 22/11/2026).
+  const read = data.pdf && (
+    <div>
+      <Button
+        variant="outline"
+        size="sm"
+        nativeButton={false}
+        render={<a href={data.pdf} target="_blank" rel="noreferrer" />}
+      >
+        {t.openPdf}
+      </Button>
+    </div>
+  );
   switch (kind) {
     case "deposit":
       return (
@@ -104,14 +117,22 @@ export function ContractNowActions({
         </div>
       );
     case "decide":
-      return <ContractDecision contractId={contract.id} />;
+      return (
+        <>
+          {read}
+          <ContractDecision contractId={contract.id} />
+        </>
+      );
     case "submit":
       return (
-        <ContractAdvanceButton
-          contractId={contract.id}
-          action="submit"
-          label={t.submit}
-        />
+        <>
+          {read}
+          <ContractAdvanceButton
+            contractId={contract.id}
+            action="submit"
+            label={t.submit}
+          />
+        </>
       );
     case "send":
       return (
