@@ -39,6 +39,21 @@ export const dealCalls = {
     meetFailed:
       "Call calé, mais Google n'a pas créé de lien Meet : ajoutez un lien de visio sur la page du call.",
   },
+  // PO's term proposals, one at a time above the terms (TermProposalReview).
+  review: {
+    label: (n: number) =>
+      `${n} terme${n > 1 ? "s" : ""} lu${n > 1 ? "s" : ""} par PO`,
+    title: (n: number) =>
+      n > 1
+        ? `PO a lu ${n} termes dans les calls`
+        : "PO a lu un terme dans un call",
+    position: (i: number, n: number) => `${i} sur ${n}`,
+    previous: "Proposition précédente",
+    next: "Proposition suivante",
+    apply: "Appliquer",
+    edit: "Modifier",
+    show: (term: string) => `Voir ce que PO a lu sur ${term}`,
+  },
   // PO's proposals from a call's report (lib/deals/call-proposals.ts), in
   // « Termes négociés » and « Prochaine action ».
   proposals: {

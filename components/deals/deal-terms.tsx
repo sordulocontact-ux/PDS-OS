@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 
-import { DismissButton } from "@/components/deals/deal-call-proposals";
 import { TermForm } from "@/components/deals/term-form";
+import {
+  TermProposalReview,
+  type TermProposal,
+} from "@/components/deals/term-proposal-review";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
-import { FactSourceText } from "@/components/ui/fact-row-frame";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { routes } from "@/lib/auth/redirects";
-import type { DealCallProposal } from "@/lib/deals/call-queries";
 import { formatTermValue } from "@/lib/deals/term-format";
 import type { DealTerm, TermFormat } from "@/lib/deals/terms";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
@@ -21,8 +21,6 @@ import { dealTermTone } from "@/lib/ui/state-tones";
 import { formatInstantDay } from "@/lib/utils/instant";
 
 const fr = { dealCalls, deals, dialogs };
-
-type TermProposal = Extract<DealCallProposal, { kind: "term" }>;
 
 // Words, not a figure: shown at reading size in their card.
 const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
@@ -34,9 +32,9 @@ const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
  * 20/11/2026: nine rows « À définir » made the page a table), each a
  * button for whoever writes the deal. A card or a button opens the term in a
  * dialog; the history is in the deal's journal. What PO read in the deal's
- * calls is the card of its term, first, in the same grid (Sacha 21/11/2026:
- * « une section complète »): the value proposed, the passage it comes from,
- * « Vérifier » opens the term's form prefilled, « Écarter » sets it aside.
+ * calls is reviewed one at a time above them (TermProposalReview, Sacha
+ * 21/11/2026: « une section complète », « une autre ergonomie »); its term's
+ * card is marked (`proposed`) and opens it there.
  */
 export function DealTerms({
   dealId,
@@ -55,11 +53,17 @@ export function DealTerms({
     term: DealTerm;
     proposalId?: string;
   } | null>(null);
+  const [index, setIndex] = useState(0);
+  const at = Math.max(0, Math.min(index, proposals.length - 1));
   const proposedKeys = new Set(proposals.map((p) => p.termKey));
   const termOfKey = new Map(terms.map((term) => [term.key, term]));
-  const shown = terms.filter((term) => !proposedKeys.has(term.key));
-  const written = shown.filter((term) => term.state !== "to_define");
-  const toDefine = shown.filter((term) => term.state === "to_define");
+  // The written ones and the proposed ones, in the configured order.
+  const written = terms.filter(
+    (term) => term.state !== "to_define" || proposedKeys.has(term.key),
+  );
+  const toDefine = terms.filter(
+    (term) => term.state === "to_define" && !proposedKeys.has(term.key),
+  );
   const label = (term: DealTerm) => t.labels[term.key] ?? term.key;
   const toDefineButtons = (className?: string) => (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
@@ -79,61 +83,26 @@ export function DealTerms({
   );
   return (
     <div className="flex flex-col gap-3">
-      {(proposals.length > 0 || written.length > 0) && (
+      {proposals.length > 0 && (
+        <TermProposalReview
+          dealId={dealId}
+          proposals={proposals}
+          terms={termOfKey}
+          index={at}
+          onIndex={setIndex}
+          onEdit={(term, proposalId) => setOpen({ term, proposalId })}
+          canWrite={canWrite}
+        />
+      )}
+      {written.length > 0 && (
         <FactCards>
-          {proposals.map((p) => {
-            const term = termOfKey.get(p.termKey);
-            if (!term) return null;
-            return (
-              <FactCard
-                key={p.id}
-                proposed
-                label={label(term)}
-                value={formatTermValue(term.format, p.value) ?? ""}
-                text={TEXT_FORMATS.has(term.format)}
-                state={{
-                  tone: dealTermTone[p.state],
-                  label: t.states[p.state],
-                }}
-                quote={
-                  <FactSourceText
-                    source={{
-                      quote: p.quote,
-                      from: fr.dealCalls.proposals.from(
-                        p.callTitle,
-                        formatInstantDay(p.callAt),
-                      ),
-                      href: routes.call(p.callId),
-                    }}
-                  />
-                }
-                action={
-                  canWrite && (
-                    <span className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setOpen({
-                            term: { ...term, value: p.value, state: p.state },
-                            proposalId: p.id,
-                          })
-                        }
-                      >
-                        {fr.dealCalls.proposals.check}
-                      </Button>
-                      <DismissButton dealId={dealId} id={p.id} />
-                    </span>
-                  )
-                }
-              />
-            );
-          })}
           {written.map((term) => {
             const name = label(term);
+            const proposal = proposals.findIndex((p) => p.termKey === term.key);
             return (
               <FactCard
                 key={term.key}
+                proposed={proposal >= 0}
                 label={name}
                 value={
                   formatTermValue(term.format, term.value) ?? t.states.to_define
@@ -151,8 +120,21 @@ export function DealTerms({
                       )
                     : null
                 }
-                onClick={canWrite ? () => setOpen({ term }) : undefined}
-                actionLabel={canWrite ? t.editTitle(name) : undefined}
+                // Proposed: its proposal in the review above.
+                onClick={
+                  proposal >= 0
+                    ? () => setIndex(proposal)
+                    : canWrite
+                      ? () => setOpen({ term })
+                      : undefined
+                }
+                actionLabel={
+                  proposal >= 0
+                    ? fr.dealCalls.review.show(name)
+                    : canWrite
+                      ? t.editTitle(name)
+                      : undefined
+                }
               />
             );
           })}

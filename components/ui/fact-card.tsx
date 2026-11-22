@@ -14,8 +14,7 @@ import type { Tone } from "@/lib/ui/state-tones";
  * reader). `action`: a button of its own at the bottom right (« Changer »),
  * never with `onClick`. `proposed`: a value PO read and a person checks (a
  * deal's term from its call, Sacha 21/11/2026) — dashed frame, sparkle
- * before the label, the passage it comes from in `quote`. Laid out by
- * `FactCards`.
+ * before the label. Laid out by `FactCards`.
  */
 export function FactCard({
   label,
@@ -27,7 +26,6 @@ export function FactCard({
   actionLabel,
   action,
   proposed = false,
-  quote,
 }: {
   label: string;
   value: ReactNode;
@@ -39,8 +37,6 @@ export function FactCard({
   actionLabel?: string;
   action?: ReactNode;
   proposed?: boolean;
-  // Where a proposed value comes from (FactSourceText).
-  quote?: ReactNode;
 }) {
   const body = (
     <>
@@ -56,7 +52,6 @@ export function FactCard({
       >
         {value}
       </span>
-      {quote}
       {(state || source || action) && (
         <span className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1">
           {state && <StatusDot tone={state.tone} label={state.label} showLabel />}
