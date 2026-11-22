@@ -8133,6 +8133,9 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     réponse** (la version corrigée revient dans le deal), puis `record_deal_memo_correction_sent` (`20261122120101`,
     colonnes `correction_sent_*`, événement `memo_correction_sent`) ; ensuite « En attente de la nouvelle version ».
     Sur un memo écrit par PDS : « Rédiger la nouvelle version ». Accord validé : « Renvoyer l'accord validé à … ».
+    Avant de décider, le document se lit dans « Maintenant » : « Ouvrir le PDF » (fichier reçu, sinon le memo de PDS)
+    à côté de « Envoyer à valider » ; pour la direction, « Valider le deal memo » = lire, « Demander des
+    modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Envoyer à valider », ex-« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,

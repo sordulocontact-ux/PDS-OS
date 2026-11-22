@@ -15,12 +15,19 @@ const fr = { dealMemos, deals };
 const t = fr.dealMemos;
 
 /** « Ouvrir le PDF » of a file received by e-mail (a short-lived link). */
-export function MemoFileButton({ file }: { file: MemoFile }) {
+export function MemoFileButton({
+  file,
+  size = "sm",
+}: {
+  file: MemoFile;
+  // `default` in « Maintenant », beside its main gesture.
+  size?: "sm" | "default";
+}) {
   if (!file.url) return null;
   return (
     <Button
       variant="outline"
-      size="sm"
+      size={size}
       nativeButton={false}
       render={<a href={file.url} target="_blank" rel="noreferrer" />}
       aria-label={t.openFileNamed(file.name)}

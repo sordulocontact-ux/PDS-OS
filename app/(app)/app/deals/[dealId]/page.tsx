@@ -190,9 +190,12 @@ async function DealTodo({
   // Negotiating, or the accord validated, whoever writes the deal sees the
   // deal memo's step (DealMemoNow).
   const memoTime =
-    deal.canWrite &&
-    (deal.stage === "negotiation" ||
-      (deal.stage === "agreement" && deal.agreementStatus === "validated"));
+    (deal.canWrite &&
+      (deal.stage === "negotiation" ||
+        (deal.stage === "agreement" &&
+          deal.agreementStatus === "validated"))) ||
+    // The direction decides an accord on its memo, read first.
+    deal.canDecide;
   const [callForm, negotiationCall, memos, loop] = await Promise.all([
     callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
@@ -201,37 +204,48 @@ async function DealTodo({
   ]);
   const latest = memos[0] ?? null;
   const mail = dealMailSetup(deal.id);
-  const memoStep: MemoStep | null = memoTime
-    ? {
-        stage: deal.stage === "agreement" ? "agreement" : "negotiation",
-        memo: latest && {
-          id: latest.id,
-          open:
-            latest.status === "draft" && !latest.submitted && !latest.changes,
-          changes: latest.changes?.reason ?? null,
-          correctionSent: latest.correction !== null,
-          toSend: latest.status === "validated" && !latest.sent,
-          received: latest.source === "email",
-          receivedSubject: latest.email?.subject ?? null,
-          attachment:
-            latest.files.length > 0
-              ? latest.files.map((f) => f.name).join(", ")
-              : dealMemos.pdf.file(dealName(deal), latest.number),
-        },
-        address: mail.address,
-        counterpart: deal.counterpartName,
-        director: can(access, "validate"),
-        dealName: dealName(deal),
-        replyTo: await memoReplyTo(
-          memos.find((m) => m.email)?.email?.from ?? null,
-          deal.counterpartId,
-        ),
-        copies: loop
-          .filter((e) => e.kind === "contact" && e.email)
-          .map((e) => e.name),
-        canEmail: mail.canEmail,
-      }
-    : null;
+  // No memo to decide on: the direction keeps the accord's recap.
+  const memoStep: MemoStep | null =
+    memoTime && !(deal.canDecide && !latest)
+      ? {
+          stage: deal.stage === "agreement" ? "agreement" : "negotiation",
+          memo: latest && {
+            id: latest.id,
+            open:
+              latest.status === "draft" && !latest.submitted && !latest.changes,
+            changes: latest.changes?.reason ?? null,
+            correctionSent: latest.correction !== null,
+            toSend: latest.status === "validated" && !latest.sent,
+            received: latest.source === "email",
+            receivedSubject: latest.email?.subject ?? null,
+            toValidate: latest.status === "draft" && !latest.changes,
+            file: latest.files.find((f) => f.url) ?? null,
+            pdf:
+              latest.source === "pds"
+                ? {
+                    href: routes.dealMemoPdf(deal.id, latest.id),
+                    fileName: dealMemos.pdf.file(dealName(deal), latest.number),
+                  }
+                : null,
+            attachment:
+              latest.files.length > 0
+                ? latest.files.map((f) => f.name).join(", ")
+                : dealMemos.pdf.file(dealName(deal), latest.number),
+          },
+          address: mail.address,
+          counterpart: deal.counterpartName,
+          director: can(access, "validate"),
+          dealName: dealName(deal),
+          replyTo: await memoReplyTo(
+            memos.find((m) => m.email)?.email?.from ?? null,
+            deal.counterpartId,
+          ),
+          copies: loop
+            .filter((e) => e.kind === "contact" && e.email)
+            .map((e) => e.name),
+          canEmail: mail.canEmail,
+        }
+      : null;
   // An abandoned deal: the direction opens a new one for its artist.
   const reopenOptions =
     deal.stage === "abandoned" && can(access, "validate")

@@ -115,6 +115,10 @@ export function DealNow({
   nextCall?: string | null;
 }) {
   const t = fr.deals.page;
+  // An accord from a deal memo: the direction decides on the memo itself,
+  // read first (DealMemoNow, Sacha 22/11/2026).
+  if (deal.canDecide && memoNow)
+    return <NowFrame label={t.now}>{memoNow}</NowFrame>;
   if (deal.canDecide)
     return (
       <NowFrame label={t.now}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { MemoFileButton } from "@/components/deals/deal-memo-card";
 import {
   DealMemoSendForm,
   type MemoReplyTo,
@@ -9,9 +10,15 @@ import { nowHeading } from "@/components/deals/now-classes";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { DialogButton } from "@/components/ui/dialog-button";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
+import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { createDealMemo, validateDealMemo } from "@/lib/deals/memo-actions";
-import { submitDealMemo } from "@/lib/deals/memo-mail-actions";
+import {
+  requestDealMemoChanges,
+  submitDealMemo,
+} from "@/lib/deals/memo-mail-actions";
+import type { MemoFile } from "@/lib/deals/memos";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 
 const t = dealMemos;
@@ -33,6 +40,12 @@ export type MemoStep = {
     receivedSubject: string | null;
     // The files joined to the accord sent back, by name.
     attachment: string;
+    // A draft the direction may validate (no changes asked on it).
+    toValidate: boolean;
+    // What to read before deciding (Sacha 22/11/2026: « on peut valider sans
+    // rien regarder »): the PDF received, else the memo made here.
+    file: MemoFile | null;
+    pdf: { href: string; fileName: string } | null;
   } | null;
   address: string | null;
   // The label or the brand that sends it; none for a music deal, where PDS
@@ -114,29 +127,77 @@ export function DealMemoNow({
       </DialogButton>
     );
 
+  // The memo to read, before the gesture on it.
+  const read =
+    memo &&
+    (memo.file ? (
+      <MemoFileButton file={memo.file} size="default" />
+    ) : memo.pdf ? (
+      <PdfExportButton
+        href={memo.pdf.href}
+        fileName={memo.pdf.fileName}
+        label={t.openFile}
+        pendingLabel={t.pdf.pending}
+        failedLabel={t.pdf.failed}
+        variant="outline"
+        size="sm"
+      />
+    ) : null);
+
   let heading: string;
   let gesture: React.ReactNode;
-  if (step.stage === "agreement" && memo?.toSend) {
+  if (step.director && memo?.toValidate) {
+    // The direction decides on the memo itself: read, ask for changes, or
+    // validate (the main gesture last, at the right).
+    heading = t.now.validate;
+    gesture = (
+      <>
+        {read}
+        <DialogButton
+          label={t.changes.button}
+          size="default"
+          title={t.changes.title}
+          description={t.changes.description}
+        >
+          {(close) => (
+            <ReasonForm
+              label={t.changes.reason}
+              submitLabel={t.changes.button}
+              doneMessage={t.changes.done}
+              run={(reason) => requestDealMemoChanges(dealId, memo.id, reason)}
+              onDone={close}
+            />
+          )}
+        </DialogButton>
+        <Button
+          disabled={go.pending}
+          aria-busy={go.pending || undefined}
+          onClick={() =>
+            go.run(() => validateDealMemo(dealId, memo.id), t.validated)
+          }
+        >
+          {t.now.validateButton}
+        </Button>
+      </>
+    );
+  } else if (step.stage === "agreement" && memo?.toSend) {
     heading = who ? t.now.resend(who) : t.send.button;
     gesture = mailButton(t.send.button, t.send.title, t.send.description, null);
   } else if (memo?.open) {
-    heading = step.director ? t.now.validate : t.now.show;
+    heading = t.now.show;
     gesture = (
-      <Button
-        disabled={go.pending}
-        aria-busy={go.pending || undefined}
-        onClick={() =>
-          go.run(
-            () =>
-              step.director
-                ? validateDealMemo(dealId, memo.id)
-                : submitDealMemo(dealId, memo.id),
-            step.director ? t.validated : t.submitted,
-          )
-        }
-      >
-        {step.director ? t.now.validateButton : t.submit}
-      </Button>
+      <>
+        {read}
+        <Button
+          disabled={go.pending}
+          aria-busy={go.pending || undefined}
+          onClick={() =>
+            go.run(() => submitDealMemo(dealId, memo.id), t.submitted)
+          }
+        >
+          {t.submit}
+        </Button>
+      </>
     );
   } else if (memo?.changes && memo.received && who && !memo.correctionSent) {
     heading = t.now.correct(who);
