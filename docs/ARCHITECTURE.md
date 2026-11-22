@@ -8142,7 +8142,11 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     licence pour un Label, partenariat pour une Marque, contrat d'artiste sinon, artiste et projet du deal), lié au
     deal dès sa création (`link_deal_contract`) ; les postes `business_manager` et `business` ont `manage_contracts`
     (Ibé, 18/11 : « la partie juridique d'un deal reste dans la page Deal »). En contractualisation, « Maintenant » =
-    `DealContractNow` : « Créer le contrat », puis « Faire signer le contrat » (« Ouvrir le contrat » dans Contrats) ;
+    `DealContractNow` : « Créer le contrat », puis « Déposer le contrat » (son PDF, fichier `draft` du contrat,
+    `DealContractDeposit`) ; une fois le document là, **le « Maintenant » du contrat lui-même** sur le deal (`ContractNow` +
+    `loadContractPage`, les mêmes gestes que dans Contrats : envoyer à valider, valider, envoyer pour signature,
+    marquer signé) ; la section « Contrat » ouvre son PDF (dernier signé, sinon dernier projet) et garde ses gestes
+    secondaires en icônes (ouvrir dans Contrats, changer, retirer le lien) ;
     un contrat de participation est lancé par le chef de projet. « Prochaine action » et « Dans la boucle » côte à
     côte ; la boucle vide = une ligne discrète, pas un `EmptyNote`.
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Envoyer à valider », ex-« Montrer à la direction »,

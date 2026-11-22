@@ -1,34 +1,34 @@
 "use client";
 
-import Link from "next/link";
-
 import {
   DealContractCreate,
   type DealContractDefaults,
 } from "@/components/deals/deal-contract-create";
+import { DealContractDeposit } from "@/components/deals/deal-contract-deposit";
 import { nowHeading, nowSecondary } from "@/components/deals/now-classes";
-import { Button } from "@/components/ui/button";
-import { routes } from "@/lib/auth/redirects";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 
 const t = dealMemos.contract.now;
 
-/** What « Maintenant » needs of the deal's contract while contracting. */
+/** What « Maintenant » needs of the deal's contract before its circuit. */
 export type ContractStep = {
-  contract: { id: string; visible: boolean } | null;
+  // The contract linked, without its document yet.
+  contract: { id: string } | null;
   // The participation's contract, launched by the project's owner.
   participation: boolean;
   // « Créer le contrat », for whoever creates contracts.
   create: DealContractDefaults | null;
+  organizationId: string;
 };
 
 /**
- * The contracting's gesture in « Maintenant » (Sacha 22/11/2026: « même pas
- * la carte maintenant, créer le contrat »): no contract yet → « Créer le
- * contrat », the main button (linked to the deal at once); a contract →
- * « Faire signer le contrat », opened in Contrats; the deal is « Signé » by
- * itself once it is marked signed there. A participation's contract is the
- * project owner's: said, nothing to do here.
+ * The contracting's first gestures in « Maintenant » (Sacha 22/11/2026: « je
+ * voudrais pouvoir tout faire depuis la page du deal »): no contract yet →
+ * « Créer le contrat » (linked to the deal at once); a contract without its
+ * document → « Déposer le contrat », its PDF. Once the document is there,
+ * the contract's own « Maintenant » takes over on the deal (ContractNow:
+ * send to validate, validate, send for signature, mark signed). A
+ * participation's contract is the project owner's: said, nothing to do here.
  */
 export function DealContractNow({
   dealId,
@@ -37,24 +37,23 @@ export function DealContractNow({
   dealId: string;
   step: ContractStep;
 }) {
+  if (step.participation && !step.contract)
+    return <p className={nowSecondary}>{t.participation}</p>;
   if (step.contract)
     return (
       <>
-        <h2 className={nowHeading}>{t.sign}</h2>
-        {step.contract.visible && (
+        <h2 className={nowHeading}>{t.deposit}</h2>
+        {step.create && (
           <div>
-            <Button
-              nativeButton={false}
-              render={<Link href={routes.contract(step.contract.id)} />}
-            >
-              {t.open}
-            </Button>
+            <DealContractDeposit
+              organizationId={step.organizationId}
+              contractId={step.contract.id}
+              size="lg"
+            />
           </div>
         )}
       </>
     );
-  if (step.participation)
-    return <p className={nowSecondary}>{t.participation}</p>;
   return (
     <>
       <h2 className={nowHeading}>{t.create}</h2>

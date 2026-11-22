@@ -187,8 +187,14 @@ export const dealMemos = {
     createDescription:
       "Rempli depuis le deal ; il lui est lié dès sa création. Ses parties et ses fichiers s'ajoutent ensuite sur sa page.",
     created: "Contrat créé et lié au deal",
+    // « Déposer le contrat » (DealContractDeposit).
+    deposit: "Déposer le contrat",
+    depositing: "Envoi…",
+    deposited: "Contrat déposé",
+    openPdf: "Ouvrir le PDF",
     // The contracting's gesture in « Maintenant » (DealContractNow).
     now: {
+      deposit: "Déposer le contrat",
       create: "Créer le contrat",
       sign: "Faire signer le contrat",
       open: "Ouvrir le contrat",

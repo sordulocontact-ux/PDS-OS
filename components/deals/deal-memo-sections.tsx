@@ -4,6 +4,7 @@ import { DealMemoLoop } from "@/components/deals/deal-memo-loop";
 import { DealMemos } from "@/components/deals/deal-memos";
 import { PageSection } from "@/components/shell/page-section";
 import { can, type Access } from "@/lib/auth/access";
+import { listCatalogFiles } from "@/lib/catalog/files";
 import { loadDealContacts } from "@/lib/deals/contact-queries";
 import {
   dealMailSetup,
@@ -61,6 +62,21 @@ export async function DealMemoSections({
       canWrite ? loadDealContacts(deal.id) : Promise.resolve([]),
     ],
   );
+  const memoPart = part === "all" || part === "memo";
+  const loopPart = part === "all" || part === "loop";
+  const contractPart = part === "all" || part === "contract";
+  // The contract's PDF: its latest signed copy, else its latest draft.
+  const contractFiles =
+    contractPart && contract?.visible
+      ? (await listCatalogFiles({ kind: "contract", id: contract.id })).files
+      : [];
+  const pick = (category: string) =>
+    contractFiles.find((f) => f.category === category) ?? null;
+  const latestFile = pick("signed") ?? pick("pds_signed") ?? pick("draft");
+  const contractFile = latestFile && {
+    name: latestFile.fileName,
+    openUrl: latestFile.openUrl,
+  };
   const mail = dealMailSetup(deal.id);
   const latestFrom = memos.find((m) => m.email)?.email?.from ?? null;
   const replyTo =
@@ -79,9 +95,6 @@ export async function DealMemoSections({
     (can(access, "validate") ||
       (deal.assignee?.id === access.personId && can(access, "negotiate")));
 
-  const memoPart = part === "all" || part === "memo";
-  const loopPart = part === "all" || part === "loop";
-  const contractPart = part === "all" || part === "contract";
   return (
     <>
       {memoPart && (
@@ -131,6 +144,14 @@ export async function DealMemoSections({
               create={
                 canWrite && can(access, "manage_contracts")
                   ? dealContractDefaults(deal)
+                  : null
+              }
+              document={contractFile}
+              deposit={
+                canWrite &&
+                can(access, "manage_contracts") &&
+                contract?.source === "deal"
+                  ? access.organizationId
                   : null
               }
             />

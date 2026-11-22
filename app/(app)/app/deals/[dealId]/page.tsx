@@ -20,6 +20,8 @@ import {
 } from "@/lib/deals/memo-mail-queries";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { loadDealContract, loadDealMemos } from "@/lib/deals/memo-queries";
+import { loadContractPage } from "@/lib/contracts/page-data";
+import { findContract } from "@/lib/contracts/queries";
 import { dealContractDefaults } from "@/lib/deals/contract-defaults";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -189,6 +191,7 @@ async function DealTodo({
   | "nextCall"
   | "memoStep"
   | "contractStep"
+  | "contractCircuit"
 >) {
   // Negotiating, or the accord validated, whoever writes the deal sees the
   // deal memo's step (DealMemoNow).
@@ -208,15 +211,30 @@ async function DealTodo({
     memoTime ? loadDealLoop(deal.id) : Promise.resolve([]),
     contractTime ? loadDealContract(deal.id) : Promise.resolve(null),
   ]);
-  const contractStep: ContractStep | null = contractTime
-    ? {
-        contract: contract && { id: contract.id, visible: contract.visible },
-        participation: deal.participationId !== null,
-        create: can(access, "manage_contracts")
-          ? dealContractDefaults(deal)
-          : null,
-      }
+  // Its circuit, the same as on its page in Contrats, once its document is
+  // there (generated, or a PDF deposited).
+  const detail =
+    contract?.visible && contractTime ? await findContract(contract.id) : null;
+  const circuit = detail
+    ? { contract: detail, data: await loadContractPage(detail, access) }
     : null;
+  const documented =
+    circuit !== null &&
+    (circuit.data.document !== null ||
+      circuit.data.library.files.some((f) =>
+        ["draft", "signed", "pds_signed"].includes(f.category),
+      ));
+  const contractStep: ContractStep | null =
+    contractTime && !documented
+      ? {
+          contract: contract && { id: contract.id },
+          participation: deal.participationId !== null,
+          create: can(access, "manage_contracts")
+            ? dealContractDefaults(deal)
+            : null,
+          organizationId: access.organizationId ?? "",
+        }
+      : null;
   const latest = memos[0] ?? null;
   const mail = dealMailSetup(deal.id);
   // No memo to decide on: the direction keeps the accord's recap.
@@ -295,6 +313,7 @@ async function DealTodo({
       calls={calls}
       memoStep={memoStep}
       contractStep={contractStep}
+      contractCircuit={documented ? circuit : null}
       nextCall={
         nextCall
           ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }

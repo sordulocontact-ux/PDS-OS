@@ -175,8 +175,8 @@ export function DealNow({
       (deal.stage === "agreement" && deal.agreementStatus === "validated"))
   )
     return <NowFrame label={t.now}>{memoNow}</NowFrame>;
-  if (deal.stage === "contracting" && contractNow)
-    return <NowFrame label={t.now}>{contractNow}</NowFrame>;
+  // Framed by its own (DealContractNow in a NowFrame, or ContractNow).
+  if (deal.stage === "contracting" && contractNow) return <>{contractNow}</>;
   const next = nextStageOf(deal, terms, callHeld);
   // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à
   // rien »): negotiating, the terms are right below; « Changer d'étape » and

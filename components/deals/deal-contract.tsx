@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { IconPenWriting2, IconXmark } from "nucleo-sharp-essential";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -9,7 +10,10 @@ import {
   DealContractCreate,
   type DealContractDefaults,
 } from "@/components/deals/deal-contract-create";
+import { DealContractDeposit } from "@/components/deals/deal-contract-deposit";
+import { IconExternalLink } from "@/components/icons";
 import { EmptyNote } from "@/components/shell/empty-state";
+import { IconAction } from "@/components/ui/icon-action";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -89,6 +93,8 @@ export function DealContract({
   contract,
   options,
   create = null,
+  document = null,
+  deposit = null,
 }: {
   dealId: string;
   participation: boolean;
@@ -97,7 +103,12 @@ export function DealContract({
   options: Record<string, string> | null;
   // « Créer le contrat », for whoever creates contracts (Sacha 22/11/2026).
   create?: DealContractDefaults | null;
+  // Its PDF (the latest draft or signed copy), to open from the deal.
+  document?: { name: string; openUrl: string | null } | null;
+  // The organization, for whoever may deposit its PDF.
+  deposit?: string | null;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const unlink = useWriteSubmit(undefined, t.unlinked);
   const canLink = !participation && options !== null;
@@ -141,29 +152,58 @@ export function DealContract({
                   contract.status as keyof typeof fr.contracts.states
                 ] ?? contract.status}
               </StatusBadge>
+              {/* The secondary gestures as icons, the main one last, at the
+                  right: open its PDF, or deposit it (Sacha 22/11/2026). */}
               {contract.visible && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  nativeButton={false}
-                  render={<Link href={routes.contract(contract.id)} />}
-                  aria-label={t.open(contract.title)}
-                >
-                  {t.openShort}
-                </Button>
+                <IconAction
+                  label={t.open(contract.title)}
+                  icon={IconExternalLink}
+                  size="icon-sm"
+                  onClick={() => router.push(routes.contract(contract.id))}
+                />
               )}
-              {canLink && linkButton}
               {canLink && (
-                <Button
+                <IconAction
+                  label={t.change}
+                  icon={IconPenWriting2}
+                  size="icon-sm"
+                  onClick={() => setOpen(true)}
+                />
+              )}
+              {canLink && (
+                <IconAction
+                  label={t.unlink}
+                  icon={IconXmark}
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   disabled={unlink.pending}
                   onClick={() =>
                     unlink.run(() => linkDealContract(dealId, null))
                   }
+                />
+              )}
+              {document?.openUrl ? (
+                <Button
+                  size="sm"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={document.openUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  }
+                  aria-label={`${t.openPdf} · ${document.name}`}
                 >
-                  {t.unlink}
+                  {t.openPdf}
                 </Button>
+              ) : (
+                deposit && (
+                  <DealContractDeposit
+                    organizationId={deposit}
+                    contractId={contract.id}
+                  />
+                )
               )}
             </span>
           }

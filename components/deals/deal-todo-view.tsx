@@ -10,6 +10,7 @@ import {
   DealCalls,
   dealCallMovable,
 } from "@/components/deals/deal-calls";
+import { ContractNow } from "@/components/contracts/now/contract-now";
 import { DealContacts } from "@/components/deals/deal-contacts";
 import {
   DealContractNow,
@@ -22,9 +23,12 @@ import { DealNow } from "@/components/deals/deal-now";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
 import { EmptyNote } from "@/components/shell/empty-state";
+import { NowFrame } from "@/components/shell/journey/now-card";
 import { PageSection } from "@/components/shell/page-section";
 import { StepFrieze } from "@/components/ui/step-frieze";
 import type { Access } from "@/lib/auth/access";
+import type { ContractPageData } from "@/lib/contracts/page-data";
+import type { ContractDetail } from "@/lib/contracts/types";
 import {
   dealCallHeld,
   nextDealCall,
@@ -125,6 +129,7 @@ export function DealTodoView({
   nextCall,
   memoStep = null,
   contractStep = null,
+  contractCircuit = null,
 }: {
   access: Access;
   deal: Deal;
@@ -143,6 +148,9 @@ export function DealTodoView({
   memoStep?: MemoStep | null;
   // The contract's step while contracting (DealContractNow).
   contractStep?: ContractStep | null;
+  // Its document there: the contract's own « Maintenant » (ContractNow), the
+  // same as on its page in Contrats.
+  contractCircuit?: { contract: ContractDetail; data: ContractPageData } | null;
 }) {
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
@@ -248,8 +256,17 @@ export function DealTodoView({
         callHeld={dealCallHeld(calls)}
         memoNow={memoStep && <DealMemoNow dealId={deal.id} step={memoStep} />}
         contractNow={
-          contractStep && (
-            <DealContractNow dealId={deal.id} step={contractStep} />
+          contractCircuit ? (
+            <ContractNow
+              contract={contractCircuit.contract}
+              data={contractCircuit.data}
+            />
+          ) : (
+            contractStep && (
+              <NowFrame label={t.page.now}>
+                <DealContractNow dealId={deal.id} step={contractStep} />
+              </NowFrame>
+            )
           )
         }
       />
