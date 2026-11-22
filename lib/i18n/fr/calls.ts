@@ -321,6 +321,10 @@ export const calls = {
   transcript: {
     title: "Transcription",
     empty: "Pas encore de transcription.",
+    // A quoted passage opened in its transcript (TranscriptPassageDialog).
+    loading: "Lecture de la transcription…",
+    error: "La transcription n'a pas pu être lue.",
+    open: "Ouvrir le call",
   },
   report: {
     title: "Compte rendu",

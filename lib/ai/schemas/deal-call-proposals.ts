@@ -59,7 +59,7 @@ export const dealCallProposalsSchema = z.object({
         stance: z
           .string()
           .describe(
-            "Une seule valeur : pds (proposé par PDS), counter (contre-proposition de l'autre partie), agreed (accepté par les deux).",
+            "Une seule valeur : pds (proposé par PDS), counter (proposé par l'autre partie), agreed (accepté par les deux).",
           ),
         quote: z
           .string()

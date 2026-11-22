@@ -1,6 +1,8 @@
 import "server-only";
 
 import { asCallStatus, type CallStatus } from "@/lib/calls/constants";
+import { passageOf, passagesOf } from "@/lib/calls/passages";
+import { loadLatestTranscript } from "@/lib/calls/queries";
 import { parseTermValue } from "@/lib/deals/term-format";
 import {
   termOf,
@@ -59,6 +61,9 @@ export type DealCallProposal = {
   callTitle: string;
   callAt: string;
   quote: string;
+  // Who said it, read from the transcript's line by code (« Sarah
+  // Benali »); none when the source does not say.
+  speaker: string | null;
 } & (
   | {
       kind: "term";
@@ -93,6 +98,20 @@ export async function loadDealCallProposals(
     .neq("kind", "stage")
     .order("created_at");
   if (error) console.error("loadDealCallProposals:", error.message);
+  // Each call's transcript as lines, once, to say who said each passage.
+  const callIds = [...new Set((data ?? []).map((p) => p.call_id))];
+  const lines = new Map(
+    await Promise.all(
+      callIds.map(async (id) => {
+        const stored = await loadLatestTranscript(supabase, id);
+        return [id, stored ? passagesOf(stored.transcript) : []] as const;
+      }),
+    ),
+  );
+  const speakerOf = (callId: string, quote: string) => {
+    const passages = lines.get(callId) ?? [];
+    return passages[passageOf(passages, quote)]?.speaker ?? null;
+  };
   return (data ?? []).flatMap((p): DealCallProposal[] => {
     const base = {
       id: p.id,
@@ -100,6 +119,7 @@ export async function loadDealCallProposals(
       callTitle: p.call?.title ?? "",
       callAt: p.call?.occurred_at ?? "",
       quote: p.quote,
+      speaker: speakerOf(p.call_id, p.quote),
     };
     if (p.kind === "term" && p.term_key) {
       const term = termOf(kind, p.term_key);

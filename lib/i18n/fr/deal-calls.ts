@@ -59,7 +59,9 @@ export const dealCalls = {
   // PO's proposals from a call's report (lib/deals/call-proposals.ts), in
   // « Termes négociés » and « Prochaine action ».
   proposals: {
-    from: (call: string, day: string) => `D'après « ${call} », ${day}`,
+    // The call a passage comes from, opening its transcript (ProposalSource).
+    call: (call: string, day: string) => `${call}, ${day}`,
+    said: (who: string) => `${who} :`,
     term: (label: string, value: string, state: string) =>
       `${label} : ${value} (${state})`,
     next: (action: string, day: string | null) =>

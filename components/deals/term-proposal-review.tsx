@@ -7,15 +7,14 @@ import {
 } from "nucleo-sharp-essential";
 
 import { DismissButton } from "@/components/deals/deal-call-proposals";
+import { ProposalSource } from "@/components/deals/proposal-source";
 import { Button } from "@/components/ui/button";
 import {
   documentCardClass,
   documentHeadClass,
 } from "@/components/ui/document-card-classes";
-import { FactSourceText } from "@/components/ui/fact-row-frame";
 import { StatusDot } from "@/components/ui/status-dot";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { routes } from "@/lib/auth/redirects";
 import type { DealCallProposal } from "@/lib/deals/call-queries";
 import { formatTermValue } from "@/lib/deals/term-format";
 import { setDealTerm } from "@/lib/deals/term-actions";
@@ -24,7 +23,6 @@ import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dealTermTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
-import { formatInstantDay } from "@/lib/utils/instant";
 
 const fr = { dealCalls, deals };
 
@@ -124,16 +122,7 @@ export function TermProposalReview({
             showLabel
           />
         </p>
-        <FactSourceText
-          source={{
-            quote: p.quote,
-            from: fr.dealCalls.proposals.from(
-              p.callTitle,
-              formatInstantDay(p.callAt),
-            ),
-            href: routes.call(p.callId),
-          }}
-        />
+        <ProposalSource proposal={p} />
         {canWrite && (
           <div className="flex flex-wrap items-center gap-2 pt-2">
             <Button

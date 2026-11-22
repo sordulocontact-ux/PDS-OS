@@ -121,8 +121,11 @@ export const deals = {
       obligations: "Annulation et reporting",
     } as Record<string, string>,
     states: {
-      pds_proposal: "Proposé par PDS",
-      counter_proposal: "Contre-proposition",
+      // Seen from PDS Records (Sacha 22/11/2026): « Proposé par PDS » read
+      // as « by PDS OS », « Contre-proposition » as an answer to a first
+      // offer when the other side may speak first.
+      pds_proposal: "Notre proposition",
+      counter_proposal: "Leur proposition",
       confirmed: "Confirmé",
       to_define: "À définir",
     },

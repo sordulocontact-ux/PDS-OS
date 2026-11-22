@@ -7,10 +7,9 @@ import { NextActionForm } from "@/components/deals/deal-next-action";
 import { TermForm } from "@/components/deals/term-form";
 import { Button } from "@/components/ui/button";
 import { DocumentCard } from "@/components/ui/document-card";
-import { FactSourceText } from "@/components/ui/fact-row-frame";
+import { ProposalSource } from "@/components/deals/proposal-source";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { routes } from "@/lib/auth/redirects";
 import { dismissDealProposal } from "@/lib/deals/call-actions";
 import type { DealCallProposal } from "@/lib/deals/call-queries";
 import { formatTermValue } from "@/lib/deals/term-format";
@@ -115,15 +114,7 @@ export function DealCallProposals({
             key={p.id}
             name={textOf(deal, p)}
             icon={IconSparkle3}
-            line={
-              <FactSourceText
-                source={{
-                  quote: p.quote,
-                  from: t.from(p.callTitle, formatInstantDay(p.callAt)),
-                  href: routes.call(p.callId),
-                }}
-              />
-            }
+            line={<ProposalSource proposal={p} />}
             action={
               deal.canWrite ? (
                 <div className="flex items-center gap-2">
@@ -146,7 +137,7 @@ export function DealCallProposals({
         onOpenChange={(next) => !next && setOpen(null)}
         title={open ? textOf(deal, open) : ""}
         description={
-          open ? t.from(open.callTitle, formatInstantDay(open.callAt)) : ""
+          open ? t.call(open.callTitle, formatInstantDay(open.callAt)) : ""
         }
         closeLabel={fr.dialogs.close}
       >
