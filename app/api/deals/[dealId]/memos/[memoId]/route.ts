@@ -1,5 +1,5 @@
 import { getAccess } from "@/lib/auth/dal";
-import { memoHtml } from "@/lib/deals/memo-pdf";
+import { loadMemoLetter, memoHtml } from "@/lib/deals/memo-pdf";
 import { loadDealMemos } from "@/lib/deals/memo-queries";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal } from "@/lib/deals/queries";
@@ -27,7 +27,7 @@ export async function GET(
   const name = dealName(deal);
   let pdf: Uint8Array;
   try {
-    pdf = await htmlToPdf(memoHtml(memo, name));
+    pdf = await htmlToPdf(memoHtml(memo, await loadMemoLetter(deal)));
   } catch (error) {
     console.error("[deal-memo] pdf failed:", error);
     return Response.json({ ok: false, error: "pdf_failed" }, { status: 500 });

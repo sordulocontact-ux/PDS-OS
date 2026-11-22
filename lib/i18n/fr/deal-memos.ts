@@ -122,15 +122,26 @@ export const dealMemos = {
   noTerms: "Aucun terme écrit au moment du deal memo.",
   changed: "Les termes ont changé depuis ce deal memo.",
   older: "Versions précédentes",
+  // The memo of PDS as a letter, in the form of the labels' (Wagram's memo
+  // « Projet Dioo », given by Ibé; lib/deals/memo-pdf.ts).
+  letter: {
+    to: "A",
+    from: "FROM",
+    mail: "MAIL",
+    date: "DATE",
+    re: "RE",
+    pds: "PDS Records",
+    fromLine: (who: string) => `${who} - PDS Records`,
+    draft: "DRAFT DOCUMENT - SUBJECT TO CONTRACT – NON CONTRACTUEL",
+    hello: "Bonjour,",
+    intro:
+      "Veuillez trouver ci-dessous les points principaux d'un contrat que PDS Records pourrait vous proposer sur ce projet.",
+  },
   pdf: {
     label: "Exporter en PDF",
     pending: "Export…",
     failed: "Le PDF n'a pas pu être créé. Réessayez.",
     file: (deal: string, n: number) => `Deal memo ${deal} n°${n}.pdf`,
-    meta: (stage: string, day: string) => `Étape : ${stage} · ${day}`,
-    term: "Terme",
-    value: "Valeur",
-    state: "État",
   },
   contract: {
     section: "Contrat",

@@ -8077,7 +8077,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `validated` ; jamais modifiée. Prise **à l'accord de principe** (trigger `deal_events_memo` : proposé →
   brouillon ; validé par la direction → le dernier brouillon est validé, sinon un memo validé est pris ;
   la direction qui pose l'accord elle-même → validé d'emblée) ou à la main (`create_deal_memo`, qui écrit le
-  deal). `validate_deal_memo` : direction seule, le dernier seulement. PDF par le rendu commun
+  deal). **PDF = une lettre au format des memos des labels** (memo Wagram « Projet Dioo » donné par Ibé, 22/11/2026 ;
+  `memoHtml` + `loadMemoLetter`, `lib/deals/memo-pdf.ts`) : en-tête PDS Records, « A / FROM / MAIL / DATE / RE »,
+  « DRAFT DOCUMENT - SUBJECT TO CONTRACT – NON CONTRACTUEL », salutation, puis chaque terme en gras et sa valeur en
+  puce « o » (une par ligne) ; ni état ni tableau. Même PDF joint au renvoi de l'accord (`memoAttachments`). `validate_deal_memo` : direction seule, le dernier seulement. PDF par le rendu commun
   (`/api/deals/<id>/memos/<memo>`, `memoHtml`, `lib/pdf/render.ts`). **Contrat** : celui de la participation
   pour un deal de participation (`title_participations.contract_id`, jamais copié :
   `deals_contract_participation_check`) ; sinon **un contrat principal** `deals.contract_id`

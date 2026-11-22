@@ -5,11 +5,7 @@ import { useState, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { IconAction } from "@/components/ui/icon-action";
 
 const fr = { dialogs };
 
@@ -28,6 +24,7 @@ export function DialogButton({
   description,
   wide = false,
   iconOnly = false,
+  iconSize = "icon",
   children,
 }: {
   label: string;
@@ -41,6 +38,8 @@ export function DialogButton({
   // Its icon alone, its label in a tooltip shown fast and to screen readers
   // (a list's tools, as the proto, Sacha 15/11/2026). Needs `icon`.
   iconOnly?: boolean;
+  // `icon-sm` beside the small buttons of a card's head.
+  iconSize?: "icon" | "icon-sm";
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const [open, setOpen] = useState(false);
@@ -48,23 +47,13 @@ export function DialogButton({
   return (
     <>
       {iconOnly && Icon ? (
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                type="button"
-                variant={variant}
-                size="icon"
-                aria-label={label}
-                className="relative z-10"
-                onClick={() => setOpen(true)}
-              />
-            }
-          >
-            <Icon aria-hidden />
-          </TooltipTrigger>
-          <TooltipContent side="bottom">{label}</TooltipContent>
-        </Tooltip>
+        <IconAction
+          label={label}
+          icon={Icon}
+          variant={variant}
+          size={iconSize}
+          onClick={() => setOpen(true)}
+        />
       ) : (
         <Button
           type="button"

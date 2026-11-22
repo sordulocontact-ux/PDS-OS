@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/toast";
 
 import { IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
 import { core } from "@/lib/i18n/fr/core";
 
 const fr = { pdf: core.pdf };
@@ -90,6 +91,11 @@ export async function downloadPdf(
  * the server really sent a PDF (PROJ-BUG-05): never an empty file, never a
  * success that did not happen.
  */
+/** The loader, turning, as an icon. */
+function Spinner(props: { "aria-hidden"?: boolean; className?: string }) {
+  return <IconLoader {...props} className="animate-spin" />;
+}
+
 export function PdfExportButton({
   href,
   fileName,
@@ -98,6 +104,7 @@ export function PdfExportButton({
   failedLabel,
   variant = "default",
   size = "lg",
+  iconOnly = false,
 }: {
   href: string;
   fileName: string;
@@ -108,6 +115,9 @@ export function PdfExportButton({
   variant?: "default" | "outline";
   // « sm » in the head of a document card (DocumentCard).
   size?: "lg" | "sm";
+  // Its icon alone, its words in a tooltip (IconAction): beside a card's
+  // main gesture.
+  iconOnly?: boolean;
 }) {
   const [exporting, setExporting] = useState(false);
 
@@ -120,6 +130,18 @@ export function PdfExportButton({
     }
   }
 
+  if (iconOnly)
+    return (
+      <IconAction
+        label={exporting ? pendingLabel : label}
+        icon={exporting ? Spinner : IconDownload}
+        variant={variant}
+        size={size === "sm" ? "icon-sm" : "icon"}
+        disabled={exporting}
+        busy={exporting}
+        onClick={exportPdf}
+      />
+    );
   return (
     <Button
       size={size}

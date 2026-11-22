@@ -7,7 +7,6 @@ import { loadDealLoop } from "@/lib/deals/memo-mail-queries";
 import { memoAttachments } from "@/lib/deals/memo-mail-send";
 import { loadDealMemos } from "@/lib/deals/memo-queries";
 import { runMemoGesture, uuid } from "@/lib/deals/memo-run";
-import { dealName } from "@/lib/deals/names";
 import { loadDeal } from "@/lib/deals/queries";
 import { emailMessage } from "@/lib/email/link-email";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
@@ -106,7 +105,7 @@ export async function sendDealMemo(
     return { ok: false, error: t.errors.memo_not_validated };
   if (memo.sent) return { ok: false, error: t.errors.memo_sent };
 
-  const attachments = await memoAttachments(memo, dealName(deal));
+  const attachments = await memoAttachments(memo, deal);
   if (!attachments) return { ok: false, error: t.send.noAttachment };
   const mail = {
     subject: p.data.subject,
