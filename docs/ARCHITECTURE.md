@@ -8137,6 +8137,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     Avant de décider, le document se lit dans « Maintenant » : « Ouvrir le PDF » (fichier reçu, sinon le memo de PDS)
     à côté de « Envoyer à valider » ; pour la direction, « Valider le deal memo » = lire, « Demander des
     modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
+  - **Suivi du contrat généré** (`20261122160101`) : il est suivi par la personne qui négocie le deal (`owner_person_id`
+    = l'affecté), qui l'envoie pour signature et le marque signé ; le « Maintenant » d'un contrat ouvre son PDF avant de
+    l'envoyer à valider ou de le valider (`ContractPageData.pdf`), et « Ensuite » dit « Vous l'envoyez pour signature »
+    quand c'est le lecteur qui le suit (`mine`).
   - **Contrat généré par PDS OS** (22/11/2026, `20261122140101`) : « Générer le contrat » (bouton principal, à côté
     de « Importer un contrat ») = un modèle validé de Contrats rempli depuis le deal (`DealContractGenerate`,
     `loadDealContractDraft` / `generateDealContract`, valeurs lues par `dealFieldValues` : la partie (label ou marque, sinon le contact de
