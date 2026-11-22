@@ -1,5 +1,11 @@
 /** Contracts: type, parties, owner, status, dates, files, validation, signature. */
 export const contracts = {
+  // « Déposer le contrat » (ContractDepositButton).
+  deposit: {
+    deposit: "Déposer le contrat",
+    depositing: "Envoi…",
+    deposited: "Contrat déposé",
+  },
   title: "Contrats",
   description:
     "Chaque contrat avec ses parties, son responsable et ses versions, de la rédaction à la signature.",
@@ -190,6 +196,7 @@ export const contracts = {
     toValidate: "À valider",
     direction: "la direction",
     titles: {
+      deposit: "Déposer le contrat",
       decide: "Valider le contrat",
       submit: "Envoyer le contrat à valider",
       resubmit: "Reprendre le contrat et l'envoyer à valider à nouveau",
@@ -211,6 +218,8 @@ export const contracts = {
     // The party who signs, when none is named yet.
     theParty: "la partie qui signe",
     why: {
+      deposit:
+        "Le contrat n'a pas encore de document : déposez son PDF, puis envoyez-le à valider.",
       draft: "Le responsable prépare le contrat, puis l'envoie à valider.",
       in_review:
         "Le business manager ou la direction relit le contrat : il le valide ou demande des modifications.",

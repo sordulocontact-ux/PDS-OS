@@ -77,6 +77,11 @@ export async function loadContractPage(
     generated,
     returned,
     countersigned: Boolean(proof?.countersign),
+    documented:
+      generated ||
+      library.files.some((f) =>
+        ["draft", "signed", "pds_signed"].includes(f.category),
+      ),
   });
   // Who sent it: the last « Envoyé en signature » of the journal.
   const sentBy = journal.find((e) => e.kind === "signature.requested")?.by;

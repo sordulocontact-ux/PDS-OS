@@ -13,6 +13,7 @@ import { ContractNowActions } from "./contract-now-actions";
 const fr = { contracts, legalDocuments };
 
 const WHY: Record<ContractNowKind, keyof typeof fr.contracts.now.why> = {
+  deposit: "deposit",
   decide: "in_review",
   await_decide: "in_review",
   submit: "draft",

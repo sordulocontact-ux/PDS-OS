@@ -10,7 +10,7 @@ import {
   DealContractCreate,
   type DealContractDefaults,
 } from "@/components/deals/deal-contract-create";
-import { DealContractDeposit } from "@/components/deals/deal-contract-deposit";
+import { ContractDepositButton } from "@/components/contracts/contract-deposit-button";
 import { IconExternalLink } from "@/components/icons";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { IconAction } from "@/components/ui/icon-action";
@@ -199,7 +199,7 @@ export function DealContract({
                 </Button>
               ) : (
                 deposit && (
-                  <DealContractDeposit
+                  <ContractDepositButton
                     organizationId={deposit}
                     contractId={contract.id}
                   />

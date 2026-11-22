@@ -218,21 +218,13 @@ async function DealTodo({
   const circuit = detail
     ? { contract: detail, data: await loadContractPage(detail, access) }
     : null;
-  const documented =
-    circuit !== null &&
-    (circuit.data.document !== null ||
-      circuit.data.library.files.some((f) =>
-        ["draft", "signed", "pds_signed"].includes(f.category),
-      ));
   const contractStep: ContractStep | null =
-    contractTime && !documented
+    contractTime && !circuit
       ? {
-          contract: contract && { id: contract.id },
           participation: deal.participationId !== null,
           create: can(access, "manage_contracts")
             ? dealContractDefaults(deal)
             : null,
-          organizationId: access.organizationId ?? "",
         }
       : null;
   const latest = memos[0] ?? null;
@@ -313,7 +305,7 @@ async function DealTodo({
       calls={calls}
       memoStep={memoStep}
       contractStep={contractStep}
-      contractCircuit={documented ? circuit : null}
+      contractCircuit={circuit}
       nextCall={
         nextCall
           ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }

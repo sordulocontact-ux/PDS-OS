@@ -7,18 +7,18 @@ import { useRef, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { dealMemos } from "@/lib/i18n/fr/deal-memos";
+import { contracts } from "@/lib/i18n/fr/contracts";
 
-const t = dealMemos.contract;
+const t = contracts.deposit;
 
 /**
- * « Déposer le contrat » from the deal (Sacha 22/11/2026: « je voudrais
- * pouvoir tout faire depuis la page du deal »): the PDF of the long contract
- * — the label's, or the one PDS had drafted — filed as the contract's draft
- * (its files in Contrats, category « draft »), the page then shows it and
- * its next gesture. A new PDF is a new version of it.
+ * « Déposer le contrat » (Sacha 22/11/2026): a contract made outside a
+ * template has no document until its PDF is filed — the label's long
+ * contract, or the one a lawyer drafted —, as its draft (its files,
+ * category « draft »); only then is it sent to validate. The same button on
+ * its page in Contrats and on its deal's page (« Maintenant », « Contrat »).
  */
-export function DealContractDeposit({
+export function ContractDepositButton({
   organizationId,
   contractId,
   variant = "default",

@@ -1,3 +1,4 @@
+import { ContractDepositButton } from "@/components/contracts/contract-deposit-button";
 import { ContractAdvanceButton } from "@/components/contracts/now/contract-advance-button";
 import { ContractCountersignDialog } from "@/components/contracts/now/contract-countersign-dialog";
 import { ContractDecision } from "@/components/contracts/now/contract-decision";
@@ -92,6 +93,16 @@ export function ContractNowActions({
   );
 
   switch (kind) {
+    case "deposit":
+      return (
+        <div>
+          <ContractDepositButton
+            organizationId={contract.organizationId}
+            contractId={contract.id}
+            size="lg"
+          />
+        </div>
+      );
     case "decide":
       return <ContractDecision contractId={contract.id} />;
     case "submit":
