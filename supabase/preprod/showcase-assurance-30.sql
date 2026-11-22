@@ -143,6 +143,13 @@ select pg_temp.k('org'), v.name, 'collaboration'
 insert into k select 'a:' || a.name, a.id from public.artists a
  where a.organization_id = pg_temp.k('org') and a.archived_at is null
    and a.name in ('Tavio Marlan', 'Selma Quirin', 'Joss Barelle', 'Elio Danvers');
+-- PDS, the collective's main artist (a signed artist of the label): created
+-- when the base has none (the pre-production's seed has no « PDS »).
+insert into public.artists (organization_id, name, relation)
+select pg_temp.k('org'), 'PDS', 'signed'
+ where not exists (select 1 from public.artists a
+                    where a.organization_id = pg_temp.k('org') and a.archived_at is null
+                      and public.artist_name_key(a.name) = public.artist_name_key('PDS'));
 insert into k select 'a:pds', id from public.artists
  where organization_id = pg_temp.k('org') and archived_at is null and name = 'PDS';
 
@@ -191,7 +198,8 @@ insert into k values ('p', public.create_collective_project(
   p_budget_cents => 1000000,
   p_initial_context =>
     'Objectif : 1 000 000 de streams en 3 mois, sur Spotify et Deezer. Tournage le 5 décembre 2026. Budget : 10 000 €.',
-  p_content_format_id => (select id from public.content_formats where name = 'PDS Mic' and archived_at is null),
+  p_content_format_id => (select id from public.content_formats where name = 'PDS Mic' and archived_at is null
+                          and organization_id = pg_temp.k('org')),
   p_guest_artist_ids => array[pg_temp.k('a:Tavio Marlan'), pg_temp.k('a:Selma Quirin'),
                               pg_temp.k('a:Joss Barelle'), pg_temp.k('a:Elio Danvers')]));
 insert into k select 'assignment', id from public.project_assignments
