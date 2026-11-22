@@ -8137,6 +8137,14 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     Avant de décider, le document se lit dans « Maintenant » : « Ouvrir le PDF » (fichier reçu, sinon le memo de PDS)
     à côté de « Envoyer à valider » ; pour la direction, « Valider le deal memo » = lire, « Demander des
     modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
+  - **Contrat du deal créé depuis le deal** (22/11/2026, `20261122130101`) : « Créer le contrat » (bouton principal,
+    `DealContractCreate` : formulaire de Contrats rempli depuis le deal, `dealContractDefaults` : « Contrat · <deal> »,
+    licence pour un Label, partenariat pour une Marque, contrat d'artiste sinon, artiste et projet du deal), lié au
+    deal dès sa création (`link_deal_contract`) ; les postes `business_manager` et `business` ont `manage_contracts`
+    (Ibé, 18/11 : « la partie juridique d'un deal reste dans la page Deal »). En contractualisation, « Maintenant » =
+    `DealContractNow` : « Créer le contrat », puis « Faire signer le contrat » (« Ouvrir le contrat » dans Contrats) ;
+    un contrat de participation est lancé par le chef de projet. « Prochaine action » et « Dans la boucle » côte à
+    côte ; la boucle vide = une ligne discrète, pas un `EmptyNote`.
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Envoyer à valider », ex-« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,

@@ -5,6 +5,10 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
+import {
+  DealContractCreate,
+  type DealContractDefaults,
+} from "@/components/deals/deal-contract-create";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
@@ -84,12 +88,15 @@ export function DealContract({
   participation,
   contract,
   options,
+  create = null,
 }: {
   dealId: string;
   participation: boolean;
   contract: Contract | null;
   // The contracts it may name, for whoever writes it; null otherwise.
   options: Record<string, string> | null;
+  // « Créer le contrat », for whoever creates contracts (Sacha 22/11/2026).
+  create?: DealContractDefaults | null;
 }) {
   const [open, setOpen] = useState(false);
   const unlink = useWriteSubmit(undefined, t.unlinked);
@@ -162,9 +169,24 @@ export function DealContract({
           }
         />
       ) : (
-        <EmptyNote action={canLink && !empty && linkButton}>
+        <EmptyNote
+          action={
+            (create || (canLink && !empty)) && (
+              <span className="flex flex-wrap justify-center gap-2">
+                {canLink && !empty && linkButton}
+                {create && !participation && (
+                  <DealContractCreate
+                    dealId={dealId}
+                    defaults={create}
+                    // The main gesture here (Sacha 22/11/2026).
+                    variant="default"
+                  />
+                )}
+              </span>
+            )
+          }
+        >
           {participation ? t.noneParticipation : t.none}
-          {canLink && empty && ` ${t.noOption}`}
         </EmptyNote>
       )}
       <FormDialog

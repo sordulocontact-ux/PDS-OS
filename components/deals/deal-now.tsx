@@ -97,6 +97,7 @@ export function DealNow({
   nextCall = null,
   callHeld = false,
   memoNow,
+  contractNow,
 }: {
   deal: Deal;
   terms: DealTerm[];
@@ -112,6 +113,8 @@ export function DealNow({
   callHeld?: boolean;
   // The negotiation's gesture: the deal memo (DealMemoNow).
   memoNow?: ReactNode;
+  // The contracting's gesture: the contract (DealContractNow).
+  contractNow?: ReactNode;
   nextCall?: string | null;
 }) {
   const t = fr.deals.page;
@@ -172,6 +175,8 @@ export function DealNow({
       (deal.stage === "agreement" && deal.agreementStatus === "validated"))
   )
     return <NowFrame label={t.now}>{memoNow}</NowFrame>;
+  if (deal.stage === "contracting" && contractNow)
+    return <NowFrame label={t.now}>{contractNow}</NowFrame>;
   const next = nextStageOf(deal, terms, callHeld);
   // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à
   // rien »): negotiating, the terms are right below; « Changer d'étape » and

@@ -11,6 +11,10 @@ import {
   dealCallMovable,
 } from "@/components/deals/deal-calls";
 import { DealContacts } from "@/components/deals/deal-contacts";
+import {
+  DealContractNow,
+  type ContractStep,
+} from "@/components/deals/deal-contract-now";
 import { DealMemoNow, type MemoStep } from "@/components/deals/deal-memo-now";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
@@ -41,6 +45,9 @@ import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { dealContacts } from "@/lib/i18n/fr/deal-contacts";
 import { deals as t } from "@/lib/i18n/fr/deals";
 import { formatShortDay } from "@/lib/utils/day";
+
+// Where a deal memo is worked on: its loop beside the next action.
+const MEMO_STAGES: DealStage[] = ["negotiation", "agreement", "contracting"];
 
 type Work = "next" | "terms" | "contacts" | "calls" | "memo" | "contract";
 
@@ -117,6 +124,7 @@ export function DealTodoView({
   calls,
   nextCall,
   memoStep = null,
+  contractStep = null,
 }: {
   access: Access;
   deal: Deal;
@@ -133,6 +141,8 @@ export function DealTodoView({
   nextCall: { label: string; href: string } | null;
   // The deal memo's step while negotiating (DealMemoNow).
   memoStep?: MemoStep | null;
+  // The contract's step while contracting (DealContractNow).
+  contractStep?: ContractStep | null;
 }) {
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
@@ -144,27 +154,39 @@ export function DealTodoView({
   // Calls right above: the next one is not repeated beside the action.
   const callsFirst = WORKS[deal.stage]?.[0] === "calls";
   const sections: Record<Work, ReactNode> = {
+    // The next action and the loop side by side: two small blocks (Sacha
+    // 22/11/2026); the loop only where a deal memo is worked on.
     next: !isClosedStage(deal.stage) && (
-      <PageSection id="prochaine-action" title={s.next}>
-        <div className="flex flex-col gap-3">
-          {nextProposals.length > 0 && (
-            <DealCallProposals deal={deal} proposals={nextProposals} />
-          )}
-          <DealNextAction
+      <div className="grid gap-6 md:grid-cols-2 [&>*:only-child]:md:col-span-2">
+        <PageSection id="prochaine-action" title={s.next}>
+          <div className="flex flex-col gap-3">
+            {nextProposals.length > 0 && (
+              <DealCallProposals deal={deal} proposals={nextProposals} />
+            )}
+            <DealNextAction
+              deal={deal}
+              call={
+                upcomingCall &&
+                !callsFirst && (
+                  <DealCallCard
+                    call={upcomingCall}
+                    now={new Date()}
+                    movable={movable(upcomingCall)}
+                  />
+                )
+              }
+            />
+          </div>
+        </PageSection>
+        {MEMO_STAGES.includes(deal.stage) && (
+          <DealMemoSections
+            access={access}
             deal={deal}
-            call={
-              upcomingCall &&
-              !callsFirst && (
-                <DealCallCard
-                  call={upcomingCall}
-                  now={new Date()}
-                  movable={movable(upcomingCall)}
-                />
-              )
-            }
+            terms={terms}
+            part="loop"
           />
-        </div>
-      </PageSection>
+        )}
+      </div>
     ),
     terms: (
       <PageSection id="termes" title={t.terms.title}>
@@ -206,7 +228,7 @@ export function DealTodoView({
         access={access}
         deal={deal}
         terms={terms}
-        part="follow"
+        part="contract"
       />
     ),
   };
@@ -225,6 +247,11 @@ export function DealTodoView({
         nextCall={nextCall?.label ?? null}
         callHeld={dealCallHeld(calls)}
         memoNow={memoStep && <DealMemoNow dealId={deal.id} step={memoStep} />}
+        contractNow={
+          contractStep && (
+            <DealContractNow dealId={deal.id} step={contractStep} />
+          )
+        }
       />
       {deal.stage === "signed" && <EmptyNote>{t.page.signedNote}</EmptyNote>}
       {(WORKS[deal.stage] ?? []).map((work) => (

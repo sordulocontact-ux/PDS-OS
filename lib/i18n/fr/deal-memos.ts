@@ -181,8 +181,21 @@ export const dealMemos = {
       "Le contrat principal du deal, parmi ceux de son projet ou de son artiste. Les autres contrats de l'opération restent dans Contrats.",
     pick: "Contrat",
     pickPlaceholder: "Choisir un contrat",
-    noOption:
-      "Aucun contrat sur le projet ou l'artiste de ce deal : créez-le d'abord dans Contrats.",
+    // « Créer le contrat » from the deal (DealContractCreate).
+    create: "Créer le contrat",
+    createTitle: "Créer le contrat du deal",
+    createDescription:
+      "Rempli depuis le deal ; il lui est lié dès sa création. Ses parties et ses fichiers s'ajoutent ensuite sur sa page.",
+    created: "Contrat créé et lié au deal",
+    // The contracting's gesture in « Maintenant » (DealContractNow).
+    now: {
+      create: "Créer le contrat",
+      sign: "Faire signer le contrat",
+      open: "Ouvrir le contrat",
+      participation:
+        "Le contrat de la participation est lancé par le chef de projet : il est prévenu de l'accord validé.",
+    },
+    title: (deal: string) => `Contrat · ${deal}`,
     submit: "Lier le contrat",
     linked: "Contrat lié",
     unlinked: "Lien retiré",

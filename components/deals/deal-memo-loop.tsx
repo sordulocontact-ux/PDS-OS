@@ -156,8 +156,17 @@ export function DealMemoLoop({
       )}
     </DialogButton>
   );
+  // No one else is the usual case, not a gap to fill: one quiet line, not an
+  // empty state (Sacha 22/11/2026).
   if (entries.length === 0)
-    return <EmptyNote action={addButton}>{t.empty}</EmptyNote>;
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-body-md text-[color:var(--text-secondary)]">
+          {t.empty}
+        </p>
+        {addButton}
+      </div>
+    );
   return (
     <div className="flex flex-col gap-3">
       <FactRows>

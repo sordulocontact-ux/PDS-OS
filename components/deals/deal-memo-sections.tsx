@@ -18,6 +18,7 @@ import {
   loadMemoChecks,
 } from "@/lib/deals/memo-queries";
 import { changedSince, compareMemo } from "@/lib/deals/memos";
+import { dealContractDefaults } from "@/lib/deals/contract-defaults";
 import { dealName } from "@/lib/deals/names";
 import type { DealTerm } from "@/lib/deals/terms";
 import { isClosedStage, type Deal } from "@/lib/deals/types";
@@ -30,9 +31,9 @@ import { dealMemos } from "@/lib/i18n/fr/deal-memos";
  * the people in the loop, then the contract and, once a memo is validated
  * and a contract linked, the comparison term by term. `readOnly`: the
  * deal's « Dossier », read without its gestures (they are in « À faire »).
- * `part`: the memo alone, or what follows it (the loop, the contract), so
- * that « À faire » puts the terms between them (Sacha 22/11/2026: the terms
- * matter more than an empty loop and contract).
+ * `part`: the memo, the loop or the contract alone, so that « À faire »
+ * orders them (Sacha 22/11/2026: the terms matter more than an empty loop
+ * and contract; the loop beside the next action).
  */
 export async function DealMemoSections({
   access,
@@ -45,7 +46,7 @@ export async function DealMemoSections({
   deal: Deal;
   terms: DealTerm[];
   readOnly?: boolean;
-  part?: "all" | "memo" | "follow";
+  part?: "all" | "memo" | "loop" | "contract";
 }) {
   const canWrite = deal.canWrite && !readOnly;
   const [memos, contract, options, loop, members, contacts] = await Promise.all(
@@ -78,8 +79,9 @@ export async function DealMemoSections({
     (can(access, "validate") ||
       (deal.assignee?.id === access.personId && can(access, "negotiate")));
 
-  const memoPart = part !== "follow";
-  const followPart = part !== "memo";
+  const memoPart = part === "all" || part === "memo";
+  const loopPart = part === "all" || part === "loop";
+  const contractPart = part === "all" || part === "contract";
   return (
     <>
       {memoPart && (
@@ -104,7 +106,7 @@ export async function DealMemoSections({
           />
         </PageSection>
       )}
-      {followPart && (canWrite || loop.length > 0) && (
+      {loopPart && (canWrite || loop.length > 0) && (
         <PageSection id="boucle" title={dealMemos.loop.section}>
           <DealMemoLoop
             dealId={deal.id}
@@ -118,7 +120,7 @@ export async function DealMemoSections({
           />
         </PageSection>
       )}
-      {followPart && (
+      {contractPart && (
         <PageSection id="contrat" title={dealMemos.contract.section}>
           <div className="flex flex-col gap-6">
             <DealContract
@@ -126,6 +128,11 @@ export async function DealMemoSections({
               participation={deal.participationId !== null}
               contract={contract}
               options={options}
+              create={
+                canWrite && can(access, "manage_contracts")
+                  ? dealContractDefaults(deal)
+                  : null
+              }
             />
             <DealMemoCompare
               dealId={deal.id}

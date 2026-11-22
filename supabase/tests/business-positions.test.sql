@@ -3,7 +3,7 @@
 -- invited; an unknown position is still refused.
 -- Run with `supabase test db`.
 begin;
-select plan(8);
+select plan(10);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -62,5 +62,9 @@ select throws_ok(
   $$ select public.invite_member('bp-bad-' || pg_temp.tag() || '@pds.test', 'X', null, 'manager') $$,
   'invalid_role', 'an unknown position is refused');
 
+select ok('manage_contracts' = any(public.role_permissions('business_manager')),
+  'the business manager creates the contract of his deals (20261122130101)');
+select ok('manage_contracts' = any(public.role_permissions('business')),
+  'the business too');
 select * from finish();
 rollback;

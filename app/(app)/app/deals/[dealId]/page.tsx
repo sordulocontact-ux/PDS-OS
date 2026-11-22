@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { DealCallFormData } from "@/components/deals/deal-call-button";
 import { DealFileView } from "@/components/deals/deal-file-view";
+import type { ContractStep } from "@/components/deals/deal-contract-now";
 import type { MemoStep } from "@/components/deals/deal-memo-now";
 import { DealStageMenu } from "@/components/deals/deal-stage-menu";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
@@ -18,7 +19,8 @@ import {
   memoReplyTo,
 } from "@/lib/deals/memo-mail-queries";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
-import { loadDealMemos } from "@/lib/deals/memo-queries";
+import { loadDealContract, loadDealMemos } from "@/lib/deals/memo-queries";
+import { dealContractDefaults } from "@/lib/deals/contract-defaults";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
@@ -186,6 +188,7 @@ async function DealTodo({
   | "negotiationCall"
   | "nextCall"
   | "memoStep"
+  | "contractStep"
 >) {
   // Negotiating, or the accord validated, whoever writes the deal sees the
   // deal memo's step (DealMemoNow).
@@ -196,12 +199,24 @@ async function DealTodo({
           deal.agreementStatus === "validated"))) ||
     // The direction decides an accord on its memo, read first.
     deal.canDecide;
-  const [callForm, negotiationCall, memos, loop] = await Promise.all([
+  // Contracting, whoever writes the deal sees the contract's step.
+  const contractTime = deal.canWrite && deal.stage === "contracting";
+  const [callForm, negotiationCall, memos, loop, contract] = await Promise.all([
     callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
     memoTime ? loadDealMemos(deal.id, deal.kind, true) : Promise.resolve([]),
     memoTime ? loadDealLoop(deal.id) : Promise.resolve([]),
+    contractTime ? loadDealContract(deal.id) : Promise.resolve(null),
   ]);
+  const contractStep: ContractStep | null = contractTime
+    ? {
+        contract: contract && { id: contract.id, visible: contract.visible },
+        participation: deal.participationId !== null,
+        create: can(access, "manage_contracts")
+          ? dealContractDefaults(deal)
+          : null,
+      }
+    : null;
   const latest = memos[0] ?? null;
   const mail = dealMailSetup(deal.id);
   // No memo to decide on: the direction keeps the accord's recap.
@@ -279,6 +294,7 @@ async function DealTodo({
       contacts={contacts}
       calls={calls}
       memoStep={memoStep}
+      contractStep={contractStep}
       nextCall={
         nextCall
           ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }
