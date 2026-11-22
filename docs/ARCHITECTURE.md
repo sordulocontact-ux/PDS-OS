@@ -8147,7 +8147,9 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `generate_deal_contract` (copie remplie v1 dans `contract_documents`, contrat créé et lié au deal, ou v1 du contrat
     déjà lié sans document ; jamais pour une participation). Les modèles ont un groupe « Les termes du deal »
     (`CONTRACT_FIELD_GROUPS.deal`, `deal.*` de `lib/legal/contracts/fields.ts`, jamais remplis dans le Juridique).
-    La section « Contrat » ouvre le PDF de la copie générée (`routes.contractDocumentPdf`).
+    Le PDF de la copie est imprimé **dès la génération** et rangé dans les fichiers du contrat (catégorie `draft`,
+    `fileContractPdf`) : la section « Contrat » l'ouvre dans un onglet, sans téléchargement (sinon, impression à la
+    demande en `?view=1`).
   - **Contrat du deal créé depuis le deal** (22/11/2026, `20261122130101`) : « Créer le contrat » (bouton principal,
     `DealContractCreate` : formulaire de Contrats rempli depuis le deal, `dealContractDefaults` : « Contrat · <deal> »,
     licence pour un Label, partenariat pour une Marque, contrat d'artiste sinon, artiste et projet du deal), lié au

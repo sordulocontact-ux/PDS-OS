@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
+import { recordCatalogFile } from "@/lib/catalog/file-actions";
+import { FILE_BUCKETS } from "@/lib/catalog/file-rules";
+import { getContractDocument } from "@/lib/legal/contracts/document";
+import { documentFileName } from "@/lib/legal/contracts/document-name";
+import { documentHtml } from "@/lib/legal/contracts/document-pdf";
+import { htmlToPdf } from "@/lib/pdf/render";
 import { routes } from "@/lib/auth/redirects";
 import {
   dealFieldValues,
@@ -93,22 +99,67 @@ const input = z.object({
   ),
 });
 
+/** The PDF of a generated contract's latest version, filed among its files
+ * (category « draft »): the same print as « Télécharger le PDF ». */
+async function fileContractPdf(contractId: string, organizationId: string) {
+  const supabase = await createClient();
+  const [{ data: contract }, document] = await Promise.all([
+    supabase.from("contracts").select("title").eq("id", contractId).single(),
+    getContractDocument(contractId),
+  ]);
+  if (!contract || !document) return;
+  const pdf = await htmlToPdf(
+    documentHtml({
+      title: contract.title,
+      body: document.latest.body,
+      language: document.language,
+    }),
+  );
+  const path = `${organizationId}/${contractId}/${crypto.randomUUID()}.pdf`;
+  const { error } = await supabase.storage
+    .from(FILE_BUCKETS.contract)
+    .upload(path, pdf, { contentType: "application/pdf", upsert: false });
+  if (error) throw new Error(error.message);
+  const recorded = await recordCatalogFile({
+    owner: { kind: "contract", id: contractId },
+    path,
+    category: "draft",
+    fileName: documentFileName(`${contract.title} v${document.latest.version}`),
+    mime: "application/pdf",
+    bytes: pdf.byteLength,
+  });
+  if (!recorded.ok) throw new Error(recorded.error);
+}
+
 /** The contract generated from the template, every value checked by the
  * person (generate_deal_contract): the deal's contract at once. */
 export async function generateDealContract(
   raw: z.input<typeof input>,
 ): Promise<WriteResult> {
-  await requireApproved();
   const p = input.safeParse(raw);
   if (!p.success) return { ok: false, error: deals.errors.invalid };
+  const access = await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("generate_deal_contract", {
-    p_deal_id: p.data.dealId,
-    p_template_id: p.data.templateId,
-    p_fields: p.data.fields as Json,
-  });
-  if (error)
-    return { ok: false, error: dealFailure("generateDealContract", error) };
+  const { data: contractId, error } = await supabase.rpc(
+    "generate_deal_contract",
+    {
+      p_deal_id: p.data.dealId,
+      p_template_id: p.data.templateId,
+      p_fields: p.data.fields as Json,
+    },
+  );
+  if (error || !contractId)
+    return {
+      ok: false,
+      error: dealFailure("generateDealContract", error ?? {}),
+    };
+  // Printed at once and filed with it (Sacha 22/11/2026: « dès qu'on crée le
+  // contrat, en base, on exporte avant »): opening it is then instant, in
+  // the browser. A failed print leaves the contract, printed on demand.
+  if (access.organizationId)
+    await fileContractPdf(contractId, access.organizationId).catch((e) =>
+      console.error("generateDealContract pdf:", e),
+    );
   revalidatePath(routes.deal(p.data.dealId));
   return { ok: true, done: dealMemos.contract.generated };
 }

@@ -15,7 +15,6 @@ import { DealContractGenerate } from "@/components/deals/deal-contract-generate"
 import { IconExternalLink } from "@/components/icons";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { IconAction } from "@/components/ui/icon-action";
-import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -190,14 +189,21 @@ export function DealContract({
                 />
               )}
               {document?.pdfHref ? (
-                <PdfExportButton
-                  href={document.pdfHref}
-                  fileName={`${document.name}.pdf`}
-                  label={t.openPdf}
-                  pendingLabel={fr.dealMemos.pdf.pending}
-                  failedLabel={fr.dealMemos.pdf.failed}
+                // Shown in the browser's tab, never downloaded (Sacha
+                // 22/11/2026: « on voudrait juste l'ouvrir »).
+                <Button
                   size="sm"
-                />
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={`${document.pdfHref}?view=1`}
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  }
+                >
+                  {t.openPdf}
+                </Button>
               ) : document?.openUrl ? (
                 <Button
                   size="sm"
