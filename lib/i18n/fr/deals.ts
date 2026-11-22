@@ -92,9 +92,8 @@ export const deals = {
     // « Noter un terme » in « Maintenant » (NoteTermButton).
     note: "Noter un terme",
     which: "Quel terme ?",
-    // The terms still to define, on one line (Sacha 20/11/2026).
-    toDefine: "À définir :",
-    noneWritten: "Aucun terme négocié pour l'instant. À définir :",
+    // A term still to define, its empty slot (FactSlot).
+    define: "Définir",
     labels: {
       songwriting_split: "Splits auteur-compositeur",
       master_split: "Part du master",

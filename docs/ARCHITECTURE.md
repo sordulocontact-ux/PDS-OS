@@ -8002,7 +8002,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   Juridique, `money` en centimes HT, `yesno`. **Les splits reprennent les rôles du Juridique**
   (`SPLIT_ROLES`, `legal_split_entries.role`) dans la valeur du terme : aucun second modèle de répartition.
   Lecture `loadDealTerms` (`term-queries.ts`), écriture `setDealTerm` (`term-actions.ts`, valeur validée
-  par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`),
+  par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`) :
+  termes écrits en cartes (`FactCard`), puis ceux à définir en **emplacements vides** dans la même grille
+  (`FactSlot` : pointillé, sans fond, « + Définir », ce que PO a lu en petit ; proto « Termes à définir » v2,
+  22/11/2026, Ibé ne veut pas de tableau pour modifier),
   ton de l'état `dealTermTone`. Test : `supabase/tests/deal-terms.test.sql`.
 - **Vue « Deals » et page d'un deal** (BIZ 4) : entrée de la navigation principale `/app/deals` pour qui a
   `negotiate`, `validate` ou `pilot_projects` (`NavItem.permission` accepte une liste : l'une suffit ;

@@ -1,5 +1,6 @@
 "use client";
 
+import { IconSparkle3 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { TermForm } from "@/components/deals/term-form";
@@ -7,10 +8,7 @@ import {
   TermProposalReview,
   type TermProposal,
 } from "@/components/deals/term-proposal-review";
-import { EmptyNote } from "@/components/shell/empty-state";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { FactCard, FactCards } from "@/components/ui/fact-card";
+import { FactCard, FactCards, FactSlot } from "@/components/ui/fact-card";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { formatTermValue } from "@/lib/deals/term-format";
 import type { DealTerm, TermFormat } from "@/lib/deals/terms";
@@ -26,15 +24,16 @@ const fr = { dealCalls, deals, dialogs };
 const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
 
 /**
- * The terms negotiated in a deal (BIZ 3): the ones written, one card each in
- * the configured order (Sacha 20/11/2026, proto « Fiche d'un deal » v2) — its
- * value, its state as a dot, who changed it last and when; then the ones still to define on one line (Sacha
- * 20/11/2026: nine rows « À définir » made the page a table), each a
- * button for whoever writes the deal. A card or a button opens the term in a
- * dialog; the history is in the deal's journal. What PO read in the deal's
- * calls is reviewed one at a time above them (TermProposalReview, Sacha
- * 21/11/2026: « une section complète », « une autre ergonomie »); its term's
- * card is marked (`proposed`) and opens it there.
+ * The terms negotiated in a deal (BIZ 3), one card each in the configured
+ * order (Sacha 20/11/2026, proto « Fiche d'un deal » v2): the written ones —
+ * value, state as a dot, who changed it last and when —, then the ones still
+ * to define as empty slots in the same grid (Sacha 22/11/2026, proto
+ * « Termes à définir » v2: a missing term must not read like a written one,
+ * and Ibé finds a table to edit « algorithmique »). A card or a slot opens the
+ * term in a dialog; the history is in the deal's journal. What PO read in the
+ * deal's calls is reviewed one at a time above them (TermProposalReview); a
+ * written term it changes is marked (`proposed`) and opens it there, a slot
+ * shows what PO read and opens the form prefilled with it.
  */
 export function DealTerms({
   dealId,
@@ -55,32 +54,11 @@ export function DealTerms({
   } | null>(null);
   const [index, setIndex] = useState(0);
   const at = Math.max(0, Math.min(index, proposals.length - 1));
-  const proposedKeys = new Set(proposals.map((p) => p.termKey));
   const termOfKey = new Map(terms.map((term) => [term.key, term]));
-  // The written ones and the proposed ones, in the configured order.
-  const written = terms.filter(
-    (term) => term.state !== "to_define" || proposedKeys.has(term.key),
-  );
-  const toDefine = terms.filter(
-    (term) => term.state === "to_define" && !proposedKeys.has(term.key),
-  );
+  const written = terms.filter((term) => term.state !== "to_define");
+  const toDefine = terms.filter((term) => term.state === "to_define");
   const label = (term: DealTerm) => t.labels[term.key] ?? term.key;
-  const toDefineButtons = (className?: string) => (
-    <div className={cn("flex flex-wrap gap-1.5", className)}>
-      {toDefine.map((term) => (
-        <Button
-          key={term.key}
-          type="button"
-          variant="outline"
-          size="xs"
-          onClick={() => setOpen({ term })}
-          aria-label={t.editTitle(label(term))}
-        >
-          {label(term)}
-        </Button>
-      ))}
-    </div>
-  );
+  const proposalOf = (key: string) => proposals.find((p) => p.termKey === key);
   return (
     <div className="flex flex-col gap-3">
       {proposals.length > 0 && (
@@ -94,69 +72,93 @@ export function DealTerms({
           canWrite={canWrite}
         />
       )}
-      {written.length > 0 && (
-        <FactCards>
-          {written.map((term) => {
-            const name = label(term);
-            const proposal = proposals.findIndex((p) => p.termKey === term.key);
-            return (
-              <FactCard
-                key={term.key}
-                proposed={proposal >= 0}
-                label={name}
-                value={
-                  formatTermValue(term.format, term.value) ?? t.states.to_define
-                }
-                text={TEXT_FORMATS.has(term.format)}
-                state={{
-                  tone: dealTermTone[term.state],
-                  label: t.states[term.state],
-                }}
-                source={
-                  term.changedBy && term.changedAt
-                    ? t.changed(
-                        term.changedBy,
-                        formatInstantDay(term.changedAt),
+      <FactCards>
+        {written.map((term) => {
+          const name = label(term);
+          const proposal = proposals.findIndex((p) => p.termKey === term.key);
+          return (
+            <FactCard
+              key={term.key}
+              proposed={proposal >= 0}
+              label={name}
+              value={
+                formatTermValue(term.format, term.value) ?? t.states.to_define
+              }
+              text={TEXT_FORMATS.has(term.format)}
+              state={{
+                tone: dealTermTone[term.state],
+                label: t.states[term.state],
+              }}
+              source={
+                term.changedBy && term.changedAt
+                  ? t.changed(term.changedBy, formatInstantDay(term.changedAt))
+                  : null
+              }
+              // Proposed: its proposal in the review above.
+              onClick={
+                proposal >= 0
+                  ? () => setIndex(proposal)
+                  : canWrite
+                    ? () => setOpen({ term })
+                    : undefined
+              }
+              actionLabel={
+                proposal >= 0
+                  ? fr.dealCalls.review.show(name)
+                  : canWrite
+                    ? t.editTitle(name)
+                    : undefined
+              }
+            />
+          );
+        })}
+        {toDefine.map((term) => {
+          const name = label(term);
+          const proposal = proposalOf(term.key);
+          const read = proposal && formatTermValue(term.format, proposal.value);
+          return (
+            <FactSlot
+              key={term.key}
+              label={name}
+              note={
+                read && (
+                  <span className="flex items-start gap-1.5 text-caption text-[color:var(--text-secondary)]">
+                    <IconSparkle3
+                      aria-hidden
+                      className="mt-0.5 size-3.5 shrink-0"
+                    />
+                    <span className="min-w-0 break-words">
+                      {fr.dealCalls.review.read}{" "}
+                      <b className="font-semibold text-foreground">{read}</b>
+                    </span>
+                  </span>
+                )
+              }
+              actionText={t.define}
+              emptyLabel={t.states.to_define}
+              // What PO read: the form prefilled with it.
+              onClick={
+                canWrite
+                  ? () =>
+                      setOpen(
+                        proposal
+                          ? {
+                              term: {
+                                ...term,
+                                value: proposal.value,
+                                state: proposal.state,
+                              },
+                              proposalId: proposal.id,
+                            }
+                          : { term },
                       )
-                    : null
-                }
-                // Proposed: its proposal in the review above.
-                onClick={
-                  proposal >= 0
-                    ? () => setIndex(proposal)
-                    : canWrite
-                      ? () => setOpen({ term })
-                      : undefined
-                }
-                actionLabel={
-                  proposal >= 0
-                    ? fr.dealCalls.review.show(name)
-                    : canWrite
-                      ? t.editTitle(name)
-                      : undefined
-                }
-              />
-            );
-          })}
-        </FactCards>
-      )}
-      {toDefine.length > 0 &&
-        (written.length === 0 && proposals.length === 0 ? (
-          // None written yet: the empty note of the deal's other sections,
-          // the terms to define as its buttons (Sacha 20/11/2026).
-          <EmptyNote action={canWrite && toDefineButtons("justify-center")}>
-            {t.noneWritten}
-            {!canWrite && ` ${toDefine.map(label).join(", ")}`}
-          </EmptyNote>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-              {t.toDefine}
-              {!canWrite && ` ${toDefine.map(label).join(", ")}`}
-            </p>
-            {canWrite && toDefineButtons()}
-          </div>
-        ))}
+                  : undefined
+              }
+              actionLabel={canWrite ? t.editTitle(name) : undefined}
+            />
+          );
+        })}
+      </FactCards>
       <FormDialog
         open={open !== null}
         onOpenChange={(next) => !next && setOpen(null)}

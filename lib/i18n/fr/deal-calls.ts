@@ -53,6 +53,8 @@ export const dealCalls = {
     apply: "Appliquer",
     edit: "Modifier",
     show: (term: string) => `Voir ce que PO a lu sur ${term}`,
+    // On a term still to define: « PO a lu : Avance de 15 000 € HT ».
+    read: "PO a lu :",
   },
   // PO's proposals from a call's report (lib/deals/call-proposals.ts), in
   // « Termes négociés » and « Prochaine action ».

@@ -1,4 +1,4 @@
-import { IconSparkle3 } from "nucleo-sharp-essential";
+import { IconPlus, IconSparkle3 } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
 import { StatusDot } from "@/components/ui/status-dot";
@@ -80,6 +80,68 @@ export function FactCard({
       className={cn(
         frame,
         "cursor-pointer transition-colors hover:border-[color:var(--border-default)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--selection)]",
+      )}
+    >
+      {body}
+    </button>
+  );
+}
+
+/**
+ * A fact still to write, in the place of its card (Sacha 22/11/2026, proto
+ * « Termes à définir » v2 « Emplacements vides »: Ibé finds a table to edit
+ * « algorithmique »): dashed, no fill, its label, what is known of it in
+ * `note` (what PO read), then « + Définir » at the bottom. `onClick` makes it
+ * the button that fills it; without, it says `emptyLabel`. In `FactCards`.
+ */
+export function FactSlot({
+  label,
+  note,
+  actionText,
+  emptyLabel,
+  onClick,
+  actionLabel,
+}: {
+  label: string;
+  note?: ReactNode;
+  // « Définir », shown when the slot can be filled.
+  actionText: string;
+  // « À définir », for whoever only reads.
+  emptyLabel: string;
+  onClick?: () => void;
+  actionLabel?: string;
+}) {
+  const body = (
+    <>
+      <span className="text-caption text-[color:var(--text-secondary)]">
+        {label}
+      </span>
+      {note}
+      <span className="mt-auto flex items-center gap-1.5 pt-1 text-body-sm font-semibold text-[color:var(--text-secondary)]">
+        {onClick ? (
+          <>
+            <IconPlus aria-hidden className="size-3.5 shrink-0" />
+            {actionText}
+          </>
+        ) : (
+          <span className="font-normal text-[color:var(--text-tertiary)]">
+            {emptyLabel}
+          </span>
+        )}
+      </span>
+    </>
+  );
+  const frame =
+    "flex min-h-28 min-w-0 flex-col gap-1.5 rounded-xl border-[1.5px] border-dashed border-[color:var(--border-default)] bg-transparent p-4 text-left";
+  if (!onClick) return <div className={frame}>{body}</div>;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={actionLabel}
+      className={cn(
+        frame,
+        "cursor-pointer transition-colors hover:border-[color:var(--border-hover)] hover:bg-[color:var(--surface-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--selection)]",
       )}
     >
       {body}
