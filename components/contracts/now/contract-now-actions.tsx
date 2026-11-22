@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { DocumentCard } from "@/components/ui/document-card";
 import { Fold } from "@/components/ui/fold";
-import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
 import { emailEnabled } from "@/lib/email/send";
 import { contractMails } from "@/lib/contracts/mail";
@@ -53,21 +52,13 @@ export function ContractNowActions({
     version !== null
       ? documentFileName(t.send.fileName(contract.title, version))
       : null;
-  // The generated document, to attach to the e-mail.
-  const attachment = fileName && (
-    <>
-      <b className="font-semibold break-all">{fileName}</b>
-      <PdfExportButton
-        href={routes.contractDocumentPdf(contract.id)}
-        fileName={fileName}
-        label={t.send.pdf}
-        pendingLabel={t.send.pdfPending}
-        failedLabel={t.send.pdfFailed}
-        variant="outline"
-        size="sm"
-      />
-    </>
-  );
+  // The generated document, to attach to the e-mail, opened in a tab.
+  const attachment = fileName
+    ? {
+        name: fileName,
+        href: `${routes.contractDocumentPdf(contract.id)}?view=1`,
+      }
+    : null;
   const deposit = proof?.deposit;
   const backOn = deposit
     ? todayInParis(new Date(deposit.at))

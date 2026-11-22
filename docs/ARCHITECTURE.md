@@ -8137,6 +8137,11 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     Avant de décider, le document se lit dans « Maintenant » : « Ouvrir le PDF » (fichier reçu, sinon le memo de PDS)
     à côté de « Envoyer à valider » ; pour la direction, « Valider le deal memo » = lire, « Demander des
     modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
+  - **Envoi pour signature par PDS OS** (`20261122170101`) : l'e-mail s'affiche dans la carte de mail commune
+    (`ContractMailDraft` → `MailCard`, pièce jointe ouverte dans un onglet) ; un contrat sans lien privé (celui d'un deal)
+    part de po@ quand le SMTP est en place (`emailContractForSignature` : son dernier projet déposé ou imprimé à la
+    génération, sinon imprimé à l'envoi, en pièce jointe), puis `send_contract` « Envoyé par PDS OS » ; sans SMTP,
+    « Ouvrir dans ma messagerie » / « Marquer comme envoyé ».
   - **Suivi du contrat généré** (`20261122160101`) : il est suivi par la personne qui négocie le deal (`owner_person_id`
     = l'affecté), qui l'envoie pour signature et le marque signé ; le « Maintenant » d'un contrat ouvre son PDF avant de
     l'envoyer à valider ou de le valider (`ContractPageData.pdf`), et « Ensuite » dit « Vous l'envoyez pour signature »

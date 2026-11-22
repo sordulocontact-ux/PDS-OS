@@ -9,6 +9,12 @@ import { emailContractSigner } from "@/lib/contracts/signer-email";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { legalOutcome } from "@/lib/legal/outcome";
+import { listCatalogFiles } from "@/lib/catalog/files";
+import { emailMessage } from "@/lib/email/link-email";
+import { getContractDocument } from "@/lib/legal/contracts/document";
+import { documentFileName } from "@/lib/legal/contracts/document-name";
+import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -96,5 +102,101 @@ export async function remindContractSigner(
   return emailOutcome(sent, {
     sent: auto.remindDone,
     failed: auto.remindFailed,
+  });
+}
+
+const emailInput = z.object({
+  contractId: z.uuid(),
+  projectId: z.uuid().nullable(),
+  to: z.object({ name: z.string().trim().max(200), email: z.email() }),
+  subject: z.string().trim().min(1).max(300),
+  message: z.string().trim().min(1).max(4000),
+});
+
+/** The contract's PDF to join: its latest draft filed (printed at its
+ * generation, or deposited), else its generated document printed now. */
+async function contractAttachment(
+  contractId: string,
+  title: string,
+): Promise<{ filename: string; content: Uint8Array } | null> {
+  const { files } = await listCatalogFiles({
+    kind: "contract",
+    id: contractId,
+  });
+  const filed = files.find((f) => f.category === "draft" && f.openUrl);
+  if (filed?.openUrl) {
+    const response = await fetch(filed.openUrl);
+    if (response.ok)
+      return {
+        filename: filed.fileName,
+        content: new Uint8Array(await response.arrayBuffer()),
+      };
+  }
+  const document = await getContractDocument(contractId);
+  if (!document) return null;
+  const supabase = await createClient();
+  return {
+    filename: documentFileName(`${title} v${document.latest.version}`),
+    content: await contractPdf({
+      title,
+      body: document.latest.body,
+      language: document.language,
+      letterhead: await loadContractLetterhead(supabase, contractId),
+    }),
+  };
+}
+
+/**
+ * « Envoyer par e-mail » sent by PDS OS itself (Sacha 22/11/2026: « pourquoi
+ * on ne peut pas envoyer depuis PDS OS ? »), for a contract the person signs
+ * without a private link (a deal's): the e-mail as shown and edited, from
+ * po@ in the member's name, the contract's PDF joined; once it left, the
+ * sending is kept (send_contract, « Envoyé par PDS OS », today). Without
+ * SMTP, nothing leaves: « disabled ».
+ */
+export async function emailContractForSignature(
+  values: z.input<typeof emailInput>,
+): Promise<WriteResult> {
+  const t = fr.signedReturns.team;
+  const v = emailInput.safeParse(values);
+  if (!v.success) return { ok: false, error: t.errors.failed };
+  await requireApproved();
+  const supabase = await createClient();
+  const { data: contract } = await supabase
+    .from("contracts")
+    .select("title")
+    .eq("id", v.data.contractId)
+    .maybeSingle();
+  if (!contract) return { ok: false, error: fr.contracts.errors.forbidden };
+  const file = await contractAttachment(v.data.contractId, contract.title);
+  if (!file) return { ok: false, error: fr.contracts.now.sendMail.noFile };
+  const outcome = await emailMessage({
+    to: { name: v.data.to.name || v.data.to.email, email: v.data.to.email },
+    subject: v.data.subject,
+    text: v.data.message,
+    attachments: [
+      {
+        filename: file.filename,
+        content: file.content,
+        contentType: "application/pdf",
+      },
+    ],
+  });
+  if (outcome !== "sent")
+    return {
+      ok: false,
+      error:
+        outcome === "failed"
+          ? fr.contracts.now.sendMail.failed
+          : fr.contracts.now.sendMail.disabled,
+    };
+  return sendContractForSignature({
+    contractId: v.data.contractId,
+    projectId: v.data.projectId,
+    via: "other",
+    how: "Envoyé par PDS OS",
+    on: new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(
+      new Date(),
+    ),
   });
 }
