@@ -6,7 +6,7 @@
 -- owner is told when the accord is validated.
 -- Run with `supabase test db`.
 begin;
-select plan(45);
+select plan(46);
 
 -- Fixtures (as deal-calls.test.sql) ------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -210,6 +210,8 @@ select is((select count(*)::int from public.deal_events
             where deal_id = pg_temp.id_of('d2') and kind = 'stage' and to_stage = 'negotiation'
               and detail ->> 'call' = pg_temp.id_of('k2')::text),
   1, 'its journal says which call');
+select ok((select occurred_at <= now() and ends_at <= now() from public.calls where id = pg_temp.id_of('k2')),
+  'a call planned later but whose exchange is saved took place: it is no longer to come');
 
 -- Where a participation's deal stands ----------------------------------------------------------
 select is((select (deal_id, stage, agreement_validated, can_plan_call)

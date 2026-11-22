@@ -7969,7 +7969,9 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `agreement` exige un terme confirmé (`agreement_needs_terms`), `negotiation` un call du deal qui a eu lieu
   (`negotiation_needs_call`, Sacha 21/11/2026, migration `20261121140101`) ; un deal « Call prévu » passe **tout seul** en
   négociation dès qu'un de ses calls a son échange enregistré (trigger `transcripts_start_negotiation`, migration
-  `20261121150101`, journalisé avec le call ; PO ne le propose plus), `signed` le contrat du deal signé
+  `20261121150101`, journalisé avec le call ; PO ne le propose plus ; un call prévu plus tard dont l'échange est
+  enregistré a eu lieu : son heure passe à celle de l'enregistrement, durée gardée, trigger `transcripts_call_held`,
+  `20261122100101`), `signed` le contrat du deal signé
   (`deal_contract_id`, `contract_not_signed`), et le deal en contractualisation passe seul à `signed` quand son
   contrat l'est (trigger `z_deal_follows_contract` sur `contracts`, ligne de journal `detail.contract = signed`).
   Côté page, « Maintenant » ne propose plus que le vrai geste de l'étape (`DealNow` : « Préparer un call » à
