@@ -8,8 +8,7 @@ import { recordCatalogFile } from "@/lib/catalog/file-actions";
 import { FILE_BUCKETS } from "@/lib/catalog/file-rules";
 import { getContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
-import { documentHtml } from "@/lib/legal/contracts/document-pdf";
-import { htmlToPdf } from "@/lib/pdf/render";
+import { contractPdf } from "@/lib/legal/contracts/document-pdf";
 import { routes } from "@/lib/auth/redirects";
 import {
   dealFieldValues,
@@ -108,13 +107,11 @@ async function fileContractPdf(contractId: string, organizationId: string) {
     getContractDocument(contractId),
   ]);
   if (!contract || !document) return;
-  const pdf = await htmlToPdf(
-    documentHtml({
-      title: contract.title,
-      body: document.latest.body,
-      language: document.language,
-    }),
-  );
+  const pdf = await contractPdf({
+    title: contract.title,
+    body: document.latest.body,
+    language: document.language,
+  });
   const path = `${organizationId}/${contractId}/${crypto.randomUUID()}.pdf`;
   const { error } = await supabase.storage
     .from(FILE_BUCKETS.contract)

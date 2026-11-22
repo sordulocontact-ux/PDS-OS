@@ -8147,6 +8147,12 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `generate_deal_contract` (copie remplie v1 dans `contract_documents`, contrat créé et lié au deal, ou v1 du contrat
     déjà lié sans document ; jamais pour une participation). Les modèles ont un groupe « Les termes du deal »
     (`CONTRACT_FIELD_GROUPS.deal`, `deal.*` de `lib/legal/contracts/fields.ts`, jamais remplis dans le Juridique).
+    **Mise en page des contrats** (tous les contrats générés, Juridique compris ; `lib/legal/contracts/document-pdf.ts`,
+    `contractPdf`) = le contrat type envoyé par Ibé le 22/11/2026 : Arial 10 pt justifié, A4 aux marges du modèle,
+    blocs séparés par une ligne vide = paragraphes (retours à la ligne et tabulations gardés : adresses, signatures),
+    « 2. Avance. … » = numéro, tabulation, intitulé en gras souligné, ligne « Article 3 — Durée » seule en gras
+    souligné, ligne courte en capitales en gras ; pied de page centré : numéro de page puis titre du contrat
+    (`htmlToPdf` option `footer`). Le texte n'est jamais réécrit, seule sa présentation change.
     Le PDF de la copie est imprimé **dès la génération** et rangé dans les fichiers du contrat (catégorie `draft`,
     `fileContractPdf`) : la section « Contrat » l'ouvre dans un onglet, sans téléchargement (sinon, impression à la
     demande en `?view=1`).

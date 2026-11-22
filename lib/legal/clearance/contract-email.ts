@@ -3,8 +3,7 @@ import "server-only";
 import type { EmailAttachment } from "@/lib/email/send";
 import { contracts as contractTexts } from "@/lib/i18n/fr/contracts";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
-import { documentHtml } from "@/lib/legal/contracts/document-pdf";
-import { htmlToPdf } from "@/lib/pdf/render";
+import { contractPdf } from "@/lib/legal/contracts/document-pdf";
 import { createClient } from "@/lib/supabase/server";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -94,9 +93,10 @@ export async function contractAttachments(
           filename: documentFileName(
             contractTexts.now.send.fileName(c.title, generated.data.version),
           ),
-          content: await htmlToPdf(
-            documentHtml({ title: c.title, body: generated.data.body }),
-          ),
+          content: await contractPdf({
+            title: c.title,
+            body: generated.data.body,
+          }),
           contentType: "application/pdf",
         });
         continue;
