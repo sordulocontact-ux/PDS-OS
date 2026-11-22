@@ -8127,7 +8127,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     négociation, en tête à l'accord et en contractualisation. En négociation, « Maintenant » = le geste du memo
     (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore montré → « Montrer à la direction » (la
     direction : « Valider ») ; aucun → deal Label ou Marque : « En attente du deal memo de <structure> », « Copier
-    l'adresse du deal » et « Rédiger le deal memo » à côté ; deal Musique (PDS est le label) : « Rédiger le deal memo ».
+    l'adresse du deal » seul (rien une fois la correction demandée ; « Nouveau deal memo » reste sur la carte) ; deal Musique (PDS est le label) : « Rédiger le deal memo ».
     Modifications demandées sur le memo du label → « Demander la correction à <structure> » : `DealMemoSendForm
     correction` (motif de la DG dans le message), `sendMemoCorrection` envoie depuis po@ avec **l'adresse du deal en
     réponse** (la version corrigée revient dans le deal), puis `record_deal_memo_correction_sent` (`20261122120101`,
