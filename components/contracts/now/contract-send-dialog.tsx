@@ -6,7 +6,6 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
-import { envelopeErrors } from "@/components/ui/mail-card";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -15,7 +14,11 @@ import {
   sendContractForSignature,
 } from "@/lib/contracts/send-actions";
 import { todayInParis } from "@/lib/contracts/types";
-import { addressesOf, type MailEnvelope } from "@/lib/email/addresses";
+import {
+  addressesOf,
+  envelopeErrors,
+  type MailEnvelope,
+} from "@/lib/email/addresses";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 
@@ -177,11 +180,9 @@ function SendForm({
           smtp={mail.smtp}
           bySelf={!byPds}
           onMessage={setMessage}
-          envelope={
-            byPds
-              ? { value: envelope, onChange: setEnvelope, tried }
-              : undefined
-          }
+          // Always written in the card; sent by PDS OS, or by the
+          // person's own mail app with the same envelope.
+          envelope={{ value: envelope, onChange: setEnvelope, tried }}
         />
       ) : (
         <>

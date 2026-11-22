@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { MailCard } from "@/components/ui/mail-card";
-import type { MailEnvelope } from "@/lib/email/addresses";
+import { addressesOf, type MailEnvelope } from "@/lib/email/addresses";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { mailtoHref } from "@/lib/utils/mailto";
 
@@ -59,6 +59,9 @@ export function ContractMailDraft({
   return (
     <div className="flex flex-col gap-3">
       <MailCard
+        // Sent from the person's own mail app: not « PDS OS enverra ».
+        title={bySelf ? t.title : undefined}
+        line={bySelf ? t.line : undefined}
         to={email ?? t.noAddress}
         // Its address read in the Réseau (MailCard's default source).
         toSource={to ? undefined : null}
@@ -104,12 +107,30 @@ export function ContractMailDraft({
               variant="outline"
               size="sm"
               nativeButton={false}
-              render={<a href={mailtoHref(email ?? "", subject, message)} />}
+              render={
+                <a
+                  href={
+                    envelope
+                      ? mailtoHref(
+                          addressesOf(envelope.value.to).join(","),
+                          envelope.value.subject,
+                          message,
+                          {
+                            cc: addressesOf(envelope.value.cc).join(","),
+                            bcc: addressesOf(envelope.value.bcc).join(","),
+                          },
+                        )
+                      : mailtoHref(email ?? "", subject, message)
+                  }
+                />
+              }
             >
               {t.open}
             </Button>
             <CopyButton
-              value={() => `${subject}\n\n${message}`}
+              value={() =>
+                `${envelope?.value.subject ?? subject}\n\n${message}`
+              }
               label={t.copy}
               copiedLabel={t.copied}
               variant="ghost"

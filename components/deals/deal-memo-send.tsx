@@ -4,17 +4,22 @@ import { useState, type ReactNode } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { envelopeErrors, MailCard } from "@/components/ui/mail-card";
+import { MailCard } from "@/components/ui/mail-card";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   sendDealMemo,
   sendMemoCorrection,
 } from "@/lib/deals/memo-mail-actions";
+import { contracts } from "@/lib/i18n/fr/contracts";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
-import { addressesOf, type MailEnvelope } from "@/lib/email/addresses";
+import {
+  addressesOf,
+  envelopeErrors,
+  type MailEnvelope,
+} from "@/lib/email/addresses";
 import { mailtoHref } from "@/lib/utils/mailto";
 
-const fr = { dealMemos };
+const fr = { contracts, dealMemos };
 const t = fr.dealMemos.send;
 
 export type MemoReplyTo = {
@@ -109,6 +114,8 @@ export function DealMemoSendForm({
   return (
     <div className="flex flex-col gap-4">
       <MailCard
+        title={canEmail ? undefined : fr.contracts.now.mail.title}
+        line={canEmail ? undefined : fr.contracts.now.mail.line}
         to={envelope.to}
         subject={envelope.subject}
         envelope={{ value: envelope, onChange: setEnvelope, tried }}
@@ -160,6 +167,10 @@ export function DealMemoSendForm({
                     addressesOf(envelope.to).join(","),
                     envelope.subject,
                     message,
+                    {
+                      cc: addressesOf(envelope.cc).join(","),
+                      bcc: addressesOf(envelope.bcc).join(","),
+                    },
                   )}
                 />
               }

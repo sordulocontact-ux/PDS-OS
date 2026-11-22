@@ -2,6 +2,8 @@
 // (Sacha 22/11/2026): several, separated by commas, semicolons or spaces.
 // Client-safe, pure.
 
+import { mail } from "@/lib/i18n/fr/mail";
+
 const EMAIL = /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/;
 
 /** Every address of the field, trimmed, each once. */
@@ -27,3 +29,17 @@ export type MailEnvelope = {
   bcc: string;
   subject: string;
 };
+
+/** What is wrong in an envelope, said on its row after a first try. */
+export function envelopeErrors(e: MailEnvelope) {
+  const wrong = (text: string) => {
+    const bad = invalidAddresses(text);
+    return bad.length ? mail.addressesInvalid(bad.join(", ")) : undefined;
+  };
+  return {
+    to: addressesOf(e.to).length === 0 ? mail.toMissing : wrong(e.to),
+    cc: wrong(e.cc),
+    bcc: wrong(e.bcc),
+    subject: e.subject.trim() ? undefined : mail.subjectMissing,
+  };
+}

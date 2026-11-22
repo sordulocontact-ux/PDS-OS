@@ -8,7 +8,16 @@ export const mail = {
   // The envelope written in the card (MailCard `envelope`, Sacha 22/11/2026).
   cc: "Cc",
   bcc: "Cci",
-  addresses: "Séparez les adresses par une virgule",
+  // The recipients picked in the Réseau or typed (RecipientsField).
+  addFirst: "Un nom du Réseau ou une adresse e-mail",
+  addMore: "Ajouter",
+  addAddress: (email: string) => `Ajouter ${email}`,
+  suggestions: "Contacts du Réseau",
+  remove: (name: string) => `Retirer ${name}`,
+  notEmail: (text: string) => `« ${text} » n'est pas une adresse e-mail.`,
+  nobody: "Personne",
+  edit: (label: string) => `Modifier « ${label} »`,
+  done: "OK",
   addressesInvalid: (list: string) => `Adresse non valide : ${list}`,
   toMissing: "Indiquez au moins un destinataire.",
   subjectMissing: "Indiquez l'objet.",
