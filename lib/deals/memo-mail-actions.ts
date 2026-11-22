@@ -29,7 +29,7 @@ async function told(result: WriteResult): Promise<WriteResult> {
   return result;
 }
 
-/** « Montrer à la direction ». */
+/** « Envoyer à valider » (the direction validates; Sacha 22/11/2026). */
 export async function submitDealMemo(
   dealId: string,
   memoId: string,

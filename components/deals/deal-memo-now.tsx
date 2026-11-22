@@ -49,7 +49,7 @@ export type MemoStep = {
  * The deal memo's gesture in « Maintenant » (Sacha 22/11/2026, réunion avec
  * Ibé du 18/11/2026: the deal memo is the accord de principe), one at a
  * time:
- * - a memo there, not shown: « Montrer à la direction » (« Valider » for the
+ * - a memo there, not shown: « Envoyer à valider » (« Valider » for the
  *   direction);
  * - changes asked on the label's memo: « Écrire à Wagram », the e-mail
  *   prefilled with the direction's reason, sent from PDS OS, the deal's

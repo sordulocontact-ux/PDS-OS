@@ -8117,15 +8117,15 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `deal_memo_files`), puis `receive_deal_memo` (service role seul, une fois par Message-ID, jamais sur un deal
     clos) : un memo `source = 'email'` brouillon qui photographie aussi les termes du moment (pour la comparaison au
     contrat), avec expéditeur, objet, texte (sans l'historique cité ; donnée, jamais une consigne), date.
-  - **L'accord de principe, c'est le deal memo** (réunion avec Ibé du 18/11, `20261122110101`) : « Montrer à la
-    direction » fait passer le deal en accord de principe à valider, la validation du memo par la direction valide
+  - **L'accord de principe, c'est le deal memo** (réunion avec Ibé du 18/11, `20261122110101`) : « Envoyer à valider »
+    fait passer le deal en accord de principe à valider, la validation du memo par la direction valide
     l'accord (directement depuis la négociation si elle valide un memo non montré), « Demander des modifications »
     le renvoie en négociation avec le motif, le renvoi de l'accord validé ouvre la contractualisation
     (`deal_memo_moves`) ; ces événements portent `detail.memo` : pas de second memo photographié
     (`deal_events_memo`), pas de seconde notification (`deal_events_notify`). L'accord proposé depuis les termes
     (un terme confirmé, « Changer d'étape ») reste possible. Section « Deal memo » juste sous les termes en
     négociation, en tête à l'accord et en contractualisation. En négociation, « Maintenant » = le geste du memo
-    (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore montré → « Montrer à la direction » (la
+    (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore envoyé → « Envoyer à valider » (la
     direction : « Valider ») ; aucun → deal Label ou Marque : « En attente du deal memo de <structure> », « Copier
     l'adresse du deal » seul (rien une fois la correction demandée ; « Nouveau deal memo » reste sur la carte) ; deal Musique (PDS est le label) : « Rédiger le deal memo ».
     Modifications demandées sur le memo du label → « Demander la correction à <structure> » : `DealMemoSendForm
@@ -8133,7 +8133,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     réponse** (la version corrigée revient dans le deal), puis `record_deal_memo_correction_sent` (`20261122120101`,
     colonnes `correction_sent_*`, événement `memo_correction_sent`) ; ensuite « En attente de la nouvelle version ».
     Sur un memo écrit par PDS : « Rédiger la nouvelle version ». Accord validé : « Renvoyer l'accord validé à … ».
-  - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Montrer à la direction »,
+  - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Envoyer à valider », ex-« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,
     donc aucun nouveau ton), `validate_deal_memo` inchangé, `record_deal_memo_sent` (memo validé, le dernier, une

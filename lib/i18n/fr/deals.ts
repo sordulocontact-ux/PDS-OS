@@ -335,7 +335,8 @@ export const deals = {
       memoValidated: "Deal memo validé",
       memoReceived: (n: string, from: string) =>
         `Deal memo n°${n} reçu par e-mail${from ? ` de ${from}` : ""}`,
-      memoSubmitted: (n: string) => `Deal memo n°${n} montré à la direction`,
+      memoSubmitted: (n: string) =>
+        `Deal memo n°${n} envoyé à la direction pour validation`,
       memoChangesRequested: (n: string) =>
         `Modifications demandées au deal memo n°${n}`,
       memoSent: (n: string, to: string) =>

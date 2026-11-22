@@ -219,7 +219,7 @@ export const notifications = {
     deal_follow_up_due: (_actor: string, project: string) =>
       `Une relance est due aujourd'hui${dealOf(project)}.`,
     deal_memo_received: (_actor: string, project: string) =>
-      `Un deal memo est arrivé par e-mail${dealOf(project)} : à montrer à la direction.`,
+      `Un deal memo est arrivé par e-mail${dealOf(project)}  : à envoyer à la direction pour validation.`,
     deal_memo_submitted: (actor: string, project: string) =>
       `${actor} vous montre un deal memo${dealOf(project)} : à valider.`,
     deal_memo_changes_requested: (actor: string, project: string) =>

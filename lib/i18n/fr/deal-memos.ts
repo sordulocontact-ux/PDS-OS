@@ -14,7 +14,7 @@ export const dealMemos = {
   // The negotiation's gesture in « Maintenant » (DealMemoNow, Sacha
   // 22/11/2026): the deal memo is the accord de principe.
   now: {
-    show: "Montrer le deal memo à la direction",
+    show: "Faire valider le deal memo par la direction",
     validate: "Valider le deal memo",
     validateButton: "Valider",
     write: "Rédiger le deal memo",
@@ -31,8 +31,8 @@ export const dealMemos = {
     from ? `Reçu de ${from}, le ${day}` : `Reçu le ${day}`,
   submittedBy: (who: string | null, day: string) =>
     who
-      ? `Montré à la direction par ${who}, le ${day}`
-      : `Montré à la direction le ${day}`,
+      ? `Envoyé à valider par ${who}, le ${day}`
+      : `Envoyé à valider le ${day}`,
   correctionTo: (to: string | null, day: string) =>
     to
       ? `Correction demandée à ${to}, le ${day}`
@@ -48,8 +48,8 @@ export const dealMemos = {
   file: "Pièce jointe",
   subject: "Objet",
   message: "Message",
-  submit: "Montrer à la direction",
-  submitted: "Deal memo montré à la direction",
+  submit: "Envoyer à valider",
+  submitted: "Deal memo envoyé à la direction pour validation",
   changes: {
     button: "Demander des modifications",
     title: "Demander des modifications",
@@ -102,7 +102,7 @@ export const dealMemos = {
   // What PO reads of the latest memo's circuit (lib/assistant/read/deals.ts).
   read: {
     received: "Ce deal memo est arrivé par e-mail du label ou de la marque.",
-    submitted: "Il a été montré à la direction.",
+    submitted: "Il a été envoyé à la direction pour validation.",
     changes: (reason: string) =>
       `La direction demande des modifications : « ${reason} ».`,
     correction: "La correction a été demandée au label.",
@@ -229,7 +229,7 @@ export const dealMemos = {
     check_unchanged: "Rien n'a changé.",
     invalid_verdict: "Choisissez « Conforme » ou « Différent ».",
     invalid_term: "Ce terme n'est pas dans le deal memo.",
-    memo_submitted: "Ce deal memo est déjà montré à la direction.",
+    memo_submitted: "Ce deal memo est déjà envoyé à valider.",
     memo_changes_requested:
       "Des modifications sont déjà demandées : la version suivante arrivera par e-mail.",
     memo_sent: "Cet accord est déjà renvoyé.",
