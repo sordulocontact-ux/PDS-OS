@@ -58,9 +58,15 @@ export async function loadDealContractDraft(
   const wanted = dealContractDefaults(deal).type;
   const filled = (fields: string[]) =>
     fields.filter((id) => values[id]).length / Math.max(fields.length, 1);
+  // The deal's kind of contract first, made for deals (it asks for their
+  // terms) before one made for a project's title (a featuring), then the one
+  // it fills best.
+  const forDeals = (fields: string[]) =>
+    fields.some((id) => id.startsWith("deal."));
   const sorted = [...(templates ?? [])].sort(
     (a, b) =>
       Number(b.type === wanted) - Number(a.type === wanted) ||
+      Number(forDeals(b.fields)) - Number(forDeals(a.fields)) ||
       filled(b.fields) - filled(a.fields) ||
       a.name.localeCompare(b.name, "fr"),
   );

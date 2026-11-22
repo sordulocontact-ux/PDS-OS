@@ -92,8 +92,18 @@ export async function dealFieldValues(
   });
 
   const out: Record<string, DealFieldValue> = {};
+  // Without a fiche, what is said of the structure comes from the Réseau.
+  const noFiche = !fiche?.details;
   for (const [id, v] of Object.entries(base))
-    if (v && !v.notApplicable) out[id] = { value: v.value, source: v.source };
+    if (v && !v.notApplicable)
+      out[id] = {
+        value: v.value,
+        source: noFiche && v.source === "fiche" ? "network" : v.source,
+      };
+  // No project: the artist's project, as the labels name it (« Projet Dioo »
+  // in Wagram's memo).
+  if (!out["projet.titre"] && deal.artistName)
+    out["projet.titre"] = { value: deal.artistName, source: "project" };
   // The remuneration as the term says it (« Avance de 15 000 € HT »).
   if (pay) {
     const said = formatTermValue(pay.format, pay.value);
