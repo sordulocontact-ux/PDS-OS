@@ -15,7 +15,8 @@ const fr = { invoices };
 
 const t = fr.invoices.billing;
 
-/** « Facturation de PDS »: what an invoice is addressed to. */
+/** « Coordonnées de PDS »: what an invoice is addressed to, and the head of
+ * every contract PDS OS prints (Sacha 22/11/2026). */
 export function BillingForm({ initial }: { initial: Billing | null }) {
   const root = useRef<HTMLFormElement>(null);
   const [v, setV] = useState({
@@ -23,6 +24,9 @@ export function BillingForm({ initial }: { initial: Billing | null }) {
     address: initial?.address ?? "",
     siret: initial?.siret ?? "",
     vat: initial?.vat ?? "",
+    phone: initial?.phone ?? "",
+    email: initial?.email ?? "",
+    website: initial?.website ?? "",
   });
   const [tried, setTried] = useState(false);
   const submit = useWriteSubmit(() => setTried(false), t.saved);
@@ -33,6 +37,10 @@ export function BillingForm({ initial }: { initial: Billing | null }) {
       !v.siret.trim() || /^\d{14}$/.test(v.siret.replace(/\s/g, ""))
         ? undefined
         : t.siretInvalid,
+    email:
+      !v.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim())
+        ? undefined
+        : t.emailInvalid,
   };
   const missing = Object.values(errors).filter(Boolean).length;
   const shown: Partial<typeof errors> = tried ? errors : {};
@@ -89,6 +97,32 @@ export function BillingForm({ initial }: { initial: Billing | null }) {
           onChange={(e) => setV({ ...v, vat: e.target.value })}
         />
       </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          name="phone"
+          label={t.phone}
+          type="tel"
+          autoComplete="tel"
+          value={v.phone}
+          onChange={(e) => setV({ ...v, phone: e.target.value })}
+        />
+        <Field
+          name="email"
+          label={t.email}
+          type="email"
+          autoComplete="email"
+          value={v.email}
+          error={shown.email}
+          onChange={(e) => setV({ ...v, email: e.target.value })}
+        />
+      </div>
+      <Field
+        name="website"
+        label={t.website}
+        type="url"
+        value={v.website}
+        onChange={(e) => setV({ ...v, website: e.target.value })}
+      />
       {tried && missing > 0 && (
         <FormMessage kind="error">
           {fr.invoices.fields.missingCount(missing)}

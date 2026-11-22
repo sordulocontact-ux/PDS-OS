@@ -54,7 +54,8 @@ export function CallWorkspace({
   transcript: StoredTranscript | null;
   // One per take when the call was recorded in parts.
   audioUrls: Array<string | null>;
-  // Whoever works on the call: the project's owner, the meeting's creator.
+  // Whoever works on the call: the project's owner, the meeting's creator;
+  // on a deal's call, its negotiator and its project's owner.
   canEdit: boolean;
   // The project's title or « Réunion interne » (the summary's subject).
   where: string;

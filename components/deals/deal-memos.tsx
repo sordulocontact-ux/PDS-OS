@@ -1,5 +1,7 @@
 "use client";
 
+import { IconPlus } from "nucleo-sharp-essential";
+
 import { DealMemoCard } from "@/components/deals/deal-memo-card";
 import {
   DealMemoGestures,
@@ -7,6 +9,7 @@ import {
 } from "@/components/deals/deal-memo-gestures";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
 import { CopyButton } from "@/components/ui/copy-button";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -36,6 +39,7 @@ function MemoPdf({
       failedLabel={t.pdf.failed}
       variant="outline"
       size="sm"
+      iconOnly
     />
   );
 }
@@ -90,21 +94,34 @@ export function DealMemos({
 }) {
   const create = useWriteSubmit(undefined, t.created);
   const [latest, ...older] = memos;
-  const newButton = canWrite && (
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={create.pending}
-      onClick={() => create.run(() => createDealMemo(dealId))}
-    >
-      {t.create}
-    </Button>
-  );
+  // Beside the memo's main gesture, an icon (Sacha 22/11/2026); alone (no
+  // memo yet), its words.
+  const newButton = (iconOnly: boolean) =>
+    canWrite &&
+    (iconOnly ? (
+      <IconAction
+        label={t.create}
+        icon={IconPlus}
+        size="icon-sm"
+        disabled={create.pending}
+        busy={create.pending}
+        onClick={() => create.run(() => createDealMemo(dealId))}
+      />
+    ) : (
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={create.pending}
+        onClick={() => create.run(() => createDealMemo(dealId))}
+      >
+        {t.create}
+      </Button>
+    ));
   const addressLine = canWrite && address && <DealAddress address={address} />;
   if (!latest)
     return (
       <div className="flex flex-col gap-2">
-        <EmptyNote action={newButton}>
+        <EmptyNote action={newButton(false)}>
           {address ? t.noneByEmail : t.none}
         </EmptyNote>
         {addressLine}
@@ -124,6 +141,7 @@ export function DealMemos({
         open={pdf(latest)}
         actions={
           <>
+            {newButton(true)}
             <DealMemoGestures
               dealId={dealId}
               dealName={dealName}
@@ -132,7 +150,6 @@ export function DealMemos({
               canValidate={canValidate}
               send={send}
             />
-            {newButton}
           </>
         }
       />

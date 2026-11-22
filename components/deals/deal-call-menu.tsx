@@ -1,25 +1,20 @@
 "use client";
 
-import { IconCalendarDays } from "nucleo-sharp-essential";
+import { IconPenWriting2 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { RescheduleCallDialog } from "@/components/calls/reschedule-call-button";
+import { EditCallDialog } from "@/components/calls/edit-call-button";
 import { RowActions } from "@/components/ui/row-actions";
 import { calls } from "@/lib/i18n/fr/calls";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 
 const fr = { calls, dealCalls };
 
-/** « ⋯ » of a deal's call card: « Modifier l'horaire » (Sacha 21/11/2026). */
+/** « ⋯ » of a deal's call card: « Modifier le call » (Sacha 21/11/2026). */
 export function DealCallMenu({
   call,
 }: {
-  call: {
-    id: string;
-    title: string;
-    occurredAt: string;
-    endsAt: string | null;
-  };
+  call: { id: string; title: string };
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -28,14 +23,14 @@ export function DealCallMenu({
         label={fr.dealCalls.actions(call.title)}
         actions={[
           {
-            key: "reschedule",
-            label: fr.calls.calendar.reschedule.title,
-            icon: IconCalendarDays,
+            key: "edit",
+            label: fr.calls.edit.button,
+            icon: IconPenWriting2,
             onSelect: () => setOpen(true),
           },
         ]}
       />
-      <RescheduleCallDialog call={call} open={open} onOpenChange={setOpen} />
+      <EditCallDialog callId={call.id} open={open} onOpenChange={setOpen} />
     </>
   );
 }

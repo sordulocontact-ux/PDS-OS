@@ -542,6 +542,9 @@ export type Database = {
           changes_at: string | null
           changes_by: string | null
           changes_reason: string | null
+          correction_sent_at: string | null
+          correction_sent_by: string | null
+          correction_sent_to: string | null
           created_at: string
           created_by: string | null
           deal_id: string
@@ -569,6 +572,9 @@ export type Database = {
           changes_at?: string | null
           changes_by?: string | null
           changes_reason?: string | null
+          correction_sent_at?: string | null
+          correction_sent_by?: string | null
+          correction_sent_to?: string | null
           created_at?: string
           created_by?: string | null
           deal_id: string
@@ -596,6 +602,9 @@ export type Database = {
           changes_at?: string | null
           changes_by?: string | null
           changes_reason?: string | null
+          correction_sent_at?: string | null
+          correction_sent_by?: string | null
+          correction_sent_to?: string | null
           created_at?: string
           created_by?: string | null
           deal_id?: string
@@ -13864,6 +13873,9 @@ export type Database = {
       organization_billing: {
         Row: {
           address: string
+          email: string | null
+          phone: string | null
+          website: string | null
           legal_name: string
           organization_id: string
           siret: string | null
@@ -13873,6 +13885,9 @@ export type Database = {
         }
         Insert: {
           address: string
+          email?: string | null
+          phone?: string | null
+          website?: string | null
           legal_name: string
           organization_id: string
           siret?: string | null
@@ -13882,6 +13897,9 @@ export type Database = {
         }
         Update: {
           address?: string
+          email?: string | null
+          phone?: string | null
+          website?: string | null
           legal_name?: string
           organization_id?: string
           siret?: string | null
@@ -23088,6 +23106,10 @@ export type Database = {
         }
         Returns: string
       }
+      record_deal_memo_correction_sent: {
+        Args: { p_memo_id: string; p_sent_to: string }
+        Returns: undefined
+      }
       record_deal_memo_sent: {
         Args: { p_memo_id: string; p_sent_to: string }
         Returns: undefined
@@ -23148,6 +23170,8 @@ export type Database = {
           title_position: number
         }[]
       }
+      // 20261121120101_call_planner_arranges.sql (added by hand).
+      can_arrange_call: { Args: { p_call_id: string }; Returns: boolean }
       // 20261121110101_reschedule_call.sql (added by hand).
       reschedule_call: {
         Args: { p_call_id: string; p_ends_at: string; p_starts_at: string }
@@ -25395,6 +25419,14 @@ export type Database = {
       generate_formality_document: {
         Args: { p_formality_id: string }
         Returns: number
+      }
+      contract_letterhead: {
+        Args: { p_contact_token?: string; p_contract_id: string }
+        Returns: Json
+      }
+      generate_deal_contract: {
+        Args: { p_deal_id: string; p_fields: Json; p_template_id: string }
+        Returns: string
       }
       generate_legal_contract: {
         Args: { p_fields: Json; p_need_id: string }

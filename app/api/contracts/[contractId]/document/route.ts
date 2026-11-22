@@ -2,8 +2,9 @@ import { getAccess } from "@/lib/auth/dal";
 import { getContract } from "@/lib/contracts/queries";
 import { getContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
-import { documentHtml } from "@/lib/legal/contracts/document-pdf";
-import { htmlToPdf } from "@/lib/pdf/render";
+import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
+import { createClient } from "@/lib/supabase/server";
 
 // Starting a browser and printing takes a few seconds, more on a cold start.
 export const maxDuration = 60;
@@ -34,13 +35,15 @@ export async function GET(
 
   let pdf: Uint8Array;
   try {
-    pdf = await htmlToPdf(
-      documentHtml({
-        title: contract.title,
-        body: document.latest.body,
-        language: document.language,
-      }),
-    );
+    pdf = await contractPdf({
+      title: contract.title,
+      body: document.latest.body,
+      language: document.language,
+      letterhead: await loadContractLetterhead(
+        await createClient(),
+        contractId,
+      ),
+    });
   } catch (error) {
     console.error("[contract-document] pdf failed:", error);
     return Response.json({ ok: false, error: "pdf_failed" }, { status: 500 });

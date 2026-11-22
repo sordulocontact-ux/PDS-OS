@@ -92,6 +92,9 @@ export type Deal = {
   // writing it, plans the call of a music deal before its accord
   // (can_plan_negotiation_call, 20261120140101).
   canPlanCall: boolean;
+  // The reader owns the deal's project: she runs its calls (is_call_owner,
+  // Sacha 21/11/2026: « c'est elle qui fait la réunion »).
+  ownsProject: boolean;
 };
 
 /** A line of a deal's journal. */

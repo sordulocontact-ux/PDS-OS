@@ -1,7 +1,9 @@
 import "server-only";
 
-import { memoHtml } from "@/lib/deals/memo-pdf";
+import { loadMemoLetter, memoHtml } from "@/lib/deals/memo-pdf";
 import type { DealMemo } from "@/lib/deals/memos";
+import { dealName as nameOf } from "@/lib/deals/names";
+import type { Deal } from "@/lib/deals/types";
 import type { EmailAttachment } from "@/lib/email/send";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { htmlToPdf } from "@/lib/pdf/render";
@@ -15,11 +17,12 @@ import { createClient } from "@/lib/supabase/server";
  */
 export async function memoAttachments(
   memo: DealMemo,
-  dealName: string,
+  deal: Deal,
 ): Promise<EmailAttachment[] | null> {
+  const dealName = nameOf(deal);
   if (memo.source === "pds") {
     try {
-      const pdf = await htmlToPdf(memoHtml(memo, dealName));
+      const pdf = await htmlToPdf(memoHtml(memo, await loadMemoLetter(deal)));
       return [
         {
           filename: dealMemos.pdf.file(dealName, memo.number),

@@ -104,7 +104,7 @@ export function CallProcessing({
     if (extracted.dealId && extracted.dealProposals) {
       // A deal's call (BIZ 6): PO's proposals wait on the deal's page.
       toast.success(t.dealProposals(extracted.dealProposals));
-      router.push(`${routes.deal(extracted.dealId)}#propositions`);
+      router.push(`${routes.deal(extracted.dealId)}#termes`);
     } else if (extracted.productionDeliverableId && projectId) {
       toast.success(fr.productionPreprod.call.afterCall);
       router.push(

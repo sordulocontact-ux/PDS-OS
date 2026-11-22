@@ -7,8 +7,8 @@ import { loadDealLoop } from "@/lib/deals/memo-mail-queries";
 import { memoAttachments } from "@/lib/deals/memo-mail-send";
 import { loadDealMemos } from "@/lib/deals/memo-queries";
 import { runMemoGesture, uuid } from "@/lib/deals/memo-run";
-import { dealName } from "@/lib/deals/names";
 import { loadDeal } from "@/lib/deals/queries";
+import { dealMemoAddress } from "@/lib/email/deal-memo-address";
 import { emailMessage } from "@/lib/email/link-email";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -29,7 +29,7 @@ async function told(result: WriteResult): Promise<WriteResult> {
   return result;
 }
 
-/** « Montrer à la direction ». */
+/** « Envoyer à valider » (the direction validates; Sacha 22/11/2026). */
 export async function submitDealMemo(
   dealId: string,
   memoId: string,
@@ -106,7 +106,7 @@ export async function sendDealMemo(
     return { ok: false, error: t.errors.memo_not_validated };
   if (memo.sent) return { ok: false, error: t.errors.memo_sent };
 
-  const attachments = await memoAttachments(memo, dealName(deal));
+  const attachments = await memoAttachments(memo, deal);
   if (!attachments) return { ok: false, error: t.send.noAttachment };
   const mail = {
     subject: p.data.subject,
@@ -181,5 +181,50 @@ export async function removeDealLoop(
   if (!uuid.safeParse(loopId).success) return invalid;
   return runMemoGesture(dealId, "removeDealLoop", t.loop.removed, (s) =>
     s.rpc("remove_deal_loop", { p_loop_id: loopId }),
+  );
+}
+
+/**
+ * « Demander la correction » (Sacha 22/11/2026): the changes the direction
+ * asked on a memo received go to the label or the brand from PDS OS (po@, in
+ * the member's name), the deal's address in reply-to so their next version
+ * comes back into the deal by itself; then the sending is kept (to whom).
+ * `byEmail: false`: asked another way, only noted.
+ */
+export async function sendMemoCorrection(
+  dealId: string,
+  memoId: string,
+  input: z.input<typeof sendInput>,
+): Promise<WriteResult> {
+  await requireApproved();
+  const p = sendInput.safeParse(input);
+  if (!uuid.safeParse(dealId).success || !uuid.safeParse(memoId).success)
+    return invalid;
+  if (!p.success) return { ok: false, error: t.send.invalid };
+  const record = (to: string) =>
+    runMemoGesture(dealId, "sendMemoCorrection", t.correction.done, (s) =>
+      s.rpc("record_deal_memo_correction_sent", {
+        p_memo_id: memoId,
+        p_sent_to: to,
+      }),
+    );
+  if (!p.data.byEmail) return told(await record(""));
+  const to = {
+    name: p.data.to.name || p.data.to.email,
+    email: p.data.to.email,
+  };
+  const address = dealMemoAddress(dealId);
+  const outcome = await emailMessage({
+    to,
+    subject: p.data.subject,
+    text: p.data.message,
+    replyTo: address ? [address] : undefined,
+  });
+  if (outcome !== "sent")
+    return outcome === "failed"
+      ? { ok: false, error: t.send.failed }
+      : { ok: false, error: t.send.disabled };
+  return told(
+    await record(to.name === to.email ? to.email : `${to.name} (${to.email})`),
   );
 }

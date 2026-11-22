@@ -23,6 +23,7 @@ export function DocumentCardFold({
   action,
   className,
   defaultOpen = true,
+  strip,
   children,
 }: {
   name: string;
@@ -30,6 +31,9 @@ export function DocumentCardFold({
   action?: ReactNode;
   className?: string;
   defaultOpen?: boolean;
+  // Under the head, never folded (DocumentCard's « what changed »); told
+  // whether the body is open, to rule its foot.
+  strip?: (open: boolean) => ReactNode;
   children: ReactNode;
 }) {
   const t = fr.shell.section;
@@ -38,7 +42,7 @@ export function DocumentCardFold({
   return (
     <section className={cn(documentCardClass, className)}>
       <div
-        className={cn(documentHeadClass(open), "cursor-pointer")}
+        className={cn(documentHeadClass(open || Boolean(strip)), "cursor-pointer")}
         onClick={(e) => {
           // A button or link of the head keeps its own click.
           if ((e.target as HTMLElement).closest("button, a")) return;
@@ -66,6 +70,7 @@ export function DocumentCardFold({
           </Button>
         </span>
       </div>
+      {strip?.(open)}
       <div id={bodyId} hidden={!open} className="flex min-w-0 flex-col">
         {children}
       </div>

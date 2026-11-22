@@ -1,5 +1,11 @@
 /** Contracts: type, parties, owner, status, dates, files, validation, signature. */
 export const contracts = {
+  // « Déposer le contrat » (ContractDepositButton).
+  deposit: {
+    deposit: "Déposer le contrat",
+    depositing: "Envoi…",
+    deposited: "Contrat déposé",
+  },
   title: "Contrats",
   description:
     "Chaque contrat avec ses parties, son responsable et ses versions, de la rédaction à la signature.",
@@ -111,7 +117,7 @@ export const contracts = {
     importSteps: [
       "Remplissez ce qui le décrit : titre, type, projet, dates.",
       "Sur sa page, ajoutez ses parties depuis le Réseau.",
-      "Déposez son fichier, puis soumettez-le à la validation de la direction.",
+      "Déposez son fichier, puis envoyez-le à valider.",
     ],
     generate: "Le générer depuis un modèle",
     generateHint:
@@ -190,9 +196,10 @@ export const contracts = {
     toValidate: "À valider",
     direction: "la direction",
     titles: {
+      deposit: "Déposer le contrat",
       decide: "Valider le contrat",
-      submit: "Soumettre à la direction",
-      resubmit: "Reprendre le contrat et le soumettre à nouveau",
+      submit: "Envoyer le contrat à valider",
+      resubmit: "Reprendre le contrat et l'envoyer à valider à nouveau",
       send: "Envoyer le contrat pour signature",
       countersign: "Signer le contrat pour PDS",
       mark_signed: "Marquer le contrat comme signé",
@@ -201,7 +208,7 @@ export const contracts = {
       `En attente de ${who}${viaLink ? " (lien privé)" : ""} : ${todo}`,
     todos: {
       decide: "valider le contrat",
-      submit: "soumettre le contrat à la direction",
+      submit: "envoyer le contrat à valider",
       send: "envoyer le contrat pour signature",
       signer: "signer et renvoyer le contrat",
       countersign: "signer le contrat pour PDS",
@@ -211,12 +218,13 @@ export const contracts = {
     // The party who signs, when none is named yet.
     theParty: "la partie qui signe",
     why: {
-      draft:
-        "Le responsable prépare le contrat, puis le soumet à la direction.",
+      deposit:
+        "Le contrat n'a pas encore de document : déposez son PDF, puis envoyez-le à valider.",
+      draft: "Le responsable prépare le contrat, puis l'envoie à valider.",
       in_review:
-        "La direction relit le contrat : elle le valide ou demande des modifications.",
+        "Le business manager ou la direction relit le contrat : il le valide ou demande des modifications.",
       approved:
-        "Validé par la direction : il part à la partie qui signe, avec son lien privé quand elle en a un.",
+        "Validé : il part à la partie qui signe, avec son lien privé quand elle en a un.",
       sent: "Envoyé pour signature : il revient signé par le lien privé de la partie, ou autrement.",
       returned:
         "Revenu signé : la direction signe pour PDS, et le contrat est conclu.",
@@ -232,6 +240,7 @@ export const contracts = {
     facts: {
       then: "Ensuite",
       thenSend: (owner: string) => `Envoi pour signature par ${owner}`,
+      thenSendYou: "Vous l'envoyez pour signature",
       validation: "Validation",
       sentTo: "Envoyé à",
       sentToValue: (name: string, email: string | null) =>
@@ -244,7 +253,10 @@ export const contracts = {
       opened: "Lien ouvert",
       notOpened: "pas encore",
     },
-    submit: "Soumettre à la direction",
+    // Validated by the business manager or the direction since 18/11/2026
+    // (validate_contracts).
+    submit: "Envoyer à valider",
+    openPdf: "Ouvrir le PDF",
     decide: {
       approve: "Valider",
       requestChanges: "Demander des modifications",
@@ -364,7 +376,7 @@ export const contracts = {
     cancel: "Annuler",
     close: "Fermer",
     done: {
-      submit: "Contrat soumis à la direction.",
+      submit: "Contrat envoyé à valider.",
       approve: "Contrat validé.",
       request_changes: "Modifications demandées au responsable.",
       send: "Contrat marqué comme envoyé.",

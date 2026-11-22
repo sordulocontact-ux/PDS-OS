@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
  * `collapsible`: a chevron at the end of the head folds a long body (the
  * SACEM bulletin and its dossier, a person's link), open unless
  * `defaultOpen={false}` (the SACEM bulletin, folded on arrival: Sacha,
- * 10/11/2026).
+ * 10/11/2026); the info strip (`change`) stays in sight when folded.
  */
 export function DocumentCard({
   name,
@@ -64,23 +64,27 @@ export function DocumentCard({
       </span>
     </>
   );
+  const strip = (ruled: boolean) =>
+    change && (
+      <p
+        className={cn(
+          "flex items-start gap-2.5 bg-[var(--tone-info-bg)] px-3.5 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--tone-info-fg)]",
+          ruled && "border-b border-[color:var(--border-hairline)]",
+        )}
+      >
+        <IconCircleInfo aria-hidden className="mt-0.5 size-4 shrink-0" />
+        <span className="min-w-0">{change}</span>
+      </p>
+    );
   const rest = (
     <>
-      {change && (
-        <p
-          className={cn(
-            "flex items-start gap-2.5 bg-[var(--tone-info-bg)] px-3.5 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--tone-info-fg)]",
-            children && "border-b border-[color:var(--border-hairline)]",
-          )}
-        >
-          <IconCircleInfo aria-hidden className="mt-0.5 size-4 shrink-0" />
-          <span className="min-w-0">{change}</span>
-        </p>
-      )}
+      {strip(Boolean(children))}
       {children}
     </>
   );
-  if (collapsible && body)
+  // Folded, what changed stays in sight under the head (Sacha 22/11/2026:
+  // « même quand le chevron est fermé »); only the body folds.
+  if (collapsible && children)
     return (
       <DocumentCardFold
         name={name}
@@ -88,8 +92,9 @@ export function DocumentCard({
         action={action}
         className={className}
         defaultOpen={defaultOpen}
+        strip={change ? (open: boolean) => strip(open) : undefined}
       >
-        {rest}
+        {children}
       </DocumentCardFold>
     );
   return (

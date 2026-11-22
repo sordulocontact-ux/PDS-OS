@@ -23,15 +23,12 @@ function reachable(deal: Deal) {
   });
 }
 
-/** « Changer d'étape » of a deal, with why (BIZ 4); on a proposal of PO
- * (BIZ 6), the stage it proposes first and its quote as why. */
+/** « Changer d'étape » of a deal, with why (BIZ 4). */
 export function DealStageForm({
   deal,
-  proposal,
   onDone,
 }: {
   deal: Deal;
-  proposal?: { id: string; stage: string; note: string };
   onDone: () => void;
 }) {
   const t = fr.deals.page;
@@ -48,7 +45,6 @@ export function DealStageForm({
             deal.id,
             String(data.get("stage") ?? ""),
             String(data.get("note") ?? ""),
-            proposal?.id,
           ),
         );
       }}
@@ -59,9 +55,7 @@ export function DealStageForm({
         label={t.stage}
         required
         items={Object.fromEntries(stages.map((s) => [s, fr.deals.stages[s]]))}
-        defaultValue={
-          stages.find((s) => s === proposal?.stage) ?? stages[0] ?? null
-        }
+        defaultValue={stages[0] ?? null}
       />
       <TextareaField
         id={`deal-${deal.id}-note`}
@@ -69,7 +63,6 @@ export function DealStageForm({
         label={t.note}
         rows={3}
         maxLength={2000}
-        defaultValue={proposal?.note}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions

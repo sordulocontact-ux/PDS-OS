@@ -3,6 +3,9 @@ import { z } from "zod";
 
 import type { DealCallFormData } from "@/components/deals/deal-call-button";
 import { DealFileView } from "@/components/deals/deal-file-view";
+import type { ContractStep } from "@/components/deals/deal-contract-now";
+import type { MemoStep } from "@/components/deals/deal-memo-now";
+import { DealStageMenu } from "@/components/deals/deal-stage-menu";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { DealTodoView } from "@/components/deals/deal-todo-view";
 import { NewDealButton } from "@/components/deals/new-deal-button";
@@ -10,6 +13,16 @@ import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { TabBar } from "@/components/ui/tab-bar";
 import { can } from "@/lib/auth/access";
+import {
+  dealMailSetup,
+  loadDealLoop,
+  memoReplyTo,
+} from "@/lib/deals/memo-mail-queries";
+import { dealMemos } from "@/lib/i18n/fr/deal-memos";
+import { loadDealContract, loadDealMemos } from "@/lib/deals/memo-queries";
+import { loadContractPage } from "@/lib/contracts/page-data";
+import { findContract } from "@/lib/contracts/queries";
+import { dealContractDefaults } from "@/lib/deals/contract-defaults";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
@@ -21,7 +34,10 @@ import {
   nextDealCall,
 } from "@/lib/deals/call-queries";
 import { loadDealContacts } from "@/lib/deals/contact-queries";
-import { loadDealNegotiationCall } from "@/lib/deals/negotiation-call";
+import {
+  loadDealNegotiationCall,
+  withSlots,
+} from "@/lib/deals/negotiation-call";
 import { loadNewDealOptions } from "@/lib/deals/new-deal-options";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal, loadDealEvents } from "@/lib/deals/queries";
@@ -50,6 +66,7 @@ async function negotiatorsFor(canAssign: boolean) {
 async function callFormFor(
   deal: Deal,
   terms: DealTerm[],
+  me: string | null,
 ): Promise<DealCallFormData | null> {
   if (!deal.canWrite) return null;
   return {
@@ -60,6 +77,11 @@ async function callFormFor(
     defaultOccurredAt: nextRoundHourInput(new Date()),
     topics: dealCallTopics(deal, terms),
     negotiator: deal.assignee,
+    // His free slots when someone else plans the call (the direction).
+    slots:
+      deal.assignee && deal.assignee.id !== me
+        ? await withSlots([deal.assignee])
+        : [],
   };
 }
 
@@ -110,6 +132,12 @@ export default async function DealPage({
       above={<BackLink href={routes.deals}>{t.page.back}</BackLink>}
       title={dealName(deal)}
       badge={<DealStageBadge deal={deal} size="md" />}
+      action={
+        deal.canWrite &&
+        deal.stage !== "abandoned" && (
+          <DealStageMenu deal={deal} name={dealName(deal)} />
+        )
+      }
     >
       <TabBar
         label={tabs.label}
@@ -156,12 +184,93 @@ async function DealTodo({
   contacts,
 }: Omit<
   Parameters<typeof DealTodoView>[0],
-  "proposer" | "reopen" | "callForm" | "negotiationCall" | "nextCall"
+  | "proposer"
+  | "reopen"
+  | "callForm"
+  | "negotiationCall"
+  | "nextCall"
+  | "memoStep"
+  | "contractStep"
+  | "contractCircuit"
 >) {
-  const [callForm, negotiationCall] = await Promise.all([
-    callFormFor(deal, terms),
+  // Negotiating, or the accord validated, whoever writes the deal sees the
+  // deal memo's step (DealMemoNow).
+  const memoTime =
+    (deal.canWrite &&
+      (deal.stage === "negotiation" ||
+        (deal.stage === "agreement" &&
+          deal.agreementStatus === "validated"))) ||
+    // The direction decides an accord on its memo, read first.
+    deal.canDecide;
+  // Contracting, whoever writes the deal sees the contract's step.
+  const contractTime = deal.canWrite && deal.stage === "contracting";
+  const [callForm, negotiationCall, memos, loop, contract] = await Promise.all([
+    callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
+    memoTime ? loadDealMemos(deal.id, deal.kind, true) : Promise.resolve([]),
+    memoTime ? loadDealLoop(deal.id) : Promise.resolve([]),
+    contractTime ? loadDealContract(deal.id) : Promise.resolve(null),
   ]);
+  // Its circuit, the same as on its page in Contrats, once its document is
+  // there (generated, or a PDF deposited).
+  const detail =
+    contract?.visible && contractTime ? await findContract(contract.id) : null;
+  const circuit = detail
+    ? { contract: detail, data: await loadContractPage(detail, access) }
+    : null;
+  const contractStep: ContractStep | null =
+    contractTime && !circuit
+      ? {
+          participation: deal.participationId !== null,
+          create: can(access, "manage_contracts")
+            ? dealContractDefaults(deal)
+            : null,
+        }
+      : null;
+  const latest = memos[0] ?? null;
+  const mail = dealMailSetup(deal.id);
+  // No memo to decide on: the direction keeps the accord's recap.
+  const memoStep: MemoStep | null =
+    memoTime && !(deal.canDecide && !latest)
+      ? {
+          stage: deal.stage === "agreement" ? "agreement" : "negotiation",
+          memo: latest && {
+            id: latest.id,
+            open:
+              latest.status === "draft" && !latest.submitted && !latest.changes,
+            changes: latest.changes?.reason ?? null,
+            correctionSent: latest.correction !== null,
+            toSend: latest.status === "validated" && !latest.sent,
+            received: latest.source === "email",
+            receivedSubject: latest.email?.subject ?? null,
+            toValidate: latest.status === "draft" && !latest.changes,
+            file: latest.files.find((f) => f.url) ?? null,
+            pdf:
+              latest.source === "pds"
+                ? {
+                    href: routes.dealMemoPdf(deal.id, latest.id),
+                    fileName: dealMemos.pdf.file(dealName(deal), latest.number),
+                  }
+                : null,
+            attachment:
+              latest.files.length > 0
+                ? latest.files.map((f) => f.name).join(", ")
+                : dealMemos.pdf.file(dealName(deal), latest.number),
+          },
+          address: mail.address,
+          counterpart: deal.counterpartName,
+          director: can(access, "validate"),
+          dealName: dealName(deal),
+          replyTo: await memoReplyTo(
+            memos.find((m) => m.email)?.email?.from ?? null,
+            deal.counterpartId,
+          ),
+          copies: loop
+            .filter((e) => e.kind === "contact" && e.email)
+            .map((e) => e.name),
+          canEmail: mail.canEmail,
+        }
+      : null;
   // An abandoned deal: the direction opens a new one for its artist.
   const reopenOptions =
     deal.stage === "abandoned" && can(access, "validate")
@@ -194,6 +303,9 @@ async function DealTodo({
       proposals={proposals}
       contacts={contacts}
       calls={calls}
+      memoStep={memoStep}
+      contractStep={contractStep}
+      contractCircuit={circuit}
       nextCall={
         nextCall
           ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }

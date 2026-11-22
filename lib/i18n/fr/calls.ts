@@ -6,6 +6,17 @@ import { microphoneErrors } from "./microphone";
 export const calls = {
   schedule,
   calendar,
+  // « Modifier le call » (Sacha 21/11/2026): the call form, filled.
+  edit: {
+    button: "Modifier le call",
+    title: "Modifier le call",
+    save: "Enregistrer",
+    saving: "Enregistrement…",
+    cancel: "Annuler",
+    done: "Call modifié",
+    googleFailed:
+      "Call modifié, mais Google n'a pas suivi : prévenez les invités et vérifiez le lien de visio.",
+  },
   details,
   list: {
     title: "Calls",
@@ -310,6 +321,10 @@ export const calls = {
   transcript: {
     title: "Transcription",
     empty: "Pas encore de transcription.",
+    // A quoted passage opened in its transcript (TranscriptPassageDialog).
+    loading: "Lecture de la transcription…",
+    error: "La transcription n'a pas pu être lue.",
+    open: "Ouvrir le call",
   },
   report: {
     title: "Compte rendu",

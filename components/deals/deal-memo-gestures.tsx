@@ -1,10 +1,15 @@
 "use client";
 
+import { IconMsgPen2 } from "nucleo-sharp-essential";
+
 import {
   DealMemoSendForm,
   type MemoReplyTo,
 } from "@/components/deals/deal-memo-send";
+import { MemoFileButton } from "@/components/deals/deal-memo-card";
 import { Button } from "@/components/ui/button";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
+import { routes } from "@/lib/auth/redirects";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -29,7 +34,8 @@ export type MemoSendSetup = {
 /**
  * The gestures of the latest deal memo, in its order (réunion avec Ibé du
  * 18/11/2026): the business manager shows it to the direction; the
- * direction validates it or asks for changes with a written reason
+ * direction validates it or asks for changes with a written reason (the
+ * icons first, the main gesture last, at the right: Sacha 22/11/2026)
  * (docs/VISION-UX.md rule 6); once validated, the business manager sends
  * the agreement back by e-mail (`DealMemoSendForm`). The database decides
  * again on each one.
@@ -62,17 +68,11 @@ export function DealMemoGestures({
     <>
       {open && canValidate && (
         <>
-          <Button
-            size="sm"
-            disabled={validate.pending}
-            onClick={() =>
-              validate.run(() => validateDealMemo(dealId, memo.id))
-            }
-          >
-            {t.validate}
-          </Button>
           <DialogButton
             label={t.changes.button}
+            icon={IconMsgPen2}
+            iconOnly
+            iconSize="icon-sm"
             title={t.changes.title}
             description={t.changes.description}
           >
@@ -88,6 +88,15 @@ export function DealMemoGestures({
               />
             )}
           </DialogButton>
+          <Button
+            size="sm"
+            disabled={validate.pending}
+            onClick={() =>
+              validate.run(() => validateDealMemo(dealId, memo.id))
+            }
+          >
+            {t.validate}
+          </Button>
         </>
       )}
       {open && canWrite && !canValidate && !memo.submitted && (
@@ -117,6 +126,21 @@ export function DealMemoGestures({
               replyTo={send.replyTo}
               copies={send.copies}
               canEmail={send.canEmail}
+              open={
+                memo.files[0]?.url ? (
+                  <MemoFileButton file={memo.files[0]} />
+                ) : (
+                  <PdfExportButton
+                    href={routes.dealMemoPdf(dealId, memo.id)}
+                    fileName={t.pdf.file(dealName, memo.number)}
+                    label={t.openFile}
+                    pendingLabel={t.pdf.pending}
+                    failedLabel={t.pdf.failed}
+                    variant="outline"
+                    size="sm"
+                  />
+                )
+              }
               onDone={close}
             />
           )}

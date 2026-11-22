@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { MailCard } from "@/components/ui/mail-card";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { sendDealMemo } from "@/lib/deals/memo-mail-actions";
+import {
+  sendDealMemo,
+  sendMemoCorrection,
+} from "@/lib/deals/memo-mail-actions";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { isEmail } from "@/lib/utils/email";
 import { mailtoHref } from "@/lib/utils/mailto";
@@ -30,6 +33,9 @@ export type MemoReplyTo = {
  * counterpart's, correctable in the card; the memo joined; the contacts in
  * the loop in copy. « Envoyé autrement » stays the way out; without SMTP,
  * the same card for one's own mail app, then « Marquer comme envoyé ».
+ * `correction` (Sacha 22/11/2026): the same card asks the label for the
+ * changes the direction wrote (its reason in the message), nothing joined,
+ * no copy; the deal's address in reply-to brings their next version back.
  */
 export function DealMemoSendForm({
   dealId,
@@ -40,6 +46,8 @@ export function DealMemoSendForm({
   replyTo,
   copies,
   canEmail,
+  correction = null,
+  open = null,
   onDone,
 }: {
   dealId: string;
@@ -52,20 +60,36 @@ export function DealMemoSendForm({
   // The contacts in the loop who receive a copy, by name.
   copies: string[];
   canEmail: boolean;
+  // The direction's reason: the e-mail asks the label for it.
+  correction?: string | null;
+  // A way to open the memo joined, beside its name (Sacha 22/11/2026: « on
+  // voudrait le voir pour valider le mail »).
+  open?: ReactNode;
   onDone: () => void;
 }) {
+  const c = fr.dealMemos.correction;
   const [address, setAddress] = useState(replyTo?.email ?? "");
-  const [subject] = useState(t.subject(dealName, receivedSubject));
-  const [message, setMessage] = useState<string>(t.message);
+  const [subject] = useState(
+    correction !== null
+      ? c.subject(dealName, receivedSubject)
+      : t.subject(dealName, receivedSubject),
+  );
+  const [message, setMessage] = useState<string>(
+    correction !== null ? c.message(correction) : t.message,
+  );
   const [tried, setTried] = useState(false);
-  const { pending, error, run } = useWriteSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(
+    onDone,
+    correction !== null ? c.done : t.done,
+  );
   const valid = isEmail(address.trim());
 
   function send(byEmail: boolean) {
     setTried(true);
     if (byEmail && !valid) return;
+    const action = correction !== null ? sendMemoCorrection : sendDealMemo;
     run(() =>
-      sendDealMemo(dealId, memoId, {
+      action(dealId, memoId, {
         byEmail,
         to: {
           name: replyTo?.email === address.trim() ? replyTo.name : "",
@@ -107,9 +131,11 @@ export function DealMemoSendForm({
         onMessage={setMessage}
         name="deal-memo-message"
         rows={6}
-        attachment={{ name: attachment }}
+        attachment={
+          correction !== null ? undefined : { name: attachment, side: open }
+        }
       />
-      {copies.length > 0 && (
+      {correction === null && copies.length > 0 && (
         <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           {t.copies(copies.join(", "))}
         </p>

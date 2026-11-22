@@ -30,11 +30,24 @@ async function launch(): Promise<Browser> {
 const PAGE_NUMBERS =
   '<div style="width:100%;font-size:9px;text-align:center;color:#767676;font-family:system-ui,sans-serif"><span class="pageNumber"></span> / <span class="totalPages"></span></div>';
 
+// A contract's foot, as in Ibé's model: centered, small, the page number
+// then the contract's title. Escaped: the title comes from people.
+const contractFooter = (title: string) =>
+  `<div style="width:100%;font-size:7.5pt;line-height:1.3;text-align:center;color:#000;font-family:Arial,'Liberation Sans',Helvetica,sans-serif"><span class="pageNumber"></span><br>${title
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")}</div>`;
+
 // `cssPage`: the page size and margins the HTML sets itself (@page), as the
 // 16:9 Plan de sortie of a title (lot 14); A4 with margins otherwise.
 export async function htmlToPdf(
   html: string,
-  options: { pageNumbers?: boolean; cssPage?: boolean } = {},
+  options: {
+    pageNumbers?: boolean;
+    cssPage?: boolean;
+    // A contract's foot (Ibé's model): its page number, then its title.
+    footer?: string;
+  } = {},
 ): Promise<Uint8Array> {
   const browser = await launch();
   try {
@@ -58,13 +71,19 @@ export async function htmlToPdf(
               right: "16mm",
             },
           }),
-      ...(options.pageNumbers
+      ...(options.footer !== undefined
         ? {
             displayHeaderFooter: true,
             headerTemplate: "<span></span>",
-            footerTemplate: PAGE_NUMBERS,
+            footerTemplate: contractFooter(options.footer),
           }
-        : {}),
+        : options.pageNumbers
+          ? {
+              displayHeaderFooter: true,
+              headerTemplate: "<span></span>",
+              footerTemplate: PAGE_NUMBERS,
+            }
+          : {}),
     });
     // Never an empty file handed out as a PDF (PROJ-BUG-05).
     if (pdf.length === 0) throw new Error("empty_pdf");

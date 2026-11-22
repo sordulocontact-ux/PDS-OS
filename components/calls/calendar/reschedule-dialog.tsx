@@ -61,18 +61,15 @@ export function RescheduleDialog({
   );
 }
 
-/** The day and the two times of a call, as in Teams: the calendar's
- * dialog and the call page's « Modifier l'horaire » (RescheduleCallButton). */
-export function RescheduleForm({
+/** The day and the two times of a call, as in Teams. */
+function RescheduleForm({
   id,
   initial,
-  pending = false,
   onCancel,
   onSave,
 }: {
   id: string;
   initial: SlotInput;
-  pending?: boolean;
   onCancel: () => void;
   onSave: (place: Place) => void;
 }) {
@@ -120,8 +117,8 @@ export function RescheduleForm({
         <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
           {t.cancel}
         </Button>
-        <Button type="submit" size="lg" aria-busy={pending || undefined}>
-          {pending ? t.saving : t.save}
+        <Button type="submit" size="lg">
+          {t.save}
         </Button>
       </div>
     </form>

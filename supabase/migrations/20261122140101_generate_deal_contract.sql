@@ -1,0 +1,107 @@
+-- « Je voudrais que PDS OS puisse créer le contrat » (Sacha 22/11/2026): the long contract of a deal is
+-- generated from a validated template of Contrats, its fields filled from the deal — the terms of its
+-- validated deal memo ({{deal.<term>}}), its artist and project, its label or brand —, every value
+-- checked by a person before (the fields come from the page, prefilled and correctable: the same rule as
+-- the Juridique's generation, generate_legal_contract). The copy becomes the deal's contract at once:
+-- the one already linked and still without a document gets it as its v1, otherwise a new contract is
+-- made (owned by whoever generates it, the label or the brand as its party). A participation's contract
+-- stays the participation's.
+
+create or replace function public.generate_deal_contract(
+  p_deal_id uuid,
+  p_template_id uuid,
+  p_fields jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v public.deals%rowtype;
+  v_template public.contract_templates%rowtype;
+  v_me uuid := public.auth_person_id();
+  v_body text;
+  v_key text;
+  v_value text;
+  v_missing text[] := '{}';
+  v_fields jsonb := '{}';
+  v_contract uuid;
+  v_name text;
+begin
+  v := public.lock_deal_for_write(p_deal_id);
+  if v_me is null or not public.has_permission(v.organization_id, 'manage_contracts') then
+    raise exception 'forbidden' using errcode = '42501';
+  end if;
+  if v.participation_id is not null then
+    raise exception 'participation_contract' using errcode = 'P0001';
+  end if;
+  if not (v.stage = 'contracting'
+          or (v.stage = 'agreement' and v.agreement_status = 'validated')) then
+    raise exception 'agreement_not_validated' using errcode = 'P0001';
+  end if;
+  select * into v_template from public.contract_templates
+   where id = p_template_id and organization_id = v.organization_id;
+  if not found or v_template.status <> 'validated' then
+    raise exception 'template_not_validated' using errcode = 'P0001';
+  end if;
+  if jsonb_typeof(coalesce(p_fields, '{}')) <> 'object' then
+    raise exception 'contract_fields_invalid' using errcode = '22023';
+  end if;
+  if v.contract_id is not null and exists (
+       select 1 from public.contract_documents d where d.contract_id = v.contract_id) then
+    raise exception 'deal_contract_generated' using errcode = 'P0001';
+  end if;
+
+  v_body := v_template.body;
+  foreach v_key in array v_template.fields loop
+    v_value := nullif(btrim(coalesce(p_fields -> v_key ->> 'value', '')), '');
+    if v_value is null then
+      v_missing := v_missing || v_key;
+      continue;
+    end if;
+    v_value := left(v_value, 2000);
+    v_fields := v_fields || jsonb_build_object(v_key, jsonb_build_object(
+      'value', v_value,
+      'source', left(coalesce(p_fields -> v_key ->> 'source', ''), 200)));
+    v_body := regexp_replace(
+      v_body, '\{\{\s*' || replace(v_key, '.', '\.') || '\s*\}\}',
+      replace(v_value, '\', '\\'), 'g');
+  end loop;
+  if cardinality(v_missing) > 0 then
+    raise exception 'contract_fields_missing'
+      using detail = array_to_string(v_missing, ',');
+  end if;
+
+  v_contract := v.contract_id;
+  if v_contract is null then
+    select coalesce(
+             (select c.name from public.network_contacts c where c.id = v.counterpart_contact_id),
+             (select a.name from public.artists a where a.id = v.artist_id),
+             '')
+      into v_name;
+    insert into public.contracts
+      (organization_id, title, type, status, project_id, artist_id, owner_person_id)
+    values (v.organization_id,
+            left(v_template.name || case when v_name <> '' then ' — ' || v_name else '' end, 200),
+            v_template.type, 'draft', v.project_id, v.artist_id, v_me)
+    returning id into v_contract;
+    if v.counterpart_contact_id is not null then
+      insert into public.contract_parties (contract_id, organization_id, contact_id)
+      values (v_contract, v.organization_id, v.counterpart_contact_id);
+    end if;
+    update public.deals set contract_id = v_contract where id = v.id returning * into v;
+    perform public.log_deal_event(v, 'contract_linked', null, null, null,
+      jsonb_build_object('contract', v_contract, 'generated', true));
+  end if;
+  insert into public.contract_documents
+    (organization_id, contract_id, version, template_id, template_version, body, fields)
+  values (v.organization_id, v_contract, 1, v_template.id, v_template.version, v_body, v_fields);
+  perform public.log_contract_event(v.organization_id, v_contract, v.project_id,
+                                    'contract.generated',
+                                    v_template.name || ' v' || v_template.version);
+  return v_contract;
+end;
+$$;
+revoke execute on function public.generate_deal_contract(uuid, uuid, jsonb) from public, anon;
+grant execute on function public.generate_deal_contract(uuid, uuid, jsonb) to authenticated;

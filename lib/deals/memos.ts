@@ -40,6 +40,9 @@ export type DealMemo = {
   // changes asked with a reason, the validated agreement sent back.
   submitted: { by: string | null; at: string } | null;
   changes: { reason: string; by: string | null; at: string } | null;
+  // The correction asked sent to the label or the brand (`to`: « Nom
+  // (adresse) »; null when sent another way).
+  correction: { at: string; to: string | null } | null;
   // `to`: « Nom (adresse), … »; null when sent another way.
   sent: { by: string | null; at: string; to: string | null } | null;
 };

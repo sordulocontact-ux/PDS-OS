@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import {
   DealCallButton,
@@ -10,17 +10,27 @@ import {
   DealCalls,
   dealCallMovable,
 } from "@/components/deals/deal-calls";
+import { ContractNow } from "@/components/contracts/now/contract-now";
 import { DealContacts } from "@/components/deals/deal-contacts";
+import {
+  DealContractNow,
+  type ContractStep,
+} from "@/components/deals/deal-contract-now";
+import { DealMemoNow, type MemoStep } from "@/components/deals/deal-memo-now";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
 import { DealNow } from "@/components/deals/deal-now";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
 import { EmptyNote } from "@/components/shell/empty-state";
+import { NowFrame } from "@/components/shell/journey/now-card";
 import { PageSection } from "@/components/shell/page-section";
 import { StepFrieze } from "@/components/ui/step-frieze";
 import type { Access } from "@/lib/auth/access";
+import type { ContractPageData } from "@/lib/contracts/page-data";
+import type { ContractDetail } from "@/lib/contracts/types";
 import {
+  dealCallHeld,
   nextDealCall,
   type DealCall,
   type DealCallProposal,
@@ -40,14 +50,26 @@ import { dealContacts } from "@/lib/i18n/fr/deal-contacts";
 import { deals as t } from "@/lib/i18n/fr/deals";
 import { formatShortDay } from "@/lib/utils/day";
 
-// What each stage works on, under its « Maintenant » (Ibé 18/11/2026: one
-// view to act, the rest in « Dossier »).
-const WORKS: Record<"terms" | "contacts" | "calls" | "memo", DealStage[]> = {
-  terms: ["to_contact", "call_planned", "negotiation", "agreement"],
-  contacts: ["to_contact", "call_planned"],
-  calls: ["to_contact", "call_planned", "negotiation"],
-  // A deal memo can arrive by e-mail while negotiating (20261120150101).
-  memo: ["negotiation", "agreement", "contracting"],
+// Where a deal memo is worked on: its loop beside the next action.
+const MEMO_STAGES: DealStage[] = ["negotiation", "agreement", "contracting"];
+
+type Work = "next" | "terms" | "contacts" | "calls" | "memo" | "contract";
+
+// What each stage works on under its « Maintenant », in order (Ibé
+// 18/11/2026: one view to act, the rest in « Dossier »): around the call,
+// the calls first; negotiating, the terms first (Sacha 21/11/2026). A deal
+// memo can arrive by e-mail while negotiating (20261120150101).
+const WORKS: Partial<Record<DealStage, Work[]>> = {
+  to_contact: ["contacts", "next", "calls", "terms"],
+  call_planned: ["calls", "next", "contacts", "terms"],
+  // The deal memo is the accord de principe (réunion avec Ibé du 18/11/2026,
+  // 20261122110101): right under the terms while negotiating, first at the
+  // accord. The loop and the contract come after the terms, which matter
+  // more until the contract is drawn up (Sacha 22/11/2026); then the
+  // contract comes up.
+  negotiation: ["terms", "memo", "next", "calls", "contract"],
+  agreement: ["memo", "next", "terms", "contract"],
+  contracting: ["memo", "contract", "next"],
 };
 
 /** The deal's stages as a frieze of points, each reached one with its day
@@ -86,11 +108,11 @@ function StageFrieze({ deal, events }: { deal: Deal; events: DealEvent[] }) {
 
 /**
  * « À faire » of a deal: its stages as a frieze (Sacha 20/11/2026, proto
- * « Fiche d'un deal » v2), its « Maintenant » (the stage's own gesture), PO's
- * proposals from its calls, the next action, then only what its stage
- * works on — the people and the call to contact, the terms to negotiate,
- * the deal memo and the contract to agree and sign. Everything else is in
- * « Dossier » (DealFileView).
+ * « Fiche d'un deal » v2), its « Maintenant » (the stage's own gesture), then
+ * only what its stage works on, its main work first (WORKS) — the calls
+ * around the call, the terms (with PO's proposals in place of their terms)
+ * while negotiating, the next action, the deal memo and the contract to
+ * agree and sign. Everything else is in « Dossier » (DealFileView).
  */
 export function DealTodoView({
   access,
@@ -105,6 +127,9 @@ export function DealTodoView({
   contacts,
   calls,
   nextCall,
+  memoStep = null,
+  contractStep = null,
+  contractCircuit = null,
 }: {
   access: Access;
   deal: Deal;
@@ -119,11 +144,102 @@ export function DealTodoView({
   contacts: DealContact[];
   calls: DealCall[];
   nextCall: { label: string; href: string } | null;
+  // The deal memo's step while negotiating (DealMemoNow).
+  memoStep?: MemoStep | null;
+  // The contract's step while contracting (DealContractNow).
+  contractStep?: ContractStep | null;
+  // Its document there: the contract's own « Maintenant » (ContractNow), the
+  // same as on its page in Contrats.
+  contractCircuit?: { contract: ContractDetail; data: ContractPageData } | null;
 }) {
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
   const movable = dealCallMovable(deal, access.personId);
-  const works = (what: keyof typeof WORKS) => WORKS[what].includes(deal.stage);
+  const termProposals = proposals.flatMap((p) =>
+    p.kind === "term" ? [p] : [],
+  );
+  const nextProposals = proposals.filter((p) => p.kind === "next_action");
+  // Calls right above: the next one is not repeated beside the action.
+  const callsFirst = WORKS[deal.stage]?.[0] === "calls";
+  const sections: Record<Work, ReactNode> = {
+    // The next action and the loop side by side: two small blocks (Sacha
+    // 22/11/2026); the loop only where a deal memo is worked on.
+    next: !isClosedStage(deal.stage) && (
+      <div className="grid gap-6 md:grid-cols-2 [&>*:only-child]:md:col-span-2">
+        <PageSection id="prochaine-action" title={s.next}>
+          <div className="flex flex-col gap-3">
+            {nextProposals.length > 0 && (
+              <DealCallProposals deal={deal} proposals={nextProposals} />
+            )}
+            <DealNextAction
+              deal={deal}
+              call={
+                upcomingCall &&
+                !callsFirst && (
+                  <DealCallCard
+                    call={upcomingCall}
+                    now={new Date()}
+                    movable={movable(upcomingCall)}
+                  />
+                )
+              }
+            />
+          </div>
+        </PageSection>
+        {MEMO_STAGES.includes(deal.stage) && (
+          <DealMemoSections
+            access={access}
+            deal={deal}
+            terms={terms}
+            part="loop"
+          />
+        )}
+      </div>
+    ),
+    terms: (
+      <PageSection id="termes" title={t.terms.title}>
+        <DealTerms
+          dealId={deal.id}
+          terms={terms}
+          canWrite={deal.canWrite}
+          proposals={termProposals}
+        />
+      </PageSection>
+    ),
+    contacts: (
+      <PageSection id="contacts" title={dealContacts.section}>
+        <DealContacts
+          dealId={deal.id}
+          contacts={contacts}
+          canWrite={deal.canWrite}
+        />
+      </PageSection>
+    ),
+    calls: (
+      <PageSection
+        id="calls"
+        title={dealCalls.section}
+        // « À contacter »: « Caler le call » is already the main gesture.
+        action={
+          callForm &&
+          deal.stage !== "to_contact" && <DealCallButton data={callForm} />
+        }
+      >
+        <DealCalls calls={calls} movable={movable} />
+      </PageSection>
+    ),
+    memo: (
+      <DealMemoSections access={access} deal={deal} terms={terms} part="memo" />
+    ),
+    contract: (
+      <DealMemoSections
+        access={access}
+        deal={deal}
+        terms={terms}
+        part="contract"
+      />
+    ),
+  };
   return (
     <>
       <StageFrieze deal={deal} events={events} />
@@ -137,59 +253,27 @@ export function DealTodoView({
           negotiationCall && <NegotiationCallButton data={negotiationCall} />
         }
         nextCall={nextCall?.label ?? null}
+        callHeld={dealCallHeld(calls)}
+        memoNow={memoStep && <DealMemoNow dealId={deal.id} step={memoStep} />}
+        contractNow={
+          contractCircuit ? (
+            <ContractNow
+              contract={contractCircuit.contract}
+              data={contractCircuit.data}
+            />
+          ) : (
+            contractStep && (
+              <NowFrame label={t.page.now}>
+                <DealContractNow dealId={deal.id} step={contractStep} />
+              </NowFrame>
+            )
+          )
+        }
       />
       {deal.stage === "signed" && <EmptyNote>{t.page.signedNote}</EmptyNote>}
-      {proposals.length > 0 && (
-        <PageSection id="propositions" title={dealCalls.proposals.title}>
-          <DealCallProposals deal={deal} proposals={proposals} />
-        </PageSection>
-      )}
-      {!isClosedStage(deal.stage) && (
-        <PageSection id="prochaine-action" title={s.next}>
-          <DealNextAction
-            deal={deal}
-            call={
-              upcomingCall && (
-                <DealCallCard
-                  call={upcomingCall}
-                  now={new Date()}
-                  movable={movable(upcomingCall)}
-                />
-              )
-            }
-          />
-        </PageSection>
-      )}
-      {works("terms") && (
-        <PageSection id="termes" title={t.terms.title}>
-          <DealTerms dealId={deal.id} terms={terms} canWrite={deal.canWrite} />
-        </PageSection>
-      )}
-      {works("contacts") && (
-        <PageSection id="contacts" title={dealContacts.section}>
-          <DealContacts
-            dealId={deal.id}
-            contacts={contacts}
-            canWrite={deal.canWrite}
-          />
-        </PageSection>
-      )}
-      {works("calls") && (
-        <PageSection
-          id="calls"
-          title={dealCalls.section}
-          // « À contacter »: « Préparer un call » is already the main gesture.
-          action={
-            callForm &&
-            deal.stage !== "to_contact" && <DealCallButton data={callForm} />
-          }
-        >
-          <DealCalls calls={calls} movable={movable} />
-        </PageSection>
-      )}
-      {works("memo") && (
-        <DealMemoSections access={access} deal={deal} terms={terms} />
-      )}
+      {(WORKS[deal.stage] ?? []).map((work) => (
+        <Fragment key={work}>{sections[work]}</Fragment>
+      ))}
     </>
   );
 }

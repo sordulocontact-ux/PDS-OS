@@ -17,6 +17,29 @@ export const legalContracts = {
     "projet.titres": "Titres concernés",
     remuneration: "Rémunération",
     "organisation.nom": "Nom de la structure",
+    // The terms of a deal (its validated deal memo).
+    "deal.songwriting_split": "Splits auteur-compositeur",
+    "deal.master_split": "Part du master",
+    "deal.royalties": "Royalties",
+    "deal.advance": "Avance ou cachet",
+    "deal.credits": "Crédits",
+    "deal.territories": "Territoires",
+    "deal.duration": "Durée",
+    "deal.exclusivity": "Exclusivité",
+    "deal.promo": "Promo",
+    "deal.deal_nature": "Nature de l'accord",
+    "deal.scope": "Périmètre",
+    "deal.minimum_guarantee": "Minimum garanti",
+    "deal.options": "Options",
+    "deal.commitments": "Engagements",
+    "deal.conditions": "Conditions et résiliation",
+    "deal.campaign": "Campagne",
+    "deal.deliverables": "Livrables",
+    "deal.schedule": "Calendrier et validation",
+    "deal.fee": "Fee",
+    "deal.usage_rights": "Droits d'usage",
+    "deal.paid_media": "Paid media et whitelisting",
+    "deal.obligations": "Annulation et reporting",
   } as Record<string, string>,
   sources: {
     fiche: "Fiche de renseignements",
@@ -25,6 +48,7 @@ export const legalContracts = {
     credits: "Crédits des titres",
     mapping: "Contrats à prévoir",
     organization: "Structure",
+    deal: "Deal memo validé",
   } as Record<string, string>,
   // JUR-16: a value that does not apply to the person, as the contract says it.
   notApplicable: "Sans objet",
@@ -167,10 +191,14 @@ export const legalContracts = {
       insert: "Insérer une valeur",
       insertHint:
         "Placez le curseur dans le texte, puis cliquez sur la valeur à insérer. Elle sera remplie pour chaque contrat.",
+      // The marks the contract prints (document-pdf.ts, Sacha 22/11/2026).
+      marksHint:
+        "**texte** en gras (⌘B), __texte__ souligné (⌘U) ; un texte collé depuis Word garde son gras et son souligné.",
       groups: {
         person: "La personne",
         project: "Le projet",
         agreement: "L'accord",
+        deal: "Les termes du deal",
       },
       placeholder:
         "Collez ici le texte du contrat, déjà relu par votre juriste.",

@@ -6,6 +6,7 @@ import type { ContractRights, ContractState } from "@/lib/contracts/types";
 
 export type ContractNowKind =
   // The viewer acts.
+  | "deposit"
   | "decide"
   | "submit"
   | "send"
@@ -33,11 +34,15 @@ export type ContractNowInput = {
   // The signed copy is back (by the person's link, or dropped by the team).
   returned: boolean;
   countersigned: boolean;
+  // It has a document: generated, or a PDF filed (draft or signed).
+  documented: boolean;
 };
 
 export function contractNowOf(c: ContractNowInput): ContractNowKind {
   switch (c.state) {
+    // Nothing to send to validate before its PDF is filed (Sacha 22/11/2026).
     case "draft":
+      if (!c.documented) return c.can.submit ? "deposit" : "await_submit";
       return c.can.submit ? "submit" : "await_submit";
     case "in_review":
       return c.can.decide ? "decide" : "await_decide";
@@ -55,4 +60,11 @@ export function contractNowOf(c: ContractNowInput): ContractNowKind {
 
 /** The kinds the viewer acts on (« À vous »). */
 export const isMine = (kind: ContractNowKind) =>
-  ["decide", "submit", "send", "countersign", "mark_signed"].includes(kind);
+  [
+    "deposit",
+    "decide",
+    "submit",
+    "send",
+    "countersign",
+    "mark_signed",
+  ].includes(kind);

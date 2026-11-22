@@ -30,7 +30,7 @@ export function DealCallCard({
 }: {
   call: DealCall;
   now: Date;
-  // « ⋯ » › « Modifier l'horaire » (DealCallMenu).
+  // « ⋯ » › « Modifier le call » (DealCallMenu).
   movable?: boolean;
 }) {
   const upcoming = isUpcoming(call, now);
@@ -98,8 +98,8 @@ export function DealCalls({
 }
 
 /** Whether the reader may move a deal's call (reschedule_call decides
- * again): whoever writes the deal, or whoever planned it while the deal is
- * open; never once something is recorded. */
+ * again): whoever writes the deal, its project's owner, or whoever planned
+ * it, while the deal is open; never once something is recorded. */
 export function dealCallMovable(
   deal: Deal,
   me: string | null,
@@ -107,5 +107,7 @@ export function dealCallMovable(
   return (call) =>
     !call.audioPath &&
     !isClosedStage(deal.stage) &&
-    (deal.canWrite || (me !== null && call.createdBy === me));
+    (deal.canWrite ||
+      deal.ownsProject ||
+      (me !== null && call.createdBy === me));
 }

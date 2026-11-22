@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { DealNowActions } from "@/components/deals/deal-now-actions";
+import { nowHeading, nowSecondary } from "@/components/deals/now-classes";
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -12,10 +13,8 @@ import { myValidationTone } from "@/lib/ui/state-tones";
 
 const fr = { deals };
 
-const secondary =
-  "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)] text-pretty";
-const heading =
-  "text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance";
+const secondary = nowSecondary;
+const heading = nowHeading;
 
 /** The stage a deal moves to next, by its order. */
 export const NEXT_STAGE: Partial<Record<Deal["stage"], Deal["stage"]>> = {
@@ -36,11 +35,18 @@ export const NEXT_STAGE: Partial<Record<Deal["stage"], Deal["stage"]>> = {
  * already hold before its negotiation started goes straight to its accord
  * de principe — one gesture, not two (UX test of 12/11/2026).
  */
-function nextStageOf(deal: Deal, terms: DealTerm[]): Deal["stage"] | null {
+function nextStageOf(
+  deal: Deal,
+  terms: DealTerm[],
+  callHeld: boolean,
+): Deal["stage"] | null {
   const confirmed = terms.some((term) => term.state === "confirmed");
   const early = deal.stage === "to_contact" || deal.stage === "call_planned";
   if (early && confirmed) return "agreement";
   if (deal.stage === "to_contact" || deal.stage === "contracting") return null;
+  // The negotiation follows a call that took place (Sacha 21/11/2026,
+  // negotiation_needs_call).
+  if (deal.stage === "call_planned" && !callHeld) return null;
   if (deal.stage === "negotiation" && !confirmed) return null;
   return NEXT_STAGE[deal.stage] ?? null;
 }
@@ -74,10 +80,12 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
  * « Maintenant » of a deal (BIZ 4), only when the reader has a gesture on
  * it: the direction decides a proposed accord de principe, its confirmed
  * terms recalled above; the negotiator moves his deal to its next stage
- * (or another, or abandons it) — or reads that the direction is warned.
+ * when something made it true, or plans its call — or reads that the
+ * direction is warned. Nothing else: another stage and abandoning are in
+ * the « ⋯ » beside the title (DealStageMenu).
  * An abandoned deal says it is final and what to do (`reopen`: « Ouvrir un
  * nouveau deal » for whoever may). Nothing for the project's owner, who
- * reads. `lead`: « Préparer un call », the gesture of a deal to contact.
+ * reads. `lead`: « Caler le call », the gesture of a deal to contact.
  */
 export function DealNow({
   deal,
@@ -87,6 +95,9 @@ export function DealNow({
   lead,
   planCall,
   nextCall = null,
+  callHeld = false,
+  memoNow,
+  contractNow,
 }: {
   deal: Deal;
   terms: DealTerm[];
@@ -98,9 +109,19 @@ export function DealNow({
   // « Caler le call » of the project's owner (deal.canPlanCall), and the
   // next call already planned (its day and hour).
   planCall?: ReactNode;
+  // A call of the deal took place: « Négociation » may follow.
+  callHeld?: boolean;
+  // The negotiation's gesture: the deal memo (DealMemoNow).
+  memoNow?: ReactNode;
+  // The contracting's gesture: the contract (DealContractNow).
+  contractNow?: ReactNode;
   nextCall?: string | null;
 }) {
   const t = fr.deals.page;
+  // An accord from a deal memo: the direction decides on the memo itself,
+  // read first (DealMemoNow, Sacha 22/11/2026).
+  if (deal.canDecide && memoNow)
+    return <NowFrame label={t.now}>{memoNow}</NowFrame>;
   if (deal.canDecide)
     return (
       <NowFrame label={t.now}>
@@ -126,9 +147,11 @@ export function DealNow({
   // The project's owner calls the negotiation, never writes it (Ibé
   // 18/11/2026): her gesture until the accord. A call already planned: no
   // gesture, no frame (Sacha 21/11/2026: « cette frame ne sert à rien »), the
-  // call's card is in « Prochaine action »; once held, the button comes back.
+  // call's card is in « Prochaine action ». Held while the deal is still
+  // « Call prévu »: the negotiator starts the negotiation, nothing to plan.
+  // In negotiation, the button comes back for the next call.
   if (deal.canPlanCall && planCall)
-    return nextCall ? null : (
+    return nextCall || (callHeld && deal.stage === "call_planned") ? null : (
       <NowFrame label={t.now}>
         <h2 className={heading}>
           {t.planCall.title(deal.assignee?.name ?? null)}
@@ -141,23 +164,32 @@ export function DealNow({
     return (
       <NowFrame label={t.now} quiet>
         <p className={secondary}>{t.waitDirection}</p>
-        <DealNowActions deal={deal} mode="wait" next={null} />
       </NowFrame>
     );
-  const next = nextStageOf(deal, terms);
+  // Negotiating, the next stage is the deal memo shown to the direction;
+  // the accord validated, it is sent back (réunion avec Ibé du 18/11/2026,
+  // 20261122110101).
+  if (
+    memoNow &&
+    (deal.stage === "negotiation" ||
+      (deal.stage === "agreement" && deal.agreementStatus === "validated"))
+  )
+    return <NowFrame label={t.now}>{memoNow}</NowFrame>;
+  // Framed by its own (DealContractNow in a NowFrame, or ContractNow).
+  if (deal.stage === "contracting" && contractNow) return <>{contractNow}</>;
+  const next = nextStageOf(deal, terms, callHeld);
+  // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à
+  // rien »): negotiating, the terms are right below; « Changer d'étape » and
+  // « Abandonner » are in the « ⋯ » beside the title (DealStageMenu).
+  const own = deal.stage === "to_contact" && !next ? lead : null;
+  if (!next && !own) return null;
   return (
     <NowFrame label={t.now}>
       <h2 className={heading}>
         {deal.nextAction ??
           (next ? t.advance[next] : fr.deals.work.todo[deal.stage])}
       </h2>
-      <p className={secondary}>{t.why[deal.stage]}</p>
-      <DealNowActions
-        deal={deal}
-        mode="move"
-        next={next}
-        lead={deal.stage === "to_contact" && !next ? lead : undefined}
-      />
+      <DealNowActions deal={deal} mode="move" next={next} lead={own} />
     </NowFrame>
   );
 }

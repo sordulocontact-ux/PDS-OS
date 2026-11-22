@@ -8030,7 +8030,12 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `contracting` exige un accord **validé**, `signed` vient de `contracting` ; signé ou abandonné, le deal
   ne bouge plus (`deal_closed`). **Une étape dit ce qui s'est passé** (réunion avec Ibé du 18/11/2026,
   `20261120110101_deal_stage_guards.sql` : le bouton « étape suivante » laissait cliquer un deal jusqu'à « Signé ») :
-  `agreement` exige un terme confirmé (`agreement_needs_terms`), `signed` le contrat du deal signé
+  `agreement` exige un terme confirmé (`agreement_needs_terms`), `negotiation` un call du deal qui a eu lieu
+  (`negotiation_needs_call`, Sacha 21/11/2026, migration `20261121140101`) ; un deal « Call prévu » passe **tout seul** en
+  négociation dès qu'un de ses calls a son échange enregistré (trigger `transcripts_start_negotiation`, migration
+  `20261121150101`, journalisé avec le call ; PO ne le propose plus ; un call prévu plus tard dont l'échange est
+  enregistré a eu lieu : son heure passe à celle de l'enregistrement, durée gardée, trigger `transcripts_call_held`,
+  `20261122100101`), `signed` le contrat du deal signé
   (`deal_contract_id`, `contract_not_signed`), et le deal en contractualisation passe seul à `signed` quand son
   contrat l'est (trigger `z_deal_follows_contract` sur `contracts`, ligne de journal `detail.contract = signed`).
   Côté page, « Maintenant » ne propose plus que le vrai geste de l'étape (`DealNow` : « Préparer un call » à
@@ -8063,7 +8068,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   Juridique, `money` en centimes HT, `yesno`. **Les splits reprennent les rôles du Juridique**
   (`SPLIT_ROLES`, `legal_split_entries.role`) dans la valeur du terme : aucun second modèle de répartition.
   Lecture `loadDealTerms` (`term-queries.ts`), écriture `setDealTerm` (`term-actions.ts`, valeur validée
-  par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`),
+  par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`) :
+  termes écrits en cartes (`FactCard`), puis ceux à définir en **emplacements vides** dans la même grille
+  (`FactSlot` : pointillé, sans fond, « + Définir », ce que PO a lu en petit ; proto « Termes à définir » v2,
+  22/11/2026, Ibé ne veut pas de tableau pour modifier),
   ton de l'état `dealTermTone`. Test : `supabase/tests/deal-terms.test.sql`.
 - **Vue « Deals » et page d'un deal** (BIZ 4) : entrée de la navigation principale `/app/deals` pour qui a
   `negotiate`, `validate` ou `pilot_projects` (`NavItem.permission` accepte une liste : l'une suffit ;
@@ -8108,11 +8116,22 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   rendu, la route `extract` ne touche à aucun module du projet : `proposeFromDealCall`
   (`lib/deals/call-proposals.ts`) lit la transcription (donnée dans `<data>`, jamais une consigne,
   `lib/ai/instructions/deal-call-proposals.ts`) et écrit des **propositions** `deal_call_proposals`
-  (terme et valeur, étape, prochaine action ; chacune avec son passage recopié) que le code garde seulement
+  (terme et valeur, prochaine action ; chacune avec son passage recopié ; plus d'étape depuis le 21/11/2026,
+  le deal passe tout seul en négociation et les anciennes propositions d'étape ne s'affichent plus) que le code garde seulement
   si le terme existe, le passage est trouvé mot pour mot, chaque chiffre vient du passage
   (`parseSaidEuros`, `unitsOf`) et la date dite est résolue par le code (`resolveSaidDate`). Page du deal :
-  « Propositions des calls » (`DealCallProposals`) : « Vérifier » ouvre le **vrai formulaire** pré-rempli
-  (`TermForm`, `DealStageForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
+  chaque proposition dans la section de ce qu'elle change (`DealCallProposals`, 21/11/2026) : celle d'un terme
+  chacune avec sa source (`ProposalSource`, 22/11/2026) : qui l'a dit, lu par le code dans la ligne de la
+  transcription (`lib/calls/passages.ts` : segments, sinon « [mm:ss] Nom : », jamais par le modèle ;
+  `DealCallProposal.speaker`), le passage, et le call, qui ouvre sa transcription sur cette ligne
+  (`TranscriptPassageDialog`, `loadCallPassages` sous la session) ; états d'un terme vus de PDS Records :
+  « Notre proposition », « Leur proposition », « Confirmé » ; **pré-remplies dans la carte de leur terme**
+  (`DealTerms`, `FactCard proposed` : valeur lue, l'ancienne barrée, source en `note`, « Modifier » = `TermForm
+  proposalId`, « Écarter »), « Tout valider » au-dessus (`applyDealTermProposals`, `lib/deals/proposal-actions.ts` :
+  `set_deal_term` avec valeur et état lus, un terme lu deux fois = le plus récent, l'autre écarté ; 22/11/2026), celle de la
+  prochaine action dans « Prochaine action » ; ordre des sections de « À faire » selon l'étape (`WORKS` de
+  `deal-todo-view.tsx` : calls en tête à « Call prévu », termes en tête en négociation). « Vérifier » ouvre le **vrai formulaire** pré-rempli
+  (`TermForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
   (`settle_deal_call_proposal` `applied`) ; « Écarter » la met de côté. PO ne change jamais un deal ; la
   « Maintenant » du call renvoie au deal (`CallModule` « le deal », compte des propositions en attente).
   Liste « Calls » du deal (`DealCalls`). `delete_project_row` prend les calls des deals du projet. Test :
@@ -8122,7 +8141,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `validated` ; jamais modifiée. Prise **à l'accord de principe** (trigger `deal_events_memo` : proposé →
   brouillon ; validé par la direction → le dernier brouillon est validé, sinon un memo validé est pris ;
   la direction qui pose l'accord elle-même → validé d'emblée) ou à la main (`create_deal_memo`, qui écrit le
-  deal). `validate_deal_memo` : direction seule, le dernier seulement. PDF par le rendu commun
+  deal). **PDF = une lettre au format des memos des labels** (memo Wagram « Projet Dioo » donné par Ibé, 22/11/2026 ;
+  `memoHtml` + `loadMemoLetter`, `lib/deals/memo-pdf.ts`) : en-tête PDS Records, « A / FROM / MAIL / DATE / RE »,
+  « DRAFT DOCUMENT - SUBJECT TO CONTRACT – NON CONTRACTUEL », salutation, puis chaque terme en gras et sa valeur en
+  puce « o » (une par ligne) ; ni état ni tableau. Même PDF joint au renvoi de l'accord (`memoAttachments`). `validate_deal_memo` : direction seule, le dernier seulement. PDF par le rendu commun
   (`/api/deals/<id>/memos/<memo>`, `memoHtml`, `lib/pdf/render.ts`). **Contrat** : celui de la participation
   pour un deal de participation (`title_participations.contract_id`, jamais copié :
   `deals_contract_participation_check`) ; sinon **un contrat principal** `deals.contract_id`
@@ -8159,7 +8181,67 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `deal_memo_files`), puis `receive_deal_memo` (service role seul, une fois par Message-ID, jamais sur un deal
     clos) : un memo `source = 'email'` brouillon qui photographie aussi les termes du moment (pour la comparaison au
     contrat), avec expéditeur, objet, texte (sans l'historique cité ; donnée, jamais une consigne), date.
-  - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Montrer à la direction »,
+  - **L'accord de principe, c'est le deal memo** (réunion avec Ibé du 18/11, `20261122110101`) : « Envoyer à valider »
+    fait passer le deal en accord de principe à valider, la validation du memo par la direction valide
+    l'accord (directement depuis la négociation si elle valide un memo non montré), « Demander des modifications »
+    le renvoie en négociation avec le motif, le renvoi de l'accord validé ouvre la contractualisation
+    (`deal_memo_moves`) ; ces événements portent `detail.memo` : pas de second memo photographié
+    (`deal_events_memo`), pas de seconde notification (`deal_events_notify`). L'accord proposé depuis les termes
+    (un terme confirmé, « Changer d'étape ») reste possible. Section « Deal memo » juste sous les termes en
+    négociation, en tête à l'accord et en contractualisation ; « Dans la boucle » et « Contrat » après les termes
+    (`DealMemoSections part`), le contrat remonte sous le memo en contractualisation. En négociation, « Maintenant » = le geste du memo
+    (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore envoyé → « Envoyer à valider » (la
+    direction : « Valider ») ; aucun → deal Label ou Marque : « En attente du deal memo de <structure> », « Copier
+    l'adresse du deal » seul (rien une fois la correction demandée ; « Nouveau deal memo » reste sur la carte) ; deal Musique (PDS est le label) : « Rédiger le deal memo ».
+    Modifications demandées sur le memo du label → « Demander la correction à <structure> » : `DealMemoSendForm
+    correction` (motif de la DG dans le message), `sendMemoCorrection` envoie depuis po@ avec **l'adresse du deal en
+    réponse** (la version corrigée revient dans le deal), puis `record_deal_memo_correction_sent` (`20261122120101`,
+    colonnes `correction_sent_*`, événement `memo_correction_sent`) ; ensuite « En attente de la nouvelle version ».
+    Sur un memo écrit par PDS : « Rédiger la nouvelle version ». Accord validé : « Renvoyer l'accord validé à … ».
+    Avant de décider, le document se lit dans « Maintenant » : « Ouvrir le PDF » (fichier reçu, sinon le memo de PDS)
+    à côté de « Envoyer à valider » ; pour la direction, « Valider le deal memo » = lire, « Demander des
+    modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
+  - **Suivi du contrat généré** (`20261122160101`) : il est suivi par la personne qui négocie le deal (`owner_person_id`
+    = l'affecté), qui l'envoie pour signature et le marque signé ; le « Maintenant » d'un contrat ouvre son PDF avant de
+    l'envoyer à valider ou de le valider (`ContractPageData.pdf`), et « Ensuite » dit « Vous l'envoyez pour signature »
+    quand c'est le lecteur qui le suit (`mine`).
+  - **Contrat généré par PDS OS** (22/11/2026, `20261122140101`) : « Générer le contrat » (bouton principal, à côté
+    de « Importer un contrat ») = un modèle validé de Contrats rempli depuis le deal (`DealContractGenerate`,
+    `loadDealContractDraft` / `generateDealContract`, valeurs lues par `dealFieldValues` : la partie (label ou marque, sinon le contact de
+    l'artiste) lue comme dans le Juridique (`fieldValues` : fiche de renseignements d'abord, puis Réseau ; une structure
+    sans fiche = une société à son nom), termes du dernier memo validé en `{{deal.<terme>}}`, rémunération depuis
+    avance / cachet / minimum garanti, projet, artiste, nom de la structure ; modèle choisi dans une liste déroulante,
+    celui du type du deal présélectionné, puis ceux que le deal remplit le mieux), chaque valeur affichée avec sa source et corrigeable, puis
+    `generate_deal_contract` (copie remplie v1 dans `contract_documents`, contrat créé et lié au deal, ou v1 du contrat
+    déjà lié sans document ; jamais pour une participation). Les modèles ont un groupe « Les termes du deal »
+    (`CONTRACT_FIELD_GROUPS.deal`, `deal.*` de `lib/legal/contracts/fields.ts`, jamais remplis dans le Juridique).
+    **Mise en page des contrats** (tous les contrats générés, Juridique compris ; `lib/legal/contracts/document-pdf.ts`,
+    `contractPdf`) = le contrat type envoyé par Ibé le 22/11/2026 : Arial 10 pt justifié, A4 aux marges du modèle,
+    blocs séparés par une ligne vide = paragraphes (retours à la ligne et tabulations gardés : adresses, signatures),
+    « 2. Avance. … » = numéro, tabulation, intitulé en gras souligné, ligne « Article 3 — Durée » seule en gras
+    souligné, ligne courte en capitales en gras ; pied de page centré : numéro de page puis titre du contrat
+    (`htmlToPdf` option `footer`). Le texte n'est jamais réécrit, seule sa présentation change.
+    **Marques dans un modèle** : `**texte**` en gras, `__texte__` souligné (⌘B / ⌘U dans l'éditeur ; un texte collé depuis
+    Word garde son gras et son souligné, `markedTextOf`). **En-tête** de première page : les coordonnées de la structure
+    (Réglages › « Coordonnées de PDS » = `organization_billing` : raison sociale, adresse, téléphone, e-mail, site ;
+    `20261122150101`), lues par `contract_letterhead` (membre qui voit le contrat, ou la personne par son lien privé) ;
+    la raison sociale remplit aussi `{{organisation.nom}}` d'un contrat de deal.
+    Le PDF de la copie est imprimé **dès la génération** et rangé dans les fichiers du contrat (catégorie `draft`,
+    `fileContractPdf`) : la section « Contrat » l'ouvre dans un onglet, sans téléchargement (sinon, impression à la
+    demande en `?view=1`).
+  - **Contrat du deal créé depuis le deal** (22/11/2026, `20261122130101`) : « Créer le contrat » (bouton principal,
+    `DealContractCreate` : formulaire de Contrats rempli depuis le deal, `dealContractDefaults` : « Contrat · <deal> »,
+    licence pour un Label, partenariat pour une Marque, contrat d'artiste sinon, artiste et projet du deal), lié au
+    deal dès sa création (`link_deal_contract`) ; les postes `business_manager` et `business` ont `manage_contracts`
+    (Ibé, 18/11 : « la partie juridique d'un deal reste dans la page Deal »). En contractualisation, « Maintenant » =
+    `DealContractNow` : « Créer le contrat » ; dès qu'il existe, **le « Maintenant » du contrat lui-même** sur le deal (`ContractNow` +
+    `loadContractPage`, les mêmes gestes que dans Contrats : envoyer à valider, valider, envoyer pour signature,
+    marquer signé ; un contrat en brouillon sans document, ni généré ni PDF déposé, demande d'abord « Déposer le
+    contrat » : type `deposit` de `contractNowOf`, `ContractDepositButton`, le même dans Contrats) ; la section « Contrat » ouvre son PDF (dernier signé, sinon dernier projet) et garde ses gestes
+    secondaires en icônes (ouvrir dans Contrats, changer, retirer le lien) ;
+    un contrat de participation est lancé par le chef de projet. « Prochaine action » et « Dans la boucle » côte à
+    côte ; la boucle vide = une ligne discrète, pas un `EmptyNote`.
+  - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Envoyer à valider », ex-« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,
     donc aucun nouveau ton), `validate_deal_memo` inchangé, `record_deal_memo_sent` (memo validé, le dernier, une
@@ -8239,7 +8321,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   notification `deal_assigned`), écrit le call, ses invités (`call_guests`) et fait passer un deal « À contacter » à
   « Call prévu » (journal `stage`, `detail.call`). Erreurs : `negotiator_required`, `negotiator_changed`,
   `negotiation_call_music_only`, `negotiation_call_too_late`, `invalid_slot`, `link_invalid`, `title_required`.
-  `set_deal_negotiation_call_link` : le lien Meet donné par Google, écrit une fois par qui a calé le call. Créneaux :
+  `set_deal_negotiation_call_link` : le lien Meet donné par Google, écrit une fois par qui a calé le call. **Le chef de projet mène le call** (Sacha 21/11/2026, « c'est elle qui fait la réunion », remplace la règle d'Ibé du 18/11 « vous n'êtes pas dans le call » ; migrations `20261121120101` et `20261121130101`) : `is_call_owner` d'un call de deal = qui écrit le deal, le responsable de son projet ou l'auteur du call qui lit le deal ; il l'organise (horaire par `reschedule_call`, aussi depuis la page du call et le « ⋯ » de sa carte, participants, ordre du jour, lien), l'enregistre et le traite, et il est invité au Meet. `can_arrange_call` = `is_call_owner`. Jeton Google refusé : « Caler le call » le dit (toast `meetFailed`) au lieu de l'avaler. Créneaux :
   `negotiator_free_slots(p_person_id, p_from, p_to, p_minutes = 30)` (migration `20261121100101`) pour qui a
   `pilot_projects` ou `validate`, sur un membre qui a `negotiate` : les jours ouvrés de la période (deux mois au plus
   par appel, jusqu'à 5 ans, Sacha 21/11/2026 ; la page lit ce mois et le suivant, le calendrier lit chaque autre mois

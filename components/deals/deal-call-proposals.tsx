@@ -4,14 +4,12 @@ import { IconSparkle3 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { NextActionForm } from "@/components/deals/deal-next-action";
-import { DealStageForm } from "@/components/deals/deal-stage-form";
 import { TermForm } from "@/components/deals/term-form";
 import { Button } from "@/components/ui/button";
 import { DocumentCard } from "@/components/ui/document-card";
-import { FactSourceText } from "@/components/ui/fact-row-frame";
+import { ProposalSource } from "@/components/deals/proposal-source";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { routes } from "@/lib/auth/redirects";
 import { dismissDealProposal } from "@/lib/deals/call-actions";
 import type { DealCallProposal } from "@/lib/deals/call-queries";
 import { formatTermValue } from "@/lib/deals/term-format";
@@ -27,9 +25,8 @@ const fr = { dealCalls, deals, dialogs };
 const t = fr.dealCalls.proposals;
 
 /** The proposal in words: « Avance ou cachet : Avance de 2 000 € HT
- * (Contre-proposition) », « Passer à l'étape … », « Prochaine action : … ». */
+ * (Contre-proposition) », « Prochaine action : … ». */
 function textOf(deal: Deal, p: DealCallProposal): string {
-  if (p.kind === "stage") return t.stage(fr.deals.stages[p.stage]);
   if (p.kind === "next_action")
     return t.next(p.action, p.on ? formatDay(p.on) : null);
   const term = termOf(deal.kind, p.termKey);
@@ -50,18 +47,6 @@ function ProposalForm({
   proposal: DealCallProposal;
   onDone: () => void;
 }) {
-  if (proposal.kind === "stage")
-    return (
-      <DealStageForm
-        deal={deal}
-        proposal={{
-          id: proposal.id,
-          stage: proposal.stage,
-          note: proposal.quote,
-        }}
-        onDone={onDone}
-      />
-    );
   if (proposal.kind === "next_action")
     return (
       <NextActionForm
@@ -90,7 +75,7 @@ function ProposalForm({
   );
 }
 
-function DismissButton({ dealId, id }: { dealId: string; id: string }) {
+export function DismissButton({ dealId, id }: { dealId: string; id: string }) {
   const { pending, run } = useWriteSubmit(() => {}, t.dismissed);
   return (
     <Button
@@ -106,7 +91,10 @@ function DismissButton({ dealId, id }: { dealId: string; id: string }) {
 
 /**
  * PO's proposals from the deal's calls (BIZ 6), one card each with the
- * passage it comes from (Sacha 20/11/2026, proto « Fiche d'un deal » v2). « Vérifier » opens the deal's real form prefilled with it:
+ * passage it comes from (Sacha 20/11/2026, proto « Fiche d'un deal » v2),
+ * each in the section of what it changes: a term's in « Termes négociés »
+ * in place of the term, the next action's in « Prochaine action » (Sacha
+ * 21/11/2026). « Vérifier » opens the deal's real form prefilled with it:
  * the person corrects and saves (the proposal is then applied); « Écarter »
  * sets it aside. PO never changes the deal by itself.
  */
@@ -126,15 +114,7 @@ export function DealCallProposals({
             key={p.id}
             name={textOf(deal, p)}
             icon={IconSparkle3}
-            line={
-              <FactSourceText
-                source={{
-                  quote: p.quote,
-                  from: t.from(p.callTitle, formatInstantDay(p.callAt)),
-                  href: routes.call(p.callId),
-                }}
-              />
-            }
+            line={<ProposalSource proposal={p} />}
             action={
               deal.canWrite ? (
                 <div className="flex items-center gap-2">
@@ -157,7 +137,7 @@ export function DealCallProposals({
         onOpenChange={(next) => !next && setOpen(null)}
         title={open ? textOf(deal, open) : ""}
         description={
-          open ? t.from(open.callTitle, formatInstantDay(open.callAt)) : ""
+          open ? t.call(open.callTitle, formatInstantDay(open.callAt)) : ""
         }
         closeLabel={fr.dialogs.close}
       >

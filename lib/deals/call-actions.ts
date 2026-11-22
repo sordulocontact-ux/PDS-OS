@@ -52,6 +52,9 @@ export async function createDealCall(
   }
   revalidatePath(routes.deal(deal.id));
   revalidatePath(routes.deals);
+  // « Caler le call » stays on the deal (Sacha 21/11/2026).
+  if (form.get("stay") === "1")
+    return { ok: true, id: result.id, meetFailed: result.meetFailed };
   const href = routes.call(result.id);
   redirect(result.meetFailed ? `${href}?meet=failed` : href);
 }

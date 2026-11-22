@@ -2,7 +2,8 @@ import { z } from "zod";
 
 /**
  * What PO reads in the transcript of a deal's call (BIZ 6): the terms whose
- * value was said, a stage the negotiation reached, the next action. Each with
+ * value was said and the next action (no stage since 21/11/2026: the deal
+ * moves by itself, Sacha « ça sert à rien »). Each with
  * the verbatim passage it comes from. Never a value, a date or a number of
  * its own: the code keeps only what it finds in the passage
  * (lib/deals/call-proposals.ts), and a person confirms every proposal in the
@@ -29,13 +30,18 @@ export const dealCallProposalsSchema = z.object({
           .describe(
             "La valeur telle qu'elle a été dite, en peu de mots (« 25 % », « 2 000 € », « Monde », « 12 mois »).",
           ),
+        // Default empty: ministral-14b leaves the fields that do not apply
+        // out, and every term was dropped (Sacha 22/11/2026, « aucune
+        // proposition »).
         mode: z
           .string()
+          .default("")
           .describe(
             "Pour un montant seulement : advance (avance) ou fee (cachet) ; sinon vide.",
           ),
         yes: z
           .string()
+          .default("")
           .describe("Pour un oui/non seulement : yes ou no ; sinon vide."),
         parts: z
           .array(
@@ -53,7 +59,7 @@ export const dealCallProposalsSchema = z.object({
         stance: z
           .string()
           .describe(
-            "Une seule valeur : pds (proposé par PDS), counter (contre-proposition de l'autre partie), agreed (accepté par les deux).",
+            "Une seule valeur : pds (proposé par PDS), counter (proposé par l'autre partie), agreed (accepté par les deux).",
           ),
         quote: z
           .string()
@@ -63,26 +69,21 @@ export const dealCallProposalsSchema = z.object({
       }),
     )
     .default([]),
-  stage: z
-    .string()
-    .describe(
-      "Clé d'une étape de <stages> que la négociation a clairement atteinte pendant le call, ou vide.",
-    ),
-  stageQuote: z
-    .string()
-    .describe("Passage recopié mot pour mot qui le montre, ou vide."),
   nextAction: z
     .string()
+    .default("")
     .describe(
       "La prochaine action convenue pendant le call, en une phrase courte, ou vide.",
     ),
   nextActionWhen: z
     .string()
+    .default("")
     .describe(
       "Le jour de cette action tel qu'il a été dit (« le 14 mars 2027 », « vendredi »), ou vide.",
     ),
   nextActionQuote: z
     .string()
+    .default("")
     .describe(
       "Passage recopié mot pour mot où l'action est convenue, ou vide.",
     ),

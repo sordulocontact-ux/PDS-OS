@@ -21,9 +21,14 @@ import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ActionResult } from "@/lib/calls/constants";
 import type { CallContact } from "@/lib/calls/invite";
-import { participantPool } from "@/lib/calls/prep/pool";
+import { participantPool, type ParticipantsForm } from "@/lib/calls/prep/pool";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { instantOf, slotFrom, slotMinutes } from "@/lib/calls/slot";
+import {
+  instantOf,
+  slotFrom,
+  slotMinutes,
+  type SlotInput,
+} from "@/lib/calls/slot";
 import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
 
@@ -37,8 +42,8 @@ type Errors = SlotErrors & { title?: string; link?: string };
 /**
  * A new call, as in Teams: its name, who takes part (team, Réseau, e-mail),
  * the day and the slot, and its video link (a Google Meet created for it, or
- * a pasted link). Shared by a project's « Nouveau call » and the « Nouvelle
- * réunion » of the Calls page. Missing fields turn red at the first try, the
+ * a pasted link). Shared by a project's « Nouveau call », the « Nouvelle
+ * réunion » of the Calls page and « Modifier le call » (EditCallDialog). Missing fields turn red at the first try, the
  * button is never disabled for them (docs/DESIGN.md § 4).
  */
 export function CallPlanForm({
@@ -62,6 +67,8 @@ export function CallPlanForm({
   onSaved,
   footer = "end",
   extra,
+  people: current,
+  slotField,
 }: {
   action: (
     previous: ActionResult | null,
@@ -86,12 +93,24 @@ export function CallPlanForm({
   pendingLabel: string;
   cancelLabel: string;
   onCancel?: () => void;
-  // Created from PO's panel: the page stays and gets the new call's id.
-  onSaved?: (id: string) => void;
+  // Created from PO's panel: the page stays and gets the new call's id
+  // (and whether Google refused its Meet).
+  onSaved?: (id: string, meetFailed: boolean) => void;
   // Buttons on the right (modal) or the left (card in a page).
   footer?: "start" | "end";
   // Below the fields, above the buttons (a deal call's agenda, folded).
   extra?: React.ReactNode;
+  // « Modifier le call »: the choices and who takes part now, read by the
+  // server (loadCallEdit), in place of members / contacts.
+  people?: ParticipantsForm;
+  // In place of the day and times (a deal's call: the business manager's
+  // free slots, DealSlotField).
+  slotField?: (field: {
+    idPrefix: string;
+    slot: SlotInput;
+    onChange: (slot: SlotInput) => void;
+    errors: SlotErrors;
+  }) => React.ReactNode;
 }) {
   const t = fr.calls.schedule;
   const idPrefix = useId();
@@ -111,20 +130,24 @@ export function CallPlanForm({
   const [title, setTitle] = useState(defaultTitle ?? "");
   const [link, setLink] = useState(defaultUrl ?? "");
   // Who takes part: members and contacts by id, addresses typed.
-  const [pool] = useState<PrepPerson[]>(() =>
-    participantPool(members, contacts, {
-      memberDetail,
-      noEmail: t.contactNoEmail,
-    }),
+  const [pool] = useState<PrepPerson[]>(
+    () =>
+      current?.pool ??
+      participantPool(members, contacts, {
+        memberDetail,
+        noEmail: t.contactNoEmail,
+      }),
   );
-  const [people, setPeople] = useState<PrepPerson[]>(() =>
-    pool.filter(
-      (p) => defaultMemberIds.includes(p.key.slice(2)) && !p.external,
-    ),
+  const [people, setPeople] = useState<PrepPerson[]>(
+    () =>
+      current?.value ??
+      pool.filter(
+        (p) => defaultMemberIds.includes(p.key.slice(2)) && !p.external,
+      ),
   );
 
   useEffect(() => {
-    if (state?.ok && state.id) onSaved?.(state.id);
+    if (state?.ok && state.id) onSaved?.(state.id, state.meetFailed === true);
     // onSaved changes with each render of the parent; the result is what counts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
@@ -209,12 +232,16 @@ export function CallPlanForm({
         hiddenNames
         filesEmails={false}
       />
-      <CallSlotFields
-        idPrefix={idPrefix}
-        slot={slot}
-        onChange={setSlot}
-        errors={errors}
-      />
+      {slotField ? (
+        slotField({ idPrefix, slot, onChange: setSlot, errors })
+      ) : (
+        <CallSlotFields
+          idPrefix={idPrefix}
+          slot={slot}
+          onChange={setSlot}
+          errors={errors}
+        />
+      )}
       {past && (
         <ToneCallout tone="warning">
           {googleMeet && google ? t.pastSlotGoogle : t.pastSlot}

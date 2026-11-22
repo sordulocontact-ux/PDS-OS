@@ -6,7 +6,7 @@
 -- owner is told when the accord is validated.
 -- Run with `supabase test db`.
 begin;
-select plan(37);
+select plan(46);
 
 -- Fixtures (as deal-calls.test.sql) ------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -133,8 +133,8 @@ select is((select count(*)::int from public.deal_events
             where deal_id = pg_temp.id_of('d1') and kind = 'stage' and to_stage = 'call_planned'
               and detail ->> 'call' = pg_temp.id_of('k1')::text),
   1, 'its journal says which call');
-select ok(not public.is_call_owner(pg_temp.id_of('k1')),
-  'she does not record or process it (she is not in the call)');
+select ok(public.is_call_owner(pg_temp.id_of('k1')),
+  'she runs the call she planned: records and processes it (Sacha 21/11/2026)');
 select ok(not exists (select 1 from public.negotiator_free_slots(pg_temp.id_of('glen_person'))
                        where starts_at = (select v::timestamptz from vars where k = 'slot')),
   'the slot taken is no longer free');
@@ -155,6 +155,17 @@ select is((select occurred_at from public.calls where id = pg_temp.id_of('k1')),
   'to its new slot');
 select throws_ok($$ select public.reschedule_call(pg_temp.id_of('k1'), pg_temp.at(31),
   pg_temp.at(30)) $$, '22023', 'invalid_slot', 'a moved slot ends after it starts');
+select ok(public.can_arrange_call(pg_temp.id_of('k1')), 'she arranges the call she planned');
+select lives_ok($$ insert into public.call_guests (call_id, organization_id, email)
+  values (pg_temp.id_of('k1'), pg_temp.id_of('org'), 'avocat@nadia.test') $$, 'she adds a guest');
+select lives_ok($$ delete from public.call_guests where call_id = pg_temp.id_of('k1')
+  and email = 'avocat@nadia.test' $$, 'and takes one off');
+select is((select count(*)::int from public.call_guests
+            where call_id = pg_temp.id_of('k1') and email = 'avocat@nadia.test'), 0, 'taken off');
+update public.calls set agenda = '[{"topic": "Avance", "minutes": 10}]'::jsonb, title = 'Call · Nadia (2)'
+ where id = pg_temp.id_of('k1');
+select is((select title from public.calls where id = pg_temp.id_of('k1')), 'Call · Nadia (2)',
+  'she changes its name and agenda');
 reset role;
 
 select pg_temp.act_as(pg_temp.id_of('glen'));
@@ -163,6 +174,8 @@ select lives_ok($$ select public.reschedule_call(pg_temp.id_of('k1'),
   (select v::timestamptz from vars where k = 'slot'),
   (select v::timestamptz + interval '30 minutes' from vars where k = 'slot')) $$,
   'the negotiator moves it too (back to its first slot)');
+select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'negotiation') $$,
+  'P0001', 'negotiation_needs_call', 'no negotiation before the call took place');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other_pm'));
 select throws_ok($$ select public.plan_deal_negotiation_call('x', pg_temp.at(1), pg_temp.at(2),
@@ -189,6 +202,16 @@ select is((select (participation_id, assignee_person_id, stage) from public.deal
             where id = pg_temp.id_of('d2')),
   (pg_temp.id_of('p2'), pg_temp.id_of('glen_person'), 'call_planned'::text),
   'the participation''s deal is opened, given to its negotiator, its call planned');
+insert into public.transcripts (organization_id, call_id, text, provider, model)
+values (pg_temp.id_of('org'), pg_temp.id_of('k2'), 'On part sur 25 % de royalties.', 'test', 'test');
+select is((select stage from public.deals where id = pg_temp.id_of('d2')), 'negotiation',
+  'once its call is held (its exchange saved), the deal is in negotiation by itself');
+select is((select count(*)::int from public.deal_events
+            where deal_id = pg_temp.id_of('d2') and kind = 'stage' and to_stage = 'negotiation'
+              and detail ->> 'call' = pg_temp.id_of('k2')::text),
+  1, 'its journal says which call');
+select ok((select occurred_at <= now() and ends_at <= now() from public.calls where id = pg_temp.id_of('k2')),
+  'a call planned later but whose exchange is saved took place: it is no longer to come');
 
 -- Where a participation's deal stands ----------------------------------------------------------
 select is((select (deal_id, stage, agreement_validated, can_plan_call)

@@ -1,6 +1,8 @@
 import "server-only";
 
 import { asCallStatus, type CallStatus } from "@/lib/calls/constants";
+import { passageOf, passagesOf } from "@/lib/calls/passages";
+import { loadLatestTranscript } from "@/lib/calls/queries";
 import { parseTermValue } from "@/lib/deals/term-format";
 import {
   termOf,
@@ -8,11 +10,7 @@ import {
   type TermState,
   type TermValue,
 } from "@/lib/deals/terms";
-import {
-  isDealStage,
-  type DealKind,
-  type MovableDealStage,
-} from "@/lib/deals/types";
+import type { DealKind } from "@/lib/deals/types";
 import { createClient } from "@/lib/supabase/server";
 
 // Read with the user's session: a deal's calls and proposals are seen by
@@ -63,6 +61,9 @@ export type DealCallProposal = {
   callTitle: string;
   callAt: string;
   quote: string;
+  // Who said it, read from the transcript's line by code (« Sarah
+  // Benali »); none when the source does not say.
+  speaker: string | null;
 } & (
   | {
       kind: "term";
@@ -70,7 +71,6 @@ export type DealCallProposal = {
       value: TermValue;
       state: Exclude<TermState, "to_define">;
     }
-  | { kind: "stage"; stage: MovableDealStage }
   | { kind: "next_action"; action: string; on: string | null }
 );
 
@@ -93,8 +93,25 @@ export async function loadDealCallProposals(
     )
     .eq("deal_id", dealId)
     .eq("status", "proposed")
+    // No stage proposals since 21/11/2026 (the deal moves by itself): the
+    // older ones are not shown.
+    .neq("kind", "stage")
     .order("created_at");
   if (error) console.error("loadDealCallProposals:", error.message);
+  // Each call's transcript as lines, once, to say who said each passage.
+  const callIds = [...new Set((data ?? []).map((p) => p.call_id))];
+  const lines = new Map(
+    await Promise.all(
+      callIds.map(async (id) => {
+        const stored = await loadLatestTranscript(supabase, id);
+        return [id, stored ? passagesOf(stored.transcript) : []] as const;
+      }),
+    ),
+  );
+  const speakerOf = (callId: string, quote: string) => {
+    const passages = lines.get(callId) ?? [];
+    return passages[passageOf(passages, quote)]?.speaker ?? null;
+  };
   return (data ?? []).flatMap((p): DealCallProposal[] => {
     const base = {
       id: p.id,
@@ -102,6 +119,7 @@ export async function loadDealCallProposals(
       callTitle: p.call?.title ?? "",
       callAt: p.call?.occurred_at ?? "",
       quote: p.quote,
+      speaker: speakerOf(p.call_id, p.quote),
     };
     if (p.kind === "term" && p.term_key) {
       const term = termOf(kind, p.term_key);
@@ -118,8 +136,6 @@ export async function loadDealCallProposals(
           ]
         : [];
     }
-    if (p.kind === "stage" && isDealStage(p.stage) && p.stage !== "abandoned")
-      return [{ ...base, kind: "stage", stage: p.stage }];
     if (p.kind === "next_action" && p.next_action)
       return [
         {
@@ -142,4 +158,11 @@ export function nextDealCall(calls: DealCall[]): DealCall | null {
       .filter((c) => !c.closed && Date.parse(c.occurredAt) >= now)
       .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))[0] ?? null
   );
+}
+
+/** A call of the deal took place (its start passed): « Négociation » may
+ * follow (negotiation_needs_call, Sacha 21/11/2026). */
+export function dealCallHeld(calls: DealCall[]): boolean {
+  const now = Date.now();
+  return calls.some((c) => Date.parse(c.occurredAt) <= now);
 }

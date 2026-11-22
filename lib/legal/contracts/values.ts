@@ -71,6 +71,8 @@ function read(id: ContractFieldId, ctx: ValueContext): FieldValue {
   const language = ctx.language ?? "fr";
   const en = language === "en";
   const notApplicable = notApplicableIn(language);
+  // A deal's terms: never in a project's agreement (they come from a deal).
+  if (id.startsWith("deal.")) return null;
   switch (id) {
     case "personne.nom_civil":
       return from(
@@ -131,6 +133,8 @@ function read(id: ContractFieldId, ctx: ValueContext): FieldValue {
         : null;
     case "organisation.nom":
       return from(ctx.organizationName, "organization");
+    default:
+      return null;
   }
 }
 

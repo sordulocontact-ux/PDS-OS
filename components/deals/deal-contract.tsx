@@ -1,11 +1,20 @@
 "use client";
 
-import Link from "next/link";
+import { IconPenWriting2, IconXmark } from "nucleo-sharp-essential";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
+import {
+  DealContractCreate,
+  type DealContractDefaults,
+} from "@/components/deals/deal-contract-create";
+import { ContractDepositButton } from "@/components/contracts/contract-deposit-button";
+import { DealContractGenerate } from "@/components/deals/deal-contract-generate";
+import { IconExternalLink } from "@/components/icons";
 import { EmptyNote } from "@/components/shell/empty-state";
+import { IconAction } from "@/components/ui/icon-action";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -84,13 +93,28 @@ export function DealContract({
   participation,
   contract,
   options,
+  create = null,
+  document = null,
+  deposit = null,
 }: {
   dealId: string;
   participation: boolean;
   contract: Contract | null;
   // The contracts it may name, for whoever writes it; null otherwise.
   options: Record<string, string> | null;
+  // « Créer le contrat », for whoever creates contracts (Sacha 22/11/2026).
+  create?: DealContractDefaults | null;
+  // Its PDF (the latest draft or signed copy), to open from the deal.
+  // `pdfHref`: a contract generated from a template, printed on demand.
+  document?: {
+    name: string;
+    openUrl: string | null;
+    pdfHref?: string;
+  } | null;
+  // The organization, for whoever may deposit its PDF.
+  deposit?: string | null;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const unlink = useWriteSubmit(undefined, t.unlinked);
   const canLink = !participation && options !== null;
@@ -134,37 +158,100 @@ export function DealContract({
                   contract.status as keyof typeof fr.contracts.states
                 ] ?? contract.status}
               </StatusBadge>
+              {/* The secondary gestures as icons, the main one last, at the
+                  right: open its PDF, or deposit it (Sacha 22/11/2026). */}
               {contract.visible && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  nativeButton={false}
-                  render={<Link href={routes.contract(contract.id)} />}
-                  aria-label={t.open(contract.title)}
-                >
-                  {t.openShort}
-                </Button>
+                <IconAction
+                  label={t.open(contract.title)}
+                  icon={IconExternalLink}
+                  size="icon-sm"
+                  onClick={() => router.push(routes.contract(contract.id))}
+                />
               )}
-              {canLink && linkButton}
               {canLink && (
-                <Button
+                <IconAction
+                  label={t.change}
+                  icon={IconPenWriting2}
+                  size="icon-sm"
+                  onClick={() => setOpen(true)}
+                />
+              )}
+              {canLink && (
+                <IconAction
+                  label={t.unlink}
+                  icon={IconXmark}
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   disabled={unlink.pending}
                   onClick={() =>
                     unlink.run(() => linkDealContract(dealId, null))
                   }
+                />
+              )}
+              {document?.pdfHref ? (
+                // Shown in the browser's tab, never downloaded (Sacha
+                // 22/11/2026: « on voudrait juste l'ouvrir »).
+                <Button
+                  size="sm"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={`${document.pdfHref}?view=1`}
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  }
                 >
-                  {t.unlink}
+                  {t.openPdf}
                 </Button>
+              ) : document?.openUrl ? (
+                <Button
+                  size="sm"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={document.openUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  }
+                  aria-label={`${t.openPdf} · ${document.name}`}
+                >
+                  {t.openPdf}
+                </Button>
+              ) : (
+                deposit && (
+                  <ContractDepositButton
+                    organizationId={deposit}
+                    contractId={contract.id}
+                  />
+                )
               )}
             </span>
           }
         />
       ) : (
-        <EmptyNote action={canLink && !empty && linkButton}>
+        <EmptyNote
+          action={
+            (create || (canLink && !empty)) && (
+              <span className="flex flex-wrap justify-center gap-2">
+                {canLink && !empty && linkButton}
+                {create && !participation && (
+                  <>
+                    <DealContractCreate
+                      dealId={dealId}
+                      defaults={create}
+                      label={t.import}
+                    />
+                    {/* The main gesture here (Sacha 22/11/2026). */}
+                    <DealContractGenerate dealId={dealId} />
+                  </>
+                )}
+              </span>
+            )
+          }
+        >
           {participation ? t.noneParticipation : t.none}
-          {canLink && empty && ` ${t.noOption}`}
         </EmptyNote>
       )}
       <FormDialog

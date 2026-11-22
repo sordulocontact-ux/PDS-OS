@@ -1,5 +1,10 @@
 /** The Business module's deals (BIZ 2 to 4): stages, gestures, errors. */
 export const deals = {
+  // What a generated contract says of the deal's party (dealFieldValues).
+  contractFields: {
+    company: "Société",
+    person: "Personne physique",
+  },
   // The Deals page (BIZ 4): one list, tabs and filters.
   title: "Deals",
   description:
@@ -89,9 +94,8 @@ export const deals = {
   // The terms of lib/deals/terms.ts (BIZ 3): one label per key.
   terms: {
     title: "Termes négociés",
-    // The terms still to define, on one line (Sacha 20/11/2026).
-    toDefine: "À définir :",
-    noneWritten: "Aucun terme négocié pour l'instant. À définir :",
+    // A term still to define, its empty slot (FactSlot).
+    define: "Définir",
     labels: {
       songwriting_split: "Splits auteur-compositeur",
       master_split: "Part du master",
@@ -119,8 +123,11 @@ export const deals = {
       obligations: "Annulation et reporting",
     } as Record<string, string>,
     states: {
-      pds_proposal: "Proposé par PDS",
-      counter_proposal: "Contre-proposition",
+      // Seen from PDS Records (Sacha 22/11/2026): « Proposé par PDS » read
+      // as « by PDS OS », « Contre-proposition » as an answer to a first
+      // offer when the other side may speak first.
+      pds_proposal: "Notre proposition",
+      counter_proposal: "Leur proposition",
       confirmed: "Confirmé",
       to_define: "À définir",
     },
@@ -222,18 +229,6 @@ export const deals = {
       contracting: "Passer à la contractualisation",
       signed: "Marquer comme signé",
     } as Record<string, string>,
-    why: {
-      to_contact:
-        "Premier contact avec l'artiste, son entourage, le label ou la marque : préparez le call, le deal passe à « Call prévu ».",
-      call_planned:
-        "Le call est calé : préparez-le, puis ouvrez la négociation.",
-      negotiation:
-        "Notez chaque proposition et contre-proposition dans les termes ; l'accord de principe se propose dès qu'un terme est confirmé.",
-      agreement:
-        "Les termes tiennent : la direction valide l'accord de principe avant le contrat.",
-      contracting:
-        "L'accord est validé : le deal passe à « Signé » dès que son contrat est signé.",
-    } as Record<string, string>,
     // « Maintenant » of the project's owner on a music deal before its
     // accord (Ibé 18/11/2026): she calls the negotiation, never writes it.
     planCall: {
@@ -261,6 +256,8 @@ export const deals = {
     approve: "Valider l'accord de principe",
     refuse: "Renvoyer en négociation",
     refuseReason: "Ce qui reste à négocier",
+    // « ⋯ » beside the deal's title (DealStageMenu).
+    menu: (name: string) => `Actions pour « ${name} »`,
     otherStage: "Changer d'étape",
     otherStageTitle: "Changer d'étape",
     otherStageDescription:
@@ -343,7 +340,8 @@ export const deals = {
       memoValidated: "Deal memo validé",
       memoReceived: (n: string, from: string) =>
         `Deal memo n°${n} reçu par e-mail${from ? ` de ${from}` : ""}`,
-      memoSubmitted: (n: string) => `Deal memo n°${n} montré à la direction`,
+      memoSubmitted: (n: string) =>
+        `Deal memo n°${n} envoyé à la direction pour validation`,
       memoChangesRequested: (n: string) =>
         `Modifications demandées au deal memo n°${n}`,
       memoSent: (n: string, to: string) =>
@@ -398,6 +396,11 @@ export const deals = {
     term: "Terme enregistré",
   },
   errors: {
+    templateNotValidated: "Choisissez un modèle validé.",
+    contractFieldsMissing: "Remplissez chaque valeur du contrat.",
+    dealContractGenerated: "Le contrat de ce deal est déjà généré.",
+    participationContract:
+      "Le contrat d'un deal de participation est celui de la participation.",
     generic: "L'enregistrement a échoué. Réessayez.",
     invalid: "Vérifiez les champs du formulaire.",
     forbidden: "Vous n'avez pas le droit de faire ce geste sur ce deal.",
@@ -432,6 +435,8 @@ export const deals = {
     agreementNotValidated:
       "La contractualisation attend un accord de principe validé par la direction.",
     notContracting: "Un deal est signé après la contractualisation.",
+    negotiationNeedsCall:
+      "La négociation commence après un call : attendez que le call prévu ait eu lieu.",
     agreementNeedsTerms:
       "Confirmez au moins un terme avant de proposer l'accord de principe.",
     contractNotSigned:

@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 import { documentFileName } from "@/lib/legal/contracts/document-name";
-import { documentHtml } from "@/lib/legal/contracts/document-pdf";
+import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import {
   notFoundResponse,
   pdfResponse,
 } from "@/lib/legal/signed-returns/document-response";
-import { htmlToPdf } from "@/lib/pdf/render";
 import { createClient } from "@/lib/supabase/server";
 
 // Starting a browser and printing takes a few seconds, more on a cold start.
@@ -63,9 +63,11 @@ export async function GET(
   const parsed = document.safeParse(data);
   if (!parsed.success) return notFoundResponse();
   try {
-    const pdf = await htmlToPdf(
-      documentHtml({ title: parsed.data.title, body: parsed.data.body }),
-    );
+    const pdf = await contractPdf({
+      title: parsed.data.title,
+      body: parsed.data.body,
+      letterhead: await loadContractLetterhead(supabase, contractId, token),
+    });
     return pdfResponse(
       pdf,
       documentFileName(`${parsed.data.title} v${parsed.data.version}`),
