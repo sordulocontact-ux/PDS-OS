@@ -24,6 +24,14 @@ const CAPITALS = (line: string) =>
   /\p{Lu}/u.test(line) &&
   line === line.toLocaleUpperCase("fr-FR");
 
+/** Inside a sentence (Sacha 22/11/2026): « **NOVA SOUND SAS** » in bold,
+ * « __Company__ » underlined — the template's own marks, since a text
+ * pasted in a template lost Word's. */
+const inline = (escaped: string) =>
+  escaped
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/__(.+?)__/g, "<u>$1</u>");
+
 /**
  * The text of a contract laid out as Ibé's model contract (Sacha 22/11/2026,
  * « il faudrait qu'il respecte ce design »): its blocks — separated by an
@@ -35,7 +43,7 @@ const CAPITALS = (line: string) =>
  * look. `mark` turns the escaped text into HTML (the template's blanks).
  */
 function bodyHtml(body: string, mark: (escaped: string) => string): string {
-  const text = (value: string) => mark(escape(value));
+  const text = (value: string) => mark(inline(escape(value)));
   return body
     .replaceAll("\r\n", "\n")
     .split(/\n[ \t]*\n/)
@@ -60,14 +68,47 @@ function bodyHtml(body: string, mark: (escaped: string) => string): string {
 // PDF and in the preview frame. The look of Ibé's model contract: Arial
 // 10 pt, justified, tight letter spacing; on screen, the text sits on an A4
 // sheet.
+/** The structure's coordinates at the head of a contract (Réglages ›
+ * Coordonnées de PDS, contract_letterhead). */
+export type Letterhead = {
+  name: string;
+  address: string;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+};
+
+// The first page's head, as in Ibé's model: the sender in small, its name,
+// its address, then its coordinates on one line.
+function letterheadHtml(l: Letterhead | null | undefined): string {
+  if (!l) return "";
+  const lines = [
+    `<b>${escape(l.name)}</b>`,
+    ...l.address
+      .split(/\r?\n/)
+      .map((line) => escape(line.trim()))
+      .filter(Boolean),
+    [
+      l.phone && `T : ${escape(l.phone)}`,
+      l.email && escape(l.email),
+      l.website && escape(l.website),
+    ]
+      .filter(Boolean)
+      .join("&nbsp;&nbsp;·&nbsp;&nbsp;"),
+  ].filter(Boolean);
+  return `<header class="letterhead">${lines.join("<br>")}</header>`;
+}
+
 function page({
   title,
   language,
   main,
+  letterhead,
 }: {
   title: string;
   language: ContractLanguage;
   main: string;
+  letterhead?: Letterhead | null;
 }): string {
   return `<!doctype html>
 <html lang="${language}">
@@ -83,6 +124,7 @@ function page({
   main p { text-align: justify; white-space: pre-wrap; margin-bottom: 10pt;
     break-inside: avoid-page; }
   main .tab { display: inline-block; width: 0.5in; }
+  .letterhead { font-size: 8pt; line-height: 1.35; margin-bottom: 22pt; color: #000000; }
   main u { text-underline-offset: 1.5pt; }
   .field { display: inline; padding: 0 4px; border-bottom: 1px solid #8a8a8a;
     background: #f1f1f1; color: #4a4a4a; font-weight: 600; font-size: 9pt;
@@ -94,7 +136,7 @@ function page({
   }
 </style>
 </head>
-<body><main>${main}</main></body>
+<body><main>${letterheadHtml(letterhead)}${main}</main></body>
 </html>`;
 }
 
@@ -108,12 +150,14 @@ export function documentHtml({
   title,
   body,
   language = "fr",
+  letterhead = null,
 }: {
   title: string;
   body: string;
   language?: ContractLanguage;
+  letterhead?: Letterhead | null;
 }): string {
-  return page({ title, language, main: bodyHtml(body, (s) => s) });
+  return page({ title, language, letterhead, main: bodyHtml(body, (s) => s) });
 }
 
 /**
@@ -124,6 +168,7 @@ export function contractPdf(input: {
   title: string;
   body: string;
   language?: ContractLanguage;
+  letterhead?: Letterhead | null;
 }): Promise<Uint8Array> {
   return htmlToPdf(documentHtml(input), { cssPage: true, footer: input.title });
 }

@@ -9,6 +9,7 @@ import { FILE_BUCKETS } from "@/lib/catalog/file-rules";
 import { getContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import { routes } from "@/lib/auth/redirects";
 import {
   dealFieldValues,
@@ -55,11 +56,15 @@ export async function loadDealContractDraft(
       .order("name"),
     supabase
       .from("organizations")
-      .select("name")
+      .select("name, billing:organization_billing(legal_name)")
       .eq("id", access.organizationId ?? "")
       .maybeSingle(),
   ]);
-  const values = await dealFieldValues(deal, organization?.name ?? null);
+  // Its legal name (Réglages › Coordonnées), else its name in PDS OS.
+  const values = await dealFieldValues(
+    deal,
+    organization?.billing?.[0]?.legal_name ?? organization?.name ?? null,
+  );
   const wanted = dealContractDefaults(deal).type;
   const filled = (fields: string[]) =>
     fields.filter((id) => values[id]).length / Math.max(fields.length, 1);
@@ -111,6 +116,7 @@ async function fileContractPdf(contractId: string, organizationId: string) {
     title: contract.title,
     body: document.latest.body,
     language: document.language,
+    letterhead: await loadContractLetterhead(supabase, contractId),
   });
   const path = `${organizationId}/${contractId}/${crypto.randomUUID()}.pdf`;
   const { error } = await supabase.storage

@@ -4,6 +4,7 @@ import type { EmailAttachment } from "@/lib/email/send";
 import { contracts as contractTexts } from "@/lib/i18n/fr/contracts";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import { createClient } from "@/lib/supabase/server";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -96,6 +97,7 @@ export async function contractAttachments(
           content: await contractPdf({
             title: c.title,
             body: generated.data.body,
+            letterhead: await loadContractLetterhead(supabase, c.id),
           }),
           contentType: "application/pdf",
         });

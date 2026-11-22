@@ -8153,6 +8153,11 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     « 2. Avance. … » = numéro, tabulation, intitulé en gras souligné, ligne « Article 3 — Durée » seule en gras
     souligné, ligne courte en capitales en gras ; pied de page centré : numéro de page puis titre du contrat
     (`htmlToPdf` option `footer`). Le texte n'est jamais réécrit, seule sa présentation change.
+    **Marques dans un modèle** : `**texte**` en gras, `__texte__` souligné (⌘B / ⌘U dans l'éditeur ; un texte collé depuis
+    Word garde son gras et son souligné, `markedTextOf`). **En-tête** de première page : les coordonnées de la structure
+    (Réglages › « Coordonnées de PDS » = `organization_billing` : raison sociale, adresse, téléphone, e-mail, site ;
+    `20261122150101`), lues par `contract_letterhead` (membre qui voit le contrat, ou la personne par son lien privé) ;
+    la raison sociale remplit aussi `{{organisation.nom}}` d'un contrat de deal.
     Le PDF de la copie est imprimé **dès la génération** et rangé dans les fichiers du contrat (catégorie `draft`,
     `fileContractPdf`) : la section « Contrat » l'ouvre dans un onglet, sans téléchargement (sinon, impression à la
     demande en `?view=1`).

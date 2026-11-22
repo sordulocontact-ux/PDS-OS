@@ -15,6 +15,7 @@ import {
 } from "@/components/contracts/templates/editor-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { markedTextOf } from "@/lib/legal/contracts/pasted-marks";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import {
   CONTRACT_FIELD_GROUPS,
@@ -118,14 +119,25 @@ export function TemplateBodyEditor({
     } else if (
       (event.metaKey || event.ctrlKey) &&
       ["b", "i", "u"].includes(event.key.toLowerCase())
-    )
-      // Plain text only: no bold that the contract would lose.
+    ) {
+      // Plain text, its bold and underline as marks the contract prints
+      // (« **gras** », « __souligné__ »); no italic.
       event.preventDefault();
+      const key = event.key.toLowerCase();
+      if (key === "i") return;
+      const mark = key === "b" ? "**" : "__";
+      const selected = window.getSelection()?.toString() ?? "";
+      document.execCommand("insertText", false, `${mark}${selected}${mark}`);
+      sync();
+    }
   };
 
   const onPaste = (event: React.ClipboardEvent) => {
     event.preventDefault();
-    const text = event.clipboardData.getData("text/plain");
+    // From Word, its bold and underline kept as marks.
+    const text =
+      markedTextOf(event.clipboardData.getData("text/html")) ??
+      event.clipboardData.getData("text/plain");
     document.execCommand("insertText", false, text.replace(/\r\n?/g, "\n"));
     chipify(rootRef.current!);
     sync();
@@ -142,6 +154,7 @@ export function TemplateBodyEditor({
         className="flex flex-col gap-2 rounded-lg bg-[var(--surface-soft)] p-2.5"
       >
         <p className="text-sm text-muted-foreground">{t.insertHint}</p>
+        <p className="text-sm text-muted-foreground">{t.marksHint}</p>
         {Object.entries(CONTRACT_FIELD_GROUPS).map(([group, ids]) => (
           <div
             key={group}

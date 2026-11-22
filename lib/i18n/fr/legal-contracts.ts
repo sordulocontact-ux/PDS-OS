@@ -191,6 +191,9 @@ export const legalContracts = {
       insert: "Insérer une valeur",
       insertHint:
         "Placez le curseur dans le texte, puis cliquez sur la valeur à insérer. Elle sera remplie pour chaque contrat.",
+      // The marks the contract prints (document-pdf.ts, Sacha 22/11/2026).
+      marksHint:
+        "**texte** en gras (⌘B), __texte__ souligné (⌘U) ; un texte collé depuis Word garde son gras et son souligné.",
       groups: {
         person: "La personne",
         project: "Le projet",

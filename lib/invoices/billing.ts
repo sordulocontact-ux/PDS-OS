@@ -10,6 +10,10 @@ export type Billing = {
   address: string;
   siret: string | null;
   vat: string | null;
+  // The structure's coordinates, also at the head of its contracts.
+  phone: string | null;
+  email: string | null;
+  website: string | null;
 };
 
 export async function loadBilling(
@@ -18,7 +22,7 @@ export async function loadBilling(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("organization_billing")
-    .select("legal_name, address, siret, vat_number")
+    .select("legal_name, address, siret, vat_number, phone, email, website")
     .eq("organization_id", organizationId)
     .maybeSingle();
   if (error) console.error("loadBilling:", error.message);
@@ -28,6 +32,9 @@ export async function loadBilling(
         address: data.address,
         siret: data.siret,
         vat: data.vat_number,
+        phone: data.phone,
+        email: data.email,
+        website: data.website,
       }
     : null;
 }

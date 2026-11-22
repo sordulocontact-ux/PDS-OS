@@ -13873,6 +13873,9 @@ export type Database = {
       organization_billing: {
         Row: {
           address: string
+          email: string | null
+          phone: string | null
+          website: string | null
           legal_name: string
           organization_id: string
           siret: string | null
@@ -13882,6 +13885,9 @@ export type Database = {
         }
         Insert: {
           address: string
+          email?: string | null
+          phone?: string | null
+          website?: string | null
           legal_name: string
           organization_id: string
           siret?: string | null
@@ -13891,6 +13897,9 @@ export type Database = {
         }
         Update: {
           address?: string
+          email?: string | null
+          phone?: string | null
+          website?: string | null
           legal_name?: string
           organization_id?: string
           siret?: string | null
@@ -25329,6 +25338,10 @@ export type Database = {
       generate_formality_document: {
         Args: { p_formality_id: string }
         Returns: number
+      }
+      contract_letterhead: {
+        Args: { p_contact_token?: string; p_contract_id: string }
+        Returns: Json
       }
       generate_deal_contract: {
         Args: { p_deal_id: string; p_fields: Json; p_template_id: string }

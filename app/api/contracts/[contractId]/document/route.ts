@@ -3,6 +3,8 @@ import { getContract } from "@/lib/contracts/queries";
 import { getContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
+import { createClient } from "@/lib/supabase/server";
 
 // Starting a browser and printing takes a few seconds, more on a cold start.
 export const maxDuration = 60;
@@ -37,6 +39,10 @@ export async function GET(
       title: contract.title,
       body: document.latest.body,
       language: document.language,
+      letterhead: await loadContractLetterhead(
+        await createClient(),
+        contractId,
+      ),
     });
   } catch (error) {
     console.error("[contract-document] pdf failed:", error);

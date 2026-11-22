@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { contractPdf } from "@/lib/legal/contracts/document-pdf";
+import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import {
   notFoundResponse,
   pdfResponse,
@@ -65,6 +66,7 @@ export async function GET(
     const pdf = await contractPdf({
       title: parsed.data.title,
       body: parsed.data.body,
+      letterhead: await loadContractLetterhead(supabase, contractId, token),
     });
     return pdfResponse(
       pdf,

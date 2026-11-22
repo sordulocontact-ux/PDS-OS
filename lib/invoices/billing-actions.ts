@@ -19,6 +19,9 @@ const billing = z.object({
     .transform((v) => v.replace(/\s/g, ""))
     .refine((v) => v === "" || /^\d{14}$/.test(v)),
   vat: z.string().trim().max(30),
+  phone: z.string().trim().max(40).default(""),
+  email: z.union([z.literal(""), z.email().max(200)]).default(""),
+  website: z.string().trim().max(200).default(""),
 });
 
 /** « Enregistrer » the billing identity: the administration (RLS). */
@@ -35,6 +38,9 @@ export async function saveBilling(
     address: v.data.address,
     siret: v.data.siret || null,
     vat_number: v.data.vat || null,
+    phone: v.data.phone || null,
+    email: v.data.email || null,
+    website: v.data.website || null,
   };
   // Update the row when it exists, else create it (no upsert: the
   // organization never changes, it is not updatable).

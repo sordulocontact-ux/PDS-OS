@@ -222,19 +222,23 @@ export const invoices = {
   },
   // The organization's billing identity (/app/settings, administration).
   billing: {
-    title: "Facturation de PDS",
-    description:
-      "Ce que les ingénieurs, musiciens et prestataires mettent sur leurs factures : ils le lisent sur leur lien privé.",
+    // Also the head of the contracts (Sacha 22/11/2026).
+    title: "Coordonnées de PDS",
+    description: "Sur les factures des prestataires et en tête des contrats.",
     legalName: "Raison sociale",
-    address: "Adresse de facturation",
+    address: "Adresse",
     siret: "SIRET",
     vat: "N° de TVA",
+    phone: "Téléphone",
+    email: "E-mail",
+    emailInvalid: "Cette adresse e-mail n'est pas valide.",
+    website: "Site web",
     save: "Enregistrer",
-    saved: "Facturation enregistrée",
+    saved: "Coordonnées enregistrées",
     legalNameMissing: "Indiquez la raison sociale.",
-    addressMissing: "Indiquez l'adresse de facturation.",
+    addressMissing: "Indiquez l'adresse.",
     siretInvalid: "Le SIRET compte 14 chiffres.",
-    failed: "La facturation n'a pas pu être enregistrée. Réessayez.",
+    failed: "Les coordonnées n'ont pas pu être enregistrées. Réessayez.",
   },
   // The database's refusals, as the page words them.
   errors: {
