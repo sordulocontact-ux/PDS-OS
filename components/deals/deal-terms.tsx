@@ -3,9 +3,9 @@
 import { IconSparkle3 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { DismissButton } from "@/components/deals/deal-call-proposals";
 import { ProposalSource } from "@/components/deals/proposal-source";
 import { TermForm } from "@/components/deals/term-form";
+import { TermProposalActions } from "@/components/deals/term-proposal-actions";
 import { Button } from "@/components/ui/button";
 import { FactCard, FactCards, FactSlot } from "@/components/ui/fact-card";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -72,8 +72,8 @@ function ProposalsBar({
  * read in the deal's calls is already in its term's card, to check (Sacha
  * 22/11/2026: « pré-remplis avec ce que PDS OS a trouvé, et après on le fait
  * valider »): the value read — the one written before struck through —, its
- * state, who said it and where (the call opens its transcript), « Modifier »
- * and « Écarter »; « Tout valider » writes them all as read. A term read twice
+ * state, who said it and where (the call opens its transcript), « Valider »,
+ * « Modifier » and « Écarter » as icons (TermProposalActions); « Tout valider » writes them all as read. A term read twice
  * shows the latest. A card or a slot opens the term in a dialog; the history
  * is in the deal's journal.
  */
@@ -132,21 +132,16 @@ export function DealTerms({
         state={{ tone: dealTermTone[p.state], label: t.states[p.state] }}
         action={
           canWrite && (
-            <span className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="xs"
-                onClick={() =>
-                  setOpen({
-                    term: { ...term, value: p.value, state: p.state },
-                    proposalId: p.id,
-                  })
-                }
-              >
-                {t.edit}
-              </Button>
-              <DismissButton dealId={dealId} id={p.id} />
-            </span>
+            <TermProposalActions
+              dealId={dealId}
+              proposal={p}
+              onEdit={() =>
+                setOpen({
+                  term: { ...term, value: p.value, state: p.state },
+                  proposalId: p.id,
+                })
+              }
+            />
           )
         }
       />

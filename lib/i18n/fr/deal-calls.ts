@@ -65,6 +65,7 @@ export const dealCalls = {
           ? "Terme validé"
           : "Rien à valider",
     dismiss: "Écarter",
+    validate: "Valider",
     dismissed: "Proposition écartée",
     applied: "Proposition appliquée",
     errors: {
