@@ -340,6 +340,9 @@ export const contracts = {
       message: "Message",
       link: "Lien privé",
       open: "Ouvrir dans ma messagerie",
+      // The card's head when the person sends it from their own mail app.
+      title: "L'e-mail à envoyer",
+      line: "Préparé par PDS OS, envoyé depuis votre messagerie",
       copy: "Copier le message",
       copied: "Message copié",
       note: "PDS OS n'envoie pas encore l'e-mail lui-même : ouvrez-le dans votre messagerie ou copiez-le.",

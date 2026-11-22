@@ -3,81 +3,14 @@
 import { IconEnvelopeOpen } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
-import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows, type FactSource } from "@/components/ui/fact-row";
-import {
-  addressesOf,
-  invalidAddresses,
-  type MailEnvelope,
-} from "@/lib/email/addresses";
+import { MailEnvelopeRows } from "@/components/network/mail-envelope-rows";
+import type { MailEnvelope } from "@/lib/email/addresses";
 import { mail } from "@/lib/i18n/fr/mail";
 
 const fr = { mail };
-
-/** What is wrong in an envelope, said under its field after a first try. */
-export function envelopeErrors(e: MailEnvelope) {
-  const t = fr.mail;
-  const wrong = (text: string) => {
-    const bad = invalidAddresses(text);
-    return bad.length ? t.addressesInvalid(bad.join(", ")) : undefined;
-  };
-  return {
-    to: addressesOf(e.to).length === 0 ? t.toMissing : wrong(e.to),
-    cc: wrong(e.cc),
-    bcc: wrong(e.bcc),
-    subject: e.subject.trim() ? undefined : t.subjectMissing,
-  };
-}
-
-function EnvelopeRows({
-  value,
-  onChange,
-  tried,
-  name,
-  source,
-}: {
-  value: MailEnvelope;
-  onChange: (next: MailEnvelope) => void;
-  tried: boolean;
-  name: string;
-  source?: FactSource | null;
-}) {
-  const t = fr.mail;
-  const errors = tried ? envelopeErrors(value) : {};
-  const field = (key: keyof MailEnvelope, label: string, type = "text") => (
-    <Field
-      name={`${name}-${key}`}
-      label={label}
-      hideLabel
-      type={type}
-      autoComplete="off"
-      placeholder={key === "subject" ? undefined : t.addresses}
-      value={value[key]}
-      error={errors[key as keyof typeof errors]}
-      onChange={(event) => onChange({ ...value, [key]: event.target.value })}
-    />
-  );
-  return (
-    <>
-      <FactRow
-        label={t.to}
-        value={value.to}
-        control={field("to", t.to)}
-        source={source === undefined ? t.fromNetwork : source}
-      />
-      <FactRow label={t.cc} value={value.cc} control={field("cc", t.cc)} source={null} />
-      <FactRow label={t.bcc} value={value.bcc} control={field("bcc", t.bcc)} source={null} />
-      <FactRow
-        label={t.subject}
-        value={value.subject}
-        control={field("subject", t.subject)}
-        source={null}
-      />
-    </>
-  );
-}
 
 /**
  * THE e-mail PDS OS sends, shown before it leaves (docs/VISION-UX.md rule
@@ -145,7 +78,7 @@ export function MailCard({
     >
       <FactRows className="rounded-none border-0">
         {envelope ? (
-          <EnvelopeRows {...envelope} name={name} source={toSource} />
+          <MailEnvelopeRows {...envelope} name={name} source={toSource} />
         ) : (
           <>
             <FactRow
