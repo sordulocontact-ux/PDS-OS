@@ -3,30 +3,25 @@
 import { useState, type ReactNode } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { DealStageForm } from "@/components/deals/deal-stage-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import {
-  abandonDeal,
-  decideDealAgreement,
-  setDealStage,
-} from "@/lib/deals/actions";
+import { decideDealAgreement, setDealStage } from "@/lib/deals/actions";
 import type { Deal, DealStage } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 
 const fr = { deals, dialogs };
 
-type Open = "refuse" | "stage" | "abandon" | null;
+type Open = "refuse" | null;
 
 /**
  * The gestures of a deal's « Maintenant » (BIZ 4): the direction validates
  * the accord de principe or sends it back with a reason; the negotiator
- * moves to the next stage (main button) or does the stage's own gesture
- * (`lead`: « Caler le call »), moves to another stage (outline), or
- * abandons the deal with a reason (text button beside the outline).
+ * moves to the next stage or does the stage's own gesture (`lead`: « Caler
+ * le call »). « Changer d'étape » and « Abandonner » are in the « ⋯ »
+ * beside the deal's title (DealStageMenu, Sacha 22/11/2026).
  */
 export function DealNowActions({
   deal,
@@ -35,7 +30,7 @@ export function DealNowActions({
   lead,
 }: {
   deal: Deal;
-  mode: "decide" | "move" | "wait";
+  mode: "decide" | "move";
   next: DealStage | null;
   lead?: ReactNode;
 }) {
@@ -60,30 +55,6 @@ export function DealNowActions({
           run={(reason) => decideDealAgreement(deal.id, false, reason)}
           onDone={close}
         />
-      </FormDialog>
-      <FormDialog
-        open={open === "abandon"}
-        onOpenChange={(o) => !o && close()}
-        title={t.abandonTitle}
-        description={t.abandonDescription}
-        closeLabel={fr.dialogs.close}
-      >
-        <ReasonForm
-          label={t.abandonReason}
-          submitLabel={t.abandonSubmit}
-          doneMessage={fr.deals.done.abandoned}
-          run={(reason) => abandonDeal(deal.id, reason)}
-          onDone={close}
-        />
-      </FormDialog>
-      <FormDialog
-        open={open === "stage"}
-        onOpenChange={(o) => !o && close()}
-        title={t.otherStageTitle}
-        description={t.otherStageDescription}
-        closeLabel={fr.dialogs.close}
-      >
-        {open === "stage" && <DealStageForm deal={deal} onDone={close} />}
       </FormDialog>
     </>
   );
@@ -116,12 +87,6 @@ export function DealNowActions({
               </Button>
             )}
             {mode === "move" && !next && lead}
-            <Button variant="outline" onClick={() => setOpen("stage")}>
-              {t.otherStage}
-            </Button>
-            <Button variant="ghost" onClick={() => setOpen("abandon")}>
-              {t.abandon}
-            </Button>
           </>
         )}
       </div>

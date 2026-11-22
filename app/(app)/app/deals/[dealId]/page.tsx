@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { DealCallFormData } from "@/components/deals/deal-call-button";
 import { DealFileView } from "@/components/deals/deal-file-view";
+import { DealStageMenu } from "@/components/deals/deal-stage-menu";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { DealTodoView } from "@/components/deals/deal-todo-view";
 import { NewDealButton } from "@/components/deals/new-deal-button";
@@ -119,6 +120,12 @@ export default async function DealPage({
       above={<BackLink href={routes.deals}>{t.page.back}</BackLink>}
       title={dealName(deal)}
       badge={<DealStageBadge deal={deal} size="md" />}
+      action={
+        deal.canWrite &&
+        deal.stage !== "abandoned" && (
+          <DealStageMenu deal={deal} name={dealName(deal)} />
+        )
+      }
     >
       <TabBar
         label={tabs.label}

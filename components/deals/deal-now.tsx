@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { DealNowActions } from "@/components/deals/deal-now-actions";
-import { NoteTermButton } from "@/components/deals/note-term-button";
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -82,7 +81,9 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
  * « Maintenant » of a deal (BIZ 4), only when the reader has a gesture on
  * it: the direction decides a proposed accord de principe, its confirmed
  * terms recalled above; the negotiator moves his deal to its next stage
- * (or another, or abandons it) — or reads that the direction is warned.
+ * when something made it true, or plans its call — or reads that the
+ * direction is warned. Nothing else: another stage and abandoning are in
+ * the « ⋯ » beside the title (DealStageMenu).
  * An abandoned deal says it is final and what to do (`reopen`: « Ouvrir un
  * nouveau deal » for whoever may). Nothing for the project's owner, who
  * reads. `lead`: « Caler le call », the gesture of a deal to contact.
@@ -154,29 +155,21 @@ export function DealNow({
     return (
       <NowFrame label={t.now} quiet>
         <p className={secondary}>{t.waitDirection}</p>
-        <DealNowActions deal={deal} mode="wait" next={null} />
       </NowFrame>
     );
   const next = nextStageOf(deal, terms, callHeld);
+  // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à
+  // rien »): negotiating, the terms are right below; « Changer d'étape » and
+  // « Abandonner » are in the « ⋯ » beside the title (DealStageMenu).
+  const own = deal.stage === "to_contact" && !next ? lead : null;
+  if (!next && !own) return null;
   return (
     <NowFrame label={t.now}>
       <h2 className={heading}>
         {deal.nextAction ??
           (next ? t.advance[next] : fr.deals.work.todo[deal.stage])}
       </h2>
-      <DealNowActions
-        deal={deal}
-        mode="move"
-        next={next}
-        lead={
-          deal.stage === "to_contact" && !next ? (
-            lead
-          ) : deal.stage === "negotiation" && !next ? (
-            // The negotiation's gesture: a term said (Sacha 21/11/2026).
-            <NoteTermButton dealId={deal.id} terms={terms} />
-          ) : undefined
-        }
-      />
+      <DealNowActions deal={deal} mode="move" next={next} lead={own} />
     </NowFrame>
   );
 }

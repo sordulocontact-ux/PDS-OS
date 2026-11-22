@@ -89,9 +89,6 @@ export const deals = {
   // The terms of lib/deals/terms.ts (BIZ 3): one label per key.
   terms: {
     title: "Termes négociés",
-    // « Noter un terme » in « Maintenant » (NoteTermButton).
-    note: "Noter un terme",
-    which: "Quel terme ?",
     // A term still to define, its empty slot (FactSlot).
     define: "Définir",
     labels: {
@@ -254,6 +251,8 @@ export const deals = {
     approve: "Valider l'accord de principe",
     refuse: "Renvoyer en négociation",
     refuseReason: "Ce qui reste à négocier",
+    // « ⋯ » beside the deal's title (DealStageMenu).
+    menu: (name: string) => `Actions pour « ${name} »`,
     otherStage: "Changer d'étape",
     otherStageTitle: "Changer d'étape",
     otherStageDescription:
