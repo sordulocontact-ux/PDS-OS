@@ -39,23 +39,6 @@ export const dealCalls = {
     meetFailed:
       "Call calé, mais Google n'a pas créé de lien Meet : ajoutez un lien de visio sur la page du call.",
   },
-  // PO's term proposals, one at a time above the terms (TermProposalReview).
-  review: {
-    label: (n: number) =>
-      `${n} terme${n > 1 ? "s" : ""} lu${n > 1 ? "s" : ""} par PO`,
-    title: (n: number) =>
-      n > 1
-        ? `PO a lu ${n} termes dans les calls`
-        : "PO a lu un terme dans un call",
-    position: (i: number, n: number) => `${i} sur ${n}`,
-    previous: "Proposition précédente",
-    next: "Proposition suivante",
-    apply: "Appliquer",
-    edit: "Modifier",
-    show: (term: string) => `Voir ce que PO a lu sur ${term}`,
-    // On a term still to define: « PO a lu : Avance de 15 000 € HT ».
-    read: "PO a lu :",
-  },
   // PO's proposals from a call's report (lib/deals/call-proposals.ts), in
   // « Termes négociés » and « Prochaine action ».
   proposals: {
@@ -69,6 +52,18 @@ export const dealCalls = {
         ? `Prochaine action : ${action} · ${day}`
         : `Prochaine action : ${action}`,
     check: "Vérifier",
+    // The terms PO read, already in their cards (DealTerms).
+    toCheck: (n: number) =>
+      n > 1
+        ? `PO a lu ${n} termes · à vérifier`
+        : "PO a lu un terme · à vérifier",
+    applyAll: "Tout valider",
+    allApplied: (n: number) =>
+      n > 1
+        ? `${n} termes validés`
+        : n === 1
+          ? "Terme validé"
+          : "Rien à valider",
     dismiss: "Écarter",
     dismissed: "Proposition écartée",
     applied: "Proposition appliquée",

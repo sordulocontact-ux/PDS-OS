@@ -14,7 +14,7 @@ import type { Tone } from "@/lib/ui/state-tones";
  * reader). `action`: a button of its own at the bottom right (« Changer »),
  * never with `onClick`. `proposed`: a value PO read and a person checks (a
  * deal's term from its call, Sacha 21/11/2026) — dashed frame, sparkle
- * before the label. Laid out by `FactCards`.
+ * before the label, where it comes from in `note`. Laid out by `FactCards`.
  */
 export function FactCard({
   label,
@@ -26,6 +26,7 @@ export function FactCard({
   actionLabel,
   action,
   proposed = false,
+  note,
 }: {
   label: string;
   value: ReactNode;
@@ -37,6 +38,8 @@ export function FactCard({
   actionLabel?: string;
   action?: ReactNode;
   proposed?: boolean;
+  // Under the value: where a proposed value comes from (ProposalSource).
+  note?: ReactNode;
 }) {
   const body = (
     <>
@@ -52,6 +55,7 @@ export function FactCard({
       >
         {value}
       </span>
+      {note}
       {(state || source || action) && (
         <span className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1">
           {state && <StatusDot tone={state.tone} label={state.label} showLabel />}
@@ -90,20 +94,18 @@ export function FactCard({
 /**
  * A fact still to write, in the place of its card (Sacha 22/11/2026, proto
  * « Termes à définir » v2 « Emplacements vides »: Ibé finds a table to edit
- * « algorithmique »): dashed, no fill, its label, what is known of it in
- * `note` (what PO read), then « + Définir » at the bottom. `onClick` makes it
+ * « algorithmique »): dashed, no fill, its label, then « + Définir » at the
+ * bottom. `onClick` makes it
  * the button that fills it; without, it says `emptyLabel`. In `FactCards`.
  */
 export function FactSlot({
   label,
-  note,
   actionText,
   emptyLabel,
   onClick,
   actionLabel,
 }: {
   label: string;
-  note?: ReactNode;
   // « Définir », shown when the slot can be filled.
   actionText: string;
   // « À définir », for whoever only reads.
@@ -116,7 +118,6 @@ export function FactSlot({
       <span className="text-caption text-[color:var(--text-secondary)]">
         {label}
       </span>
-      {note}
       <span className="mt-auto flex items-center gap-1.5 pt-1 text-body-sm font-semibold text-[color:var(--text-secondary)]">
         {onClick ? (
           <>

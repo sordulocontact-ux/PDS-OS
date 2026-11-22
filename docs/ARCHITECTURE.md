@@ -8061,10 +8061,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   transcription (`lib/calls/passages.ts` : segments, sinon « [mm:ss] Nom : », jamais par le modèle ;
   `DealCallProposal.speaker`), le passage, et le call, qui ouvre sa transcription sur cette ligne
   (`TranscriptPassageDialog`, `loadCallPassages` sous la session) ; états d'un terme vus de PDS Records :
-  « Notre proposition », « Leur proposition », « Confirmé » ; revues une à une au-dessus de la grille de
-  « Termes négociés » (`TermProposalReview` : avant barré → après,
-  « Appliquer » = `setDealTerm` avec la valeur et l'état lus et `proposalId`, « Modifier », « Écarter » ; carte du
-  terme marquée `FactCard proposed`), celle de la
+  « Notre proposition », « Leur proposition », « Confirmé » ; **pré-remplies dans la carte de leur terme**
+  (`DealTerms`, `FactCard proposed` : valeur lue, l'ancienne barrée, source en `note`, « Modifier » = `TermForm
+  proposalId`, « Écarter »), « Tout valider » au-dessus (`applyDealTermProposals`, `lib/deals/proposal-actions.ts` :
+  `set_deal_term` avec valeur et état lus, un terme lu deux fois = le plus récent, l'autre écarté ; 22/11/2026), celle de la
   prochaine action dans « Prochaine action » ; ordre des sections de « À faire » selon l'étape (`WORKS` de
   `deal-todo-view.tsx` : calls en tête à « Call prévu », termes en tête en négociation). « Vérifier » ouvre le **vrai formulaire** pré-rempli
   (`TermForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
@@ -8114,6 +8114,14 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `deal_memo_files`), puis `receive_deal_memo` (service role seul, une fois par Message-ID, jamais sur un deal
     clos) : un memo `source = 'email'` brouillon qui photographie aussi les termes du moment (pour la comparaison au
     contrat), avec expéditeur, objet, texte (sans l'historique cité ; donnée, jamais une consigne), date.
+  - **L'accord de principe, c'est le deal memo** (réunion avec Ibé du 18/11, `20261122110101`) : « Montrer à la
+    direction » fait passer le deal en accord de principe à valider, la validation du memo par la direction valide
+    l'accord (directement depuis la négociation si elle valide un memo non montré), « Demander des modifications »
+    le renvoie en négociation avec le motif, le renvoi de l'accord validé ouvre la contractualisation
+    (`deal_memo_moves`) ; ces événements portent `detail.memo` : pas de second memo photographié
+    (`deal_events_memo`), pas de seconde notification (`deal_events_notify`). L'accord proposé depuis les termes
+    (un terme confirmé) reste possible. Section « Deal memo » juste sous les termes en négociation, en tête à
+    l'accord et en contractualisation.
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,

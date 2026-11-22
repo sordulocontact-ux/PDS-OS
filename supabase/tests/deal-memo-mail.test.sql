@@ -4,7 +4,7 @@
 -- sent back once; the people in the loop; the notifications.
 -- Run with `supabase test db`.
 begin;
-select plan(42);
+select plan(48);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -121,6 +121,11 @@ select throws_ok($$ select public.request_deal_memo_changes(pg_temp.memo(1), 'No
   '42501', 'forbidden', 'only the direction asks for changes');
 reset role;
 select is(pg_temp.told('director', 'deal_memo_submitted'), 1, 'the direction is told');
+select is((select stage || '/' || agreement_status from public.deals where id = pg_temp.id_of('deal')),
+  'agreement/pending', 'shown to the direction, the memo is the accord de principe to validate');
+select is(pg_temp.told('director', 'deal_agreement_proposed'), 0, 'told once, by the memo');
+select is((select count(*)::int from public.deal_memos where deal_id = pg_temp.id_of('deal')), 1,
+  'no second memo photographed for it');
 
 select pg_temp.act_as(pg_temp.id_of('director'));
 select throws_ok($$ select public.request_deal_memo_changes(pg_temp.memo(1), '  ') $$,
@@ -136,6 +141,8 @@ select is((select reason from public.deal_events where deal_id = pg_temp.id_of('
             and kind = 'memo_changes_requested'), 'Après l''appel : avance à 25 000 €',
   'and in the journal');
 select is(pg_temp.told('glen', 'deal_memo_changes_requested'), 1, 'the negotiator is told');
+select is((select stage from public.deals where id = pg_temp.id_of('deal')), 'negotiation',
+  'changes asked: back to the negotiation');
 select pg_temp.act_as(pg_temp.id_of('glen'));
 select throws_ok($$ select public.submit_deal_memo(pg_temp.memo(1)) $$,
   'P0001', 'memo_changes_requested', 'a memo sent back is not shown again: the next version is');
@@ -159,6 +166,8 @@ select lives_ok($$ select public.validate_deal_memo(pg_temp.memo(2)) $$,
   'the direction validates the new version');
 reset role;
 select is(pg_temp.told('glen', 'deal_memo_validated'), 1, 'the negotiator is told');
+select is((select stage || '/' || agreement_status from public.deals where id = pg_temp.id_of('deal')),
+  'agreement/validated', 'the direction''s yes on the memo is the accord validated');
 
 select pg_temp.act_as(pg_temp.id_of('glen'));
 select lives_ok($$ select public.record_deal_memo_sent(pg_temp.memo(2), 'Label (a@label.fr)') $$,
@@ -169,6 +178,8 @@ reset role;
 select is((select sent_to from public.deal_memos where id = pg_temp.memo(2)),
   'Label (a@label.fr)', 'to whom is kept');
 select is(pg_temp.told('director', 'deal_memo_sent'), 1, 'the direction is told');
+select is((select stage from public.deals where id = pg_temp.id_of('deal')), 'contracting',
+  'the validated accord sent back: the contract comes next');
 
 -- The loop -------------------------------------------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('glen'));

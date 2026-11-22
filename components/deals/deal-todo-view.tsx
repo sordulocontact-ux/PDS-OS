@@ -50,9 +50,12 @@ type Work = "next" | "terms" | "contacts" | "calls" | "memo";
 const WORKS: Partial<Record<DealStage, Work[]>> = {
   to_contact: ["contacts", "next", "calls", "terms"],
   call_planned: ["calls", "next", "contacts", "terms"],
-  negotiation: ["terms", "next", "calls", "memo"],
-  agreement: ["next", "terms", "memo"],
-  contracting: ["next", "memo"],
+  // The deal memo is the accord de principe (réunion avec Ibé du 18/11/2026,
+  // 20261122110101): right under the terms while negotiating, first at the
+  // accord.
+  negotiation: ["terms", "memo", "next", "calls"],
+  agreement: ["memo", "next", "terms"],
+  contracting: ["memo", "next"],
 };
 
 /** The deal's stages as a frieze of points, each reached one with its day

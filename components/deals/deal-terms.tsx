@@ -3,13 +3,15 @@
 import { IconSparkle3 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
+import { DismissButton } from "@/components/deals/deal-call-proposals";
+import { ProposalSource } from "@/components/deals/proposal-source";
 import { TermForm } from "@/components/deals/term-form";
-import {
-  TermProposalReview,
-  type TermProposal,
-} from "@/components/deals/term-proposal-review";
+import { Button } from "@/components/ui/button";
 import { FactCard, FactCards, FactSlot } from "@/components/ui/fact-card";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
+import type { DealCallProposal } from "@/lib/deals/call-queries";
+import { applyDealTermProposals } from "@/lib/deals/proposal-actions";
 import { formatTermValue } from "@/lib/deals/term-format";
 import type { DealTerm, TermFormat } from "@/lib/deals/terms";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
@@ -20,20 +22,60 @@ import { formatInstantDay } from "@/lib/utils/instant";
 
 const fr = { dealCalls, deals, dialogs };
 
+export type TermProposal = Extract<DealCallProposal, { kind: "term" }>;
+
 // Words, not a figure: shown at reading size in their card.
 const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
 
+/** « PO a lu 4 termes · à vérifier », then « Tout valider ». */
+function ProposalsBar({
+  dealId,
+  count,
+  canWrite,
+}: {
+  dealId: string;
+  count: number;
+  canWrite: boolean;
+}) {
+  const t = fr.dealCalls.proposals;
+  const { pending, error, run } = useWriteSubmit(undefined, "");
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span className="flex flex-1 items-center gap-1.5 text-body-sm text-[color:var(--text-secondary)]">
+        <IconSparkle3 aria-hidden className="size-4 shrink-0" />
+        {t.toCheck(count)}
+      </span>
+      {canWrite && (
+        <Button
+          size="sm"
+          disabled={pending}
+          aria-busy={pending || undefined}
+          onClick={() => run(() => applyDealTermProposals(dealId))}
+        >
+          {t.applyAll}
+        </Button>
+      )}
+      {error && (
+        <p role="alert" className="w-full text-caption text-destructive">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /**
  * The terms negotiated in a deal (BIZ 3), one card each in the configured
- * order (Sacha 20/11/2026, proto « Fiche d'un deal » v2): the written ones —
- * value, state as a dot, who changed it last and when —, then the ones still
- * to define as empty slots in the same grid (Sacha 22/11/2026, proto
- * « Termes à définir » v2: a missing term must not read like a written one,
- * and Ibé finds a table to edit « algorithmique »). A card or a slot opens the
- * term in a dialog; the history is in the deal's journal. What PO read in the
- * deal's calls is reviewed one at a time above them (TermProposalReview); a
- * written term it changes is marked (`proposed`) and opens it there, a slot
- * shows what PO read and opens the form prefilled with it.
+ * order (Sacha 20/11/2026, proto « Fiche d'un deal » v2): value, state as a
+ * dot, who changed it last and when; the ones still to define are empty slots
+ * in the same grid (Sacha 22/11/2026, proto « Termes à définir » v2). What PO
+ * read in the deal's calls is already in its term's card, to check (Sacha
+ * 22/11/2026: « pré-remplis avec ce que PDS OS a trouvé, et après on le fait
+ * valider »): the value read — the one written before struck through —, its
+ * state, who said it and where (the call opens its transcript), « Modifier »
+ * and « Écarter »; « Tout valider » writes them all as read. A term read twice
+ * shows the latest. A card or a slot opens the term in a dialog; the history
+ * is in the deal's journal.
  */
 export function DealTerms({
   dealId,
@@ -44,7 +86,7 @@ export function DealTerms({
   dealId: string;
   terms: DealTerm[];
   canWrite: boolean;
-  // PO's term proposals from the deal's calls, still to check.
+  // PO's term proposals from the deal's calls, still to check, oldest first.
   proposals?: TermProposal[];
 }) {
   const t = fr.deals.terms;
@@ -52,34 +94,78 @@ export function DealTerms({
     term: DealTerm;
     proposalId?: string;
   } | null>(null);
-  const [index, setIndex] = useState(0);
-  const at = Math.max(0, Math.min(index, proposals.length - 1));
-  const termOfKey = new Map(terms.map((term) => [term.key, term]));
-  const written = terms.filter((term) => term.state !== "to_define");
-  const toDefine = terms.filter((term) => term.state === "to_define");
+  const read = new Map(proposals.map((p) => [p.termKey, p]));
   const label = (term: DealTerm) => t.labels[term.key] ?? term.key;
-  const proposalOf = (key: string) => proposals.find((p) => p.termKey === key);
+  // Written or read by PO first, then the slots to fill, in the configured order.
+  const filled = terms.filter(
+    (term) => term.state !== "to_define" || read.has(term.key),
+  );
+  const empty = terms.filter(
+    (term) => term.state === "to_define" && !read.has(term.key),
+  );
+
+  const proposedCard = (term: DealTerm, p: TermProposal) => {
+    const before =
+      term.state === "to_define"
+        ? null
+        : formatTermValue(term.format, term.value);
+    const after = formatTermValue(term.format, p.value) ?? "";
+    return (
+      <FactCard
+        key={term.key}
+        proposed
+        label={label(term)}
+        value={
+          before && before !== after ? (
+            <>
+              <s className="font-normal text-[color:var(--text-tertiary)]">
+                {before}
+              </s>{" "}
+              {after}
+            </>
+          ) : (
+            after
+          )
+        }
+        text={TEXT_FORMATS.has(term.format)}
+        note={<ProposalSource proposal={p} />}
+        state={{ tone: dealTermTone[p.state], label: t.states[p.state] }}
+        action={
+          canWrite && (
+            <span className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() =>
+                  setOpen({
+                    term: { ...term, value: p.value, state: p.state },
+                    proposalId: p.id,
+                  })
+                }
+              >
+                {t.edit}
+              </Button>
+              <DismissButton dealId={dealId} id={p.id} />
+            </span>
+          )
+        }
+      />
+    );
+  };
+
   return (
     <div className="flex flex-col gap-3">
-      {proposals.length > 0 && (
-        <TermProposalReview
-          dealId={dealId}
-          proposals={proposals}
-          terms={termOfKey}
-          index={at}
-          onIndex={setIndex}
-          onEdit={(term, proposalId) => setOpen({ term, proposalId })}
-          canWrite={canWrite}
-        />
+      {read.size > 0 && (
+        <ProposalsBar dealId={dealId} count={read.size} canWrite={canWrite} />
       )}
       <FactCards>
-        {written.map((term) => {
+        {filled.map((term) => {
+          const p = read.get(term.key);
+          if (p) return proposedCard(term, p);
           const name = label(term);
-          const proposal = proposals.findIndex((p) => p.termKey === term.key);
           return (
             <FactCard
               key={term.key}
-              proposed={proposal >= 0}
               label={name}
               value={
                 formatTermValue(term.format, term.value) ?? t.states.to_define
@@ -94,66 +180,20 @@ export function DealTerms({
                   ? t.changed(term.changedBy, formatInstantDay(term.changedAt))
                   : null
               }
-              // Proposed: its proposal in the review above.
-              onClick={
-                proposal >= 0
-                  ? () => setIndex(proposal)
-                  : canWrite
-                    ? () => setOpen({ term })
-                    : undefined
-              }
-              actionLabel={
-                proposal >= 0
-                  ? fr.dealCalls.review.show(name)
-                  : canWrite
-                    ? t.editTitle(name)
-                    : undefined
-              }
+              onClick={canWrite ? () => setOpen({ term }) : undefined}
+              actionLabel={canWrite ? t.editTitle(name) : undefined}
             />
           );
         })}
-        {toDefine.map((term) => {
+        {empty.map((term) => {
           const name = label(term);
-          const proposal = proposalOf(term.key);
-          const read = proposal && formatTermValue(term.format, proposal.value);
           return (
             <FactSlot
               key={term.key}
               label={name}
-              note={
-                read && (
-                  <span className="flex items-start gap-1.5 text-caption text-[color:var(--text-secondary)]">
-                    <IconSparkle3
-                      aria-hidden
-                      className="mt-0.5 size-3.5 shrink-0"
-                    />
-                    <span className="min-w-0 break-words">
-                      {fr.dealCalls.review.read}{" "}
-                      <b className="font-semibold text-foreground">{read}</b>
-                    </span>
-                  </span>
-                )
-              }
               actionText={t.define}
               emptyLabel={t.states.to_define}
-              // What PO read: the form prefilled with it.
-              onClick={
-                canWrite
-                  ? () =>
-                      setOpen(
-                        proposal
-                          ? {
-                              term: {
-                                ...term,
-                                value: proposal.value,
-                                state: proposal.state,
-                              },
-                              proposalId: proposal.id,
-                            }
-                          : { term },
-                      )
-                  : undefined
-              }
+              onClick={canWrite ? () => setOpen({ term }) : undefined}
               actionLabel={canWrite ? t.editTitle(name) : undefined}
             />
           );
