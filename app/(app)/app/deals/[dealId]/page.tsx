@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { DealCallFormData } from "@/components/deals/deal-call-button";
 import { DealFileView } from "@/components/deals/deal-file-view";
+import type { MemoStep } from "@/components/deals/deal-memo-now";
 import { DealStageMenu } from "@/components/deals/deal-stage-menu";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { DealTodoView } from "@/components/deals/deal-todo-view";
@@ -11,6 +12,8 @@ import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { TabBar } from "@/components/ui/tab-bar";
 import { can } from "@/lib/auth/access";
+import { dealMailSetup } from "@/lib/deals/memo-mail-queries";
+import { loadDealMemos } from "@/lib/deals/memo-queries";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
@@ -172,12 +175,34 @@ async function DealTodo({
   contacts,
 }: Omit<
   Parameters<typeof DealTodoView>[0],
-  "proposer" | "reopen" | "callForm" | "negotiationCall" | "nextCall"
+  | "proposer"
+  | "reopen"
+  | "callForm"
+  | "negotiationCall"
+  | "nextCall"
+  | "memoStep"
 >) {
-  const [callForm, negotiationCall] = await Promise.all([
+  // Negotiating, whoever writes the deal sees the deal memo's step.
+  const negotiating = deal.stage === "negotiation" && deal.canWrite;
+  const [callForm, negotiationCall, memos] = await Promise.all([
     callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
+    negotiating ? loadDealMemos(deal.id, deal.kind) : Promise.resolve([]),
   ]);
+  const latest = memos[0] ?? null;
+  const memoStep: MemoStep | null = negotiating
+    ? {
+        memo: latest && {
+          id: latest.id,
+          open:
+            latest.status === "draft" && !latest.submitted && !latest.changes,
+        },
+        changesAsked: latest?.changes != null,
+        address: dealMailSetup(deal.id).address,
+        counterpart: deal.counterpartName,
+        director: can(access, "validate"),
+      }
+    : null;
   // An abandoned deal: the direction opens a new one for its artist.
   const reopenOptions =
     deal.stage === "abandoned" && can(access, "validate")
@@ -210,6 +235,7 @@ async function DealTodo({
       proposals={proposals}
       contacts={contacts}
       calls={calls}
+      memoStep={memoStep}
       nextCall={
         nextCall
           ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }

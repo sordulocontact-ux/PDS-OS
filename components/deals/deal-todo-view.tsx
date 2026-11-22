@@ -11,6 +11,7 @@ import {
   dealCallMovable,
 } from "@/components/deals/deal-calls";
 import { DealContacts } from "@/components/deals/deal-contacts";
+import { DealMemoNow, type MemoStep } from "@/components/deals/deal-memo-now";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
 import { DealNow } from "@/components/deals/deal-now";
@@ -113,6 +114,7 @@ export function DealTodoView({
   contacts,
   calls,
   nextCall,
+  memoStep = null,
 }: {
   access: Access;
   deal: Deal;
@@ -127,6 +129,8 @@ export function DealTodoView({
   contacts: DealContact[];
   calls: DealCall[];
   nextCall: { label: string; href: string } | null;
+  // The deal memo's step while negotiating (DealMemoNow).
+  memoStep?: MemoStep | null;
 }) {
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
@@ -208,6 +212,7 @@ export function DealTodoView({
         }
         nextCall={nextCall?.label ?? null}
         callHeld={dealCallHeld(calls)}
+        memoNow={memoStep && <DealMemoNow dealId={deal.id} step={memoStep} />}
       />
       {deal.stage === "signed" && <EmptyNote>{t.page.signedNote}</EmptyNote>}
       {(WORKS[deal.stage] ?? []).map((work) => (

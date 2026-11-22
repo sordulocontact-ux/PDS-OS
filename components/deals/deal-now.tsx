@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { DealNowActions } from "@/components/deals/deal-now-actions";
+import { nowHeading, nowSecondary } from "@/components/deals/now-classes";
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -12,10 +13,8 @@ import { myValidationTone } from "@/lib/ui/state-tones";
 
 const fr = { deals };
 
-const secondary =
-  "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)] text-pretty";
-const heading =
-  "text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance";
+const secondary = nowSecondary;
+const heading = nowHeading;
 
 /** The stage a deal moves to next, by its order. */
 export const NEXT_STAGE: Partial<Record<Deal["stage"], Deal["stage"]>> = {
@@ -97,6 +96,7 @@ export function DealNow({
   planCall,
   nextCall = null,
   callHeld = false,
+  memoNow,
 }: {
   deal: Deal;
   terms: DealTerm[];
@@ -110,6 +110,8 @@ export function DealNow({
   planCall?: ReactNode;
   // A call of the deal took place: « Négociation » may follow.
   callHeld?: boolean;
+  // The negotiation's gesture: the deal memo (DealMemoNow).
+  memoNow?: ReactNode;
   nextCall?: string | null;
 }) {
   const t = fr.deals.page;
@@ -157,6 +159,10 @@ export function DealNow({
         <p className={secondary}>{t.waitDirection}</p>
       </NowFrame>
     );
+  // Negotiating, the next stage is the deal memo shown to the direction
+  // (réunion avec Ibé du 18/11/2026, 20261122110101).
+  if (deal.stage === "negotiation" && memoNow)
+    return <NowFrame label={t.now}>{memoNow}</NowFrame>;
   const next = nextStageOf(deal, terms, callHeld);
   // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à
   // rien »): negotiating, the terms are right below; « Changer d'étape » and

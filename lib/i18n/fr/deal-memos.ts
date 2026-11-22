@@ -11,6 +11,18 @@ export const dealMemos = {
     copied: "Adresse copiée",
     aria: "Copier l'adresse e-mail du deal",
   },
+  // The negotiation's gesture in « Maintenant » (DealMemoNow, Sacha
+  // 22/11/2026): the deal memo is the accord de principe.
+  now: {
+    show: "Montrer le deal memo à la direction",
+    validate: "Valider le deal memo",
+    validateButton: "Valider",
+    write: "Rédiger le deal memo",
+    waiting: (who: string) => `En attente du deal memo de ${who}`,
+    waitingAgain: (who: string) =>
+      `En attente de la nouvelle version du deal memo de ${who}`,
+    copyAddress: "Copier l'adresse du deal",
+  },
   toValidate: "À valider",
   receivedFrom: (from: string | null, day: string) =>
     from ? `Reçu de ${from}, le ${day}` : `Reçu le ${day}`,

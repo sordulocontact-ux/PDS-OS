@@ -8120,8 +8120,11 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     le renvoie en négociation avec le motif, le renvoi de l'accord validé ouvre la contractualisation
     (`deal_memo_moves`) ; ces événements portent `detail.memo` : pas de second memo photographié
     (`deal_events_memo`), pas de seconde notification (`deal_events_notify`). L'accord proposé depuis les termes
-    (un terme confirmé) reste possible. Section « Deal memo » juste sous les termes en négociation, en tête à
-    l'accord et en contractualisation.
+    (un terme confirmé, « Changer d'étape ») reste possible. Section « Deal memo » juste sous les termes en
+    négociation, en tête à l'accord et en contractualisation. En négociation, « Maintenant » = le geste du memo
+    (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore montré → « Montrer à la direction » (la
+    direction : « Valider ») ; aucun → deal Label ou Marque : « En attente du deal memo de <structure> », « Copier
+    l'adresse du deal » et « Rédiger le deal memo » à côté ; deal Musique (PDS est le label) : « Rédiger le deal memo ».
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,
