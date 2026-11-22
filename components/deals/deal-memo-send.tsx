@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -47,6 +47,7 @@ export function DealMemoSendForm({
   copies,
   canEmail,
   correction = null,
+  open = null,
   onDone,
 }: {
   dealId: string;
@@ -61,6 +62,9 @@ export function DealMemoSendForm({
   canEmail: boolean;
   // The direction's reason: the e-mail asks the label for it.
   correction?: string | null;
+  // A way to open the memo joined, beside its name (Sacha 22/11/2026: « on
+  // voudrait le voir pour valider le mail »).
+  open?: ReactNode;
   onDone: () => void;
 }) {
   const c = fr.dealMemos.correction;
@@ -127,7 +131,9 @@ export function DealMemoSendForm({
         onMessage={setMessage}
         name="deal-memo-message"
         rows={6}
-        attachment={correction !== null ? undefined : { name: attachment }}
+        attachment={
+          correction !== null ? undefined : { name: attachment, side: open }
+        }
       />
       {correction === null && copies.length > 0 && (
         <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">

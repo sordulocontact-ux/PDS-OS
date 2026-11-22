@@ -6,7 +6,10 @@ import {
   DealMemoSendForm,
   type MemoReplyTo,
 } from "@/components/deals/deal-memo-send";
+import { MemoFileButton } from "@/components/deals/deal-memo-card";
 import { Button } from "@/components/ui/button";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
+import { routes } from "@/lib/auth/redirects";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -123,6 +126,21 @@ export function DealMemoGestures({
               replyTo={send.replyTo}
               copies={send.copies}
               canEmail={send.canEmail}
+              open={
+                memo.files[0]?.url ? (
+                  <MemoFileButton file={memo.files[0]} />
+                ) : (
+                  <PdfExportButton
+                    href={routes.dealMemoPdf(dealId, memo.id)}
+                    fileName={t.pdf.file(dealName, memo.number)}
+                    label={t.openFile}
+                    pendingLabel={t.pdf.pending}
+                    failedLabel={t.pdf.failed}
+                    variant="outline"
+                    size="sm"
+                  />
+                )
+              }
               onDone={close}
             />
           )}

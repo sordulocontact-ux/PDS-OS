@@ -95,6 +95,23 @@ export function DealMemoNow({
       {t.now.write}
     </Button>
   );
+  // The memo to read, before the gesture on it.
+  const read =
+    memo &&
+    (memo.file ? (
+      <MemoFileButton file={memo.file} size="default" />
+    ) : memo.pdf ? (
+      <PdfExportButton
+        href={memo.pdf.href}
+        fileName={memo.pdf.fileName}
+        label={t.openFile}
+        pendingLabel={t.pdf.pending}
+        failedLabel={t.pdf.failed}
+        variant="outline"
+        size="sm"
+      />
+    ) : null);
+
   const mailButton = (
     label: string,
     title: string,
@@ -121,28 +138,12 @@ export function DealMemoNow({
             copies={step.copies}
             canEmail={step.canEmail}
             correction={correction}
+            open={correction === null ? read : null}
             onDone={close}
           />
         )}
       </DialogButton>
     );
-
-  // The memo to read, before the gesture on it.
-  const read =
-    memo &&
-    (memo.file ? (
-      <MemoFileButton file={memo.file} size="default" />
-    ) : memo.pdf ? (
-      <PdfExportButton
-        href={memo.pdf.href}
-        fileName={memo.pdf.fileName}
-        label={t.openFile}
-        pendingLabel={t.pdf.pending}
-        failedLabel={t.pdf.failed}
-        variant="outline"
-        size="sm"
-      />
-    ) : null);
 
   let heading: string;
   let gesture: React.ReactNode;
