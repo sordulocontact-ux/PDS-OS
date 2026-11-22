@@ -324,11 +324,13 @@ export const RECAP_FICHE_TONE: Record<RecapFicheState, Tone> = {
 };
 
 /** The person's fiche on this project: its status (as the Juridique says
- * it), its state in the recap's three words, and the person's démarche. */
+ * it), its state in the recap's three words, and the fiche itself in the
+ * person's démarche (`?partie=fiche`); null: no démarche yet (a guest of a
+ * title not credited in the Catalogue yet). */
 export type RecapFiche = {
   status: FicheStatus;
   state: RecapFicheState;
-  href: string;
+  href: string | null;
 };
 
 /** The fiche's status, read as loadForms does: an open link past its date
@@ -337,7 +339,7 @@ export function recapFiche(
   form: FicheForm | null,
   submission: FormSubmission | null,
   now: string,
-  href: string,
+  href: string | null,
 ): RecapFiche {
   let input: Parameters<typeof ficheStatusOf>[0] = {
     state: "none",
@@ -705,8 +707,8 @@ export type RecapParticipationFacts = {
   // the artist); null: the reader may not read the Juridique.
   fiche: RecapFiche | null;
   // Null: the reader may not read the Juridique. `href`: the person's
-  // démarche.
-  contract: { state: RecapContract; href: string } | null;
+  // démarche; null: none yet (a guest not credited in the Catalogue yet).
+  contract: { state: RecapContract; href: string | null } | null;
   // Null: the reader sees no deal of the project (dealReach « none »).
   accord: RecapAccord | null;
 };

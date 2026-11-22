@@ -105,9 +105,11 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   transmis »). La liste minimale `ProjectTitles` est supprimée (la Vue d'ensemble lancée n'a plus
   de bloc Titres). Un `DataTable` : une ligne par titre, ses participations en retrait dessous.
   Depuis le 21/11/2026 (retours d'Ibé du 18/11) les colonnes Contrat, Négociation et Négocié par
-  n'existent plus : c'est le **récap** (`loadTitleRecap`). Sur la ligne d'un artiste : Statut
-  (À contacter, Contacté, D'accord, A refusé, Retiré), Accord (étape du deal, taux, jour du call,
-  négociateur), Contact, Juridique (fiche, contrat) ; notes sous le nom. Un deal est toujours
+  n'existent plus : c'est le **récap** (`loadTitleRecap`). Depuis le 22/11/2026, **une ligne par
+  artiste** avec les colonnes de l'Excel d'Ibé : Artiste (titre dessous), Statut (À contacter,
+  Contacté, D'accord, A refusé, Retiré), Contact, Accord (étape du deal, jour du call,
+  négociateur), Taux, Fiche de renseignement (ouvre la fiche), Contrat, puis Mix, Sortie,
+  Distribution, Beatmaker, Note ; le tableau défile dans son cadre, Artiste fixe à gauche. Un deal est toujours
   lu sous la RLS : jamais « Pas de dossier » à tort. La ligne
   d'un titre porte (récap : Mix, fiche beatmaker, Sortie, Distribution) son **Master** (calculé sur `master_mix_versions` du projet et
   `masters.audio_state` : À mixer, Mix Vn à valider, Mix/Master Vn+1 attendu, Mix validé,
@@ -367,7 +369,7 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
 
 ## Règles à tenir à chaque lot
 
-- Le récap suit l'Excel d'Ibé (21/11) : fiche « À envoyer / En attente / Remplie », contrat envoyé / retour reçu /
+- Le récap suit l'Excel d'Ibé (21/11) : fiche « Pas envoyée / Envoyée / Renseignée » (22/11), contrat envoyé / retour reçu /
   signé, « Son reçu » lu au Master (jamais un champ en double), rôle du contact (« Producteur » = libellé libre
   `title_participations.contact_label`, migration `20261121220101`, pas le rôle `producer` du Réseau). Il ne lit
   **jamais** les données personnelles d'une fiche (naissance, sécu, adresse, RIB) : garde-fou `privateReadsOf`.
@@ -400,5 +402,6 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
   (numérotation sans doublon : vérifier `ls supabase/migrations | cut -d_ -f1 | uniq -d` après
   chaque merge).
 - La largeur utile d'une page de projet est de 1180 px au plus : un tableau y tient 4 colonnes
-  fixes en plus du nom ; au-delà, regrouper (lot 6 : les faits d'un titre dans l'espace des
-  colonnes de ses participations) plutôt que faire défiler.
+  fixes en plus du nom ; au-delà, regrouper plutôt que faire défiler. Seule exception :
+  « Titres et artistes » (22/11/2026), qui reprend l'Excel entier, défile dans son cadre avec la
+  colonne Artiste fixe (jamais la page).

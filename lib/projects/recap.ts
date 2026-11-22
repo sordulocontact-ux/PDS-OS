@@ -12,6 +12,7 @@ import {
   loadParticipationDealStates,
   type ParticipationDealState,
 } from "@/lib/deals/participation-states";
+import { FORM_ROLES } from "@/lib/legal/forms/definition";
 import type { FormSubmission } from "@/lib/legal/forms/queries";
 import { withPrivateDetails } from "@/lib/network/private-details";
 import { networkRolesOf } from "@/lib/network/types";
@@ -32,6 +33,7 @@ import {
   type ContactRow,
   type FicheForm,
   type RecapAccord,
+  type RecapFiche,
   type RecapContract,
   type RecapCredit,
   type TitleRecap,
@@ -161,6 +163,7 @@ export async function loadTitleRecap(
     submissions,
     call,
     contractStates,
+    legalContacts,
   ] = await Promise.all([
     masterIds.length
       ? supabase
@@ -207,8 +210,17 @@ export async function loadTitleRecap(
     canReadLegal
       ? loadContractStates(project.id, board.titles, states)
       : new Map<string, RecapContract>(),
+    // The people of the Réseau added to the legal file without a credit
+    // (formPeople's `added`): each has a démarche. With manage_legal (RLS).
+    canReadLegal
+      ? supabase
+          .from("legal_project_contacts")
+          .select("contact_id, role")
+          .eq("project_id", project.id)
+      : Promise.resolve(none),
   ]);
   for (const [scope, result] of Object.entries({
+    legalContacts,
     credits,
     artistPeople,
     managers,
@@ -286,13 +298,20 @@ export async function loadTitleRecap(
           submittedAt: s.created_at,
         }),
       );
-  const ficheOf = (contactId: string | null, key: string) => {
+  // The fiche's pill opens the fiche itself in the person's démarche
+  // (`?partie=fiche`, JUR-10), filled or not, even while their contract is
+  // the part at work (Maël 22/11/2026): the Juridique shows it, under its
+  // own rights, never the recap. No démarche: no link.
+  const ficheOf = (
+    contactId: string | null,
+    demarche: string | null,
+  ): RecapFiche => {
     const form = contactId ? formOf.get(contactId) : undefined;
     return recapFiche(
       form ? ficheForm(form) : null,
       form ? (submissionOf.get(form.id) ?? null) : null,
       now,
-      legalDemarcheHref(project.id, "person", key),
+      demarche ? `${demarche}?partie=fiche` : null,
     );
   };
 
@@ -302,6 +321,41 @@ export async function loadTitleRecap(
     role: c.role,
     contactId: c.contact_id,
   }));
+  // Who has a démarche in the Juridique, as formPeople lists them (lib/
+  // legal/forms/people.ts): a person credited on a master of the project,
+  // an artist featured on one (titles abandoned left out: out of the
+  // Master, lot 9), a contact added to the legal file. A guest of a title
+  // not in the Catalogue yet, or not credited on it yet, has none (a contract
+  // planned makes none either): their fiche and contract have no page to
+  // open, a link would lead to « Page introuvable ».
+  const liveTitles = board.titles.filter((t) => t.status !== "abandoned");
+  const liveMasters = new Set(liveTitles.flatMap((t) => t.master?.id ?? []));
+  const creditedKeys = new Set(
+    recapCredits
+      .filter((c) => liveMasters.has(c.masterId))
+      .map((c) => normalizeSearch(c.name)),
+  );
+  const featured = new Set(
+    liveTitles.flatMap((t) =>
+      (t.master?.credits ?? [])
+        .filter((c) => c.role === "featuring")
+        .map((c) => c.artist.id),
+    ),
+  );
+  const added = new Set(
+    (legalContacts.data ?? []).flatMap((c) =>
+      (FORM_ROLES as readonly string[]).includes(c.role) ? [c.contact_id] : [],
+    ),
+  );
+  const demarcheOf = (
+    key: string,
+    who: { artistId: string | null; contactId: string | null },
+  ) =>
+    creditedKeys.has(key) ||
+    (who.artistId !== null && featured.has(who.artistId)) ||
+    (who.contactId !== null && added.has(who.contactId))
+      ? legalDemarcheHref(project.id, "person", key)
+      : null;
   // The contact a name has on the project (the first credit that links
   // one), as the Juridique's person (formPeople).
   const nameContact = new Map<string, string>();
@@ -355,11 +409,14 @@ export async function loadTitleRecap(
                 fiche: canReadLegal
                   ? ficheOf(
                       person.contactId,
-                      personKeyOf({
-                        credits: recapCredits,
-                        contactId: person.contactId,
-                        creditName: person.name,
-                      }),
+                      demarcheOf(
+                        personKeyOf({
+                          credits: recapCredits,
+                          contactId: person.contactId,
+                          creditName: person.name,
+                        }),
+                        { artistId: null, contactId: person.contactId },
+                      ),
                     )
                   : null,
               }))
@@ -375,7 +432,10 @@ export async function loadTitleRecap(
             contactId: person,
             artist: p.artist,
           });
-          const href = legalDemarcheHref(project.id, "person", key);
+          const demarche = demarcheOf(key, {
+            artistId: p.artist.id,
+            contactId: person,
+          });
           // The deal the board reads is the one the state speaks of.
           const deal = p.deal && state?.dealId === p.deal.id ? p.deal : null;
           let accord: RecapAccord | null = null;
@@ -450,11 +510,11 @@ export async function loadTitleRecap(
               contactState: contactStateOf(p.status),
               note: row?.note ?? null,
               contact,
-              fiche: canReadLegal ? ficheOf(person, key) : null,
+              fiche: canReadLegal ? ficheOf(person, demarche) : null,
               contract: canReadLegal
                 ? {
                     state: contractStates.get(p.id) ?? { kind: "none" },
-                    href,
+                    href: demarche,
                   }
                 : null,
               accord,

@@ -112,11 +112,14 @@ export function AccordFacts({
   artist,
   planCall,
   inline = false,
+  rate = true,
 }: {
   accord: RecapAccord;
   artist: string;
   planCall?: React.ReactNode;
   inline?: boolean;
+  // false: the rate has its own column (« Taux », the board).
+  rate?: boolean;
 }) {
   const r = fr.projectTitles.recap;
   const stage = accord.stage;
@@ -127,7 +130,7 @@ export function AccordFacts({
       : fr.deals.stages[stage]
     : null;
   const details = [
-    accord.rate,
+    rate ? accord.rate : null,
     accord.nextCallAt ? r.accord.callOn(formatDay(accord.nextCallAt)) : null,
   ].filter((d): d is string => Boolean(d));
   // Who negotiates, once the deal is read; « À affecter » before.
@@ -196,17 +199,36 @@ export function contractStatePill(
 }
 
 /** The recap's pill: « Contrat · À rédiger » (« En attente de l'accord »
- * alone); null: none expected. */
+ * alone; `bare`, under a « Contrat » column: its words alone); null: none
+ * expected. */
 function contractPill(
   contract: RecapContract,
+  bare = false,
 ): { label: string; full: string; tone: Tone } | null {
   const pill = contractStatePill(contract);
   if (!pill) return null;
   const label =
-    contract.kind === "waiting_agreement"
+    bare || contract.kind === "waiting_agreement"
       ? pill.words
       : fr.projectTitles.recap.legal.contract(pill.words);
   return { label, full: label, tone: pill.tone };
+}
+
+/** The artist's contract alone (the board's « Contrat » column), its words
+ * without « Contrat · », opening the person's démarche. None expected:
+ * « — ». */
+export function ContractFacts({
+  contract,
+}: {
+  contract: { state: RecapContract; href: string | null };
+}) {
+  const pill = contractPill(contract.state, true);
+  if (!pill) return <span className={muted}>{EMPTY_CELL}</span>;
+  return (
+    <span className={factsClass(false)}>
+      <LinkedPill href={contract.href} tone={pill.tone} label={pill.label} />
+    </span>
+  );
 }
 
 /** The artist's fiche and contract, two short pills, each opening the
@@ -217,7 +239,7 @@ export function LegalFacts({
   inline = false,
 }: {
   fiche: RecapFiche | null;
-  contract: { state: RecapContract; href: string } | null;
+  contract: { state: RecapContract; href: string | null } | null;
   inline?: boolean;
 }) {
   const pill = contract ? contractPill(contract.state) : null;
@@ -254,19 +276,42 @@ export function MixPill({
   );
 }
 
-/** A fiche's pill in the Excel's three words (« Fiche · En attente »),
- * linked to the person's démarche. A fiche received and not yet validated
- * says so on hover and to a screen reader. */
-export function FichePill({ fiche }: { fiche: RecapFiche }) {
+/** A fiche's pill in three words (« Fiche · Envoyée »; `bare`, under a
+ * « Fiche de renseignement » column: « Envoyée »), opening the fiche
+ * itself, filled or not. A fiche received and not yet validated says so on
+ * hover and to a screen reader; `name`: whose fiche, for a screen reader.
+ * No démarche yet (a guest not credited in the Catalogue): no link, and the
+ * hover says when there will be one. */
+export function FichePill({
+  fiche,
+  bare = false,
+  name,
+}: {
+  fiche: RecapFiche;
+  bare?: boolean;
+  name?: string;
+}) {
   const r = fr.projectTitles.recap.legal;
+  const label = bare
+    ? r.ficheStates[fiche.state]
+    : r.fiche(r.ficheStates[fiche.state]);
+  const state =
+    fiche.status === "toValidate"
+      ? r.ficheToValidate
+      : r.ficheStates[fiche.state];
+  const full = !fiche.href
+    ? r.ficheLater
+    : name
+      ? r.openFiche(name, state)
+      : bare
+        ? state
+        : r.fiche(state);
   return (
     <LinkedPill
       href={fiche.href}
       tone={RECAP_FICHE_TONE[fiche.state]}
-      label={r.fiche(r.ficheStates[fiche.state])}
-      full={
-        fiche.status === "toValidate" ? r.fiche(r.ficheToValidate) : undefined
-      }
+      label={label}
+      full={full}
     />
   );
 }
