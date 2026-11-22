@@ -2,17 +2,16 @@
 
 import { useState, type ReactNode } from "react";
 
-import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { MailCard } from "@/components/ui/mail-card";
+import { envelopeErrors, MailCard } from "@/components/ui/mail-card";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   sendDealMemo,
   sendMemoCorrection,
 } from "@/lib/deals/memo-mail-actions";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
-import { isEmail } from "@/lib/utils/email";
+import { addressesOf, type MailEnvelope } from "@/lib/email/addresses";
 import { mailtoHref } from "@/lib/utils/mailto";
 
 const fr = { dealMemos };
@@ -57,7 +56,7 @@ export function DealMemoSendForm({
   // The files joined, by name.
   attachment: string;
   replyTo: MemoReplyTo | null;
-  // The contacts in the loop who receive a copy, by name.
+  // The loop's contacts' addresses, prefilled in « Cc ».
   copies: string[];
   canEmail: boolean;
   // The direction's reason: the e-mail asks the label for it.
@@ -68,12 +67,17 @@ export function DealMemoSendForm({
   onDone: () => void;
 }) {
   const c = fr.dealMemos.correction;
-  const [address, setAddress] = useState(replyTo?.email ?? "");
-  const [subject] = useState(
-    correction !== null
-      ? c.subject(dealName, receivedSubject)
-      : t.subject(dealName, receivedSubject),
-  );
+  // Who it goes to, written in the card (Sacha 22/11/2026): the memo's
+  // sender (else the counterpart's address), the loop in « Cc ».
+  const [envelope, setEnvelope] = useState<MailEnvelope>({
+    to: replyTo?.email ?? "",
+    cc: correction === null ? copies.join(", ") : "",
+    bcc: "",
+    subject:
+      correction !== null
+        ? c.subject(dealName, receivedSubject)
+        : t.subject(dealName, receivedSubject),
+  });
   const [message, setMessage] = useState<string>(
     correction !== null ? c.message(correction) : t.message,
   );
@@ -82,20 +86,21 @@ export function DealMemoSendForm({
     onDone,
     correction !== null ? c.done : t.done,
   );
-  const valid = isEmail(address.trim());
+  const wrong = Object.values(envelopeErrors(envelope)).some(Boolean);
 
   function send(byEmail: boolean) {
     setTried(true);
-    if (byEmail && !valid) return;
+    if (byEmail && wrong) return;
     const action = correction !== null ? sendMemoCorrection : sendDealMemo;
     run(() =>
       action(dealId, memoId, {
         byEmail,
-        to: {
-          name: replyTo?.email === address.trim() ? replyTo.name : "",
-          email: address.trim(),
+        envelope: {
+          to: addressesOf(envelope.to),
+          cc: addressesOf(envelope.cc),
+          bcc: addressesOf(envelope.bcc),
         },
-        subject,
+        subject: envelope.subject,
         message,
       }),
     );
@@ -104,29 +109,16 @@ export function DealMemoSendForm({
   return (
     <div className="flex flex-col gap-4">
       <MailCard
-        to={address}
-        toControl={
-          <Field
-            name="deal-memo-to"
-            type="email"
-            label={t.address}
-            hideLabel
-            aria-required
-            autoComplete="off"
-            placeholder={t.addressPlaceholder}
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
-            error={tried && !valid ? t.addressMissing : undefined}
-          />
-        }
+        to={envelope.to}
+        subject={envelope.subject}
+        envelope={{ value: envelope, onChange: setEnvelope, tried }}
         toSource={
-          replyTo && address.trim() === replyTo.email
+          replyTo && envelope.to.trim() === replyTo.email
             ? replyTo.source === "email"
               ? t.fromEmail
               : undefined
             : null
         }
-        subject={subject}
         message={message}
         onMessage={setMessage}
         name="deal-memo-message"
@@ -135,11 +127,6 @@ export function DealMemoSendForm({
           correction !== null ? undefined : { name: attachment, side: open }
         }
       />
-      {correction === null && copies.length > 0 && (
-        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {t.copies(copies.join(", "))}
-        </p>
-      )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         {canEmail ? (
@@ -167,7 +154,15 @@ export function DealMemoSendForm({
             <Button
               variant="outline"
               nativeButton={false}
-              render={<a href={mailtoHref(address.trim(), subject, message)} />}
+              render={
+                <a
+                  href={mailtoHref(
+                    addressesOf(envelope.to).join(","),
+                    envelope.subject,
+                    message,
+                  )}
+                />
+              }
             >
               {t.openMail}
             </Button>

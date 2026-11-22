@@ -89,6 +89,10 @@ export type MessageEmail = {
   attachments?: EmailAttachment[];
   // Replies also go there (PO's address of an authorisation request).
   replyTo?: string[];
+  // More recipients, in copy, in hidden copy (MailEnvelope).
+  alsoTo?: string[];
+  cc?: string[];
+  bcc?: string[];
 };
 
 /**
@@ -114,6 +118,9 @@ export async function emailMessage(
     sender: { name: sender, email },
     attachments: mail.attachments,
     replyTo: mail.replyTo,
+    alsoTo: mail.alsoTo,
+    cc: mail.cc,
+    bcc: mail.bcc,
   });
   return outcomeOf(sent);
 }

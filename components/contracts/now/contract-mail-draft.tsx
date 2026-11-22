@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { MailCard } from "@/components/ui/mail-card";
+import type { MailEnvelope } from "@/lib/email/addresses";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { mailtoHref } from "@/lib/utils/mailto";
 
@@ -34,6 +35,7 @@ export function ContractMailDraft({
   bySelf = true,
   smtp = false,
   onMessage,
+  envelope,
 }: {
   to: { contactId: string; email: string | null } | null;
   subject: string;
@@ -44,6 +46,12 @@ export function ContractMailDraft({
   // PDS OS can send e-mails (SMTP set), though not this one.
   smtp?: boolean;
   onMessage?: (message: string) => void;
+  // Sent by PDS OS: who it goes to and its subject, written in the card.
+  envelope?: {
+    value: MailEnvelope;
+    onChange: (next: MailEnvelope) => void;
+    tried: boolean;
+  };
 }) {
   const t = fr.contracts.now.mail;
   const [message, setMessage] = useState(initial);
@@ -62,6 +70,7 @@ export function ContractMailDraft({
         }}
         name="mail-message"
         rows={7}
+        envelope={envelope}
         added={link ? { open: t.link, link } : undefined}
         attachment={
           attachment

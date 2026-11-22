@@ -284,6 +284,7 @@ export const contracts = {
       byMailHint:
         "Préparé par PDS OS, envoyé depuis votre messagerie : l'e-mail et sa date font preuve.",
       otherwise: "Je l'ai remis autrement",
+      backToMail: "Revenir à l'e-mail",
       otherwiseHint: "Main propre, outil de signature… avec sa date.",
       markSent: "Marquer comme envoyé",
       sent: "Contrat envoyé pour signature.",

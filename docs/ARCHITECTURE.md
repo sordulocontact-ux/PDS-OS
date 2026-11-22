@@ -8137,6 +8137,12 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     Avant de décider, le document se lit dans « Maintenant » : « Ouvrir le PDF » (fichier reçu, sinon le memo de PDS)
     à côté de « Envoyer à valider » ; pour la direction, « Valider le deal memo » = lire, « Demander des
     modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
+  - **Un e-mail modifiable** (22/11/2026) : `MailCard envelope` = « À » (plusieurs adresses), « Cc », « Cci », « Objet »
+    écrits dans la carte (`MailEnvelope`, `addressesOf`, `envelopeErrors`, rouges après le premier essai), envoyés par
+    `sendEmail` (`alsoTo`, `cc`, `bcc`, nodemailer) ; schéma serveur `envelopeInput`, preuve `envelopeProof`. Branché
+    sur l'envoi pour signature d'un contrat (`emailContractForSignature`), le renvoi de l'accord validé et la demande de
+    correction du memo (la boucle est pré-remplie en « Cc », un seul e-mail au lieu d'une copie par contact). La fenêtre
+    « Envoyer pour signature » montre le mail d'emblée, « Je l'ai remis autrement » en lien.
   - **Envoi pour signature par PDS OS** (`20261122170101`) : l'e-mail s'affiche dans la carte de mail commune
     (`ContractMailDraft` → `MailCard`, pièce jointe ouverte dans un onglet) ; un contrat sans lien privé (celui d'un deal)
     part de po@ quand le SMTP est en place (`emailContractForSignature` : son dernier projet déposé ou imprimé à la

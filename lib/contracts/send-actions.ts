@@ -10,6 +10,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { legalOutcome } from "@/lib/legal/outcome";
 import { listCatalogFiles } from "@/lib/catalog/files";
+import { envelopeInput } from "@/lib/email/envelope";
 import { emailMessage } from "@/lib/email/link-email";
 import { getContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
@@ -108,7 +109,7 @@ export async function remindContractSigner(
 const emailInput = z.object({
   contractId: z.uuid(),
   projectId: z.uuid().nullable(),
-  to: z.object({ name: z.string().trim().max(200), email: z.email() }),
+  envelope: envelopeInput,
   subject: z.string().trim().min(1).max(300),
   message: z.string().trim().min(1).max(4000),
 });
@@ -170,8 +171,12 @@ export async function emailContractForSignature(
   if (!contract) return { ok: false, error: fr.contracts.errors.forbidden };
   const file = await contractAttachment(v.data.contractId, contract.title);
   if (!file) return { ok: false, error: fr.contracts.now.sendMail.noFile };
+  const [first, ...alsoTo] = v.data.envelope.to;
   const outcome = await emailMessage({
-    to: { name: v.data.to.name || v.data.to.email, email: v.data.to.email },
+    to: { name: first, email: first },
+    alsoTo,
+    cc: v.data.envelope.cc,
+    bcc: v.data.envelope.bcc,
     subject: v.data.subject,
     text: v.data.message,
     attachments: [

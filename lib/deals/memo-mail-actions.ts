@@ -3,12 +3,12 @@
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
-import { loadDealLoop } from "@/lib/deals/memo-mail-queries";
 import { memoAttachments } from "@/lib/deals/memo-mail-send";
 import { loadDealMemos } from "@/lib/deals/memo-queries";
 import { runMemoGesture, uuid } from "@/lib/deals/memo-run";
 import { loadDeal } from "@/lib/deals/queries";
 import { dealMemoAddress } from "@/lib/email/deal-memo-address";
+import { envelopeInput, envelopeProof } from "@/lib/email/envelope";
 import { emailMessage } from "@/lib/email/link-email";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -68,7 +68,7 @@ export async function requestDealMemoChanges(
 
 const sendInput = z.object({
   byEmail: z.boolean(),
-  to: z.object({ name: z.string().trim().max(200), email: z.string().trim() }),
+  envelope: envelopeInput,
   subject: z.string().trim().min(1).max(300),
   message: z.string().trim().min(1).max(2000),
 });
@@ -76,9 +76,9 @@ const sendInput = z.object({
 /**
  * « Renvoyer l'accord validé »: the validated memo leaves by PDS OS (from
  * po@, in the member's name, replies to them), its PDFs joined — the ones
- * received, else the memo made in PDS OS —, one e-mail to the label or the
- * brand and one copy to each contact in the loop with an address; then
- * the sending is kept (to whom: the proof). `byEmail: false`: sent another
+ * received, else the memo made in PDS OS —, one e-mail to whom the card
+ * says, in « Cc » the contacts in the loop (prefilled), « Cci » as written;
+ * then the sending is kept (to whom: the proof). `byEmail: false`: sent another
  * way, only noted.
  */
 export async function sendDealMemo(
@@ -108,47 +108,29 @@ export async function sendDealMemo(
 
   const attachments = await memoAttachments(memo, deal);
   if (!attachments) return { ok: false, error: t.send.noAttachment };
-  const mail = {
+  // One e-mail: « À », « Cc » (the loop, prefilled), « Cci » as written.
+  const [first, ...alsoTo] = p.data.envelope.to;
+  const outcome = await emailMessage({
     subject: p.data.subject,
     text: p.data.message,
     attachments,
-  };
-  const to = {
-    name: p.data.to.name || p.data.to.email,
-    email: p.data.to.email,
-  };
-  const outcome = await emailMessage({ ...mail, to });
+    to: { name: first, email: first },
+    alsoTo,
+    cc: p.data.envelope.cc,
+    bcc: p.data.envelope.bcc,
+  });
   if (outcome !== "sent")
     return outcome === "failed"
       ? { ok: false, error: t.send.failed }
       : { ok: false, error: t.send.disabled };
-
-  const copies: string[] = [];
-  const missed: string[] = [];
-  for (const entry of await loadDealLoop(dealId)) {
-    if (entry.kind !== "contact") continue;
-    const sent = entry.email
-      ? await emailMessage({
-          ...mail,
-          to: { name: entry.name, email: entry.email },
-        })
-      : "disabled";
-    if (sent === "sent") copies.push(`${entry.name} (${entry.email})`);
-    else missed.push(entry.name);
-  }
-  const proof = [
-    `${to.name === to.email ? to.email : `${to.name} (${to.email})`}`,
-    ...(copies.length ? [t.send.copiesProof(copies.join(", "))] : []),
-  ].join(" · ");
+  const proof = envelopeProof(p.data.envelope);
   const result = await told(await record(proof));
   if (!result.ok) {
     // Left, but not kept: said, never hidden.
     console.error("sendDealMemo: sent, not recorded");
     return result;
   }
-  return missed.length
-    ? { ok: true, notice: t.send.missed(missed.join(", ")) }
-    : result;
+  return result;
 }
 
 const loopInput = z.union([
@@ -209,13 +191,13 @@ export async function sendMemoCorrection(
       }),
     );
   if (!p.data.byEmail) return told(await record(""));
-  const to = {
-    name: p.data.to.name || p.data.to.email,
-    email: p.data.to.email,
-  };
   const address = dealMemoAddress(dealId);
+  const [first, ...alsoTo] = p.data.envelope.to;
   const outcome = await emailMessage({
-    to,
+    to: { name: first, email: first },
+    alsoTo,
+    cc: p.data.envelope.cc,
+    bcc: p.data.envelope.bcc,
     subject: p.data.subject,
     text: p.data.message,
     replyTo: address ? [address] : undefined,
@@ -224,7 +206,5 @@ export async function sendMemoCorrection(
     return outcome === "failed"
       ? { ok: false, error: t.send.failed }
       : { ok: false, error: t.send.disabled };
-  return told(
-    await record(to.name === to.email ? to.email : `${to.name} (${to.email})`),
-  );
+  return told(await record(envelopeProof(p.data.envelope)));
 }
