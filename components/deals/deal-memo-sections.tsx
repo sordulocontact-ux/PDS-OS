@@ -30,17 +30,22 @@ import { dealMemos } from "@/lib/i18n/fr/deal-memos";
  * the people in the loop, then the contract and, once a memo is validated
  * and a contract linked, the comparison term by term. `readOnly`: the
  * deal's « Dossier », read without its gestures (they are in « À faire »).
+ * `part`: the memo alone, or what follows it (the loop, the contract), so
+ * that « À faire » puts the terms between them (Sacha 22/11/2026: the terms
+ * matter more than an empty loop and contract).
  */
 export async function DealMemoSections({
   access,
   deal,
   terms,
   readOnly = false,
+  part = "all",
 }: {
   access: Access;
   deal: Deal;
   terms: DealTerm[];
   readOnly?: boolean;
+  part?: "all" | "memo" | "follow";
 }) {
   const canWrite = deal.canWrite && !readOnly;
   const [memos, contract, options, loop, members, contacts] = await Promise.all(
@@ -73,29 +78,33 @@ export async function DealMemoSections({
     (can(access, "validate") ||
       (deal.assignee?.id === access.personId && can(access, "negotiate")));
 
+  const memoPart = part !== "follow";
+  const followPart = part !== "memo";
   return (
     <>
-      <PageSection id="deal-memo" title={dealMemos.section}>
-        <DealMemos
-          dealId={deal.id}
-          dealName={dealName(deal)}
-          memos={memos}
-          changed={memos[0] ? changedSince(memos[0], terms) : false}
-          canWrite={canWrite}
-          canValidate={
-            !readOnly && can(access, "validate") && !isClosedStage(deal.stage)
-          }
-          send={{
-            replyTo,
-            copies: loop
-              .filter((e) => e.kind === "contact" && e.email)
-              .map((e) => e.name),
-            canEmail: mail.canEmail,
-          }}
-          address={mail.address}
-        />
-      </PageSection>
-      {(canWrite || loop.length > 0) && (
+      {memoPart && (
+        <PageSection id="deal-memo" title={dealMemos.section}>
+          <DealMemos
+            dealId={deal.id}
+            dealName={dealName(deal)}
+            memos={memos}
+            changed={memos[0] ? changedSince(memos[0], terms) : false}
+            canWrite={canWrite}
+            canValidate={
+              !readOnly && can(access, "validate") && !isClosedStage(deal.stage)
+            }
+            send={{
+              replyTo,
+              copies: loop
+                .filter((e) => e.kind === "contact" && e.email)
+                .map((e) => e.name),
+              canEmail: mail.canEmail,
+            }}
+            address={mail.address}
+          />
+        </PageSection>
+      )}
+      {followPart && (canWrite || loop.length > 0) && (
         <PageSection id="boucle" title={dealMemos.loop.section}>
           <DealMemoLoop
             dealId={deal.id}
@@ -109,26 +118,28 @@ export async function DealMemoSections({
           />
         </PageSection>
       )}
-      <PageSection id="contrat" title={dealMemos.contract.section}>
-        <div className="flex flex-col gap-6">
-          <DealContract
-            dealId={deal.id}
-            participation={deal.participationId !== null}
-            contract={contract}
-            options={options}
-          />
-          <DealMemoCompare
-            dealId={deal.id}
-            memo={validated && { id: validated.id, number: validated.number }}
-            rows={
-              validated && contract
-                ? compareMemo(validated, contract, checks)
-                : null
-            }
-            canWrite={canCheck}
-          />
-        </div>
-      </PageSection>
+      {followPart && (
+        <PageSection id="contrat" title={dealMemos.contract.section}>
+          <div className="flex flex-col gap-6">
+            <DealContract
+              dealId={deal.id}
+              participation={deal.participationId !== null}
+              contract={contract}
+              options={options}
+            />
+            <DealMemoCompare
+              dealId={deal.id}
+              memo={validated && { id: validated.id, number: validated.number }}
+              rows={
+                validated && contract
+                  ? compareMemo(validated, contract, checks)
+                  : null
+              }
+              canWrite={canCheck}
+            />
+          </div>
+        </PageSection>
+      )}
     </>
   );
 }

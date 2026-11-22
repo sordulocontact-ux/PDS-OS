@@ -8124,7 +8124,8 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     (`deal_memo_moves`) ; ces événements portent `detail.memo` : pas de second memo photographié
     (`deal_events_memo`), pas de seconde notification (`deal_events_notify`). L'accord proposé depuis les termes
     (un terme confirmé, « Changer d'étape ») reste possible. Section « Deal memo » juste sous les termes en
-    négociation, en tête à l'accord et en contractualisation. En négociation, « Maintenant » = le geste du memo
+    négociation, en tête à l'accord et en contractualisation ; « Dans la boucle » et « Contrat » après les termes
+    (`DealMemoSections part`), le contrat remonte sous le memo en contractualisation. En négociation, « Maintenant » = le geste du memo
     (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore envoyé → « Envoyer à valider » (la
     direction : « Valider ») ; aucun → deal Label ou Marque : « En attente du deal memo de <structure> », « Copier
     l'adresse du deal » seul (rien une fois la correction demandée ; « Nouveau deal memo » reste sur la carte) ; deal Musique (PDS est le label) : « Rédiger le deal memo ».

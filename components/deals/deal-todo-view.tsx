@@ -42,7 +42,7 @@ import { dealContacts } from "@/lib/i18n/fr/deal-contacts";
 import { deals as t } from "@/lib/i18n/fr/deals";
 import { formatShortDay } from "@/lib/utils/day";
 
-type Work = "next" | "terms" | "contacts" | "calls" | "memo";
+type Work = "next" | "terms" | "contacts" | "calls" | "memo" | "contract";
 
 // What each stage works on under its « Maintenant », in order (Ibé
 // 18/11/2026: one view to act, the rest in « Dossier »): around the call,
@@ -53,10 +53,12 @@ const WORKS: Partial<Record<DealStage, Work[]>> = {
   call_planned: ["calls", "next", "contacts", "terms"],
   // The deal memo is the accord de principe (réunion avec Ibé du 18/11/2026,
   // 20261122110101): right under the terms while negotiating, first at the
-  // accord.
-  negotiation: ["terms", "memo", "next", "calls"],
-  agreement: ["memo", "next", "terms"],
-  contracting: ["memo", "next"],
+  // accord. The loop and the contract come after the terms, which matter
+  // more until the contract is drawn up (Sacha 22/11/2026); then the
+  // contract comes up.
+  negotiation: ["terms", "memo", "next", "calls", "contract"],
+  agreement: ["memo", "next", "terms", "contract"],
+  contracting: ["memo", "contract", "next"],
 };
 
 /** The deal's stages as a frieze of points, each reached one with its day
@@ -196,7 +198,17 @@ export function DealTodoView({
         <DealCalls calls={calls} movable={movable} />
       </PageSection>
     ),
-    memo: <DealMemoSections access={access} deal={deal} terms={terms} />,
+    memo: (
+      <DealMemoSections access={access} deal={deal} terms={terms} part="memo" />
+    ),
+    contract: (
+      <DealMemoSections
+        access={access}
+        deal={deal}
+        terms={terms}
+        part="follow"
+      />
+    ),
   };
   return (
     <>
