@@ -27,6 +27,7 @@ const t = fr.dealMemos;
 /** What the memo sent back needs: who receives it, the copies, SMTP. */
 export type MemoSendSetup = {
   replyTo: MemoReplyTo | null;
+  // The loop's contacts' addresses, prefilled in « Cc ».
   copies: string[];
   canEmail: boolean;
 };

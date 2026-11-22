@@ -31,6 +31,10 @@ export type OutgoingEmail = {
   replyTo?: string[];
   // Files joined to the e-mail (a meeting's report as a PDF).
   attachments?: EmailAttachment[];
+  // More recipients, in copy and in hidden copy (Sacha 22/11/2026).
+  alsoTo?: string[];
+  cc?: string[];
+  bcc?: string[];
 };
 
 export type EmailAttachment = {
@@ -61,7 +65,12 @@ export async function sendEmail(
   try {
     await transport.sendMail({
       from: { name: `${mail.sender.name} · PDS`, address: env.EMAIL_SMTP_USER },
-      to: { name: mail.to.name, address: mail.to.email },
+      to: [
+        { name: mail.to.name, address: mail.to.email },
+        ...(mail.alsoTo ?? []),
+      ],
+      cc: mail.cc?.length ? mail.cc : undefined,
+      bcc: mail.bcc?.length ? mail.bcc : undefined,
       replyTo: replyToOf(mail),
       subject: mail.subject,
       text: mail.text,

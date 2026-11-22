@@ -124,7 +124,7 @@ export async function DealMemoSections({
               replyTo,
               copies: loop
                 .filter((e) => e.kind === "contact" && e.email)
-                .map((e) => e.name),
+                .flatMap((e) => (e.email ? [e.email] : [])),
               canEmail: mail.canEmail,
             }}
             address={mail.address}

@@ -1,19 +1,25 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
+import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
+import { envelopeErrors } from "@/components/ui/mail-card";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { sendContractForSignature } from "@/lib/contracts/send-actions";
+import {
+  emailContractForSignature,
+  sendContractForSignature,
+} from "@/lib/contracts/send-actions";
 import { todayInParis } from "@/lib/contracts/types";
+import { addressesOf, type MailEnvelope } from "@/lib/email/addresses";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 
-import { ContractMailDraft } from "./contract-mail-draft";
+import { ContractMailDraft, type MailAttachment } from "./contract-mail-draft";
 
 const fr = { contracts, signedReturns };
 
@@ -24,7 +30,7 @@ export type SendMail = {
   to: { contactId: string; email: string | null } | null;
   subject: string;
   message: string;
-  attachment?: ReactNode;
+  attachment?: MailAttachment | null;
   // The person's private link: sent there when it is active.
   link: string | null;
   viaLink: boolean;
@@ -83,6 +89,16 @@ function SendForm({
 }) {
   const today = todayInParis(new Date());
   const [way, setWay] = useState<"mail" | "other">("mail");
+  // PDS OS sends this e-mail itself (SMTP set, an address, no private
+  // link to send it on): Sacha 22/11/2026.
+  const byPds = !mail.auto && Boolean(mail.smtp) && Boolean(mail.to?.email);
+  const [message, setMessage] = useState(mail.message);
+  const [envelope, setEnvelope] = useState<MailEnvelope>({
+    to: mail.to?.email ?? "",
+    cc: "",
+    bcc: "",
+    subject: mail.subject,
+  });
   const [how, setHow] = useState<string | null>(null);
   const [on, setOn] = useState(today);
   const [tried, setTried] = useState(false);
@@ -101,6 +117,22 @@ function SendForm({
       onSubmit={(event) => {
         event.preventDefault();
         setTried(true);
+        if (way === "mail" && byPds) {
+          if (Object.values(envelopeErrors(envelope)).some(Boolean)) return;
+          return submit.run(() =>
+            emailContractForSignature({
+              contractId,
+              projectId,
+              envelope: {
+                to: addressesOf(envelope.to),
+                cc: addressesOf(envelope.cc),
+                bcc: addressesOf(envelope.bcc),
+              },
+              subject: envelope.subject,
+              message,
+            }),
+          );
+        }
         if (way === "mail")
           return submit.run(() =>
             sendContractForSignature(
@@ -128,29 +160,14 @@ function SendForm({
         );
       }}
     >
-      <ChoiceCards
-        name={`send-way-${contractId}`}
-        legend={t.send.legend}
-        hideLegend
-        variant="list"
-        value={way}
-        onChange={setWay}
-        choices={[
-          mail.auto
-            ? {
-                value: "mail",
-                label: t.auto.byMailAuto,
-                hint: t.auto.byMailAutoHint,
-              }
-            : { value: "mail", label: t.send.byMail, hint: t.send.byMailHint },
-          {
-            value: "other",
-            label: t.send.otherwise,
-            hint: t.send.otherwiseHint,
-          },
-        ]}
-      />
-      {way === "mail" && mail.auto ? null : way === "mail" ? (
+      {/* The e-mail at once: it is how a contract leaves almost always;
+          handed another way is the exception, one link away (Sacha
+          22/11/2026: « j'aime pas ce composant »). */}
+      {way === "mail" && mail.auto ? (
+        <p className="text-body-md text-[color:var(--text-secondary)]">
+          {t.auto.byMailAutoHint}
+        </p>
+      ) : way === "mail" ? (
         <ContractMailDraft
           to={mail.to}
           subject={mail.subject}
@@ -158,6 +175,13 @@ function SendForm({
           link={mail.link}
           message={mail.message}
           smtp={mail.smtp}
+          bySelf={!byPds}
+          onMessage={setMessage}
+          envelope={
+            byPds
+              ? { value: envelope, onChange: setEnvelope, tried }
+              : undefined
+          }
         />
       ) : (
         <>
@@ -184,11 +208,24 @@ function SendForm({
           />
         </>
       )}
+      <Button
+        type="button"
+        variant="link"
+        size="sm"
+        className="w-fit px-0"
+        onClick={() => setWay(way === "mail" ? "other" : "mail")}
+      >
+        {way === "mail" ? t.send.otherwise : t.send.backToMail}
+      </Button>
       <FormMessage kind="error">{submit.error}</FormMessage>
       <DialogFormActions
         pending={submit.pending}
         submitLabel={
-          way === "mail" && mail.auto ? t.auto.sendButton : t.send.markSent
+          way === "mail" && mail.auto
+            ? t.auto.sendButton
+            : way === "mail" && byPds
+              ? t.sendMail.button
+              : t.send.markSent
         }
         onCancel={onDone}
       />

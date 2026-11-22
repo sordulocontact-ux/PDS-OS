@@ -257,6 +257,16 @@ export const contracts = {
     // (validate_contracts).
     submit: "Envoyer à valider",
     openPdf: "Ouvrir le PDF",
+    // « Envoyer par e-mail » sent by PDS OS (emailContractForSignature).
+    sendMail: {
+      label: "PDS OS envoie l'e-mail, le contrat en pièce jointe",
+      hint: "Depuis po@, à votre nom : l'e-mail et sa date font preuve.",
+      button: "Envoyer",
+      noFile: "Le PDF du contrat est introuvable : déposez-le d'abord.",
+      failed: "L'e-mail n'est pas parti. Réessayez, ou envoyez-le autrement.",
+      disabled:
+        "PDS OS n'envoie pas d'e-mail ici : envoyez-le depuis votre messagerie.",
+    },
     decide: {
       approve: "Valider",
       requestChanges: "Demander des modifications",
@@ -274,6 +284,7 @@ export const contracts = {
       byMailHint:
         "Préparé par PDS OS, envoyé depuis votre messagerie : l'e-mail et sa date font preuve.",
       otherwise: "Je l'ai remis autrement",
+      backToMail: "Revenir à l'e-mail",
       otherwiseHint: "Main propre, outil de signature… avec sa date.",
       markSent: "Marquer comme envoyé",
       sent: "Contrat envoyé pour signature.",

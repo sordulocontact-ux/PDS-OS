@@ -5,6 +5,13 @@
 
 export const mail = {
   to: "À",
+  // The envelope written in the card (MailCard `envelope`, Sacha 22/11/2026).
+  cc: "Cc",
+  bcc: "Cci",
+  addresses: "Séparez les adresses par une virgule",
+  addressesInvalid: (list: string) => `Adresse non valide : ${list}`,
+  toMissing: "Indiquez au moins un destinataire.",
+  subjectMissing: "Indiquez l'objet.",
   subject: "Objet",
   attachment: "Pièce jointe",
   message: "Message",
