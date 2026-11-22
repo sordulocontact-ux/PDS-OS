@@ -7,7 +7,6 @@ import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { FactRow, type FactSource } from "@/components/ui/fact-row";
 import { Input } from "@/components/ui/input";
-import { NameChip, NameChips } from "@/components/ui/name-chip";
 import {
   addressesOf,
   envelopeErrors,
@@ -61,6 +60,13 @@ export function MailEnvelopeRows({
     </Button>
   );
 
+  // Cc and Cci only once written or opened (Outlook, Sacha 22/11/2026).
+  const shown = (key: Key) =>
+    key === "to" ||
+    key === "subject" ||
+    editing === key ||
+    addressesOf(value[key]).length > 0;
+
   const row = (key: Key) => {
     const label = labels[key];
     const rowSource =
@@ -71,7 +77,28 @@ export function MailEnvelopeRows({
         <FactRow
           key={key}
           label={label}
-          side={ok}
+          side={
+            key === "to" ? (
+              <>
+                {/* As Outlook: Cc and Cci open from the « À » field. */}
+                {(["cc", "bcc"] as const)
+                  .filter((k) => !shown(k))
+                  .map((k) => (
+                    <Button
+                      key={k}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditing(k)}
+                    >
+                      {labels[k]}
+                    </Button>
+                  ))}
+                {ok}
+              </>
+            ) : (
+              ok
+            )
+          }
           control={
             key === "subject" ? (
               <span className="flex flex-col gap-1.5">
@@ -116,15 +143,32 @@ export function MailEnvelopeRows({
         />
       );
     const list = key === "subject" ? [] : addressesOf(value[key]);
-    const shown =
+    const text =
       key === "subject" ? (
         value.subject
       ) : list.length ? (
-        <NameChips>
-          {list.map((email) => (
-            <NameChip key={email} name={nameOfAddress(people, email)} person />
-          ))}
-        </NameChips>
+        // As a mail app writes them: « Léa Martin <lea@label.fr>, … »;
+        // chips only while the row is changed (Sacha 22/11/2026).
+        <span>
+          {list.map((email, i) => {
+            const who = nameOfAddress(people, email);
+            return (
+              <span key={email}>
+                {i > 0 && ", "}
+                {who === email ? (
+                  email
+                ) : (
+                  <>
+                    {who}{" "}
+                    <span className="text-[color:var(--text-secondary)]">
+                      &lt;{email}&gt;
+                    </span>
+                  </>
+                )}
+              </span>
+            );
+          })}
+        </span>
       ) : key === "to" && errors.to ? (
         ""
       ) : (
@@ -134,7 +178,7 @@ export function MailEnvelopeRows({
       <FactRow
         key={key}
         label={label}
-        value={shown}
+        value={text}
         source={rowSource}
         missing={Boolean(errors[key])}
         missingLabel={errors[key]}
@@ -150,5 +194,7 @@ export function MailEnvelopeRows({
     );
   };
 
-  return <>{(["to", "cc", "bcc", "subject"] as const).map(row)}</>;
+  return (
+    <>{(["to", "cc", "bcc", "subject"] as const).filter(shown).map(row)}</>
+  );
 }
