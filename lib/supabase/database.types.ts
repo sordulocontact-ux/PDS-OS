@@ -25330,6 +25330,10 @@ export type Database = {
         Args: { p_formality_id: string }
         Returns: number
       }
+      generate_deal_contract: {
+        Args: { p_deal_id: string; p_fields: Json; p_template_id: string }
+        Returns: string
+      }
       generate_legal_contract: {
         Args: { p_fields: Json; p_need_id: string }
         Returns: string

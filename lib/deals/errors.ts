@@ -36,6 +36,10 @@ const MESSAGES: Record<string, string> = {
   term_unchanged: t.termUnchanged,
   term_value_required: t.termValueRequired,
   text_too_long: t.textTooLong,
+  template_not_validated: t.templateNotValidated,
+  contract_fields_missing: t.contractFieldsMissing,
+  deal_contract_generated: t.dealContractGenerated,
+  participation_contract: t.participationContract,
 };
 
 /** A failed deal function, in French; anything unknown is logged. */

@@ -1,5 +1,10 @@
 /** The Business module's deals (BIZ 2 to 4): stages, gestures, errors. */
 export const deals = {
+  // What a generated contract says of the deal's party (dealFieldValues).
+  contractFields: {
+    company: "Société",
+    person: "Personne physique",
+  },
   // The Deals page (BIZ 4): one list, tabs and filters.
   title: "Deals",
   description:
@@ -391,6 +396,11 @@ export const deals = {
     term: "Terme enregistré",
   },
   errors: {
+    templateNotValidated: "Choisissez un modèle validé.",
+    contractFieldsMissing: "Remplissez chaque valeur du contrat.",
+    dealContractGenerated: "Le contrat de ce deal est déjà généré.",
+    participationContract:
+      "Le contrat d'un deal de participation est celui de la participation.",
     generic: "L'enregistrement a échoué. Réessayez.",
     invalid: "Vérifiez les champs du formulaire.",
     forbidden: "Vous n'avez pas le droit de faire ce geste sur ce deal.",

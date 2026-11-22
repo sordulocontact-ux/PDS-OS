@@ -20,12 +20,37 @@ export const CONTRACT_FIELD_IDS = [
   "projet.titres",
   "remuneration",
   "organisation.nom",
+  // The terms of a deal (its validated deal memo), for the long contract
+  // generated from the deal (Sacha 22/11/2026, 20261122140101); one per term
+  // of lib/deals/terms.ts, music, label and brand.
+  "deal.songwriting_split",
+  "deal.master_split",
+  "deal.royalties",
+  "deal.advance",
+  "deal.credits",
+  "deal.territories",
+  "deal.duration",
+  "deal.exclusivity",
+  "deal.promo",
+  "deal.deal_nature",
+  "deal.scope",
+  "deal.minimum_guarantee",
+  "deal.options",
+  "deal.commitments",
+  "deal.conditions",
+  "deal.campaign",
+  "deal.deliverables",
+  "deal.schedule",
+  "deal.fee",
+  "deal.usage_rights",
+  "deal.paid_media",
+  "deal.obligations",
 ] as const;
 export type ContractFieldId = (typeof CONTRACT_FIELD_IDS)[number];
 
 /** The fields as the template editor offers them, by what they describe. */
 export const CONTRACT_FIELD_GROUPS: Record<
-  "person" | "project" | "agreement",
+  "person" | "project" | "agreement" | "deal",
   readonly ContractFieldId[]
 > = {
   person: [
@@ -41,10 +66,21 @@ export const CONTRACT_FIELD_GROUPS: Record<
   ],
   project: ["projet.titre", "projet.artiste", "projet.titres"],
   agreement: ["remuneration", "personne.roles", "organisation.nom"],
+  deal: CONTRACT_FIELD_IDS.filter((id) => id.startsWith("deal.")),
 };
 
+/** A term of a deal, as a template's field (« deal.royalties »). */
+export const dealFieldOf = (termKey: string) => `deal.${termKey}`;
+
 export type FieldSource =
-  "fiche" | "network" | "project" | "credits" | "mapping" | "organization";
+  | "fiche"
+  | "network"
+  | "project"
+  | "credits"
+  | "mapping"
+  | "organization"
+  // The terms of a deal's validated memo.
+  | "deal";
 
 // Same pattern as contract_placeholders (SQL).
 const PLACEHOLDER = /\{\{\s*([a-z0-9_.]+)\s*\}\}/g;
@@ -73,7 +109,13 @@ export function feeCentsOf(text: string | null | undefined): number | null {
 }
 
 /** Where each value is kept, so a missing one says where to fill it in. */
-export const FIELD_HOME: Record<ContractFieldId, FieldSource> = {
+export const FIELD_HOME = {
+  ...(Object.fromEntries(
+    CONTRACT_FIELD_IDS.filter((id) => id.startsWith("deal.")).map((id) => [
+      id,
+      "deal",
+    ]),
+  ) as Partial<Record<ContractFieldId, FieldSource>>),
   "personne.nom_civil": "fiche",
   "personne.nom_artiste": "fiche",
   "personne.email": "fiche",
@@ -89,4 +131,4 @@ export const FIELD_HOME: Record<ContractFieldId, FieldSource> = {
   "projet.titres": "credits",
   remuneration: "mapping",
   "organisation.nom": "organization",
-};
+} as Record<ContractFieldId, FieldSource>;

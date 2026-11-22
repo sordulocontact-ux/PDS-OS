@@ -4,7 +4,9 @@ import { DealMemoLoop } from "@/components/deals/deal-memo-loop";
 import { DealMemos } from "@/components/deals/deal-memos";
 import { PageSection } from "@/components/shell/page-section";
 import { can, type Access } from "@/lib/auth/access";
+import { routes } from "@/lib/auth/redirects";
 import { listCatalogFiles } from "@/lib/catalog/files";
+import { getContractDocument } from "@/lib/legal/contracts/document";
 import { loadDealContacts } from "@/lib/deals/contact-queries";
 import {
   dealMailSetup,
@@ -73,10 +75,20 @@ export async function DealMemoSections({
   const pick = (category: string) =>
     contractFiles.find((f) => f.category === category) ?? null;
   const latestFile = pick("signed") ?? pick("pds_signed") ?? pick("draft");
-  const contractFile = latestFile && {
-    name: latestFile.fileName,
-    openUrl: latestFile.openUrl,
-  };
+  // Generated from a template: its document, printed on demand.
+  const generated =
+    contractPart && contract?.visible && !latestFile
+      ? (await getContractDocument(contract.id)) !== null
+      : false;
+  const contractFile = latestFile
+    ? { name: latestFile.fileName, openUrl: latestFile.openUrl }
+    : generated && contract
+      ? {
+          name: contract.title,
+          openUrl: null,
+          pdfHref: routes.contractDocumentPdf(contract.id),
+        }
+      : null;
   const mail = dealMailSetup(deal.id);
   const latestFrom = memos.find((m) => m.email)?.email?.from ?? null;
   const replyTo =

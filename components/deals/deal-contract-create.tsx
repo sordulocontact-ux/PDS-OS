@@ -33,17 +33,20 @@ export function DealContractCreate({
   defaults,
   variant = "outline",
   size = "sm",
+  label = t.create,
 }: {
   dealId: string;
   defaults: DealContractDefaults;
   // `default`/`lg`: the main gesture of « Maintenant ».
   variant?: "default" | "outline";
   size?: "lg" | "sm";
+  // « Importer un contrat » beside « Générer le contrat ».
+  label?: string;
 }) {
   const link = useWriteSubmit(undefined, t.created);
   return (
     <LoadedFormButton
-      label={t.create}
+      label={label}
       icon={IconPlus}
       variant={variant}
       size={size}

@@ -187,6 +187,18 @@ export const dealMemos = {
     createDescription:
       "Rempli depuis le deal ; il lui est lié dès sa création. Ses parties et ses fichiers s'ajoutent ensuite sur sa page.",
     created: "Contrat créé et lié au deal",
+    // « Générer le contrat » (DealContractGenerate, 20261122140101).
+    generate: "Générer le contrat",
+    generateTitle: "Générer le contrat",
+    generateDescription:
+      "Un modèle validé de Contrats, rempli avec les termes du deal memo validé : vérifiez chaque valeur.",
+    generated: "Contrat généré et lié au deal",
+    template: "Modèle",
+    noTemplate:
+      "Aucun modèle validé dans Contrats : faites-en valider un, ou importez le contrat.",
+    values: "Valeurs du contrat",
+    missing: "Écrivez cette valeur.",
+    import: "Importer un contrat",
     openPdf: "Ouvrir le PDF",
     // The contracting's gesture in « Maintenant » (DealContractNow).
     now: {

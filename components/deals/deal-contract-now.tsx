@@ -4,6 +4,7 @@ import {
   DealContractCreate,
   type DealContractDefaults,
 } from "@/components/deals/deal-contract-create";
+import { DealContractGenerate } from "@/components/deals/deal-contract-generate";
 import { nowHeading, nowSecondary } from "@/components/deals/now-classes";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 
@@ -20,7 +21,8 @@ export type ContractStep = {
 /**
  * The contracting's first gesture in « Maintenant » (Sacha 22/11/2026: « je
  * voudrais pouvoir tout faire depuis la page du deal »): no contract yet →
- * « Créer le contrat » (linked to the deal at once). Once there, the
+ * « Générer le contrat » from a validated template filled from the deal (the
+ * main gesture: PDS OS writes it), or « Importer un contrat » received. Once there, the
  * contract's own « Maintenant » takes over on the deal (ContractNow, the
  * same as in Contrats: deposit its PDF, send to validate, validate, send for
  * signature, mark signed). A participation's contract is the project
@@ -39,13 +41,14 @@ export function DealContractNow({
     <>
       <h2 className={nowHeading}>{t.create}</h2>
       {step.create && (
-        <div>
+        <div className="flex flex-wrap gap-2">
           <DealContractCreate
             dealId={dealId}
             defaults={step.create}
-            variant="default"
+            label={dealMemos.contract.import}
             size="lg"
           />
+          <DealContractGenerate dealId={dealId} size="lg" />
         </div>
       )}
     </>

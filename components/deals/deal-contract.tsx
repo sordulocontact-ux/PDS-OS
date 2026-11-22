@@ -11,9 +11,11 @@ import {
   type DealContractDefaults,
 } from "@/components/deals/deal-contract-create";
 import { ContractDepositButton } from "@/components/contracts/contract-deposit-button";
+import { DealContractGenerate } from "@/components/deals/deal-contract-generate";
 import { IconExternalLink } from "@/components/icons";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { IconAction } from "@/components/ui/icon-action";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -104,7 +106,12 @@ export function DealContract({
   // « Créer le contrat », for whoever creates contracts (Sacha 22/11/2026).
   create?: DealContractDefaults | null;
   // Its PDF (the latest draft or signed copy), to open from the deal.
-  document?: { name: string; openUrl: string | null } | null;
+  // `pdfHref`: a contract generated from a template, printed on demand.
+  document?: {
+    name: string;
+    openUrl: string | null;
+    pdfHref?: string;
+  } | null;
   // The organization, for whoever may deposit its PDF.
   deposit?: string | null;
 }) {
@@ -182,7 +189,16 @@ export function DealContract({
                   }
                 />
               )}
-              {document?.openUrl ? (
+              {document?.pdfHref ? (
+                <PdfExportButton
+                  href={document.pdfHref}
+                  fileName={`${document.name}.pdf`}
+                  label={t.openPdf}
+                  pendingLabel={fr.dealMemos.pdf.pending}
+                  failedLabel={fr.dealMemos.pdf.failed}
+                  size="sm"
+                />
+              ) : document?.openUrl ? (
                 <Button
                   size="sm"
                   nativeButton={false}
@@ -215,12 +231,15 @@ export function DealContract({
               <span className="flex flex-wrap justify-center gap-2">
                 {canLink && !empty && linkButton}
                 {create && !participation && (
-                  <DealContractCreate
-                    dealId={dealId}
-                    defaults={create}
-                    // The main gesture here (Sacha 22/11/2026).
-                    variant="default"
-                  />
+                  <>
+                    <DealContractCreate
+                      dealId={dealId}
+                      defaults={create}
+                      label={t.import}
+                    />
+                    {/* The main gesture here (Sacha 22/11/2026). */}
+                    <DealContractGenerate dealId={dealId} />
+                  </>
                 )}
               </span>
             )
