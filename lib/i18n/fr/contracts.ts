@@ -366,8 +366,9 @@ export const contracts = {
     countersign: {
       button: "Signer pour PDS",
       title: "Signer pour PDS ?",
-      body: (person: string, version: number | null) =>
-        `${person} a signé le contrat${version ? ` v${version}` : ""}. Votre signature conclut le contrat ; il ne se modifie plus ensuite.`,
+      // One sentence: the gesture and what it concludes (Sacha 23/11/2026:
+      // « trop de texte »); who signed is on the file's card below.
+      body: "Signez ce PDF pour PDS avec votre outil habituel, puis déposez-le. Le contrat ne se modifie plus ensuite.",
       done: "Contrat signé pour PDS.",
     },
     // A contract back signed outside its link, or one already signed.

@@ -30,7 +30,6 @@ export function ContractCountersignDialog({
   organizationId,
   pdsSigned,
   person,
-  version,
   document,
   canSign,
   signedOn,
@@ -40,7 +39,6 @@ export function ContractCountersignDialog({
   // The PDF signed in turn for PDS is already dropped.
   pdsSigned: boolean;
   person: string;
-  version: number | null;
   // The signed copy (name, « Voir le PDF »).
   document: ReactNode;
   // The viewer may also mark it signed (advance_contract 'sign').
@@ -53,7 +51,7 @@ export function ContractCountersignDialog({
       variant="default"
       size="lg"
       title={t.title}
-      description={t.body(person, version)}
+      description={t.body}
     >
       {(close) => (
         <CountersignForm
@@ -121,9 +119,6 @@ function CountersignForm({
       }}
     >
       {document}
-      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {team.countersignBody(person)}
-      </p>
       <ContractProofSlot
         organizationId={organizationId}
         contractId={contractId}

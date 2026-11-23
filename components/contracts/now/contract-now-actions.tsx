@@ -185,7 +185,6 @@ export function ContractNowActions({
             organizationId={contract.organizationId}
             pdsSigned={Boolean(proof?.pdsSigned)}
             person={person}
-            version={version}
             canSign={contract.can.sign}
             signedOn={backOn}
             document={

@@ -112,7 +112,7 @@ export const signedReturns = {
     awaitingCountersign: (direction: string) =>
       `En attente de ${direction} : signer le contrat pour PDS.`,
     pdsFile: "Le contrat signé des deux parties (PDF)",
-    pdsFileHint: "Le PDF signé par la personne, signé à son tour pour PDS",
+    pdsFileHint: "Glissez un fichier ou cliquez",
     pdsFileMissing:
       "Déposez d'abord le PDF signé pour PDS : l'exemplaire signé des deux parties.",
     notReturned:
