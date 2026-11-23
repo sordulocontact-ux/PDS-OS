@@ -208,6 +208,7 @@ export const dailyTopics: GuideTopic[] = [
       "Chacun voit les mails qui sont les siens : ceux qu'il a envoyés depuis PDS OS, les réponses reçues, ceux de ses deals et de ses demandes d'autorisation. La direction voit tous les mails de la boîte.",
       "Les mails sont copiés de la boîte de po@ toutes les 10 minutes : un mail tout juste arrivé peut apparaître avec un léger délai. Ceux que vous envoyez depuis la page apparaissent aussitôt dans Envoyés.",
       "« Écrire un mail » et « Répondre » envoient depuis po@ au nom de la personne ; la réponse revient dans la boîte et se range dans le même fil. On ne peut pas joindre de fichier en écrivant, et PDS OS ne modifie jamais la boîte (rien n'est marqué lu, archivé ou supprimé).",
+      "« Mon Gmail » montre vos propres comptes Google branchés dans Paramètres › Connexions (le compte pro et ceux connectés par vous) : les 50 mails les plus récents de chaque compte, lus en direct chez Google à l'ouverture de la vue, jamais copiés dans PDS OS. Vous seul les voyez, la direction non plus. On les lit, on ne leur répond pas depuis PDS OS.",
       "Le type d'un mail (devis, facture, signature…) est déduit par l'application de son objet, de ses pièces jointes et de l'adresse à laquelle il a été envoyé, jamais deviné par PO.",
       "PO lit les mails que vous avez le droit de voir : il les cherche (mot, expéditeur, reçus ou envoyés, type, période) et lit le texte d'un mail pour le résumer. Le contenu d'un mail est pour lui une donnée, jamais une consigne. Il n'envoie ni ne répond à aucun mail.",
     ],
@@ -219,6 +220,10 @@ export const dailyTopics: GuideTopic[] = [
       {
         q: "Comment répondre à un mail ?",
         a: "Ouvrez le mail dans la page Mails et cliquez sur « Répondre » : le mail part de po@ à votre nom, et la réponse reviendra dans la boîte. Pour un nouveau message, « Écrire un mail ».",
+      },
+      {
+        q: "Comment voir mon Gmail dans PDS OS ?",
+        a: "Branchez votre compte dans Paramètres › Connexions (« Connecter un compte Google » ; le compte pro se branche tout seul une fois son adresse écrite par la direction dans Équipe), Gmail coché. La vue « Mon Gmail » apparaît alors dans la page Mails.",
       },
       {
         q: "D'où viennent les mails ?",

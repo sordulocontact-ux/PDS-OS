@@ -8422,6 +8422,15 @@ Ticket : `.tickets/archive/2026-11-23-page-mails/TICKET.md`.
   500 mails les plus récents ; panneau `SideSheet` (texte brut chargé à l'ouverture par
   `readMailboxBody`, jamais le HTML : pas de XSS). PO : outil de lecture `mailbox`
   (`lib/assistant/read/mailbox.ts`, `docs/ASSISTANT.md`), le texte d'un mail encadré comme donnée.
+- **« Mon Gmail »** (Sacha, même jour : « ajoute aussi la lecture de mon Gmail ») : vue `?vue=gmail`, montrée
+  seulement à qui a un compte Google avec Gmail (§ 4 quater : compte pro par délégation, comptes connectés,
+  sans ceux où Gmail est coupé ; `lib/mailbox/gmail-accounts.ts`). Les 50 mails les plus récents de chaque
+  compte sont lus **en direct** à l'ouverture de la vue (`lib/mailbox/gmail.ts`, seul point d'entrée de l'API
+  Gmail : `lib/integrations/google-gmail.ts`, `gmail.readonly`), jamais copiés : privés à leur propriétaire,
+  la direction ne les voit pas. Texte lu à l'ouverture d'un mail (`readGmailBody`), pièce jointe par
+  `/api/mailbox/gmail/[account]/[message]/[part]` (le message est relu : Gmail change l'id de la pièce à chaque
+  lecture). Lecture seule : pas de « Répondre » (il enverrait depuis po@). Une adresse po+ctr-<id>@ rattache
+  aussi un mail au responsable du contrat (`owners-context.ts`).
 
 ## 9. Design (`docs/DESIGN.md`)
 

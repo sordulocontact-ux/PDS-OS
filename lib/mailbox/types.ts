@@ -44,4 +44,8 @@ export type MailboxMessage = {
   attachments: MailboxAttachment[];
   kinds: MailKind[];
   link: MailboxLink | null;
+  // A mail of the member's own Gmail (« Mon Gmail »), read live, never
+  // stored: the account it is read from and its id at Gmail. Null for a
+  // mail of PDS OS's box.
+  gmail: { account: string; email: string; id: string } | null;
 };

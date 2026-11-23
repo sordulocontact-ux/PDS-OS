@@ -13,7 +13,8 @@ import type { InboxEntry } from "@/lib/email/inbox-entries";
  *   Reply-To is their address, lib/email/send.ts), and any member in From,
  *   To or Cc.
  * - Received: the member who sent it, any member in To or Cc, the people of
- *   the authorisation request or the deal of a po+aut-<id>@ / po+deal-<id>@
+ *   the authorisation request, the deal or the contract of a po+aut-<id>@ /
+ *   po+deal-<id>@ / po+ctr-<id>@
  *   address it was sent to, and the owners of the messages it answers (its
  *   thread).
  *

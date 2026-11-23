@@ -97,6 +97,7 @@ export async function listMailbox(access: Access): Promise<{
       attachments,
       kinds: mailKinds({ subject: row.subject, attachments, to, cc }),
       link: links[index] ?? null,
+      gmail: null,
     };
   });
   return { messages, truncated, error: false };

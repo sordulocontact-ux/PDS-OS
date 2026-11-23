@@ -13,8 +13,12 @@ import { formatInstant } from "@/lib/utils/instant";
 
 const fr = { mailbox };
 
-const downloadHref = (id: string, part: string) =>
-  `/api/mailbox/${id}/attachments/${encodeURIComponent(part)}`;
+// A file of PDS OS's box, or of « Mon Gmail » (read from the member's own
+// account).
+const downloadHref = (message: MailboxMessage, part: string) =>
+  message.gmail
+    ? `/api/mailbox/gmail/${encodeURIComponent(message.gmail.account)}/${encodeURIComponent(message.gmail.id)}/${encodeURIComponent(part)}`
+    : `/api/mailbox/${message.id}/attachments/${encodeURIComponent(part)}`;
 
 /**
  * A mail in the side sheet: received or sent and when, its types, who,
@@ -39,6 +43,8 @@ export function MailSheet({ message }: { message: MailboxMessage }) {
           <>
             {message.folder === "sent" ? t.sent : t.received} ·{" "}
             <Timestamp iso={message.sentAt} />
+            {/* « Mon Gmail »: the account it is read from. */}
+            {message.gmail && <> · {message.gmail.email}</>}
           </>
         }
         caption={
@@ -65,7 +71,7 @@ export function MailSheet({ message }: { message: MailboxMessage }) {
             {message.attachments.map((file) => (
               <li key={file.part} className="flex items-baseline gap-2">
                 <a
-                  href={downloadHref(message.id, file.part)}
+                  href={downloadHref(message, file.part)}
                   download
                   aria-label={t.download(file.name)}
                   className="min-w-0 truncate underline-offset-2 hover:underline"
@@ -82,10 +88,14 @@ export function MailSheet({ message }: { message: MailboxMessage }) {
           </ul>
         </section>
       )}
-      <MailBody id={message.id} />
-      <div>
-        <MailReplyButton message={message} />
-      </div>
+      <MailBody message={message} />
+      {/* « Répondre » sends from PDS OS's box: not for a mail of one's own
+          Gmail, read only. */}
+      {!message.gmail && (
+        <div>
+          <MailReplyButton message={message} />
+        </div>
+      )}
     </>
   );
 }

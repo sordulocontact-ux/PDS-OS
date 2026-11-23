@@ -2737,5 +2737,7 @@ envoyés ; chacun voit les siens, la direction tout ; écrire et répondre depui
   deal / l'autorisation / les justificatifs, « Écrire un mail », « Répondre ».
 - PO : outil de lecture `mailbox`, sujet « Mails » du guide.
 - Tests : `supabase/tests/mailbox.test.sql` (10), `team.test.sql` mis à jour.
+- Même jour : « Mon Gmail » (les comptes Google du membre lus en direct, privés, lecture seule) ; un mail
+  envoyé à po+ctr-<id>@ revient aussi au responsable du contrat.
 - Détail : `docs/ARCHITECTURE.md` § 8 quindecies.
 

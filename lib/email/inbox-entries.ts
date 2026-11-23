@@ -52,7 +52,7 @@ const asList = (value: string | string[] | undefined): string[] =>
   Array.isArray(value) ? value : value ? value.split(/\s+/) : [];
 
 // A text read from HTML when the message has no text part.
-function htmlText(html: string): string {
+export function htmlText(html: string): string {
   return html
     .replace(/<(style|script)[\s\S]*?<\/\1>/gi, "")
     .replace(/<br\s*\/?>|<\/(p|div|li|tr|h[1-6])>/gi, "\n")

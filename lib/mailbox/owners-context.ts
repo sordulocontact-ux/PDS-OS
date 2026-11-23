@@ -1,5 +1,6 @@
 import "server-only";
 
+import { contractOfAddress } from "@/lib/email/contract-address";
 import { dealOfAddress } from "@/lib/email/deal-memo-address";
 import type { InboxEntry } from "@/lib/email/inbox-entries";
 import { clearanceOfAddress } from "@/lib/email/reply-address";
@@ -88,7 +89,11 @@ export async function loadOwnersContext(
   ].filter((a): a is string => Boolean(a));
   const clearanceAt = new Map<string, string>();
   const dealAt = new Map<string, string>();
+  const contractAt = new Map<string, string>();
   for (const address of recipients) {
+    // A signed copy sent back to its contract's address (po+ctr-<id>@).
+    const contract = contractOfAddress(address);
+    if (contract) contractAt.set(address, contract);
     const clearance = clearanceOfAddress(address);
     if (clearance) clearanceAt.set(address, clearance);
     const deal = dealOfAddress(address);
@@ -100,6 +105,7 @@ export async function loadOwnersContext(
       organizationId,
       [...clearanceAt.values()],
       [...dealAt.values()],
+      [...contractAt.values()],
     ),
     threadOwners(
       supabase,
@@ -108,7 +114,7 @@ export async function loadOwnersContext(
     ),
   ]);
   const tagged = new Map<string, string[]>();
-  for (const [address, id] of [...clearanceAt, ...dealAt]) {
+  for (const [address, id] of [...clearanceAt, ...dealAt, ...contractAt]) {
     const ids = (people.get(id) ?? []).filter((p) => memberIds.has(p));
     if (ids.length) tagged.set(address, ids);
   }
@@ -118,15 +124,17 @@ export async function loadOwnersContext(
 /**
  * The people of each request (its responsible, the owner of its project:
  * who public.receive_clearance_reply tells) and of each deal (its assignee,
- * the owner of its project: who reads it, public.deal_readable_by), by id.
+ * the owner of its project: who reads it, public.deal_readable_by) and of
+ * each contract (its owner, the owner of its project), by id.
  */
 async function peopleOf(
   supabase: Admin,
   organizationId: string,
   clearanceIds: string[],
   dealIds: string[],
+  contractIds: string[],
 ): Promise<Map<string, string[]>> {
-  const [clearances, deals] = await Promise.all([
+  const [clearances, deals, contracts] = await Promise.all([
     clearanceIds.length
       ? supabase
           .from("legal_clearances")
@@ -141,6 +149,13 @@ async function peopleOf(
           .eq("organization_id", organizationId)
           .in("id", [...new Set(dealIds)])
       : null,
+    contractIds.length
+      ? supabase
+          .from("contracts")
+          .select("id, owner_person_id, project_id")
+          .eq("organization_id", organizationId)
+          .in("id", [...new Set(contractIds)])
+      : null,
   ]);
   const rows = [
     ...(clearances?.data ?? []).map((c) => ({
@@ -152,6 +167,11 @@ async function peopleOf(
       id: d.id,
       person: d.assignee_person_id,
       project: d.project_id,
+    })),
+    ...(contracts?.data ?? []).map((c) => ({
+      id: c.id,
+      person: c.owner_person_id,
+      project: c.project_id,
     })),
   ];
   const projectIds = [

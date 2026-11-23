@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mailbox } from "@/lib/i18n/fr/mailbox";
+import { readGmailBody } from "@/lib/mailbox/gmail-actions";
 import { readMailboxBody } from "@/lib/mailbox/read-actions";
+import type { MailboxMessage } from "@/lib/mailbox/types";
 
 const fr = { mailbox };
 
@@ -13,15 +15,17 @@ type Body = { id: string; text: string } | { id: string; error: string };
 
 /**
  * The text of a mail, loaded when its panel opens. Plain text only, never
- * the mail's HTML, and a mail's words are data: shown, never run.
+ * the mail's HTML, and a mail's words are data: shown, never run. A mail of
+ * « Mon Gmail » is read from Gmail, one of PDS OS's box from the database.
  */
-export function MailBody({ id }: { id: string }) {
+export function MailBody({ message }: { message: MailboxMessage }) {
+  const { id, gmail } = message;
   const t = fr.mailbox.sheet;
   const [body, setBody] = useState<Body | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    readMailboxBody(id)
+    (gmail ? readGmailBody(gmail.account, gmail.id) : readMailboxBody(id))
       .then((result) => {
         if (cancelled) return;
         setBody(
@@ -34,7 +38,7 @@ export function MailBody({ id }: { id: string }) {
     return () => {
       cancelled = true;
     };
-  }, [id, t.bodyError]);
+  }, [id, gmail, t.bodyError]);
 
   // A body of another mail (the panel moved on) is a body not loaded yet.
   const current = body?.id === id ? body : null;
