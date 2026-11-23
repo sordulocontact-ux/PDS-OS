@@ -109,24 +109,27 @@ export type BoardLinks = {
 };
 
 /** Which columns the table has besides those always there (Artiste,
- * Statut, Contact, Mix, Sortie, Beatmaker, Note): Accord and Taux when the
+ * Statut, Contact, Mix, Sortie, Beatmaker): Accord and Taux when the
  * reader sees deals (dealReach, lot 6); Fiche de renseignement and Contrat
  * with manage_legal; Distribution once the project has the workflow; « ⋯ »
  * for whoever writes the titles (none for a reader: no empty column on the
- * right). */
+ * right). `notes`: the artists' notes in a « Note » column of their own
+ * (Maël 23/11/2026), none on an overview (too much there). */
 type Columns = {
   accord: boolean;
   legal: boolean;
   distribution: boolean;
   actions: boolean;
+  notes: boolean;
 };
 
 // Every column (a group row spans them).
 const columnCount = (columns: Columns) =>
-  7 +
+  6 +
   2 * Number(columns.accord) +
   2 * Number(columns.legal) +
   Number(columns.distribution) +
+  Number(columns.notes) +
   Number(columns.actions);
 
 /** How a confirmation credits the title (creditModeOf), and the warning of
@@ -160,16 +163,21 @@ const masterHrefOf = (title: RecapTitle, links: BoardLinks) =>
 // The columns, as wide as their facts need, never squeezed (`min-w-*`):
 // the table is the Excel's width (Maël 22/11/2026: « toutes les colonnes de
 // la feuille Excel »), wider than the page, and scrolls inside its frame,
-// the page never does. Artiste stays on the left (`sticky`) while it
-// scrolls, on its own ground so that nothing shows through, above the pills
-// and buttons of the other cells (`z-20` > their `z-10`); its column rule
-// drawn by the cell itself (a 1 px shadow in place of its right border, which
-// a collapsed table leaves behind), so it follows the cell. The cells wrap
-// (their pills too, recap-facts). Literal classes: Tailwind only generates
-// what it reads in full.
+// the page never does. Artiste stays on the left and « ⋯ » on the right
+// (`sticky`, Maël 23/11/2026) while it scrolls, on their own ground so that
+// nothing shows through, above the pills and buttons of the other cells
+// (`z-20` > their `z-10`); their column rule drawn by the cell itself
+// (`before:`, a border staying behind in a collapsed table, which paints no
+// box-shadow on a cell either), so it follows the cell; `after:` is the
+// shadow of what passes under, shown by SCROLL_SHADOWS on the cells marked
+// `scroll-start` / `scroll-end`. The cells wrap (their pills
+// too, recap-facts). Literal classes: Tailwind only generates what it reads
+// in full.
 const COLUMN = {
   artist:
-    "sticky left-0 z-20 w-44 min-w-44 bg-card not-last:border-r-0 shadow-[1px_0_0_0_var(--border-hairline)] in-[.section-card_.table-flat]:shadow-none @min-[624px]:w-56 @min-[624px]:min-w-56",
+    "scroll-start sticky left-0 z-20 w-44 min-w-44 bg-card not-last:border-r-0 before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-3 after:bg-[linear-gradient(to_right,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_right,rgb(0_0_0/0.4),transparent)] @min-[624px]:w-56 @min-[624px]:min-w-56",
+  actions:
+    "scroll-end sticky right-0 z-20 w-16 bg-card pl-4 align-top py-2 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:right-full after:w-3 after:bg-[linear-gradient(to_left,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_left,rgb(0_0_0/0.4),transparent)]",
   status: "w-32 min-w-32",
   contact: "w-52 min-w-52",
   accord: "w-44 min-w-44",
@@ -180,21 +188,29 @@ const COLUMN = {
   release: "w-32 min-w-32",
   distribution: "w-44 min-w-44",
   beatmaker: "w-48 min-w-48",
-  note: "w-56 min-w-56",
+  // The note, three lines at most (the whole on hover).
+  note: "w-72 min-w-72",
 } as const;
 
 // A row's cells read from the top: an artist's name may take several lines
 // (its title, its waivers), its pills stay beside its first one.
 const CELL = "align-top whitespace-normal";
 
-// The header's Artiste on the header's band: the card's ground under the
-// band's tint (translucent in the dark theme, it would let the columns
-// scrolled under it show through); bare in a section card, as the band.
-const ARTIST_HEAD =
+// The header's sticky cells (Artiste, « ⋯ ») on the header's band: the
+// card's ground under the band's tint (translucent in the dark theme, it
+// would let the columns scrolled under it show through); bare in a section
+// card, as the band.
+const STICKY_HEAD =
   "[background-image:linear-gradient(var(--surface-soft),var(--surface-soft))] in-[.section-card_.table-flat]:[background-image:none]";
 
-// The edge with more columns to see fades out (useScrollFade on the
-// table's own scrolling box); never the left one, where Artiste stays.
+// What passes under a sticky column casts a light shadow on its inner edge
+// (useScrollFade's `data-fade` on the table's own scrolling box: start,
+// end or both); nothing to scroll, no shadow.
+const SCROLL_SHADOWS =
+  "[&_[data-fade=start]_.scroll-start]:after:opacity-100 [&_[data-fade=both]_.scroll-start]:after:opacity-100 [&_[data-fade=end]_.scroll-end]:after:opacity-100 [&_[data-fade=both]_.scroll-end]:after:opacity-100";
+
+// Without « ⋯ » (a reader), the right edge fades out while columns remain
+// there.
 const END_FADE =
   "[&_[data-slot=table-container][data-fade=both]]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] [&_[data-slot=table-container][data-fade=end]]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)]";
 
@@ -205,6 +221,11 @@ const ROW = cn(
   "border-0 hover:bg-transparent has-aria-expanded:bg-transparent",
   ROW_INSET,
 );
+
+// The head of a title's group of artists: on the soft band, as a group
+// row of DataTable, never a rule between groups (no-dividers).
+const GROUP_ROW =
+  "bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] in-[.section-card_.table-flat]:bg-transparent";
 
 // A name that opens its page (the artist's démarche, the title's Master):
 // the link is the name itself.
@@ -228,7 +249,8 @@ const Empty = () => <span className={muted}>{EMPTY_CELL}</span>;
  * Accord (deal, call; « Caler le call »), Taux, Fiche de renseignement
  * (« Pas envoyée », « Envoyée », « Renseignée », opening the fiche itself),
  * Contrat, Mix, Sortie (edited here), Distribution, Beatmaker (and their
- * fiche), Note (edited here). The fiche's personal data stay in the fiche.
+ * fiche), Note (edited here, Maël 23/11/2026). The fiche's personal data
+ * stay in the fiche.
  * A title's facts repeat on each of its artists' rows, as in the Excel; a
  * title without an artist has its own row. « Le tableau lit, les modules
  * font »: each name and pill leads to its module. Counters on top filter
@@ -244,6 +266,7 @@ export function TitlesBoard({
   artists,
   masterOptions = {},
   links,
+  notes = true,
   today = todayInParis(new Date()),
 }: {
   projectId: string;
@@ -254,6 +277,8 @@ export function TitlesBoard({
   // Catalogue », lot 7): id → « Titre · Artistes ».
   masterOptions?: Record<string, string>;
   links: BoardLinks;
+  // The artists' notes, read and written; none on an overview.
+  notes?: boolean;
   // Paris's day, read by the server (a waiver's due date, lot 12).
   today?: string;
 }) {
@@ -274,6 +299,7 @@ export function TitlesBoard({
     legal: recap.canReadLegal,
     distribution: links.distribution !== null,
     actions: canManage,
+    notes,
   };
 
   // The counters filter the artists; a title stays while one of its
@@ -325,10 +351,11 @@ export function TitlesBoard({
     );
 
   const total = CONTACT_STATES.reduce((sum, s) => sum + recap.counts[s], 0);
-  const rows = (list: typeof groups) =>
+  const rows = (list: typeof groups, layout: Layout) =>
     list.map(({ title, participations }) => (
       <Fragment key={title.id}>
         <TitleRows
+          layout={layout}
           projectId={projectId}
           title={title}
           participations={participations}
@@ -346,8 +373,20 @@ export function TitlesBoard({
       </Fragment>
     ));
 
+  const abandonedHead = (
+    <>
+      {t.abandonedGroup}
+      <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
+        {abandoned.length}
+      </span>
+    </>
+  );
+
+  // The table from 640 px of board, else its cards (a phone, Maël
+  // 23/11/2026): both written, the board's width shows one (container
+  // query), so that nothing jumps at load.
   return (
-    <div className="flex flex-col gap-3">
+    <div className="@container/board flex flex-col gap-3">
       {total > 0 && (
         <div
           role="group"
@@ -378,85 +417,108 @@ export function TitlesBoard({
       {groups.length === 0 ? (
         <EmptyNote>{r.filteredEmpty}</EmptyNote>
       ) : (
-        <ScrollingTable>
-          <DataTableHeader>
-            <DataTableHead className={cn(COLUMN.artist, ARTIST_HEAD)}>
-              {r.columns.artist}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.status}>
-              {r.columns.status}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.contact}>
-              {r.columns.contact}
-            </DataTableHead>
-            {columns.accord && (
-              <>
-                <DataTableHead className={COLUMN.accord}>
-                  {r.columns.accord}
+        <>
+          <div className="hidden @min-[40rem]/board:block">
+            <ScrollingTable fadeEnd={!columns.actions}>
+              <DataTableHeader>
+                <DataTableHead className={cn(COLUMN.artist, STICKY_HEAD)}>
+                  {r.columns.artist}
                 </DataTableHead>
-                <DataTableHead className={COLUMN.rate}>
-                  {r.columns.rate}
+                <DataTableHead className={COLUMN.status}>
+                  {r.columns.status}
                 </DataTableHead>
-              </>
-            )}
-            {columns.legal && (
-              <>
-                <DataTableHead className={COLUMN.fiche}>
-                  {r.columns.fiche}
+                <DataTableHead className={COLUMN.contact}>
+                  {r.columns.contact}
                 </DataTableHead>
-                <DataTableHead className={COLUMN.contract}>
-                  {r.columns.contract}
+                {columns.accord && (
+                  <>
+                    <DataTableHead className={COLUMN.accord}>
+                      {r.columns.accord}
+                    </DataTableHead>
+                    <DataTableHead className={COLUMN.rate}>
+                      {r.columns.rate}
+                    </DataTableHead>
+                  </>
+                )}
+                {columns.legal && (
+                  <>
+                    <DataTableHead className={COLUMN.fiche}>
+                      {r.columns.fiche}
+                    </DataTableHead>
+                    <DataTableHead className={COLUMN.contract}>
+                      {r.columns.contract}
+                    </DataTableHead>
+                  </>
+                )}
+                <DataTableHead className={COLUMN.mix}>
+                  {r.columns.mix}
                 </DataTableHead>
-              </>
-            )}
-            <DataTableHead className={COLUMN.mix}>
-              {r.columns.mix}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.release}>
-              {r.columns.release}
-            </DataTableHead>
-            {columns.distribution && (
-              <DataTableHead className={COLUMN.distribution}>
-                {r.columns.distribution}
-              </DataTableHead>
-            )}
-            <DataTableHead className={COLUMN.beatmaker}>
-              {r.columns.beatmaker}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.note}>
-              {r.columns.note}
-            </DataTableHead>
-            {columns.actions && (
-              <DataTableActionsHead label={t.columns.actions} />
-            )}
-          </DataTableHeader>
-          <DataTableBody>
-            {rows(live)}
+                <DataTableHead className={COLUMN.release}>
+                  {r.columns.release}
+                </DataTableHead>
+                {columns.distribution && (
+                  <DataTableHead className={COLUMN.distribution}>
+                    {r.columns.distribution}
+                  </DataTableHead>
+                )}
+                <DataTableHead className={COLUMN.beatmaker}>
+                  {r.columns.beatmaker}
+                </DataTableHead>
+                {columns.notes && (
+                  <DataTableHead className={COLUMN.note}>
+                    {r.columns.note}
+                  </DataTableHead>
+                )}
+                {columns.actions && (
+                  <DataTableActionsHead
+                    label={t.columns.actions}
+                    className={cn(COLUMN.actions, STICKY_HEAD)}
+                  />
+                )}
+              </DataTableHeader>
+              <DataTableBody>
+                {rows(live, "table")}
+                {abandoned.length > 0 && (
+                  <DataTableGroupRow columns={columnCount(columns)}>
+                    {/* Kept in sight while the table scrolls sideways. */}
+                    <span className="sticky left-4 inline-flex text-[length:var(--type-body-md)] font-semibold">
+                      {abandonedHead}
+                    </span>
+                  </DataTableGroupRow>
+                )}
+                {rows(abandoned, "table")}
+              </DataTableBody>
+            </ScrollingTable>
+          </div>
+          <div className="flex flex-col gap-3 @min-[40rem]/board:hidden">
+            {rows(live, "cards")}
             {abandoned.length > 0 && (
-              <DataTableGroupRow columns={columnCount(columns)}>
-                {/* Kept in sight while the table scrolls sideways. */}
-                <span className="sticky left-4 inline-flex text-[length:var(--type-body-md)] font-semibold">
-                  {t.abandonedGroup}
-                  <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
-                    {abandoned.length}
-                  </span>
-                </span>
-              </DataTableGroupRow>
+              <p className="mt-2 px-1 text-[length:var(--type-body-md)] font-semibold">
+                {abandonedHead}
+              </p>
             )}
-            {rows(abandoned)}
-          </DataTableBody>
-        </ScrollingTable>
+            {rows(abandoned, "cards")}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
 /** The table in its frame, scrolling sideways when it is wider (the
- * shadcn Table's own box, `data-slot="table-container"`), its right edge
- * fading while columns are hidden there. Mounted with the table, so the
- * fade follows each table shown. `isolate`: what stands above a cell
- * (`relative z-10`, the sticky Artiste) stays inside the table. */
-function ScrollingTable({ children }: { children: ReactNode }) {
+ * shadcn Table's own box, `data-slot="table-container"`): what passes
+ * under Artiste or « ⋯ » casts a light shadow on their edge; without « ⋯ »
+ * (`fadeEnd`), the right edge fades while columns are hidden there. Mounted
+ * with the table, so that it follows each table shown. `isolate`: what
+ * stands above a cell (`relative z-10`, the sticky columns) stays inside
+ * the table. */
+function ScrollingTable({
+  fadeEnd,
+  children,
+}: {
+  fadeEnd: boolean;
+  children: ReactNode;
+}) {
   const box = useRef<HTMLElement | null>(null);
   useScrollFade(box, "x");
   return (
@@ -466,7 +528,7 @@ function ScrollingTable({ children }: { children: ReactNode }) {
           node?.querySelector<HTMLElement>('[data-slot="table-container"]') ??
           null;
       }}
-      className={cn("@container isolate", END_FADE)}
+      className={cn("@container isolate", SCROLL_SHADOWS, fadeEnd && END_FADE)}
     >
       <DataTable>{children}</DataTable>
     </div>
@@ -475,7 +537,11 @@ function ScrollingTable({ children }: { children: ReactNode }) {
 
 type Dialog = "add" | "rename" | "name" | "abandon" | "attach";
 
+/** A row of the table, or a card of the phone's list. */
+type Layout = "table" | "cards";
+
 type TitleRowsProps = {
+  layout: Layout;
   projectId: string;
   title: RecapTitle;
   // Its artists shown (the counters may filter them).
@@ -492,16 +558,19 @@ type TitleRowsProps = {
   today: string;
 };
 
-/** A title's rows: one per artist shown, else « Aucun artiste invité »
- * (with « Ajouter un artiste » for whoever writes). Holds what the title's
- * rows share: its facts (Mix, Sortie, Distribution, Beatmaker, the same on
- * each row), its release, saved at the choice and shown at once on all of
- * them, its gestures (in each row's « ⋯ ») and their dialogs, once. */
+/** A title's rows (`layout="table"`) or cards (`layout="cards"`, a phone):
+ * one per artist shown, else « Aucun artiste invité » (with « Ajouter un
+ * artiste » for whoever writes). Holds what the title's rows share: its
+ * facts (Mix, Sortie, Distribution, Beatmaker, the same on each row), its
+ * release, saved at the choice and shown at once on all of them, its
+ * gestures (in each row's « ⋯ ») and their dialogs, once. */
 function TitleRows(props: TitleRowsProps) {
   const { projectId, title, participations, columns, canManage, links } = props;
   const t = fr.projectTitles;
+  const r = t.recap;
   const label = title.recap.label;
   const abandoned = title.status === "abandoned";
+  const cards = props.layout === "cards";
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [release, setRelease] = useOptimistic(title.recap.releaseDecision);
   const [releasePending, startRelease] = useTransition();
@@ -528,16 +597,24 @@ function TitleRows(props: TitleRowsProps) {
   // An abandoned title is out of the Master (lot 9): no state there.
   const mixFact = abandoned ? null : titleMixFact(title.masterState);
   const distribution = links.distribution?.[title.id] ?? null;
-  const titleCells = (
-    <>
-      <DataTableCell className={cn(COLUMN.mix, CELL)}>
+  const titleFacts: Fact[] = [
+    {
+      key: "mix",
+      label: r.columns.mix,
+      column: COLUMN.mix,
+      node: (
         <MixPill
           label={mixFact?.label ?? null}
           status={mixFact?.status ?? null}
           href={masterHref}
         />
-      </DataTableCell>
-      <DataTableCell className={cn(COLUMN.release, CELL)}>
+      ),
+    },
+    {
+      key: "release",
+      label: r.columns.release,
+      column: COLUMN.release,
+      node: (
         <ReleaseChoice
           label={label}
           value={releaseValueOf(release)}
@@ -545,26 +622,36 @@ function TitleRows(props: TitleRowsProps) {
           pending={releasePending}
           onPick={pickRelease}
         />
-      </DataTableCell>
-      {columns.distribution && (
-        <DataTableCell className={cn(COLUMN.distribution, CELL)}>
-          {distribution ? (
-            <ViewLink href={distribution.href} className={PILL_LINK}>
-              <StatusBadge
-                tone={distribution.tone}
-                size="sm"
-                className="h-auto min-h-5 max-w-full py-0.5 text-left whitespace-normal"
-              >
-                {distribution.label}
-              </StatusBadge>
-            </ViewLink>
-          ) : (
-            <Empty />
-          )}
-        </DataTableCell>
-      )}
-      <DataTableCell className={cn(COLUMN.beatmaker, CELL)}>
-        {title.recap.beatmakers.length > 0 ? (
+      ),
+    },
+    ...(columns.distribution
+      ? [
+          {
+            key: "distribution",
+            label: r.columns.distribution,
+            column: COLUMN.distribution,
+            node: distribution ? (
+              <ViewLink href={distribution.href} className={PILL_LINK}>
+                <StatusBadge
+                  tone={distribution.tone}
+                  size="sm"
+                  className="h-auto min-h-5 max-w-full py-0.5 text-left whitespace-normal"
+                >
+                  {distribution.label}
+                </StatusBadge>
+              </ViewLink>
+            ) : (
+              <Empty />
+            ),
+          },
+        ]
+      : []),
+    {
+      key: "beatmaker",
+      label: r.columns.beatmaker,
+      column: COLUMN.beatmaker,
+      node:
+        title.recap.beatmakers.length > 0 ? (
           <span className="flex min-w-0 flex-col items-start gap-1.5">
             {title.recap.beatmakers.map((person) => (
               <span
@@ -582,21 +669,15 @@ function TitleRows(props: TitleRowsProps) {
           </span>
         ) : (
           <Empty />
-        )}
-      </DataTableCell>
-    </>
-  );
+        ),
+    },
+  ];
+  const onName =
+    canManage && !abandoned && isUnnamed(title)
+      ? () => setDialog("name")
+      : undefined;
   const titleLine = (
-    <TitleLine
-      title={title}
-      label={label}
-      href={masterHref}
-      onName={
-        canManage && !abandoned && isUnnamed(title)
-          ? () => setDialog("name")
-          : undefined
-      }
-    />
+    <TitleLine title={title} label={label} href={masterHref} onName={onName} />
   );
   // Once per title, in its first row's « ⋯ » cell (a dialog shows in a
   // portal, wherever it is written).
@@ -615,27 +696,39 @@ function TitleRows(props: TitleRowsProps) {
     />
   );
 
-  if (participations.length === 0)
+  if (participations.length === 0) {
+    const empty = (
+      <span className="flex min-w-0 flex-col items-start gap-0.5">
+        <span className={muted}>{t.board.noArtist}</span>
+        {titleLine}
+        {canManage &&
+          !abandoned &&
+          Object.keys(props.artists.options).length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-1.5"
+              onClick={() => setDialog("add")}
+            >
+              {t.participations.add.action}
+            </Button>
+          )}
+      </span>
+    );
+    const menu = columns.actions && (
+      <RowActions label={t.menu(label)} actions={titleActions} />
+    );
+    if (cards)
+      return (
+        <FactCard head={empty} menu={menu} facts={titleFacts}>
+          {dialogs}
+        </FactCard>
+      );
     return (
       <TableRow className={ROW}>
         <DataTableCell className={cn(COLUMN.artist, CELL)}>
-          <span className="flex min-w-0 flex-col items-start gap-0.5">
-            <span className={muted}>{t.board.noArtist}</span>
-            {titleLine}
-            {canManage &&
-              !abandoned &&
-              Object.keys(props.artists.options).length > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-1.5"
-                  onClick={() => setDialog("add")}
-                >
-                  {t.participations.add.action}
-                </Button>
-              )}
-          </span>
+          {empty}
         </DataTableCell>
         {/* The artist's columns: nothing to say without one. */}
         <DataTableCell
@@ -644,49 +737,148 @@ function TitleRows(props: TitleRowsProps) {
         >
           {null}
         </DataTableCell>
-        {titleCells}
-        <DataTableCell className={cn(COLUMN.note, CELL)}>{null}</DataTableCell>
+        <FactCells facts={titleFacts} />
+        {columns.notes && (
+          <DataTableCell className={cn(COLUMN.note, CELL)}>
+            {null}
+          </DataTableCell>
+        )}
         {columns.actions && (
-          <DataTableActionsCell>
-            <RowActions label={t.menu(label)} actions={titleActions} />
+          <DataTableActionsCell className={COLUMN.actions}>
+            {menu}
             {dialogs}
           </DataTableActionsCell>
         )}
       </TableRow>
     );
+  }
 
+  // Several artists on the title: their rows grouped under it, its name
+  // written once (Maël 23/11/2026), its facts still on each row. On a
+  // phone, the name above its cards.
+  const grouped = participations.length > 1;
+  const heading = grouped && (
+    <TitleLine
+      title={title}
+      label={label}
+      href={masterHref}
+      heading
+      onName={onName}
+    />
+  );
+  const artistRows = participations.map((participation, index) => (
+    <ArtistRow
+      key={participation.id}
+      layout={props.layout}
+      projectId={projectId}
+      title={title}
+      participation={participation}
+      label={label}
+      credit={credit}
+      columns={columns}
+      call={props.call}
+      canReadLegal={props.canReadLegal}
+      canEditNetwork={props.canEditNetwork && !abandoned}
+      today={props.today}
+      titleLine={grouped ? null : titleLine}
+      titleFacts={titleFacts}
+      titleActions={titleActions}
+      dialogs={index === 0 ? dialogs : null}
+      // Its title abandoned: greyed and not edited (reactivate it first).
+      dimmed={abandoned}
+      canManage={canManage && !abandoned}
+      // Confirmed on a title a simple project shares: its credits were
+      // not written, they are to check by hand (décision 10).
+      toCheck={
+        credit.mode === "manual" &&
+        participation.status === "confirmed" &&
+        !abandoned
+      }
+    />
+  ));
+  if (cards)
+    return grouped ? (
+      <div className="flex flex-col gap-2">
+        <div className="px-1">{heading}</div>
+        {artistRows}
+      </div>
+    ) : (
+      <>{artistRows}</>
+    );
   return (
     <>
-      {participations.map((participation, index) => (
-        <ArtistRow
-          key={participation.id}
-          projectId={projectId}
-          title={title}
-          participation={participation}
-          label={label}
-          credit={credit}
-          columns={columns}
-          call={props.call}
-          canReadLegal={props.canReadLegal}
-          canEditNetwork={props.canEditNetwork && !abandoned}
-          today={props.today}
-          titleLine={titleLine}
-          titleCells={titleCells}
-          titleActions={titleActions}
-          dialogs={index === 0 ? dialogs : null}
-          // Its title abandoned: greyed and not edited (reactivate it first).
-          dimmed={abandoned}
-          canManage={canManage && !abandoned}
-          // Confirmed on a title a simple project shares: its credits were
-          // not written, they are to check by hand (décision 10).
-          toCheck={
-            credit.mode === "manual" &&
-            participation.status === "confirmed" &&
-            !abandoned
-          }
-        />
+      {grouped && (
+        <TableRow className={cn(ROW, GROUP_ROW)}>
+          <DataTableCell
+            className={cn(
+              COLUMN.artist,
+              CELL,
+              STICKY_HEAD,
+              "py-2 before:hidden",
+            )}
+          >
+            {heading}
+          </DataTableCell>
+          <DataTableCell colSpan={columnCount(columns) - 1} className="py-2">
+            {null}
+          </DataTableCell>
+        </TableRow>
+      )}
+      {artistRows}
+    </>
+  );
+}
+
+/** A column's fact (its header's words, its width, what it shows), told
+ * once for a row's cell and a card's pair. */
+type Fact = { key: string; label: string; column: string; node: ReactNode };
+
+/** The facts as a row's cells. */
+function FactCells({ facts }: { facts: Fact[] }) {
+  return (
+    <>
+      {facts.map((fact) => (
+        <DataTableCell key={fact.key} className={cn(fact.column, CELL)}>
+          {fact.node}
+        </DataTableCell>
       ))}
     </>
+  );
+}
+
+/** A row on a phone (Maël 23/11/2026: two sticky columns left 120 px to
+ * read): a card, its head (the artist and its title, status) with
+ * « ⋯ » at its top right, then its facts one under the other, label and
+ * value. Cards keep apart by their gap, never a rule (no-dividers); the
+ * card's own outline is the design system's. `children`: the title's
+ * dialogs, once. */
+function FactCard({
+  head,
+  menu,
+  facts,
+  children,
+}: {
+  head: ReactNode;
+  menu: ReactNode;
+  facts: Fact[];
+  children?: ReactNode;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-[color:var(--border-default)] bg-card p-4 text-[length:var(--type-body-md)] font-medium">
+      <div className="flex min-w-0 items-start gap-2">
+        <div className="min-w-0 flex-1">{head}</div>
+        {menu && <div className="-mt-1.5 -mr-2 shrink-0">{menu}</div>}
+        {children}
+      </div>
+      <dl className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] gap-x-3 gap-y-2.5">
+        {facts.map((fact) => (
+          <Fragment key={fact.key}>
+            <dt className={cn(caption, "pt-0.5 break-words")}>{fact.label}</dt>
+            <dd className="flex min-w-0 flex-col items-start">{fact.node}</dd>
+          </Fragment>
+        ))}
+      </dl>
+    </div>
   );
 }
 
@@ -698,11 +890,14 @@ function TitleLine({
   label,
   href,
   onName,
+  heading = false,
 }: {
   title: RecapTitle;
   label: string;
   href: string | null;
   onName?: () => void;
+  // At the head of its artists' group (TitleGroupRow): in the cell's ink.
+  heading?: boolean;
 }) {
   const t = fr.projectTitles;
   const reason =
@@ -713,7 +908,12 @@ function TitleLine({
         )
       : null;
   return (
-    <span className={cn(caption, "flex min-w-0 flex-col")}>
+    <span
+      className={cn(
+        heading ? "font-semibold" : caption,
+        "flex min-w-0 flex-col",
+      )}
+    >
       <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
         {href ? (
           <ViewLink
@@ -722,7 +922,8 @@ function TitleLine({
             // name: the caption's grey, a step darker.
             className={cn(
               NAME_LINK,
-              "min-w-0 [overflow-wrap:anywhere] text-[color:var(--text-secondary)]",
+              "min-w-0 [overflow-wrap:anywhere]",
+              !heading && "text-[color:var(--text-secondary)]",
             )}
           >
             {label}
@@ -735,14 +936,20 @@ function TitleLine({
             type="button"
             aria-label={t.recap.name.title(label)}
             onClick={onName}
-            className="relative z-10 shrink-0 rounded-sm font-medium text-[color:var(--text-secondary)] underline underline-offset-2 outline-none hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
+            className="relative z-10 shrink-0 rounded-sm text-[length:var(--type-caption)] font-medium text-[color:var(--text-secondary)] underline underline-offset-2 outline-none hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
           >
             {t.recap.name.action}
           </button>
         )}
       </span>
       {reason && (
-        <span className="line-clamp-2 break-words" title={reason}>
+        <span
+          className={cn(
+            "line-clamp-2 break-words",
+            heading && cn(caption, "font-medium"),
+          )}
+          title={reason}
+        >
           {reason}
         </span>
       )}
@@ -753,9 +960,11 @@ function TitleLine({
 /** An artist on a title, one row: Artiste (name and role, its title, its
  * waivers), Statut, Contact, Accord, Taux, Fiche de renseignement, Contrat,
  * then its title's facts, Note, « ⋯ » (the artist's gestures, then the
- * title's). The name opens the person's démarche in the Juridique, else the
- * deal. */
+ * title's). On a phone (`layout="cards"`), a card: name, title, status,
+ * then the same facts in pairs, the note last. The name opens the person's démarche
+ * in the Juridique, else the deal. */
 function ArtistRow({
+  layout,
   projectId,
   title,
   participation,
@@ -767,13 +976,14 @@ function ArtistRow({
   canEditNetwork,
   today,
   titleLine,
-  titleCells,
+  titleFacts,
   titleActions,
   dialogs,
   dimmed,
   canManage,
   toCheck,
 }: {
+  layout: Layout;
   projectId: string;
   title: RecapTitle;
   participation: RecapParticipation;
@@ -785,7 +995,7 @@ function ArtistRow({
   canEditNetwork: boolean;
   today: string;
   titleLine: ReactNode;
-  titleCells: ReactNode;
+  titleFacts: Fact[];
   titleActions: RowAction[];
   dialogs: ReactNode;
   dimmed: boolean;
@@ -793,6 +1003,7 @@ function ArtistRow({
   toCheck: boolean;
 }) {
   const t = fr.projectTitles;
+  const r = t.recap;
   const active = isActiveParticipation(participation.status) && !dimmed;
   const facts = participation.recap;
   const artist = participation.artist.name;
@@ -803,59 +1014,53 @@ function ArtistRow({
   const missing =
     !canReadLegal && contractGap(title, participation, today) !== null;
 
-  return (
-    <TableRow className={ROW}>
-      <DataTableCell className={cn(COLUMN.artist, CELL)}>
-        <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
-            <span
-              className={cn(
-                "min-w-0 [overflow-wrap:anywhere]",
-                !active && "text-[color:var(--text-secondary)]",
-              )}
-            >
-              {href ? (
-                <ViewLink href={href} className={NAME_LINK}>
-                  {artist}
-                </ViewLink>
-              ) : (
-                artist
-              )}
-            </span>
-            <span className={cn(muted, "shrink-0")}>
-              {`· ${t.participations.roles[participation.role]}`}
-            </span>
-          </span>
-          {titleLine}
-          {toCheck && (
-            <span className={cn(caption, "flex items-start gap-1.5")}>
-              <IconTriangleWarning
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0"
-              />
-              {t.participations.sharedShort}
-            </span>
-          )}
-          {missing && (
-            <span className={WARNING}>
-              <IconTriangleWarning
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0"
-              />
-              {t.recap.contractMissing}
-            </span>
-          )}
-          {!dimmed && (
-            <WaiverLines waivers={participation.waivers} today={today} />
-          )}
+  const status = <ContactStatePill status={participation.status} />;
+  const name = (
+    <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
+      <span
+        className={cn(
+          "min-w-0 [overflow-wrap:anywhere]",
+          !active && "text-[color:var(--text-secondary)]",
+        )}
+      >
+        {href ? (
+          <ViewLink href={href} className={NAME_LINK}>
+            {artist}
+          </ViewLink>
+        ) : (
+          artist
+        )}
+      </span>
+      <span className={cn(muted, "shrink-0")}>
+        {`· ${t.participations.roles[participation.role]}`}
+      </span>
+    </span>
+  );
+  const warnings = (
+    <>
+      {toCheck && (
+        <span className={cn(caption, "flex items-start gap-1.5")}>
+          <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {t.participations.sharedShort}
         </span>
-      </DataTableCell>
-      <DataTableCell className={cn(COLUMN.status, CELL)}>
-        <ContactStatePill status={participation.status} />
-      </DataTableCell>
-      <DataTableCell className={cn(COLUMN.contact, CELL)}>
-        {/* None and nothing to do: « — » (ContactFacts says nothing). */}
-        {facts.contact !== null || canManage ? (
+      )}
+      {missing && (
+        <span className={WARNING}>
+          <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {r.contractMissing}
+        </span>
+      )}
+      {!dimmed && <WaiverLines waivers={participation.waivers} today={today} />}
+    </>
+  );
+  const artistFacts: Fact[] = [
+    {
+      key: "contact",
+      label: r.columns.contact,
+      column: COLUMN.contact,
+      // None and nothing to do: « — » (ContactFacts says nothing).
+      node:
+        facts.contact !== null || canManage ? (
           <span className="flex min-w-0 flex-col items-start">
             <ContactFacts
               projectId={projectId}
@@ -868,12 +1073,15 @@ function ArtistRow({
           </span>
         ) : (
           <Empty />
-        )}
-      </DataTableCell>
-      {columns.accord && (
-        <>
-          <DataTableCell className={cn(COLUMN.accord, CELL)}>
-            {facts.accord ? (
+        ),
+    },
+    ...(columns.accord
+      ? [
+          {
+            key: "accord",
+            label: r.columns.accord,
+            column: COLUMN.accord,
+            node: facts.accord ? (
               <AccordFacts
                 accord={facts.accord}
                 artist={artist}
@@ -886,64 +1094,115 @@ function ArtistRow({
               />
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-          <DataTableCell className={cn(COLUMN.rate, CELL)}>
-            {facts.accord?.rate ? (
+            ),
+          },
+          {
+            key: "rate",
+            label: r.columns.rate,
+            column: COLUMN.rate,
+            node: facts.accord?.rate ? (
               <span className="text-[color:var(--text-secondary)] tabular-nums">
                 {facts.accord.rate}
               </span>
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-        </>
-      )}
-      {columns.legal && (
-        <>
-          <DataTableCell className={cn(COLUMN.fiche, CELL)}>
-            {facts.fiche ? (
+            ),
+          },
+        ]
+      : []),
+    ...(columns.legal
+      ? [
+          {
+            key: "fiche",
+            label: r.columns.fiche,
+            column: COLUMN.fiche,
+            node: facts.fiche ? (
               <FichePill fiche={facts.fiche} bare name={artist} />
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-          <DataTableCell className={cn(COLUMN.contract, CELL)}>
-            {facts.contract ? (
+            ),
+          },
+          {
+            key: "contract",
+            label: r.columns.contract,
+            column: COLUMN.contract,
+            node: facts.contract ? (
               <ContractFacts contract={facts.contract} />
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-        </>
-      )}
-      {titleCells}
-      <DataTableCell className={cn(COLUMN.note, CELL)}>
-        {canManage || facts.note ? (
-          <span className="flex min-w-0 flex-col items-start">
-            <NoteLine
-              projectId={projectId}
-              participationId={participation.id}
-              artist={artist}
-              note={facts.note}
-              canEdit={canManage}
-              wrap
-            />
+            ),
+          },
+        ]
+      : []),
+  ];
+  // Its own column, after the title's facts (Maël 23/11/2026); empty:
+  // « Ajouter une note » for whoever writes the title.
+  const noteFacts: Fact[] = columns.notes
+    ? [
+        {
+          key: "note",
+          label: r.columns.note,
+          column: COLUMN.note,
+          node:
+            facts.note || canManage ? (
+              <NoteLine
+                projectId={projectId}
+                participationId={participation.id}
+                artist={artist}
+                note={facts.note}
+                canEdit={canManage}
+              />
+            ) : (
+              <Empty />
+            ),
+        },
+      ]
+    : [];
+  const menu = columns.actions && (
+    <RowMenu
+      projectId={projectId}
+      participation={participation}
+      label={label}
+      credit={credit}
+      canManage={canManage}
+      titleActions={titleActions}
+    />
+  );
+
+  if (layout === "cards")
+    return (
+      <FactCard
+        head={
+          <span className="flex min-w-0 flex-col gap-0.5">
+            {name}
+            {titleLine}
+            <span className="mt-1 flex">{status}</span>
+            {warnings}
           </span>
-        ) : (
-          <Empty />
-        )}
+        }
+        menu={menu}
+        facts={[...artistFacts, ...titleFacts, ...noteFacts]}
+      >
+        {dialogs}
+      </FactCard>
+    );
+
+  return (
+    <TableRow className={ROW}>
+      <DataTableCell className={cn(COLUMN.artist, CELL)}>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          {name}
+          {titleLine}
+          {warnings}
+        </span>
       </DataTableCell>
+      <DataTableCell className={cn(COLUMN.status, CELL)}>
+        {status}
+      </DataTableCell>
+      <FactCells facts={[...artistFacts, ...titleFacts, ...noteFacts]} />
       {columns.actions && (
-        <DataTableActionsCell>
-          <RowMenu
-            projectId={projectId}
-            participation={participation}
-            label={label}
-            credit={credit}
-            canManage={canManage}
-            titleActions={titleActions}
-          />
+        <DataTableActionsCell className={COLUMN.actions}>
+          {menu}
           {dialogs}
         </DataTableActionsCell>
       )}

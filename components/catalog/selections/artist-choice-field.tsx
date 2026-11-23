@@ -17,7 +17,8 @@ const fr = { artistSelections };
  * « Ajouter des artistes », lot 4 of docs/pds-mic-plan.md): the search of
  * the artist and master pickers (SearchPicker, its last row creates an
  * artist that is then chosen), and the chosen ones just under it as pills
- * with their ✕ (always on screen when one has just been picked), in the
+ * with their ✕ (SearchPicker `chosen`: never under its list, on screen as
+ * soon as one is picked), in the
  * order they were picked; the legend counts them (« Artistes · 3 »).
  * Controlled by the form; `excludedIds`: artists already in the selection,
  * never offered. A name that exists is never offered for creation, even an
@@ -102,24 +103,26 @@ export function ArtistChoiceField({
         invalid={Boolean(error)}
         describedBy={error ? errorId : undefined}
         openOnFocus={openOnFocus}
+        chosen={
+          value.length > 0 ? (
+            <ul aria-label={t.chosen}>
+              <NameChips>
+                {value.map((artist) => (
+                  <li key={artist.id} className="contents">
+                    <NameChip
+                      name={artist.name}
+                      onRemove={() =>
+                        onChange(value.filter((a) => a.id !== artist.id))
+                      }
+                      removeLabel={t.remove(artist.name)}
+                    />
+                  </li>
+                ))}
+              </NameChips>
+            </ul>
+          ) : null
+        }
       />
-      {value.length > 0 && (
-        <ul aria-label={t.chosen}>
-          <NameChips>
-            {value.map((artist) => (
-              <li key={artist.id} className="contents">
-                <NameChip
-                  name={artist.name}
-                  onRemove={() =>
-                    onChange(value.filter((a) => a.id !== artist.id))
-                  }
-                  removeLabel={t.remove(artist.name)}
-                />
-              </li>
-            ))}
-          </NameChips>
-        </ul>
-      )}
       {error ? (
         <FieldError id={errorId}>{error}</FieldError>
       ) : (

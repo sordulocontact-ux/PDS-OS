@@ -2920,8 +2920,8 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   attendu) et `OverviewProgress` (avant le plan : les 4 étapes du Cadrage en fil, cochées / en cours en couleur
   de sélection avec « À vous » ou le nom / à venir ; après : une ligne par workflow, `ProgressRing`, « Étape n sur
   N · titre » ou « À vous : … », modèle `lib/overview/cards.ts`). Dessous, avant le plan : `FramingDeliverable`
-  (le Brief de cadrage, son état lu de l'étape `brief` du Cadrage, « Ouvrir le Brief ») ; après : `DependencyRows`
-  (en texte, sans pastille). `BeforeWorkflows`, `WorkflowCards` et l'en-tête « nom seul » du 29/10 sont supprimés.
+  (le Brief de cadrage, son état lu de l'étape `brief` du Cadrage, « Ouvrir le Brief ») ; après : rien (« Ce qui
+  dépend d'un autre workflow », `DependencyRows` et `lib/overview/dependencies.ts`, supprimés le 23/11/2026). `BeforeWorkflows`, `WorkflowCards` et l'en-tête « nom seul » du 29/10 sont supprimés.
   **Pochette d'un projet** : `projects.cover_path` (bucket privé `project-covers`, « org/projet/uuid.ext »),
   écrite par `set_project_cover` seulement (`can_edit_project_cover` : la direction `create_projects` avant
   l'acceptation, puis le responsable seul, `is_project_owner`) ; lue par `lib/projects/covers.ts`
@@ -2929,8 +2929,8 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   `listMasterCovers`, sinon rien → disque sur fond gris, comme les titres du Catalogue) ; URLs
   signées au rendu, jamais dans un cache (elles expirent). À la création, le formulaire envoie `intent=cover`
   (l'action renvoie le projet au lieu de rediriger), téléverse l'image (`uploadProjectCover`) puis ouvre le
-  projet. Listes de projets (`ProjectsTable`, aussi dans le Catalogue) : `withCovers` (petites copies). Sources de `DependencyRows`
-  (`lib/overview/dependencies.ts` : Master final = dépendance `master-online` ; Pochette livrée = un livrable dont
+  projet. Listes de projets (`ProjectsTable`, aussi dans le Catalogue) : `withCovers` (petites copies). Anciennes sources de `DependencyRows`
+  (supprimé ; `lib/overview/dependencies.ts` : Master final = dépendance `master-online` ; Pochette livrée = un livrable dont
   le titre correspond à `COVER` livré (`deliverable_deliveries.delivered_at`) ; Prêt pour la sortie = étape `ready`
   du parcours du Juridique s'il en a une, sinon Juridique Terminé ; Durée du master final = chaque titre a un fichier
   `final_master` avec `duration_seconds`). Supprimés : `ProjectBoard`, À faire ensuite, Blocages, Échéances,
@@ -5540,9 +5540,9 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   le manager principal de l'artiste au Catalogue ; lu sous RLS, un contact privé est masqué (aucune fonction
   SECURITY DEFINER ne lit `network_contacts`). `personKeyOf` s'aligne sur `formPeople`. Contrat de la personne et « En
   attente de l'accord » (dès qu'une participation de l'artiste est sans accord, règle de la base) ; taux = terme
-  `master_split` du deal. Collectif accepté : récap compact (`TitlesRecapCompact`) en tête de la Vue d'ensemble,
-  blocages dessous ; collectif non accepté : tableau complet en tête d'`UnlaunchedOverview` (après l'encart de réponse
-  reçue), la page Titres y est 404.
+  `master_split` du deal. Collectif accepté : récap compact (`TitlesRecapCompact`) en bas de la Vue d'ensemble,
+  sans les notes (23/11/2026 : long, il cachait le reste) ; collectif non accepté : tableau complet en bas
+  d'`UnlaunchedOverview` (après le bloc de transmission), `TitlesBoard notes={false}`, la page Titres y est 404.
 - **Actions** (`lib/projects/participation-actions.ts`, `title-actions.ts`) : `setParticipationContact`,
   `createParticipationContact`, `setContactPhone` (change le numéro dans le Réseau ; contact privé : propriétaire ou
   direction), `setParticipationNote`, `setTitleRelease` ; revalidation du projet en `"layout"`. SQL :

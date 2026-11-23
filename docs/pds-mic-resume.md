@@ -102,7 +102,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 - **Lot 6** (`20261113170101_main_artist_history`) : onglet **« Titres et artistes »** (`/app/projects/[id]/titles`,
   entrée après la Vue d'ensemble, collectif seulement : `projectSections({ collective })`, 404
   sinon ; collectif non lancé : le même tableau dans la Vue d'ensemble, sous « Ce qui est
-  transmis »). La liste minimale `ProjectTitles` est supprimée (la Vue d'ensemble lancée n'a plus
+  transmis », sans les notes). Collectif lancé : le récap compact en bas de la Vue d'ensemble,
+  sans les notes (23/11/2026). La liste minimale `ProjectTitles` est supprimée (la Vue d'ensemble lancée n'a plus
   de bloc Titres). Un `DataTable` : une ligne par titre, ses participations en retrait dessous.
   Depuis le 21/11/2026 (retours d'Ibé du 18/11) les colonnes Contrat, Négociation et Négocié par
   n'existent plus : c'est le **récap** (`loadTitleRecap`). Depuis le 22/11/2026, **une ligne par

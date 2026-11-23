@@ -309,9 +309,17 @@ export function DataTableGroupRow({
 }
 
 // Last column: the row's "⋯" menu (RowActions), as narrow as its button.
-export function DataTableActionsHead({ label }: { label: string }) {
+// `className`: a table that scrolls sideways keeps it in sight (`sticky`,
+// « Titres et artistes »).
+export function DataTableActionsHead({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
   return (
-    <TableHead className="h-11 w-12 px-0">
+    <TableHead className={cn("h-11 w-12 px-0", className)}>
       <span className="sr-only">{label}</span>
     </TableHead>
   );
@@ -319,8 +327,14 @@ export function DataTableActionsHead({ label }: { label: string }) {
 
 export function DataTableActionsCell({
   children,
+  className,
 }: {
   children: React.ReactNode;
+  className?: string;
 }) {
-  return <TableCell className="w-12 px-0 py-3 text-right">{children}</TableCell>;
+  return (
+    <TableCell className={cn("w-12 px-0 py-3 text-right", className)}>
+      {children}
+    </TableCell>
+  );
 }

@@ -7,9 +7,10 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
+import { IconUserPlus } from "@/components/icons";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { caption, factsClass } from "@/components/projects/titles/recap-facts";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -124,37 +125,33 @@ const isReleaseValue = (value: unknown): value is ReleaseValue =>
 
 // -------------------------------------------------------------------- Note
 
-/** The artist's note, on one line (the whole note on hover; `wrap`, in a
- * « Note » column: up to three lines); clicked, it opens to be changed.
- * Empty: « Ajouter une note » for whoever writes the title, nothing for the
- * others. */
+/** The artist's note in its « Note » column (Maël 23/11/2026), three lines
+ * at most (the whole on hover); clicked, it opens to be changed. Empty:
+ * « Ajouter une note » for whoever writes the title. Read only: the note
+ * alone, or nothing. */
 export function NoteLine({
   projectId,
   participationId,
   artist,
   note,
   canEdit,
-  wrap = false,
 }: {
   projectId: string;
   participationId: string;
   artist: string;
   note: string | null;
   canEdit: boolean;
-  wrap?: boolean;
 }) {
   const t = fr.projectTitles.recap.note;
   const [open, setOpen] = useState(false);
-  // One line, or three in a column of its own.
-  const lines = wrap
-    ? "line-clamp-3 whitespace-normal break-words"
-    : "truncate";
+  const lines = cn(
+    caption,
+    "line-clamp-3 whitespace-normal break-words",
+    note && "text-[color:var(--text-secondary)]",
+  );
   if (!canEdit)
     return note ? (
-      <span
-        className={cn(caption, lines, "text-[color:var(--text-secondary)]")}
-        title={note}
-      >
+      <span className={lines} title={note}>
         {note}
       </span>
     ) : null;
@@ -162,12 +159,7 @@ export function NoteLine({
     <>
       <button
         type="button"
-        className={cn(
-          caption,
-          LINE_BUTTON,
-          lines,
-          note && "text-[color:var(--text-secondary)]",
-        )}
+        className={cn(LINE_BUTTON, lines)}
         title={note ?? undefined}
         onClick={() => setOpen(true)}
       >
@@ -319,7 +311,7 @@ function IconAction({
  * private contact's coordinates the reader may not read stay « Coordonnées
  * privées ». For whoever writes the title (another contact of the Réseau, a
  * new one) or the Réseau (the number): « Contact de l'artiste » in a modal;
- * none yet: « Ajouter le contact ». None and nothing to do: nothing.
+ * none yet: « Ajouter le contact », an icon. None and nothing to do: nothing.
  */
 export function ContactFacts({
   projectId,
@@ -356,21 +348,16 @@ export function ContactFacts({
     </FormDialog>
   );
 
+  // None yet: a quiet icon of the cell, as its other gestures (Maël
+  // 23/11/2026, in place of an outlined button on every such row).
   if (!contact)
     return modes.length > 0 ? (
-      <>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="relative z-10 self-start"
-          aria-label={`${t.add} · ${artist}`}
-          onClick={() => setOpen(true)}
-        >
-          {t.add}
-        </Button>
+      <span className="-my-1 flex items-center">
+        <IconAction label={t.addFor(artist)} onClick={() => setOpen(true)}>
+          <IconUserPlus aria-hidden className="size-4" />
+        </IconAction>
         {dialog}
-      </>
+      </span>
     ) : null;
 
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;

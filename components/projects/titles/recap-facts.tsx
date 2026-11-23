@@ -1,4 +1,3 @@
-import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { EMPTY_CELL } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -17,6 +16,7 @@ import { formatDay } from "@/lib/utils/day";
 import type { Tone } from "@/lib/ui/state-tones";
 import {
   agreementTone,
+  dealStageToneOf,
   participationStatusTone,
   workflowStatusTone,
 } from "@/lib/ui/state-tones";
@@ -89,8 +89,8 @@ function LinkedPill({
   );
 }
 
-/** « À contacter », « Contacté » (orange), « D'accord » (green), « A
- * refusé », « Retiré »: where the artist stands. */
+/** « À contacter » (grey), « Contacté » (orange), « D'accord » (green),
+ * « A refusé », « Retiré » (grey): where the artist stands. */
 export function ContactStatePill({ status }: { status: ParticipationStatus }) {
   return (
     <StatusBadge tone={participationStatusTone[status]} size="sm">
@@ -99,9 +99,33 @@ export function ContactStatePill({ status }: { status: ParticipationStatus }) {
   );
 }
 
+/** A deal's stage in the recap, on one line: « Accord validé », « Accord à
+ * valider », « Négociation »… in the deal badge's tone (dealStageToneOf);
+ * the deal's own badge (DealStageBadge) keeps its longer words elsewhere. */
+function AccordPill({
+  stage,
+  agreementStatus,
+}: Pick<RecapAccord, "agreementStatus"> & {
+  stage: NonNullable<RecapAccord["stage"]>;
+}) {
+  const a = fr.projectTitles.recap.accord;
+  return (
+    // Never wrapped (`!`: over the cell's WRAPPING_PILLS).
+    <StatusBadge
+      tone={dealStageToneOf({ stage, agreementStatus })}
+      size="sm"
+      className="h-5! whitespace-nowrap!"
+    >
+      {stage === "agreement" && agreementStatus
+        ? a.agreement[agreementStatus]
+        : a.stages[stage]}
+    </StatusBadge>
+  );
+}
+
 /**
- * The accord of an artist (the Business module): its deal's stage (« à
- * valider » while the direction decides), the rate, the day of the call
+ * The accord of an artist (the Business module): its deal's stage in short
+ * (« Accord à valider » while the direction decides), the rate, the day of the call
  * planned and who negotiates, linked to the deal. `planCall`: « Caler le
  * call », given by the board when the row may plan it (the compact recap
  * gives the words « Call à caler », linked to the board), instead of the
@@ -113,6 +137,7 @@ export function AccordFacts({
   planCall,
   inline = false,
   rate = true,
+  brief = false,
 }: {
   accord: RecapAccord;
   artist: string;
@@ -120,6 +145,9 @@ export function AccordFacts({
   inline?: boolean;
   // false: the rate has its own column (« Taux », the board).
   rate?: boolean;
+  // The stage alone, no rate, call nor negotiator (the overview's recap,
+  // Maël 23/11/2026: too much there).
+  brief?: boolean;
 }) {
   const r = fr.projectTitles.recap;
   const stage = accord.stage;
@@ -129,16 +157,21 @@ export function AccordFacts({
       ? fr.deals.agreement[accord.agreementStatus]
       : fr.deals.stages[stage]
     : null;
-  const details = [
-    rate ? accord.rate : null,
-    accord.nextCallAt ? r.accord.callOn(formatDay(accord.nextCallAt)) : null,
-  ].filter((d): d is string => Boolean(d));
+  const details = brief
+    ? []
+    : [
+        rate ? accord.rate : null,
+        accord.nextCallAt
+          ? r.accord.callOn(formatDay(accord.nextCallAt))
+          : null,
+      ].filter((d): d is string => Boolean(d));
   // Who negotiates, once the deal is read; « À affecter » before.
-  const negotiator =
-    accord.negotiator ??
-    (accord.href && stage !== "abandoned"
-      ? fr.projectTitles.board.negotiation.unassigned
-      : null);
+  const negotiator = brief
+    ? null
+    : (accord.negotiator ??
+      (accord.href && stage !== "abandoned"
+        ? fr.projectTitles.board.negotiation.unassigned
+        : null));
   return (
     <span className={factsClass(inline)}>
       {stage &&
@@ -151,14 +184,13 @@ export function AccordFacts({
               stageLabel ?? "",
             )}
           >
-            <DealStageBadge
-              deal={{ stage, agreementStatus: accord.agreementStatus }}
+            <AccordPill
+              stage={stage}
+              agreementStatus={accord.agreementStatus}
             />
           </ViewLink>
         ) : (
-          <DealStageBadge
-            deal={{ stage, agreementStatus: accord.agreementStatus }}
-          />
+          <AccordPill stage={stage} agreementStatus={accord.agreementStatus} />
         ))}
       {details.length > 0 && (
         <span className="text-[color:var(--text-secondary)] tabular-nums">

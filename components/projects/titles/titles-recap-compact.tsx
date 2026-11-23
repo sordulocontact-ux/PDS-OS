@@ -66,12 +66,13 @@ function StackedFact({
 }
 
 /**
- * The collective's recap at the head of its overview (retours d'Ibé du
+ * The collective's recap at the foot of its overview (retours d'Ibé du
  * 18/11/2026, lot 2: « une vue récap sur tous les titres qui éviterait
  * d'aller dans chaque module »): one row per artist in play (a
  * participation neither declined nor withdrawn, on a title not abandoned),
- * the title's label under the name; Statut, Accord (when the reader sees
- * deals), Juridique (manage_legal), the title's Mix. Read only: the row
+ * the title's label under the name (no note: too much here, Maël
+ * 23/11/2026); Statut, Accord (its stage alone, same day; when the reader
+ * sees deals), Juridique (manage_legal), the title's Mix. Read only: the row
  * opens « Titres et artistes » (`href`), each pill its module. Rendered on
  * the server.
  */
@@ -142,6 +143,7 @@ export function TitlesRecapCompact({
                 accord={facts.accord}
                 artist={artist}
                 inline={inline}
+                brief
                 planCall={
                   awaitsCall(participation.status, facts.accord) ? (
                     <ViewLink

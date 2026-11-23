@@ -1,7 +1,7 @@
 "use client";
 
 import { IconMagnifier, IconPlus, IconTextTool2 } from "nucleo-sharp-essential";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent } from "@/components/ui/popover";
@@ -28,6 +28,11 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // holds them: case aside, spaces trimmed), so no create shortcut for a name
 // that already exists; the existing one is listed instead. When it is one of
 // the `excludedIds` (already chosen), `excludedNote` says so in the list.
+// `chosen`: the pills of what is already chosen, shown just under the field
+// and held with it by the list, which opens under them or, short of room,
+// above the field: it never covers them, and a title just picked shows at
+// once (bug of 23/11/2026, the titles of the project form). The page then
+// scrolls, on opening and after a pick, for the list to fit under them.
 export function SearchPicker({
   label,
   placeholder,
@@ -48,6 +53,7 @@ export function SearchPicker({
   openOnFocus = true,
   uniqueLabels = false,
   excludedNote,
+  chosen,
 }: {
   label: string;
   placeholder: string;
@@ -77,6 +83,8 @@ export function SearchPicker({
   // With `uniqueLabels`: what the list says when the typed name is that of
   // an excluded option (already chosen, or kept out).
   excludedNote?: (option: PickerOption) => string;
+  // The pills of the chosen ones (null while none); see above.
+  chosen?: React.ReactNode;
 }) {
   const id = useId();
   const listId = `${id}-list`;
@@ -85,9 +93,11 @@ export function SearchPicker({
     setQueryState(value);
     onQueryChange?.(value);
   };
-  const [open, setOpen] = useState(false);
+  const [open, setOpenState] = useState(false);
   const [active, setActive] = useState(0);
+  const [picks, setPicks] = useState(0);
   const anchor = useRef<HTMLDivElement>(null);
+  const holdsChosen = chosen !== undefined;
 
   const available = useMemo(
     () => options.filter((o) => !excludedIds.has(o.id)),
@@ -132,11 +142,36 @@ export function SearchPicker({
     results.length + (createRow === null ? 0 : 1) + (keepRow === null ? 0 : 1);
   const activeIndex = Math.max(0, Math.min(active, rowCount - 1));
 
+  // The list's height, as its rows will draw it (min-h-11, two lines with a
+  // detail), for the page to make room for it before it opens.
+  const listHeight = Math.min(
+    512,
+    results.reduce((sum, o) => sum + (o.detail ? 50 : 44), 0) +
+      (rowCount - results.length) * 44 +
+      (rowCount === 0 ? 36 : 0) +
+      10,
+  );
+  const makeRoom = () => {
+    if (holdsChosen && anchor.current)
+      scrollForRoom(anchor.current, listHeight);
+  };
+  // Opening scrolls first, so the list is placed once, under the pills.
+  const setOpen = (next: boolean) => {
+    if (next && !open) makeRoom();
+    setOpenState(next);
+  };
+  // A pick adds a pill: the field grows, the page follows.
+  useEffect(() => {
+    if (picks > 0) makeRoom();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per pick
+  }, [picks]);
+
   function pick(index: number) {
     if (index < results.length) {
       onPick(results[index].id);
       setQuery("");
       setActive(0);
+      setPicks((n) => n + 1);
     } else if (index === keepRow && keepName) {
       keepName.onKeep(query.trim());
       setOpen(false);
@@ -217,6 +252,7 @@ export function SearchPicker({
         onKeyDown={onKeyDown}
         className="h-10 pl-9 text-base md:text-sm"
       />
+      {chosen && <div className="pt-2">{chosen}</div>}
       {/* Opened and closed by the field alone (focus, or a click without
           openOnFocus, typing, Escape, blur):
           the popover's own dismissal is ignored, so a click in the field
@@ -305,6 +341,35 @@ export function SearchPicker({
       </Popover>
     </div>
   );
+}
+
+// Scrolls the field's scrolling box (the page, a modal) for `height` px of
+// list to fit under `el`, never pushing the field under the top bar.
+function scrollForRoom(el: HTMLElement, height: number) {
+  const box = scrollBox(el);
+  const page = box === document.scrollingElement;
+  const view = page
+    ? { top: 0, bottom: window.innerHeight }
+    : box.getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
+  // sideOffset 4 + the popover's collisionPadding 16.
+  const missing = rect.bottom + 20 + height - view.bottom;
+  // The app's top bar (h-14) over the page; a modal's own edge.
+  const headroom = rect.top - view.top - (page ? 72 : 16);
+  const by = Math.min(missing, headroom);
+  if (by > 0) box.scrollBy({ top: by, behavior: "instant" });
+}
+
+function scrollBox(el: HTMLElement): Element {
+  for (let node = el.parentElement; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (
+      /(auto|scroll)/.test(overflowY) &&
+      node.scrollHeight > node.clientHeight
+    )
+      return node;
+  }
+  return document.scrollingElement ?? document.documentElement;
 }
 
 // A name as the database tells two apart (artists_org_name_key: case aside,

@@ -1,12 +1,11 @@
 "use client";
 
-import { IconXmark } from "nucleo-sharp-essential";
 import { useMemo, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
 import { SearchPicker } from "@/components/catalog/search-picker";
-import { Button } from "@/components/ui/button";
+import { NameChip, NameChips } from "@/components/ui/name-chip";
 import { RequiredMark } from "@/components/ui/required-mark";
 import {
   Dialog,
@@ -26,8 +25,11 @@ import { shell } from "@/lib/i18n/fr/shell";
 const fr = { shell, catalog };
 
 // Masters of a project: search, add several (up to `max`: one for a single),
-// remove. Submitted as one JSON field `masterIds`, in the order chosen. "Créer un master" opens step B in a
-// modal and links the new master on return; the project form keeps its input.
+// remove. The chosen ones are pills with their ✕ just under the search, as
+// the guests of a collective, never covered by its list (SearchPicker
+// `chosen`). Submitted as one JSON field `masterIds`, in the order chosen.
+// "Créer un master" opens step B in a modal and links the new master on
+// return; the project form keeps its input.
 export function MasterPicker({
   masters,
   artists,
@@ -82,6 +84,25 @@ export function MasterPicker({
     if (!selectedIds.includes(id)) select([...selectedIds, id], known);
   };
 
+  const pills =
+    selected.length > 0 ? (
+      <ul aria-label={t.linked}>
+        <NameChips>
+          {selected.map((master) => (
+            <li key={master.id} className="contents">
+              <NameChip
+                name={masterLabel(master)}
+                onRemove={() =>
+                  select(selectedIds.filter((id) => id !== master.id))
+                }
+                removeLabel={t.remove(masterLabel(master))}
+              />
+            </li>
+          ))}
+        </NameChips>
+      </ul>
+    ) : null;
+
   const errorId = "masterIds-error";
   const hintId = "masterIds-hint";
 
@@ -97,42 +118,11 @@ export function MasterPicker({
         value={JSON.stringify(selected.map((m) => m.id))}
       />
 
-      {selected.length > 0 && (
-        <ul
-          aria-label={t.linked}
-          className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-lg border border-border bg-card"
-        >
-          {selected.map((master) => (
-            <li
-              key={master.id}
-              className="flex items-center gap-2 py-1.5 pr-1.5 pl-3"
-            >
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-sm font-medium">
-                  {masterLabel(master)}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {master.artists}
-                </span>
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  select(selectedIds.filter((id) => id !== master.id))
-                }
-                aria-label={t.remove(masterLabel(master))}
-              >
-                <IconXmark aria-hidden />
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {(max === undefined || selected.length < max) && (
+      {max !== undefined && selected.length >= max ? (
+        pills
+      ) : (
         <SearchPicker
+          chosen={pills}
           label={t.searchLabel}
           placeholder={t.placeholder}
           options={options.map((m) => ({

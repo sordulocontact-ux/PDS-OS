@@ -59,7 +59,7 @@ export function UnlaunchedOverview({
   // « Projet collectif » on the right of the name (docs/pds-mic-plan.md).
   status?: React.ComponentProps<typeof ModuleHeader>["status"];
   // A collective's recap (docs/pds-mic-plan.md, lot 2; retours d'Ibé du
-  // 18/11/2026, lot 2), at the head.
+  // 18/11/2026, lot 2), last: long, it hid the gesture (23/11/2026).
   titles?: React.ReactNode;
 }) {
   const t = fr.transmission.page;
@@ -159,8 +159,6 @@ export function UnlaunchedOverview({
         </ToneCallout>
       )}
 
-      {titles}
-
       <section
         aria-labelledby="handover-title"
         className="flex flex-col gap-3.5 modern:gap-3"
@@ -216,6 +214,8 @@ export function UnlaunchedOverview({
             </div>
           ))}
       </section>
+
+      {titles}
     </div>
   );
 }

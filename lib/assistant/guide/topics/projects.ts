@@ -75,7 +75,7 @@ export const projectsTopics: GuideTopic[] = [
       "La pochette est l'image importée pour le projet ; sans elle, la pochette de son titre au Catalogue ; sinon un disque gris en attendant une image. La direction peut la choisir en créant le projet, puis le chef de projet responsable la change en cliquant sur l'image (ou dans « Informations »).",
       "Deux zones : « Maintenant », votre première action dans ce projet avec son bouton (ou qui est attendu, sur quoi), et « Progression ».",
       "Tant que le plan du projet n'est pas lancé, « Progression » montre les étapes du Cadrage, et le livrable attendu est rappelé dessous : le Brief de cadrage. Chaque étape ouvre sa page d'un clic.",
-      "Une fois le plan lancé, « Progression » montre une ligne par workflow avec l'étape où il en est, puis ce qui dépend d'un autre workflow.",
+      "Une fois le plan lancé, « Progression » montre une ligne par workflow avec l'étape où il en est.",
       "Le Plan du projet s'écrit à la fin du Cadrage : il propose ce qui commence maintenant, ce qui suit, ce qui avance en parallèle et ce qu'il faut prévoir. On peut le modifier avant de le lancer.",
       "Rien ne démarre avant « Lancer le plan » : alors les workflows prévus démarrent.",
       "Un workflow retiré du plan peut être ajouté et lancé ensuite.",

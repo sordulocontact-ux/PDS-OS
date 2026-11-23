@@ -2725,6 +2725,69 @@ de la feuille Excel » ; « Fiche de renseignement » à la place de « Juridiqu
 - « ⋯ » d'une ligne : gestes de l'artiste puis du titre (mots du titre : « Renommer le titre »…). Vérifié dans Chrome
   (Assurance 30, PDS MIC #5, cadre de 358 px).
 
+## « Titres et artistes » : finitions du tableau (23/11/2026, branche `pre-prod`)
+
+Toujours une ligne par artiste, mêmes colonnes. Vérifié dans Chrome sur « Assurance 30 » (vu comme Lina Haddad), à
+1280 px et dans un cadre de 390 px.
+
+- **Largeur** : sans la colonne Note, le tableau fait encore environ 1 830 px pour 920 visibles à 1280 px ; il défile
+  toujours dans son cadre. Artiste reste fixe à gauche et **« ⋯ » fixe à droite**, chacun avec son filet et une ombre
+  légère du côté où des colonnes passent dessous. Le filet de la colonne Artiste ne s'affichait pas avant : Chrome ne
+  dessine pas de `box-shadow` sur une cellule de tableau en `border-collapse` (pseudo-éléments maintenant). Sans
+  « ⋯ » (lecteur), fondu à droite comme avant.
+- **Note** sous le nom (deux lignes au plus, cliquée pour la modifier) ; « Ajouter une note » / « Modifier la note »
+  dans « ⋯ ». Plus de colonne Note. Aussi dans le récap compact de la Vue d'ensemble, en lecture.
+- **Statuts** (`participationStatusTone`) : À contacter gris, Contacté orange, D'accord vert, A refusé et Retiré gris.
+  Le même ton sert aussi dans « Participations et contrats ».
+- **Accord** en mots courts sur une ligne dans le tableau et le récap compact : « Accord validé », « Accord à
+  valider », « Négociation », « Call prévu »… (ton de `dealStageToneOf`).
+- **« Ajouter le contact »** : icône fantôme avec infobulle dans la cellule Contact (même fenêtre), à la place du
+  bouton contour.
+- **Titre partagé** : une ligne de tête sur la bande douce, le titre écrit une fois, ses artistes dessous. Mix,
+  Sortie, Distribution, Beatmaker se répètent sur chaque ligne ; Sortie changée sur une ligne change l'autre
+  (vérifié dans les deux sens, après rechargement).
+- **Titre sans artiste** : garde sa ligne (« Aucun artiste invité », « Nommer », « Ajouter un artiste »), vérifié.
+- **Données de test ajoutées depuis l'app** dans la base de dev : Lila Vega (Featuring, À contacter) sur « Cap sur
+  demain », et un titre vide « Titre 7 (à nommer) ». À retirer depuis l'app si besoin (« Retirer du titre »,
+  « Abandonner le titre »).
+- **Pour Sacha** : `DataTableActionsHead` et `DataTableActionsCell` (`components/ui/data-table.tsx`) prennent un
+  `className` facultatif (sans effet ailleurs). `participationStatusTone` a changé (`proposed` neutre, `declined`
+  neutre).
+- Pas encore fait : sur téléphone, le tableau défile au lieu de passer les colonnes sous le nom (règle mobile de
+  `CLAUDE.md`) ; la fenêtre visible entre les deux colonnes fixes est étroite (environ 120 px à 390 px).
+
+## Vue d'ensemble : « Titres et artistes » en bas, sans notes ; « Ce qui dépend d'un autre workflow » retiré (23/11/2026, branche `pre-prod`)
+
+Retours de Maël. Vérifié dans Chrome sur « Assurance 30 » (lancé).
+
+- **Collectif** : la section « Titres et artistes » passe en bas de la Vue d'ensemble (après « Maintenant » et
+  « Progression ») : longue, elle cachait le reste. Même chose avant l'acceptation : le tableau vient après le bloc de
+  transmission. L'encart des contrats manquants reste en haut.
+- **Sans les notes** dans ces deux tableaux (récap compact et `TitlesBoard notes={false}`) : trop d'infos. Les notes
+  restent lues et écrites dans l'onglet « Titres et artistes ».
+- **Accord** du récap compact : l'étape seule (« Négociation », « Accord validé »…), sans taux, jour du call ni
+  négociateur (`AccordFacts brief`). « Caler le call » reste quand l'artiste a dit oui sans call prévu.
+- **Pour Sacha** : « Ce qui dépend d'un autre workflow » est retiré de la Vue d'ensemble de **tous** les projets (à la
+  demande de Maël). `DependencyRows`, `lib/overview/dependencies.ts` et les textes `projectShell.overview.dependencies`
+  sont supprimés ; la phrase correspondante de l'assistant PO (`lib/assistant/guide/topics/projects.ts`) aussi.
+  `UnlaunchedOverview` : `titles` passe sous le bloc de transmission.
+- Pas vérifié dans Chrome : un collectif pas encore accepté (aucun sous la main dans la base de dev).
+
+## « Titres et artistes » : cartes sur téléphone, colonne Note (23/11/2026, branche `pre-prod`)
+
+- **Téléphone** : sous 640 px de large pour le tableau, une carte par artiste à la place du tableau (nom, titre et
+  « Nommer », statut, puis les autres infos en paires libellé / valeur, « ⋯ » en haut à droite). Mêmes gestes. La tête
+  d'un titre partagé reste au-dessus de ses cartes ; pas de trait, les cartes se séparent par l'espacement. Vérifié
+  dans un cadre de 390 px (Assurance 30, vu comme Lina Haddad) : cartes, groupe « Cap sur demain », titre vide,
+  « ⋯ » et « Nommer ». À 1280 px, le tableau est inchangé.
+- **Note** : de nouveau dans sa propre colonne, après Beatmaker (288 px, trois lignes au plus, en entier au survol),
+  « Ajouter une note » quand elle est vide ; plus dans « ⋯ ». Sur téléphone, paire « Note » en dernier.
+- **« ⋯ » centré** dans la dernière colonne (64 px, 16 px de chaque côté).
+- **Commit mélangé, laissé tel quel (accord de Maël)** : `f5d8a5c8` (« Titres et artistes » as cards on a phone)
+  contient aussi le travail d'une autre session lancée en parallèle : section dépendances retirée de la Vue d'ensemble
+  (`components/overview/dependency-rows.tsx`, `lib/overview/dependencies.ts`, `page.tsx`, `unlaunched-overview.tsx`,
+  guide, textes) et la note retirée du récap compact. Le contenu est juste, seul le message ne le dit pas.
+
 ## Page « Mails » : la boîte de PDS OS (23/11/2026, branche `pre-prod`)
 
 Demande de Sacha : récupérer tous les mails que PDS OS reçoit (signatures, devis…) et voir les mails
