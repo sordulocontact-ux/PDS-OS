@@ -2,6 +2,7 @@
 
 import { FormMessage } from "@/components/auth/form-message";
 import { MemoFileButton } from "@/components/deals/deal-memo-card";
+import { DealGmailMemos } from "@/components/deals/deal-gmail-memos";
 import { DealMemoDepositButton } from "@/components/deals/deal-memo-deposit-button";
 import {
   DealMemoSendForm,
@@ -218,13 +219,19 @@ export function DealMemoNow({
     // the PDF they sent, wherever it arrived (Sacha 23/11/2026); one sent
     // to the deal's address files itself.
     heading = (memo?.changes ? t.now.waitingAgain : t.now.waiting)(who);
-    gesture = step.organizationId && (
-      <DealMemoDepositButton
-        organizationId={step.organizationId}
-        dealId={dealId}
-        variant="default"
-        size="default"
-      />
+    // Found in her own Gmail first (Sacha 23/11/2026), else dropped.
+    gesture = (
+      <>
+        <DealGmailMemos dealId={dealId} />
+        {step.organizationId && (
+          <DealMemoDepositButton
+            organizationId={step.organizationId}
+            dealId={dealId}
+            variant="default"
+            size="default"
+          />
+        )}
+      </>
     );
   } else {
     heading = t.now.write;

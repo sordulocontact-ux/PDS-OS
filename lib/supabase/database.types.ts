@@ -23125,6 +23125,17 @@ export type Database = {
         Args: { p_deal_id: string }
         Returns: string
       }
+      file_deal_memo_from_mail: {
+        Args: {
+          p_deal_id: string
+          p_files: Json
+          p_from: string
+          p_message_id: string
+          p_received_at: string
+          p_subject: string
+        }
+        Returns: string
+      }
       deposit_deal_memo: {
         Args: { p_deal_id: string; p_name: string; p_path: string }
         Returns: string

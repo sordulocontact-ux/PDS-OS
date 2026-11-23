@@ -8320,6 +8320,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     modifications signée en bandeau) + `DealMemoGestures` ; section « Dans la boucle » (`DealMemoLoop`). PO lit l'état
     du circuit (`lib/assistant/read/deals.ts`). Test : `supabase/tests/deal-memo-mail.test.sql`.
 - **Déposer le memo reçu** (Sacha 23/11/2026, `20261123220101_deal_memo_deposit.sql`) : le label envoie son memo à l'adresse de la personne qui négocie, pas à celle du deal (« bizarre de donner ça comme adresse ») : `DealMemoDepositButton` envoie le PDF dans `deal-files` sous `<organisation>/<deal>/` (politique `deal_files_insert` : qui écrit le deal ouvert, `can_drop_deal_file` ; `deal_files_delete_unfiled` retire un dépôt dont le memo a échoué), puis `deposit_deal_memo` en fait le memo du deal comme `receive_deal_memo` (brouillon « À valider », photo des termes, source `upload`, auteur = qui dépose, journal `memo_received` avec `deposited`). L'adresse du deal n'est plus affichée ; elle reste l'adresse de réponse des e-mails envoyés par PDS OS. Test : `supabase/tests/deal-memo-deposit.test.sql` (18).
+- **Le memo trouvé dans son Gmail** (Sacha 23/11/2026, `20261124110101_deal_memo_from_gmail.sql`) : quand « Maintenant » attend le memo du label, `DealGmailMemos` demande après l'affichage (`dealGmailMemos`, `lib/deals/gmail-memo-actions.ts`) les mails de **ses propres** comptes Gmail (`gmailAccounts`, sa session, ses désactivations de Paramètres › Connexions) envoyés depuis une adresse du deal (ses contacts, le label ou la marque, le contact de la participation, les managers de l'artiste ; `lib/deals/gmail-memos.ts`, recherche `from:(…) has:attachment filename:pdf newer_than:60d` par `searchGmailIds`, construite des seules adresses connues), avec un PDF, pas encore rangés (Message-ID). Rien n'est gardé ; « Ranger dans le deal » (`fileGmailMemo`) relit le mail, envoie ses PDF dans `deal-files` sous la session (`deal_files_insert`), puis `file_deal_memo_from_mail` en fait le memo comme un mail reçu sur po@ (source `email`, expéditeur, objet, jour, une fois par Message-ID ; le texte du mail reste dans sa boîte). Test : `supabase/tests/deal-memo-from-gmail.test.sql` (8).
 - **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
   métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
   `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et
@@ -8467,6 +8468,7 @@ Ticket : `.tickets/archive/2026-11-23-page-mails/TICKET.md`.
   `/api/mailbox/gmail/[account]/[message]/[part]` (le message est relu : Gmail change l'id de la pièce à chaque
   lecture). Lecture seule : pas de « Répondre » (il enverrait depuis po@). Une adresse po+ctr-<id>@ rattache
   aussi un mail au responsable du contrat (`owners-context.ts`).
+  Exception voulue (23/11/2026) : sur la page d'un deal, un memo trouvé dans le Gmail du membre est copié dans le deal **sur son clic seulement** (« Ranger dans le deal », § 8 quaterdecies) ; rien d'autre n'est stocké.
 
 ## 9. Design (`docs/DESIGN.md`)
 
