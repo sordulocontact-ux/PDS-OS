@@ -84,6 +84,9 @@ export const contracts = {
   emptyViewBody: "Les autres contrats restent dans l'onglet « Tous ».",
   loadError: "Les contrats n'ont pas pu être chargés. Rechargez la page.",
   form: {
+    // « Importer un contrat » of a deal: its document with the form.
+    documentChosen: (name: string) => `Document choisi : ${name}`,
+    documentMissing: "Choisissez le document du contrat.",
     createTitle: "Nouveau contrat",
     createDescription:
       "Il commence en préparation : vous ajouterez ensuite ses parties et ses fichiers.",
