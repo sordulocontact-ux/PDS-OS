@@ -22,8 +22,8 @@ export function ContactCoordinates({
   fiche,
 }: {
   contact: NetworkContactDetail;
-  // Its own fiche de renseignements, first (Sacha 23/11/2026: « dans
-  // coordonnées ou plus haut »): what the contact fills in comes here.
+  // Its own fiche de renseignements, the first line (Sacha 23/11/2026:
+  // « dans coordonnées ou plus haut », Figma node 317:5819).
   fiche?: ReactNode;
 }) {
   const p = fr.network.page;
@@ -35,7 +35,6 @@ export function ContactCoordinates({
     hidden ? [] : [fact];
   return (
     <PageSection card id="coordinates" title={p.coordinates}>
-      {fiche && <div className="mb-4">{fiche}</div>}
       {/* A private contact (BIZ 8) whose coordinates the reader may not read. */}
       {hidden && (
         <ToneCallout className="mb-4">
@@ -46,6 +45,8 @@ export function ContactCoordinates({
       <FactList
         emptyLabel={p.none}
         facts={[
+          // Its fiche first (Figma node 317:5819).
+          ...(fiche ? [{ label: p.networkFiche.label, value: fiche }] : []),
           ...privateFact({
             label: p.email,
             value: contact.email && (

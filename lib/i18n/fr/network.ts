@@ -309,7 +309,7 @@ export const network = {
     ficheTodo: "Envoyée, pas encore rendue",
     // Its own fiche, without a project (Sacha, 23/11/2026).
     networkFiche: {
-      label: "Sa fiche",
+      label: "Fiche",
       states: {
         link_generated: "Pas encore envoyée",
         sent: "Envoyée",
