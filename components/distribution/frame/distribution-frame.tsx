@@ -7,7 +7,12 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { distribution } from "@/lib/i18n/fr/distribution";
+import { requireApproved } from "@/lib/auth/dal";
+import { collectiveReleases } from "@/lib/i18n/fr/collective-releases";
 import { getProject } from "@/lib/projects/queries";
+import type { ProjectDetail } from "@/lib/projects/types";
+import { loadCollectiveReleases } from "@/lib/release/collective-releases";
+import type { CrumbOption } from "@/lib/ui/module-frame";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
@@ -22,6 +27,7 @@ import {
 import { isOpen } from "@/lib/distribution/anomalies";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { projectFormatLabel } from "@/lib/projects/labels";
+import { withRelease } from "@/lib/distribution/scope";
 import { distributionViewHref } from "@/lib/ui/distribution-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { stepChoiceKey } from "@/lib/step-tools/model";
@@ -123,6 +129,12 @@ export async function DistributionFrame({
   if (!ctx) return <WorkflowLocked projectId={projectId} title={t.module} />;
   const scope = ctx.releaseId;
   const status = distributionStatus(ctx.steps);
+  // A collective: its release in the trail, the others to choose from
+  // (Maël 23/11/2026, « 1 par son », as the Master's titles).
+  const crumbs =
+    read?.collective && ctx.release
+      ? [await releaseCrumb(read, ctx.release.id, ctx.release.label)]
+      : undefined;
   const open = ctx.anomalies.filter(isOpen).length;
   const stepRef = {
     projectId,
@@ -174,6 +186,7 @@ export async function DistributionFrame({
             }}
             facts={factsOf(ctx)}
             steps={ctx.steps}
+            extraCrumbs={crumbs}
             actions={actions}
           />
           {attention}
@@ -202,6 +215,7 @@ export async function DistributionFrame({
               head={shown}
               facts={factsOf(ctx)}
               steps={ctx.steps}
+              extraCrumbs={crumbs}
               actions={actions}
             />
             {attention}
@@ -213,4 +227,30 @@ export async function DistributionFrame({
       </JourneyLayout>
     </DistributionReleaseProvider>
   );
+}
+
+/** The release shown, with the collective's other live releases to choose
+ * from: each opens on the step that waits there (/release?sortie=), with
+ * where its deposit stands. */
+async function releaseCrumb(
+  project: ProjectDetail,
+  releaseId: string,
+  label: string,
+): Promise<{ label: string; options?: CrumbOption[] }> {
+  const access = await requireApproved();
+  const { releases } = await loadCollectiveReleases(project, access);
+  const live = releases.filter((r) => !r.abandoned || r.id === releaseId);
+  if (live.length < 2) return { label };
+  const words = collectiveReleases.distribution;
+  return {
+    label,
+    options: live.map((r) => ({
+      key: r.id,
+      label: r.label,
+      href: withRelease(routes.projectRelease(project.id), r.id),
+      detail: words[r.distribution.key](r.distribution.number),
+      current: r.id === releaseId,
+      done: r.distribution.key === "closed",
+    })),
+  };
 }
