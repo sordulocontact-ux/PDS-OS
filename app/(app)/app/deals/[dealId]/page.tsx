@@ -249,7 +249,10 @@ async function DealTodo({
               latest.status === "draft" && !latest.submitted && !latest.changes,
             changes: latest.changes?.reason ?? null,
             correctionSent: latest.correction !== null,
-            toSend: latest.status === "validated" && !latest.sent,
+            toSend:
+              latest.status === "validated" &&
+              !latest.sent &&
+              deal.stage === "agreement",
             received: latest.source !== "pds",
             receivedSubject: latest.email?.subject ?? null,
             toValidate: latest.status === "draft" && !latest.changes,
