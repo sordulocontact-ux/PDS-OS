@@ -49,10 +49,10 @@ export const dealCalls = {
     said: (who: string) => `${who} :`,
     term: (label: string, value: string, state: string) =>
       `${label} : ${value} (${state})`,
+    // Under the section « Prochaine action »: not said again (Sacha
+    // 23/11/2026).
     next: (action: string, day: string | null) =>
-      day
-        ? `Prochaine action : ${action} · ${day}`
-        : `Prochaine action : ${action}`,
+      day ? `${action} · ${day}` : action,
     check: "Vérifier",
     // The terms PO read, already in their cards (DealTerms).
     toCheck: (n: number) =>

@@ -94,10 +94,14 @@ export function NextActionForm({
 export function DealNextAction({
   deal,
   call,
+  proposed = false,
 }: {
   deal: Deal;
   // The next call to hold, as its card (DealCallCard), rendered by the server.
   call?: ReactNode;
+  // PO proposes one just above: no « Aucune prochaine action » under it
+  // (Sacha 23/11/2026: « c'est pas normal ça »).
+  proposed?: boolean;
 }) {
   const t = fr.deals.page.next;
   const [open, setOpen] = useState(false);
@@ -107,7 +111,7 @@ export function DealNextAction({
       {/* One sentence, not a table (Sacha 20/11/2026): the action and its
           day, then the follow-up. None and no call: the empty note of the
           deal's other sections, its button inside (Sacha 20/11/2026). */}
-      {none && call ? null : none ? (
+      {none && (call || proposed) ? null : none ? (
         <EmptyNote
           action={
             deal.canWrite && (

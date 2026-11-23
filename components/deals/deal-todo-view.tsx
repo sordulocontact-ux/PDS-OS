@@ -175,10 +175,10 @@ export function DealTodoView({
     deal.nextAction !== null ||
     nextProposals.length > 0;
   const sections: Record<Work, ReactNode> = {
-    // The next action and the loop side by side: two small blocks (Sacha
-    // 22/11/2026); the loop only where a deal memo is worked on.
+    // The next action, then the loop below it (Sacha 23/11/2026: never side
+    // by side); the loop only where a deal memo is worked on.
     next: !isClosedStage(deal.stage) && (
-      <div className="grid gap-6 md:grid-cols-2 [&>*:only-child]:md:col-span-2">
+      <div className="flex flex-col gap-6">
         {nextShown && (
           <PageSection id="prochaine-action" title={s.next}>
             <div className="flex flex-col gap-3">
@@ -187,6 +187,7 @@ export function DealTodoView({
               )}
               <DealNextAction
                 deal={deal}
+                proposed={nextProposals.length > 0}
                 call={
                   upcomingCall &&
                   !callsFirst && (
