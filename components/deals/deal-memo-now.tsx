@@ -2,13 +2,13 @@
 
 import { FormMessage } from "@/components/auth/form-message";
 import { MemoFileButton } from "@/components/deals/deal-memo-card";
+import { DealMemoDepositButton } from "@/components/deals/deal-memo-deposit-button";
 import {
   DealMemoSendForm,
   type MemoReplyTo,
 } from "@/components/deals/deal-memo-send";
 import { nowHeading } from "@/components/deals/now-classes";
 import { Button } from "@/components/ui/button";
-import { CopyButton } from "@/components/ui/copy-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { ReasonForm } from "@/components/ui/reason-form";
@@ -47,7 +47,8 @@ export type MemoStep = {
     file: MemoFile | null;
     pdf: { href: string; fileName: string } | null;
   } | null;
-  address: string | null;
+  // For « Déposer le memo reçu » (the deal's folder of deal-files).
+  organizationId: string | null;
   // The label or the brand that sends it; none for a music deal, where PDS
   // writes it.
   counterpart: string | null;
@@ -68,8 +69,9 @@ export type MemoStep = {
  *   prefilled with the direction's reason, sent from PDS OS, the deal's
  *   address in reply-to; then the next version is awaited;
  * - changes asked on a memo written here: its next version, from the terms;
- * - none yet: the label's awaited (its address to copy; nothing to write
- *   here, « Nouveau deal memo » stays on the memo's card), or PDS writes it;
+ * - none yet, or its next version: the label's awaited, « Déposer le memo
+ *   reçu » when it came to someone's own address (Sacha 23/11/2026;
+ *   « Nouveau deal memo » stays on the memo's card), or PDS writes it;
  * - the accord validated: « Renvoyer l'accord validé ».
  */
 export function DealMemoNow({
@@ -213,14 +215,13 @@ export function DealMemoNow({
     gesture = writeButton("default");
   } else if (who) {
     // Awaiting the label's memo, nothing to write here (Sacha 22/11/2026):
-    // its address to give them the first time, nothing once the correction
-    // is asked. « Nouveau deal memo » stays on the memo's card.
+    // the PDF they sent, wherever it arrived (Sacha 23/11/2026); one sent
+    // to the deal's address files itself.
     heading = (memo?.changes ? t.now.waitingAgain : t.now.waiting)(who);
-    gesture = !memo?.changes && step.address && (
-      <CopyButton
-        value={step.address}
-        label={t.now.copyAddress}
-        copiedLabel={t.address.copied}
+    gesture = step.organizationId && (
+      <DealMemoDepositButton
+        organizationId={step.organizationId}
+        dealId={dealId}
         variant="default"
         size="default"
       />

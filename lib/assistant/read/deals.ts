@@ -81,7 +81,7 @@ export async function readDeals(
     const r = dealMemos.read;
     return [
       t.memo(memo.number, memo.status === "validated"),
-      memo.source === "email" ? r.received : null,
+      memo.source !== "pds" ? r.received : null,
       memo.submitted_at ? r.submitted : null,
       memo.changes_reason ? r.changes(memo.changes_reason) : null,
       memo.sent_at ? r.sent : null,

@@ -129,7 +129,7 @@ export async function DealMemoSections({
                 .flatMap((e) => (e.email ? [e.email] : [])),
               canEmail: mail.canEmail,
             }}
-            address={mail.address}
+            organizationId={access.organizationId}
           />
         </PageSection>
       )}

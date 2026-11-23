@@ -23125,6 +23125,11 @@ export type Database = {
         Args: { p_deal_id: string }
         Returns: string
       }
+      deposit_deal_memo: {
+        Args: { p_deal_id: string; p_name: string; p_path: string }
+        Returns: string
+      }
+      can_drop_deal_file: { Args: { p_name: string }; Returns: boolean }
       link_deal_contract: {
         Args: { p_contract_id: string | null; p_deal_id: string }
         Returns: undefined

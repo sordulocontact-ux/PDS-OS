@@ -226,7 +226,7 @@ async function DealTodo({
             changes: latest.changes?.reason ?? null,
             correctionSent: latest.correction !== null,
             toSend: latest.status === "validated" && !latest.sent,
-            received: latest.source === "email",
+            received: latest.source !== "pds",
             receivedSubject: latest.email?.subject ?? null,
             toValidate: latest.status === "draft" && !latest.changes,
             file: latest.files.find((f) => f.url) ?? null,
@@ -242,7 +242,7 @@ async function DealTodo({
                 ? latest.files.map((f) => f.name).join(", ")
                 : dealMemos.pdf.file(dealName(deal), latest.number),
           },
-          address: mail.address,
+          organizationId: access.organizationId,
           counterpart: deal.counterpartName,
           director: can(access, "validate"),
           dealName: dealName(deal),

@@ -8311,6 +8311,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   - Page : `DealMemos` → `DealMemoCard` (PDF reçu « Ouvrir le PDF », objet et message repliés, demande de
     modifications signée en bandeau) + `DealMemoGestures` ; section « Dans la boucle » (`DealMemoLoop`). PO lit l'état
     du circuit (`lib/assistant/read/deals.ts`). Test : `supabase/tests/deal-memo-mail.test.sql`.
+- **Déposer le memo reçu** (Sacha 23/11/2026, `20261123220101_deal_memo_deposit.sql`) : le label envoie son memo à l'adresse de la personne qui négocie, pas à celle du deal (« bizarre de donner ça comme adresse ») : `DealMemoDepositButton` envoie le PDF dans `deal-files` sous `<organisation>/<deal>/` (politique `deal_files_insert` : qui écrit le deal ouvert, `can_drop_deal_file` ; `deal_files_delete_unfiled` retire un dépôt dont le memo a échoué), puis `deposit_deal_memo` en fait le memo du deal comme `receive_deal_memo` (brouillon « À valider », photo des termes, source `upload`, auteur = qui dépose, journal `memo_received` avec `deposited`). L'adresse du deal n'est plus affichée ; elle reste l'adresse de réponse des e-mails envoyés par PDS OS. Test : `supabase/tests/deal-memo-deposit.test.sql` (18).
 - **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
   métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
   `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et

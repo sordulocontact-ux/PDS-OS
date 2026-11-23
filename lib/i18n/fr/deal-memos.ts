@@ -1,15 +1,15 @@
 /** The deal memo and the contract of a deal (BIZ 7). */
 export const dealMemos = {
   section: "Deal memo",
-  none: "Aucun deal memo : il se crée à l'accord de principe, ou à la main.",
-  // The circuit by e-mail (réunion avec Ibé du 18/11/2026).
-  noneByEmail:
-    "Aucun deal memo. Celui du label ou de la marque arrive par e-mail à l'adresse du deal : il se range ici.",
-  address: {
-    label: (address: string) => `Adresse du deal : ${address}`,
-    copy: "Copier",
-    copied: "Adresse copiée",
-    aria: "Copier l'adresse e-mail du deal",
+  none: "Aucun deal memo.",
+  // The label's PDF, received anywhere (Sacha 23/11/2026).
+  deposit: {
+    button: "Déposer le memo reçu",
+    pending: "Dépôt…",
+    done: "Deal memo déposé",
+    notPdf: "Déposez le memo en PDF.",
+    tooLarge: "Ce PDF dépasse 20 Mo.",
+    failed: "Le PDF n'a pas pu être déposé. Réessayez.",
   },
   // The negotiation's gesture in « Maintenant » (DealMemoNow, Sacha
   // 22/11/2026): the deal memo is the accord de principe.
@@ -24,11 +24,12 @@ export const dealMemos = {
     rewrite: "Rédiger la nouvelle version du deal memo",
     waitingAgain: (who: string) =>
       `En attente de la nouvelle version du deal memo de ${who}`,
-    copyAddress: "Copier l'adresse du deal",
   },
   toValidate: "À valider",
   receivedFrom: (from: string | null, day: string) =>
     from ? `Reçu de ${from}, le ${day}` : `Reçu le ${day}`,
+  depositedBy: (who: string | null, day: string) =>
+    who ? `Déposé par ${who}, le ${day}` : `Déposé le ${day}`,
   submittedBy: (who: string | null, day: string) =>
     who
       ? `Envoyé à valider par ${who}, le ${day}`
@@ -251,6 +252,8 @@ export const dealMemos = {
     contract_unchanged: "Ce contrat est déjà lié.",
     no_contract: "Aucun contrat lié à ce deal.",
     check_unchanged: "Rien n'a changé.",
+    file_missing: "Le PDF n'a pas pu être déposé. Réessayez.",
+    file_already_filed: "Ce PDF est déjà le deal memo.",
     invalid_verdict: "Choisissez « Conforme » ou « Différent ».",
     invalid_term: "Ce terme n'est pas dans le deal memo.",
     memo_submitted: "Ce deal memo est déjà envoyé à valider.",

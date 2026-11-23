@@ -3,6 +3,7 @@
 import { IconPlus } from "nucleo-sharp-essential";
 
 import { DealMemoCard } from "@/components/deals/deal-memo-card";
+import { DealMemoDepositButton } from "@/components/deals/deal-memo-deposit-button";
 import {
   DealMemoGestures,
   type MemoSendSetup,
@@ -10,7 +11,6 @@ import {
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { IconAction } from "@/components/ui/icon-action";
-import { CopyButton } from "@/components/ui/copy-button";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { routes } from "@/lib/auth/redirects";
@@ -44,33 +44,17 @@ function MemoPdf({
   );
 }
 
-/** PO's address of the deal, where the label sends its memo or the business
- * manager forwards it (réunion avec Ibé du 18/11/2026). */
-function DealAddress({ address }: { address: string }) {
-  return (
-    <p className="flex flex-wrap items-center gap-2 text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-      <span className="min-w-0 break-all">{t.address.label(address)}</span>
-      <CopyButton
-        value={address}
-        label={t.address.copy}
-        copiedLabel={t.address.copied}
-        ariaLabel={t.address.aria}
-        variant="outline"
-        size="sm"
-      />
-    </p>
-  );
-}
-
 /**
  * The deal memo (BIZ 7) as document cards (Sacha 20/11/2026, proto « Fiche
  * d'un deal » v2): the latest — received by e-mail from the label or the
  * brand and filed here by PDS OS (réunion avec Ibé du 18/11/2026), or a
  * photo of the terms made here — with its gestures (`DealMemoGestures`:
  * show it to the direction, validate or ask for changes, send the agreement
- * back), « Nouveau deal memo » for whoever writes the deal. A memo never
- * changes: the next version is a new memo. The earlier ones stay below.
- * `address`: PO's address of the deal, for whoever writes it.
+ * back), « Nouveau deal memo » for whoever writes the deal, and with no memo
+ * yet « Déposer le memo reçu » (the label's PDF, received anywhere). A memo
+ * never changes: the next version is a new memo. The earlier ones stay
+ * below. PO's address of the deal is no longer shown (Sacha 23/11/2026: no
+ * one gives it to a label); it stays the reply-to of what PDS OS sends.
  */
 export function DealMemos({
   dealId,
@@ -80,7 +64,7 @@ export function DealMemos({
   canWrite,
   canValidate,
   send,
-  address,
+  organizationId,
 }: {
   dealId: string;
   dealName: string;
@@ -90,7 +74,7 @@ export function DealMemos({
   canWrite: boolean;
   canValidate: boolean;
   send: MemoSendSetup;
-  address: string | null;
+  organizationId: string | null;
 }) {
   const create = useWriteSubmit(undefined, t.created);
   const [latest, ...older] = memos;
@@ -117,15 +101,25 @@ export function DealMemos({
         {t.create}
       </Button>
     ));
-  const addressLine = canWrite && address && <DealAddress address={address} />;
   if (!latest)
     return (
-      <div className="flex flex-col gap-2">
-        <EmptyNote action={newButton(false)}>
-          {address ? t.noneByEmail : t.none}
-        </EmptyNote>
-        {addressLine}
-      </div>
+      <EmptyNote
+        action={
+          canWrite && (
+            <div className="flex flex-wrap justify-center gap-2">
+              {organizationId && (
+                <DealMemoDepositButton
+                  organizationId={organizationId}
+                  dealId={dealId}
+                />
+              )}
+              {newButton(false)}
+            </div>
+          )
+        }
+      >
+        {t.none}
+      </EmptyNote>
     );
 
   const pdf = (memo: DealMemo) =>
@@ -153,7 +147,6 @@ export function DealMemos({
           </>
         }
       />
-      {addressLine}
       {older.length > 0 && (
         <details className="group flex flex-col gap-2">
           <summary className="w-fit cursor-pointer text-body-md font-medium text-[color:var(--text-secondary)]">
