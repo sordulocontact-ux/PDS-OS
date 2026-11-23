@@ -8217,6 +8217,16 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     part de po@ quand le SMTP est en place (`emailContractForSignature` : son dernier projet déposé ou imprimé à la
     génération, sinon imprimé à l'envoi, en pièce jointe), puis `send_contract` « Envoyé par PDS OS » ; sans SMTP,
     « Ouvrir dans ma messagerie » / « Marquer comme envoyé ».
+  - **Contrat signé revenu par e-mail** (`20261123110101`, Sacha 23/11/2026, coordonné avec la page Mails) :
+    l'e-mail de signature a pour Reply-To l'adresse du contrat, `po+ctr-<id>@` (`lib/email/contract-address.ts`, sur
+    `plus-address.ts` commun avec `po+deal-` et `po+aut-`). Le cron `/api/cron/inbox` (`fileEmailedSignedContracts`,
+    `lib/contracts/signed-by-email.ts`, même passage, `inbox.recent` + `read`) range une réponse portant des PDF dans un
+    contrat « Envoyé » encore sans signé : PDF → « Signé », l'e-mail (.eml) → « Preuve de signature »
+    (`uploadSignedCopy`, partagé avec les autorisations ; `receive_contract_signed_copy`, service role seul, la partie
+    dont l'adresse du Réseau a écrit en `via_contact_id`, journal `signature.emailed`, notification
+    `contract_signed_emailed` au suivi du contrat). Le contrat passe en « Revenu signé » (« Reçu de … par e-mail ») ;
+    PDS signe ensuite et une personne vérifie la signature. Page Mails : ce mail est « Signature » + « Contrat », lien
+    vers le contrat pour qui le lit (`lib/mailbox/kinds.ts`, `links.ts`). Test : `contract-signed-by-email.test.sql`.
   - **Suivi du contrat généré** (`20261122160101`) : il est suivi par la personne qui négocie le deal (`owner_person_id`
     = l'affecté), qui l'envoie pour signature et le marque signé ; le « Maintenant » d'un contrat ouvre son PDF avant de
     l'envoyer à valider ou de le valider (`ContractPageData.pdf`), et « Ensuite » dit « Vous l'envoyez pour signature »

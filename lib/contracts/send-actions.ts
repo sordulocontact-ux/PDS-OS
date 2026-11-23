@@ -11,6 +11,7 @@ import { fr } from "@/lib/i18n/fr";
 import { legalOutcome } from "@/lib/legal/outcome";
 import { listCatalogFiles } from "@/lib/catalog/files";
 import { envelopeInput } from "@/lib/email/envelope";
+import { contractReplyAddress } from "@/lib/email/contract-address";
 import { emailMessage } from "@/lib/email/link-email";
 import { getContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
@@ -179,6 +180,11 @@ export async function emailContractForSignature(
     bcc: v.data.envelope.bcc,
     subject: v.data.subject,
     text: v.data.message,
+    // The answer comes back to PO's address of the contract too: its signed
+    // copy is filed there (lib/contracts/signed-by-email.ts).
+    replyTo: [contractReplyAddress(v.data.contractId)].filter(
+      (a): a is string => a !== null,
+    ),
     attachments: [
       {
         filename: file.filename,

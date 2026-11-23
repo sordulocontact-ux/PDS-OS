@@ -61,6 +61,7 @@ export const mailbox = {
   },
   links: {
     deal: "Ouvrir le deal",
+    contract: "Ouvrir le contrat",
     clearance: "Ouvrir la demande d'autorisation",
     proofs: "Ouvrir les justificatifs",
   },

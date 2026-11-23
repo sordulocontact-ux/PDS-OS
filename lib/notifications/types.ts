@@ -32,6 +32,8 @@ export const NOTIFICATION_KINDS = [
   "contract_review_requested",
   "contract_approved",
   "contract_changes_requested",
+  // A contract signed and sent back by e-mail, filed by PDS OS (20261123110101).
+  "contract_signed_emailed",
   "meeting_invited",
   "call_report_shared",
   "master_engineer_signal",

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { contractOfAddress } from "@/lib/email/contract-address";
 import { dealOfAddress } from "@/lib/email/deal-memo-address";
 import { clearanceOfAddress } from "@/lib/email/reply-address";
 import { isProofsAddress } from "@/lib/finance/proof-address";
@@ -46,5 +47,10 @@ export function mailKinds(mail: {
   if (addresses.some(isProofsAddress)) kinds.add("proof");
   if (addresses.some((a) => dealOfAddress(a))) kinds.add("deal_memo");
   if (addresses.some((a) => clearanceOfAddress(a))) kinds.add("clearance");
+  // A reply to a contract's signature e-mail (po+ctr-<id>@).
+  if (addresses.some((a) => contractOfAddress(a))) {
+    kinds.add("signature");
+    kinds.add("contract");
+  }
   return [...kinds];
 }

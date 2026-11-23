@@ -1,12 +1,11 @@
 import "server-only";
 
-import { randomUUID } from "node:crypto";
-
+import {
+  removeSignedCopy,
+  uploadSignedCopy,
+  type Admin,
+} from "@/lib/contracts/signed-copy-upload";
 import type { InboxMessage } from "@/lib/email/inbox";
-import { formatDate } from "@/lib/release/format";
-import type { createAdminClient } from "@/lib/supabase/admin";
-
-type Admin = NonNullable<ReturnType<typeof createAdminClient>>;
 
 /**
  * A reply to the authorisation contract that carries PDFs (Sacha,
@@ -46,60 +45,30 @@ export async function fileSignedCopy(
     .eq("category", "signed");
   if ((count ?? 0) > 0) return false;
 
-  const folder = `${contract.organization_id}/${contract.id}`;
-  const day = formatDate((receivedAt ?? new Date()).toISOString());
-  const files = [
-    ...message.pdfs.map((pdf) => ({
-      path: `${folder}/${randomUUID()}.pdf`,
-      file_name: pdf.name,
-      mime: "application/pdf",
-      category: "signed" as const,
-      content: pdf.content,
-    })),
-    {
-      path: `${folder}/${randomUUID()}.eml`,
-      file_name: `E-mail de ${from} du ${day}.eml`.slice(0, 255),
-      mime: "message/rfc822",
-      category: "evidence" as const,
-      content: message.source,
-    },
-  ];
-  const uploaded: string[] = [];
-  for (const f of files) {
-    const { error } = await supabase.storage
-      .from("contract-files")
-      .upload(f.path, f.content, { contentType: f.mime });
-    if (error) {
-      console.error("fileSignedCopy upload:", error.message);
-      await remove(supabase, uploaded);
-      return false;
-    }
-    uploaded.push(f.path);
-  }
+  const files = await uploadSignedCopy(
+    supabase,
+    contract,
+    from,
+    receivedAt,
+    message,
+  );
+  if (!files) return false;
   const { data: kept, error } = await supabase.rpc(
     "receive_clearance_signed_copy",
     {
       p_clearance_id: clearanceId,
       p_contract_id: contract.id,
       p_from: from,
-      p_files: files.map((f) => ({
-        path: f.path,
-        file_name: f.file_name,
-        mime: f.mime,
-        category: f.category,
-      })),
+      p_files: files,
     },
   );
   if (error) console.error("fileSignedCopy:", error.message);
   if (error || kept !== true) {
-    await remove(supabase, uploaded);
+    await removeSignedCopy(
+      supabase,
+      files.map((f) => f.path),
+    );
     return false;
   }
   return true;
-}
-
-async function remove(supabase: Admin, paths: string[]) {
-  if (paths.length === 0) return;
-  const { error } = await supabase.storage.from("contract-files").remove(paths);
-  if (error) console.error("fileSignedCopy remove:", error.message);
 }

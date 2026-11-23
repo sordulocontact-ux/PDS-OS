@@ -2,6 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 
+import { contractOfAddress } from "@/lib/email/contract-address";
 import { dealOfAddress } from "@/lib/email/deal-memo-address";
 import {
   inboxEnabled,
@@ -82,8 +83,14 @@ export async function fileEmailedDealMemos(): Promise<{
     let filed = 0;
     for (const e of envelopes) {
       if (known.has(e.messageId) || !e.from || e.from === po) continue;
-      // Another box's message (an authorisation's reply, a proof).
-      if (e.to.some((a) => clearanceOfAddress(a) || isProofsAddress(a)))
+      // Another box's message (an authorisation's reply, a proof, a
+      // contract signed and sent back).
+      if (
+        e.to.some(
+          (a) =>
+            clearanceOfAddress(a) || isProofsAddress(a) || contractOfAddress(a),
+        )
+      )
         continue;
       const tagged = e.to
         .map(dealOfAddress)

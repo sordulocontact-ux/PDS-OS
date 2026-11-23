@@ -81,6 +81,7 @@ export const signedReturns = {
     sentOther: (how: string, date: string) => `${how.toLowerCase()} le ${date}`,
     otherwise: "Le signé vous est parvenu autrement ?",
     received: (name: string) => `Reçu de ${name} par son lien privé`,
+    receivedByEmail: (name: string) => `Reçu de ${name} par e-mail`,
     // JUR-11: both parties sign, the team checks before « signé ».
     checkTitle: "Vérification de la signature",
     checkVersion: "Version signée",
@@ -119,6 +120,9 @@ export const signedReturns = {
     signedFile: "Contrat signé",
     depositedBy: (name: string, date: string) =>
       `Déposé par ${name} le ${date}`,
+    // Sent back by e-mail, filed by PDS OS (20261123110101).
+    emailedBy: (name: string, date: string) =>
+      `Reçu de ${name} par e-mail le ${date}`,
     viewPdf: "Voir le PDF",
     proof: "Preuve de signature",
     proofValue: "Dépôt par son lien privé, horodaté",

@@ -1,4 +1,5 @@
 import { cronJson as json, isCronAuthorized } from "@/lib/cron/auth";
+import { fileEmailedSignedContracts } from "@/lib/contracts/signed-by-email";
 import { fileEmailedDealMemos } from "@/lib/email/deal-memo-inbox";
 import { getServerEnv } from "@/lib/env";
 import { fileEmailedProofs } from "@/lib/finance/proof-email";
@@ -54,6 +55,14 @@ export async function GET(request: Request) {
     );
     return null;
   });
+  // Nor do the contracts signed and sent back: their failure is only logged.
+  const signed = await fileEmailedSignedContracts().catch((error: unknown) => {
+    console.error(
+      "cron inbox signed contracts:",
+      error instanceof Error ? error.message.slice(0, 200) : "unknown",
+    );
+    return null;
+  });
   // Nor does the copy of the mailbox: its failure is only logged.
   const mailbox = await syncMailbox().catch((error: unknown) => {
     console.error(
@@ -63,7 +72,7 @@ export async function GET(request: Request) {
     return null;
   });
   if (!result) return json({ error: "inbox_unavailable" }, 503);
-  if (result.filed > 0 || (memos?.filed ?? 0) > 0) {
+  if (result.filed > 0 || (memos?.filed ?? 0) > 0 || (signed?.filed ?? 0) > 0) {
     const supabase = createAdminClient();
     if (supabase) await sendPendingPushes(supabase);
   }
@@ -71,6 +80,7 @@ export async function GET(request: Request) {
     ...result,
     proofs: proofs?.filed ?? null,
     dealMemos: memos?.filed ?? null,
+    signedContracts: signed?.filed ?? null,
     mailbox: mailbox?.copied ?? null,
   });
 }

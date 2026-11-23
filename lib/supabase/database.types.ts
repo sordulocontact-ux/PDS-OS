@@ -23757,6 +23757,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      receive_contract_signed_copy: {
+        Args: { p_contract_id: string; p_files: Json; p_from: string }
+        Returns: boolean
+      }
       rename_project_title: {
         Args: { p_title_id: string; p_working_title: string }
         Returns: undefined

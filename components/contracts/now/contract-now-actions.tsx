@@ -192,7 +192,7 @@ export function ContractNowActions({
               deposit && (
                 <DocumentCard
                   name={deposit.fileName}
-                  line={team.depositedBy(
+                  line={(deposit.byEmail ? team.emailedBy : team.depositedBy)(
                     person,
                     formatShortDay(deposit.at, { bare: true }),
                   )}

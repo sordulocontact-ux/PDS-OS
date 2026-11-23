@@ -10,7 +10,13 @@ export type ContractProof = {
   sent: { via: "link" | "other"; how: string | null; on: string } | null;
   // The signed copy the person deposited by their link, timestamped: the
   // proof of their signature (« Voir le PDF »: a link valid one hour).
-  deposit: { fileName: string; at: string; url: string | null } | null;
+  deposit: {
+    fileName: string;
+    at: string;
+    url: string | null;
+    // Sent back by e-mail (filed by the cron, 20261123110101), not by the link.
+    byEmail: boolean;
+  } | null;
   // Signed for PDS in PDS OS (JUR-11): by whom, when.
   countersign: { by: string | null; at: string } | null;
   // The PDF the direction signed for PDS,
@@ -43,7 +49,7 @@ export async function contractProofOf(
     supabase
       .from("contract_files")
       .select(
-        "contract_id, category, via_contact_id, file_name, path, created_at",
+        "contract_id, category, via_contact_id, description, file_name, path, created_at",
       )
       .in("contract_id", contractIds)
       .in("category", ["signed", "evidence", "pds_signed"])
@@ -79,6 +85,7 @@ export async function contractProofOf(
         fileName: row.file_name,
         at: row.created_at,
         url: null,
+        byEmail: row.description === "Reçu par e-mail",
       };
       deposits.push({ id: row.contract_id, path: row.path });
     }

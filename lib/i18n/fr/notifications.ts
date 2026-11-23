@@ -74,6 +74,8 @@ export const notifications = {
     contract_review_requested: (actor: string) =>
       `${actor} vous demande de valider un contrat.`,
     contract_approved: (actor: string) => `${actor} a validé votre contrat.`,
+    contract_signed_emailed: () =>
+      "Un contrat signé est revenu par e-mail : PDS OS l'a rangé dans le contrat, à vérifier.",
     contract_changes_requested: (actor: string) =>
       `${actor} demande des modifications sur votre contrat.`,
     meeting_invited: (actor: string) =>
