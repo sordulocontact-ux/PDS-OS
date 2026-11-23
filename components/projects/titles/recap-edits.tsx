@@ -61,7 +61,7 @@ import { cn } from "@/lib/utils";
 const fr = { dialogs, projectTitles };
 
 const LINE_BUTTON =
-  "relative z-10 max-w-full truncate rounded-sm text-left outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
+  "relative z-10 max-w-full rounded-sm text-left outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
 
 // ----------------------------------------------------------------- Release
 
@@ -124,28 +124,35 @@ const isReleaseValue = (value: unknown): value is ReleaseValue =>
 
 // -------------------------------------------------------------------- Note
 
-/** The artist's note under its name, on one line (the whole note on
- * hover); clicked, it opens to be changed. Empty: « Ajouter une note » for
- * whoever writes the title, nothing for the others. */
+/** The artist's note, on one line (the whole note on hover; `wrap`, in a
+ * « Note » column: up to three lines); clicked, it opens to be changed.
+ * Empty: « Ajouter une note » for whoever writes the title, nothing for the
+ * others. */
 export function NoteLine({
   projectId,
   participationId,
   artist,
   note,
   canEdit,
+  wrap = false,
 }: {
   projectId: string;
   participationId: string;
   artist: string;
   note: string | null;
   canEdit: boolean;
+  wrap?: boolean;
 }) {
   const t = fr.projectTitles.recap.note;
   const [open, setOpen] = useState(false);
+  // One line, or three in a column of its own.
+  const lines = wrap
+    ? "line-clamp-3 whitespace-normal break-words"
+    : "truncate";
   if (!canEdit)
     return note ? (
       <span
-        className={cn(caption, "truncate text-[color:var(--text-secondary)]")}
+        className={cn(caption, lines, "text-[color:var(--text-secondary)]")}
         title={note}
       >
         {note}
@@ -158,6 +165,7 @@ export function NoteLine({
         className={cn(
           caption,
           LINE_BUTTON,
+          lines,
           note && "text-[color:var(--text-secondary)]",
         )}
         title={note ?? undefined}

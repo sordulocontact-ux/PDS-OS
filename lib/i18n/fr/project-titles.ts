@@ -379,14 +379,37 @@ export const projectTitles = {
     // The screen of the recap (lot L2b): its columns, the counters that
     // filter its artists, the title's facts in its cell, and what is edited
     // in place (contact, release, note).
+    // « Titres et artistes » (Maël 22/11/2026): one row per artist, the
+    // columns of Ibé's Excel; the fiche's personal data stay in the fiche.
     columns: {
       status: "Statut",
       accord: "Accord",
-      legal: "Juridique",
       artist: "Artiste",
-      // The overview's compact recap.
+      contact: "Contact",
+      // The Excel's « TAUX (%) »: the deal's « Part du master ».
+      rate: "Taux",
+      // The Excel's « QUESTIONNAIRE REMPLI ».
+      fiche: "Fiche de renseignement",
+      contract: "Contrat",
       mix: "Mix",
+      release: "Sortie",
+      distribution: "Distribution",
+      beatmaker: "Beatmaker",
+      note: "Note",
+      // The overview's compact recap: the fiche and the contract together.
+      legal: "Juridique",
     },
+    // The title's gestures in an artist's « ⋯ », after the artist's own:
+    // their words say they are the title's.
+    titleActions: {
+      add: "Ajouter un artiste au titre",
+      rename: "Renommer le titre",
+      abandon: "Abandonner le titre",
+      reactivate: "Réactiver le titre",
+    },
+    // Under an artist's name, for whoever does not read the Juridique: the
+    // shoot and the release wait for this contract (lot 12).
+    contractMissing: "Contrat non signé",
     filters: "Filtrer les artistes par statut",
     // No artist in the states chosen.
     filteredEmpty: "Aucun artiste dans ce statut.",
@@ -459,15 +482,23 @@ export const projectTitles = {
     },
     legal: {
       fiche: (state: string) => `Fiche · ${state}`,
-      // The fiche in the Excel's three words (RecapFicheState); the
-      // Juridique keeps its finer ones.
+      // The fiche in three words (RecapFicheState, Maël 22/11/2026:
+      // « renseignée, envoyée, pas envoyée »); the Juridique keeps its finer
+      // ones.
       ficheStates: {
-        toSend: "À envoyer",
-        waiting: "En attente",
-        filled: "Remplie",
+        toSend: "Pas envoyée",
+        waiting: "Envoyée",
+        filled: "Renseignée",
       },
       // The nuance of a fiche received and not yet validated, read on hover.
-      ficheToValidate: "Remplie, à valider",
+      ficheToValidate: "Renseignée, à valider",
+      // The fiche's pill opens the fiche itself, for a screen reader.
+      openFiche: (name: string, state: string) =>
+        `Ouvrir la fiche de renseignement ${de(name)} : ${state}`,
+      // No démarche yet (a guest not credited in the Catalogue): the fiche
+      // has no page to open, read on hover.
+      ficheLater:
+        "Au Juridique une fois l'artiste crédité sur le titre au Catalogue",
       // The contract's state (participationContract) after « Contrat · ».
       contract: (state: string) => `Contrat · ${state}`,
     },

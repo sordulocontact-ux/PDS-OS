@@ -2703,3 +2703,24 @@ tableau CONTRATS : contrat coproduction 50/50, envoyé ?, en attente de retour, 
   soit `agreementStatus`). `DealStageBadge` lit maintenant `dealStageToneOf(deal)` (`lib/ui/state-tones.ts`) : accord à
   valider = orange, **accord validé = vert** ; les autres étapes gardent leur ton. Partout où le badge s'affiche (Deals,
   page d'un deal, récap des titres).
+
+## « Titres et artistes » : une ligne par artiste (22/11/2026, branche `pre-prod`)
+
+Maël : « au lieu qu'une ligne soit un titre, une ligne = un artiste, comme la vue d'ensemble, avec toutes les colonnes
+de la feuille Excel » ; « Fiche de renseignement » à la place de « Juridique ».
+
+- Colonnes, dans l'ordre : Artiste (titre dessous, « Nommer »), Statut, Contact (TEL), Accord, Taux, Fiche de
+  renseignement, Contrat, Mix (son reçu / mix), Sortie, Distribution, Beatmaker (et sa fiche), Note. Les données
+  personnelles de la fiche (prénom civil, naissance, sécu, mail, adresse, RIB) restent dans la fiche. Lyrics, Réseaux et
+  « personnes sur place » attendent toujours Ibé.
+- Le tableau est plus large que la page (environ 2 100 px) : il **défile dans son cadre**, la colonne Artiste reste fixe
+  à gauche, fondu à droite tant qu'il reste des colonnes. Exception assumée à la règle « 4 colonnes fixes, pas de
+  défilement » des lots PDS Mic, puisqu'on veut l'Excel entier.
+- Fiche : « Pas envoyée », « Envoyée », « Renseignée » (« Renseignée, à valider » au survol) ; la pastille ouvre la fiche
+  elle-même dans la démarche de la personne (`?partie=fiche`), remplie ou non.
+- Lien seulement quand la démarche existe (personne créditée ou featuring sur un master du projet, ou ajoutée au dossier
+  juridique, comme `formPeople`) : avant, la fiche et le contrat d'un invité d'un titre pas encore au Catalogue
+  menaient à « Page introuvable » (Tavio, Selma, Joss, Tiago dans « Assurance 30 »). Leur pastille dit au survol « Au
+  Juridique une fois l'artiste crédité sur le titre au Catalogue ».
+- « ⋯ » d'une ligne : gestes de l'artiste puis du titre (mots du titre : « Renommer le titre »…). Vérifié dans Chrome
+  (Assurance 30, PDS MIC #5, cadre de 358 px).
