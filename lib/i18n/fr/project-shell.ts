@@ -78,19 +78,6 @@ export const projectShell = {
       open: "Ouvrir le Brief",
       mine: (todo: string) => `À vous : ${todo}.`,
     },
-    dependencies: {
-      title: "Ce qui dépend d'un autre workflow",
-      flow: (from: string, to: string) => `${from} → ${to}`,
-      items: {
-        masterFinal: "Master final",
-        cover: "Pochette livrée",
-        ready: "Prêt pour la sortie",
-        duration: "Durée du master final",
-      },
-      sacem: "Juridique · SACEM",
-      available: "Disponible",
-      expected: "Attendu",
-    },
   },
   // The project's image (lib/projects/cover-rules.ts).
   cover: {

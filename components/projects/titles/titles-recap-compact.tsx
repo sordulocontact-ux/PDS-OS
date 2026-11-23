@@ -66,11 +66,12 @@ function StackedFact({
 }
 
 /**
- * The collective's recap at the head of its overview (retours d'Ibé du
+ * The collective's recap at the foot of its overview (retours d'Ibé du
  * 18/11/2026, lot 2: « une vue récap sur tous les titres qui éviterait
  * d'aller dans chaque module »): one row per artist in play (a
  * participation neither declined nor withdrawn, on a title not abandoned),
- * the title's label and the artist's note under the name; Statut, Accord
+ * the title's label under the name (no note: too much here, Maël
+ * 23/11/2026); Statut, Accord
  * (when the reader sees deals), Juridique (manage_legal), the title's Mix. Read only: the row
  * opens « Titres et artistes » (`href`), each pill its module. Rendered on
  * the server.
@@ -172,15 +173,6 @@ export function TitlesRecapCompact({
                   <span className={`${caption} truncate`}>
                     {title.recap.label}
                   </span>
-                  {/* Its note, two lines at most (edited in the board). */}
-                  {facts.note && (
-                    <span
-                      className={`${caption} line-clamp-2 break-words text-[color:var(--text-secondary)]`}
-                      title={facts.note}
-                    >
-                      {facts.note}
-                    </span>
-                  )}
                   <span className="sm:hidden">
                     <ContactStatePill status={participation.status} />
                   </span>

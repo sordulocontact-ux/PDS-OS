@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { DependencyRows } from "@/components/overview/dependency-rows";
 import { ContractGapsCallout } from "@/components/legal/contract-gaps-notice";
 import { loadContractGaps } from "@/lib/legal/contract-gaps";
 import { FramingDeliverable } from "@/components/overview/framing-deliverable";
@@ -25,7 +24,6 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { workflowCards } from "@/lib/overview/cards";
-import { overviewDependencies } from "@/lib/overview/dependencies";
 import { loadShellJourneys } from "@/lib/overview/journeys";
 import { planLaunchedAt } from "@/lib/plan/queries";
 import {
@@ -49,14 +47,14 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
  * Type », « Informations » as a quiet action; then two zones, one title
  * each — « Maintenant » (the viewer's first action, the Cadrage first) and
  * « Progression » (the Cadrage's steps before « Lancer le plan », the
- * workflows after); then the Cadrage's deliverable, or once launched what
- * one workflow hands another. No state pills, no rules between sections.
+ * workflows after); then, before the launch, the Cadrage's deliverable
+ * (« Ce qui dépend d'un autre workflow » removed 23/11/2026). No state pills, no rules between sections.
  * Everything read from the journeys and the workflows (docs/ARCHITECTURE.md
  * § 3 ter, § 8 ter), nothing stored. A project not accepted yet shows its
  * one gesture and what is transmitted (UnlaunchedOverview). A collective
- * opens on its recap (retours d'Ibé du 18/11/2026, lot 2): one row per
- * artist, read only, « Tout voir » to « Titres et artistes »; what blocks
- * the project comes under it, unchanged. Any other project: unchanged.
+ * shows its recap (retours d'Ibé du 18/11/2026, lot 2): one row per
+ * artist, read only, « Tout voir » to « Titres et artistes »; last, since
+ * it is long (23/11/2026). Any other project: unchanged.
  */
 export default async function ProjectOverviewPage({
   params,
@@ -147,8 +145,6 @@ export default async function ProjectOverviewPage({
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
   const brief = framing.find((step) => step.key === "brief");
-  const deps =
-    launchedAt && flows ? await overviewDependencies(project, flows, all) : [];
   // A launched project: only its owner writes (is_project_owner).
   const canEditCover = canEditProject(access, project);
   const t = fr.projectShell.overview;
@@ -203,30 +199,6 @@ export default async function ProjectOverviewPage({
           </>
         }
       />
-      {recap && (
-        <PageSection
-          id="titles"
-          title={fr.projectTitles.title}
-          action={
-            <ViewLink
-              href={routes.projectTitles(project.id)}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              <ButtonRoll>{fr.projectTitles.recap.overview.seeAll}</ButtonRoll>
-            </ViewLink>
-          }
-        >
-          <TitlesRecapCompact
-            recap={recap}
-            href={routes.projectTitles(project.id)}
-            masterHref={
-              flows?.workflows.includes("master")
-                ? routes.projectMaster(project.id)
-                : null
-            }
-          />
-        </PageSection>
-      )}
       <ContractGapsCallout
         projectId={project.id}
         shoot={shootGaps}
@@ -251,10 +223,31 @@ export default async function ProjectOverviewPage({
           <OverviewProgress framing={framing} />
         )}
       </div>
-      {launchedAt && flows ? (
-        <DependencyRows deps={deps} />
-      ) : (
-        brief && <FramingDeliverable brief={brief} />
+      {!(launchedAt && flows) && brief && <FramingDeliverable brief={brief} />}
+      {/* Last (retour de Maël du 23/11/2026): long, it hid the rest. */}
+      {recap && (
+        <PageSection
+          id="titles"
+          title={fr.projectTitles.title}
+          action={
+            <ViewLink
+              href={routes.projectTitles(project.id)}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <ButtonRoll>{fr.projectTitles.recap.overview.seeAll}</ButtonRoll>
+            </ViewLink>
+          }
+        >
+          <TitlesRecapCompact
+            recap={recap}
+            href={routes.projectTitles(project.id)}
+            masterHref={
+              flows?.workflows.includes("master")
+                ? routes.projectMaster(project.id)
+                : null
+            }
+          />
+        </PageSection>
       )}
     </div>
   );
@@ -277,7 +270,7 @@ function projectSubtitle(project: ProjectDetail): string {
 /**
  * Before its acceptance, a collective has no sections (no « Titres et
  * artistes » page): its recap (docs/pds-mic-plan.md, lot 6; retours d'Ibé
- * du 18/11/2026, lot 2) shows here, at the head — the same table and
+ * du 18/11/2026, lot 2) shows here, last — the same table and
  * gestures, written by whoever creates projects (same rule as
  * add_project_title and add_title_participation, which enforce it); its
  * main artist is changed in the project's form. Nothing for any other
@@ -315,6 +308,7 @@ async function collectiveTitles(project: ProjectDetail, access: Access) {
         masterOptions={masterOptions}
         // No workflow before the launch: nothing to open yet.
         links={{ master: null, distribution: null }}
+        notes={false}
       />
     </PageSection>
   );

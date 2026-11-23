@@ -114,12 +114,14 @@ export type BoardLinks = {
  * reader sees deals (dealReach, lot 6); Fiche de renseignement and Contrat
  * with manage_legal; Distribution once the project has the workflow; « ⋯ »
  * for whoever writes the titles (none for a reader: no empty column on the
- * right). */
+ * right). `notes`: the artist's note under its name (not on an overview,
+ * Maël 23/11/2026: too much there). */
 type Columns = {
   accord: boolean;
   legal: boolean;
   distribution: boolean;
   actions: boolean;
+  notes: boolean;
 };
 
 // Every column (a group row spans them).
@@ -262,6 +264,7 @@ export function TitlesBoard({
   artists,
   masterOptions = {},
   links,
+  notes = true,
   today = todayInParis(new Date()),
 }: {
   projectId: string;
@@ -272,6 +275,8 @@ export function TitlesBoard({
   // Catalogue », lot 7): id → « Titre · Artistes ».
   masterOptions?: Record<string, string>;
   links: BoardLinks;
+  // The artists' notes, read and written; none on an overview.
+  notes?: boolean;
   // Paris's day, read by the server (a waiver's due date, lot 12).
   today?: string;
 }) {
@@ -292,6 +297,7 @@ export function TitlesBoard({
     legal: recap.canReadLegal,
     distribution: links.distribution !== null,
     actions: canManage,
+    notes,
   };
 
   // The counters filter the artists; a title stays while one of its
@@ -343,10 +349,11 @@ export function TitlesBoard({
     );
 
   const total = CONTACT_STATES.reduce((sum, s) => sum + recap.counts[s], 0);
-  const rows = (list: typeof groups) =>
+  const rows = (list: typeof groups, layout: Layout) =>
     list.map(({ title, participations }) => (
       <Fragment key={title.id}>
         <TitleRows
+          layout={layout}
           projectId={projectId}
           title={title}
           participations={participations}
@@ -364,8 +371,20 @@ export function TitlesBoard({
       </Fragment>
     ));
 
+  const abandonedHead = (
+    <>
+      {t.abandonedGroup}
+      <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
+        {abandoned.length}
+      </span>
+    </>
+  );
+
+  // The table from 640 px of board, else its cards (a phone, Maël
+  // 23/11/2026): both written, the board's width shows one (container
+  // query), so that nothing jumps at load.
   return (
-    <div className="flex flex-col gap-3">
+    <div className="@container/board flex flex-col gap-3">
       {total > 0 && (
         <div
           role="group"
@@ -396,74 +415,84 @@ export function TitlesBoard({
       {groups.length === 0 ? (
         <EmptyNote>{r.filteredEmpty}</EmptyNote>
       ) : (
-        <ScrollingTable fadeEnd={!columns.actions}>
-          <DataTableHeader>
-            <DataTableHead className={cn(COLUMN.artist, STICKY_HEAD)}>
-              {r.columns.artist}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.status}>
-              {r.columns.status}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.contact}>
-              {r.columns.contact}
-            </DataTableHead>
-            {columns.accord && (
-              <>
-                <DataTableHead className={COLUMN.accord}>
-                  {r.columns.accord}
+        <>
+          <div className="hidden @min-[40rem]/board:block">
+            <ScrollingTable fadeEnd={!columns.actions}>
+              <DataTableHeader>
+                <DataTableHead className={cn(COLUMN.artist, STICKY_HEAD)}>
+                  {r.columns.artist}
                 </DataTableHead>
-                <DataTableHead className={COLUMN.rate}>
-                  {r.columns.rate}
+                <DataTableHead className={COLUMN.status}>
+                  {r.columns.status}
                 </DataTableHead>
-              </>
-            )}
-            {columns.legal && (
-              <>
-                <DataTableHead className={COLUMN.fiche}>
-                  {r.columns.fiche}
+                <DataTableHead className={COLUMN.contact}>
+                  {r.columns.contact}
                 </DataTableHead>
-                <DataTableHead className={COLUMN.contract}>
-                  {r.columns.contract}
+                {columns.accord && (
+                  <>
+                    <DataTableHead className={COLUMN.accord}>
+                      {r.columns.accord}
+                    </DataTableHead>
+                    <DataTableHead className={COLUMN.rate}>
+                      {r.columns.rate}
+                    </DataTableHead>
+                  </>
+                )}
+                {columns.legal && (
+                  <>
+                    <DataTableHead className={COLUMN.fiche}>
+                      {r.columns.fiche}
+                    </DataTableHead>
+                    <DataTableHead className={COLUMN.contract}>
+                      {r.columns.contract}
+                    </DataTableHead>
+                  </>
+                )}
+                <DataTableHead className={COLUMN.mix}>
+                  {r.columns.mix}
                 </DataTableHead>
-              </>
-            )}
-            <DataTableHead className={COLUMN.mix}>
-              {r.columns.mix}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.release}>
-              {r.columns.release}
-            </DataTableHead>
-            {columns.distribution && (
-              <DataTableHead className={COLUMN.distribution}>
-                {r.columns.distribution}
-              </DataTableHead>
-            )}
-            <DataTableHead className={COLUMN.beatmaker}>
-              {r.columns.beatmaker}
-            </DataTableHead>
-            {columns.actions && (
-              <DataTableActionsHead
-                label={t.columns.actions}
-                className={cn(COLUMN.actions, STICKY_HEAD)}
-              />
-            )}
-          </DataTableHeader>
-          <DataTableBody>
-            {rows(live)}
+                <DataTableHead className={COLUMN.release}>
+                  {r.columns.release}
+                </DataTableHead>
+                {columns.distribution && (
+                  <DataTableHead className={COLUMN.distribution}>
+                    {r.columns.distribution}
+                  </DataTableHead>
+                )}
+                <DataTableHead className={COLUMN.beatmaker}>
+                  {r.columns.beatmaker}
+                </DataTableHead>
+                {columns.actions && (
+                  <DataTableActionsHead
+                    label={t.columns.actions}
+                    className={cn(COLUMN.actions, STICKY_HEAD)}
+                  />
+                )}
+              </DataTableHeader>
+              <DataTableBody>
+                {rows(live, "table")}
+                {abandoned.length > 0 && (
+                  <DataTableGroupRow columns={columnCount(columns)}>
+                    {/* Kept in sight while the table scrolls sideways. */}
+                    <span className="sticky left-4 inline-flex text-[length:var(--type-body-md)] font-semibold">
+                      {abandonedHead}
+                    </span>
+                  </DataTableGroupRow>
+                )}
+                {rows(abandoned, "table")}
+              </DataTableBody>
+            </ScrollingTable>
+          </div>
+          <div className="flex flex-col gap-3 @min-[40rem]/board:hidden">
+            {rows(live, "cards")}
             {abandoned.length > 0 && (
-              <DataTableGroupRow columns={columnCount(columns)}>
-                {/* Kept in sight while the table scrolls sideways. */}
-                <span className="sticky left-4 inline-flex text-[length:var(--type-body-md)] font-semibold">
-                  {t.abandonedGroup}
-                  <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
-                    {abandoned.length}
-                  </span>
-                </span>
-              </DataTableGroupRow>
+              <p className="mt-2 px-1 text-[length:var(--type-body-md)] font-semibold">
+                {abandonedHead}
+              </p>
             )}
-            {rows(abandoned)}
-          </DataTableBody>
-        </ScrollingTable>
+            {rows(abandoned, "cards")}
+          </div>
+        </>
       )}
     </div>
   );
@@ -501,7 +530,11 @@ function ScrollingTable({
 
 type Dialog = "add" | "rename" | "name" | "abandon" | "attach";
 
+/** A row of the table, or a card of the phone's list. */
+type Layout = "table" | "cards";
+
 type TitleRowsProps = {
+  layout: Layout;
   projectId: string;
   title: RecapTitle;
   // Its artists shown (the counters may filter them).
@@ -518,16 +551,19 @@ type TitleRowsProps = {
   today: string;
 };
 
-/** A title's rows: one per artist shown, else « Aucun artiste invité »
- * (with « Ajouter un artiste » for whoever writes). Holds what the title's
- * rows share: its facts (Mix, Sortie, Distribution, Beatmaker, the same on
- * each row), its release, saved at the choice and shown at once on all of
- * them, its gestures (in each row's « ⋯ ») and their dialogs, once. */
+/** A title's rows (`layout="table"`) or cards (`layout="cards"`, a phone):
+ * one per artist shown, else « Aucun artiste invité » (with « Ajouter un
+ * artiste » for whoever writes). Holds what the title's rows share: its
+ * facts (Mix, Sortie, Distribution, Beatmaker, the same on each row), its
+ * release, saved at the choice and shown at once on all of them, its
+ * gestures (in each row's « ⋯ ») and their dialogs, once. */
 function TitleRows(props: TitleRowsProps) {
   const { projectId, title, participations, columns, canManage, links } = props;
   const t = fr.projectTitles;
+  const r = t.recap;
   const label = title.recap.label;
   const abandoned = title.status === "abandoned";
+  const cards = props.layout === "cards";
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [release, setRelease] = useOptimistic(title.recap.releaseDecision);
   const [releasePending, startRelease] = useTransition();
@@ -554,16 +590,24 @@ function TitleRows(props: TitleRowsProps) {
   // An abandoned title is out of the Master (lot 9): no state there.
   const mixFact = abandoned ? null : titleMixFact(title.masterState);
   const distribution = links.distribution?.[title.id] ?? null;
-  const titleCells = (
-    <>
-      <DataTableCell className={cn(COLUMN.mix, CELL)}>
+  const titleFacts: Fact[] = [
+    {
+      key: "mix",
+      label: r.columns.mix,
+      column: COLUMN.mix,
+      node: (
         <MixPill
           label={mixFact?.label ?? null}
           status={mixFact?.status ?? null}
           href={masterHref}
         />
-      </DataTableCell>
-      <DataTableCell className={cn(COLUMN.release, CELL)}>
+      ),
+    },
+    {
+      key: "release",
+      label: r.columns.release,
+      column: COLUMN.release,
+      node: (
         <ReleaseChoice
           label={label}
           value={releaseValueOf(release)}
@@ -571,26 +615,36 @@ function TitleRows(props: TitleRowsProps) {
           pending={releasePending}
           onPick={pickRelease}
         />
-      </DataTableCell>
-      {columns.distribution && (
-        <DataTableCell className={cn(COLUMN.distribution, CELL)}>
-          {distribution ? (
-            <ViewLink href={distribution.href} className={PILL_LINK}>
-              <StatusBadge
-                tone={distribution.tone}
-                size="sm"
-                className="h-auto min-h-5 max-w-full py-0.5 text-left whitespace-normal"
-              >
-                {distribution.label}
-              </StatusBadge>
-            </ViewLink>
-          ) : (
-            <Empty />
-          )}
-        </DataTableCell>
-      )}
-      <DataTableCell className={cn(COLUMN.beatmaker, CELL)}>
-        {title.recap.beatmakers.length > 0 ? (
+      ),
+    },
+    ...(columns.distribution
+      ? [
+          {
+            key: "distribution",
+            label: r.columns.distribution,
+            column: COLUMN.distribution,
+            node: distribution ? (
+              <ViewLink href={distribution.href} className={PILL_LINK}>
+                <StatusBadge
+                  tone={distribution.tone}
+                  size="sm"
+                  className="h-auto min-h-5 max-w-full py-0.5 text-left whitespace-normal"
+                >
+                  {distribution.label}
+                </StatusBadge>
+              </ViewLink>
+            ) : (
+              <Empty />
+            ),
+          },
+        ]
+      : []),
+    {
+      key: "beatmaker",
+      label: r.columns.beatmaker,
+      column: COLUMN.beatmaker,
+      node:
+        title.recap.beatmakers.length > 0 ? (
           <span className="flex min-w-0 flex-col items-start gap-1.5">
             {title.recap.beatmakers.map((person) => (
               <span
@@ -608,21 +662,15 @@ function TitleRows(props: TitleRowsProps) {
           </span>
         ) : (
           <Empty />
-        )}
-      </DataTableCell>
-    </>
-  );
+        ),
+    },
+  ];
+  const onName =
+    canManage && !abandoned && isUnnamed(title)
+      ? () => setDialog("name")
+      : undefined;
   const titleLine = (
-    <TitleLine
-      title={title}
-      label={label}
-      href={masterHref}
-      onName={
-        canManage && !abandoned && isUnnamed(title)
-          ? () => setDialog("name")
-          : undefined
-      }
-    />
+    <TitleLine title={title} label={label} href={masterHref} onName={onName} />
   );
   // Once per title, in its first row's « ⋯ » cell (a dialog shows in a
   // portal, wherever it is written).
@@ -641,27 +689,39 @@ function TitleRows(props: TitleRowsProps) {
     />
   );
 
-  if (participations.length === 0)
+  if (participations.length === 0) {
+    const empty = (
+      <span className="flex min-w-0 flex-col items-start gap-0.5">
+        <span className={muted}>{t.board.noArtist}</span>
+        {titleLine}
+        {canManage &&
+          !abandoned &&
+          Object.keys(props.artists.options).length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-1.5"
+              onClick={() => setDialog("add")}
+            >
+              {t.participations.add.action}
+            </Button>
+          )}
+      </span>
+    );
+    const menu = columns.actions && (
+      <RowActions label={t.menu(label)} actions={titleActions} />
+    );
+    if (cards)
+      return (
+        <FactCard head={empty} menu={menu} facts={titleFacts}>
+          {dialogs}
+        </FactCard>
+      );
     return (
       <TableRow className={ROW}>
         <DataTableCell className={cn(COLUMN.artist, CELL)}>
-          <span className="flex min-w-0 flex-col items-start gap-0.5">
-            <span className={muted}>{t.board.noArtist}</span>
-            {titleLine}
-            {canManage &&
-              !abandoned &&
-              Object.keys(props.artists.options).length > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-1.5"
-                  onClick={() => setDialog("add")}
-                >
-                  {t.participations.add.action}
-                </Button>
-              )}
-          </span>
+          {empty}
         </DataTableCell>
         {/* The artist's columns: nothing to say without one. */}
         <DataTableCell
@@ -670,19 +730,69 @@ function TitleRows(props: TitleRowsProps) {
         >
           {null}
         </DataTableCell>
-        {titleCells}
+        <FactCells facts={titleFacts} />
         {columns.actions && (
           <DataTableActionsCell className={COLUMN.actions}>
-            <RowActions label={t.menu(label)} actions={titleActions} />
+            {menu}
             {dialogs}
           </DataTableActionsCell>
         )}
       </TableRow>
     );
+  }
 
   // Several artists on the title: their rows grouped under it, its name
-  // written once (Maël 23/11/2026), its facts still on each row.
+  // written once (Maël 23/11/2026), its facts still on each row. On a
+  // phone, the name above its cards.
   const grouped = participations.length > 1;
+  const heading = grouped && (
+    <TitleLine
+      title={title}
+      label={label}
+      href={masterHref}
+      heading
+      onName={onName}
+    />
+  );
+  const artistRows = participations.map((participation, index) => (
+    <ArtistRow
+      key={participation.id}
+      layout={props.layout}
+      projectId={projectId}
+      title={title}
+      participation={participation}
+      label={label}
+      credit={credit}
+      columns={columns}
+      call={props.call}
+      canReadLegal={props.canReadLegal}
+      canEditNetwork={props.canEditNetwork && !abandoned}
+      today={props.today}
+      titleLine={grouped ? null : titleLine}
+      titleFacts={titleFacts}
+      titleActions={titleActions}
+      dialogs={index === 0 ? dialogs : null}
+      // Its title abandoned: greyed and not edited (reactivate it first).
+      dimmed={abandoned}
+      canManage={canManage && !abandoned}
+      // Confirmed on a title a simple project shares: its credits were
+      // not written, they are to check by hand (décision 10).
+      toCheck={
+        credit.mode === "manual" &&
+        participation.status === "confirmed" &&
+        !abandoned
+      }
+    />
+  ));
+  if (cards)
+    return grouped ? (
+      <div className="flex flex-col gap-2">
+        <div className="px-1">{heading}</div>
+        {artistRows}
+      </div>
+    ) : (
+      <>{artistRows}</>
+    );
   return (
     <>
       {grouped && (
@@ -695,53 +805,68 @@ function TitleRows(props: TitleRowsProps) {
               "py-2 before:hidden",
             )}
           >
-            <TitleLine
-              title={title}
-              label={label}
-              href={masterHref}
-              heading
-              onName={
-                canManage && !abandoned && isUnnamed(title)
-                  ? () => setDialog("name")
-                  : undefined
-              }
-            />
+            {heading}
           </DataTableCell>
           <DataTableCell colSpan={columnCount(columns) - 1} className="py-2">
             {null}
           </DataTableCell>
         </TableRow>
       )}
-      {participations.map((participation, index) => (
-        <ArtistRow
-          key={participation.id}
-          projectId={projectId}
-          title={title}
-          participation={participation}
-          label={label}
-          credit={credit}
-          columns={columns}
-          call={props.call}
-          canReadLegal={props.canReadLegal}
-          canEditNetwork={props.canEditNetwork && !abandoned}
-          today={props.today}
-          titleLine={grouped ? null : titleLine}
-          titleCells={titleCells}
-          titleActions={titleActions}
-          dialogs={index === 0 ? dialogs : null}
-          // Its title abandoned: greyed and not edited (reactivate it first).
-          dimmed={abandoned}
-          canManage={canManage && !abandoned}
-          // Confirmed on a title a simple project shares: its credits were
-          // not written, they are to check by hand (décision 10).
-          toCheck={
-            credit.mode === "manual" &&
-            participation.status === "confirmed" &&
-            !abandoned
-          }
-        />
+      {artistRows}
+    </>
+  );
+}
+
+/** A column's fact (its header's words, its width, what it shows), told
+ * once for a row's cell and a card's pair. */
+type Fact = { key: string; label: string; column: string; node: ReactNode };
+
+/** The facts as a row's cells. */
+function FactCells({ facts }: { facts: Fact[] }) {
+  return (
+    <>
+      {facts.map((fact) => (
+        <DataTableCell key={fact.key} className={cn(fact.column, CELL)}>
+          {fact.node}
+        </DataTableCell>
       ))}
     </>
+  );
+}
+
+/** A row on a phone (Maël 23/11/2026: two sticky columns left 120 px to
+ * read): a card, its head (the artist and its title, status, note) with
+ * « ⋯ » at its top right, then its facts one under the other, label and
+ * value. Cards keep apart by their gap, never a rule (no-dividers); the
+ * card's own outline is the design system's. `children`: the title's
+ * dialogs, once. */
+function FactCard({
+  head,
+  menu,
+  facts,
+  children,
+}: {
+  head: ReactNode;
+  menu: ReactNode;
+  facts: Fact[];
+  children?: ReactNode;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-[color:var(--border-default)] bg-card p-4 text-[length:var(--type-body-md)] font-medium">
+      <div className="flex min-w-0 items-start gap-2">
+        <div className="min-w-0 flex-1">{head}</div>
+        {menu && <div className="-mt-1.5 -mr-2 shrink-0">{menu}</div>}
+        {children}
+      </div>
+      <dl className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] gap-x-3 gap-y-2.5">
+        {facts.map((fact) => (
+          <Fragment key={fact.key}>
+            <dt className={cn(caption, "pt-0.5 break-words")}>{fact.label}</dt>
+            <dd className="flex min-w-0 flex-col items-start">{fact.node}</dd>
+          </Fragment>
+        ))}
+      </dl>
+    </div>
   );
 }
 
@@ -823,9 +948,11 @@ function TitleLine({
 /** An artist on a title, one row: Artiste (name and role, its title, its
  * note, its waivers), Statut, Contact, Accord, Taux, Fiche de renseignement,
  * Contrat, then its title's facts, « ⋯ » (the artist's gestures, then the
- * title's). The name opens the person's démarche in the Juridique, else the
- * deal. */
+ * title's). On a phone (`layout="cards"`), a card: name, title, status,
+ * note, then the same facts in pairs. The name opens the person's démarche
+ * in the Juridique, else the deal. */
 function ArtistRow({
+  layout,
   projectId,
   title,
   participation,
@@ -837,13 +964,14 @@ function ArtistRow({
   canEditNetwork,
   today,
   titleLine,
-  titleCells,
+  titleFacts,
   titleActions,
   dialogs,
   dimmed,
   canManage,
   toCheck,
 }: {
+  layout: Layout;
   projectId: string;
   title: RecapTitle;
   participation: RecapParticipation;
@@ -855,7 +983,7 @@ function ArtistRow({
   canEditNetwork: boolean;
   today: string;
   titleLine: ReactNode;
-  titleCells: ReactNode;
+  titleFacts: Fact[];
   titleActions: RowAction[];
   dialogs: ReactNode;
   dimmed: boolean;
@@ -863,6 +991,7 @@ function ArtistRow({
   toCheck: boolean;
 }) {
   const t = fr.projectTitles;
+  const r = t.recap;
   const [noteOpen, setNoteOpen] = useState(false);
   const active = isActiveParticipation(participation.status) && !dimmed;
   const facts = participation.recap;
@@ -874,68 +1003,64 @@ function ArtistRow({
   const missing =
     !canReadLegal && contractGap(title, participation, today) !== null;
 
-  return (
-    <TableRow className={ROW}>
-      <DataTableCell className={cn(COLUMN.artist, CELL)}>
-        <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
-            <span
-              className={cn(
-                "min-w-0 [overflow-wrap:anywhere]",
-                !active && "text-[color:var(--text-secondary)]",
-              )}
-            >
-              {href ? (
-                <ViewLink href={href} className={NAME_LINK}>
-                  {artist}
-                </ViewLink>
-              ) : (
-                artist
-              )}
-            </span>
-            <span className={cn(muted, "shrink-0")}>
-              {`· ${t.participations.roles[participation.role]}`}
-            </span>
-          </span>
-          {titleLine}
-          <NoteLine
-            projectId={projectId}
-            participationId={participation.id}
-            artist={artist}
-            note={facts.note}
-            canEdit={canManage}
-            open={noteOpen}
-            onOpenChange={setNoteOpen}
-          />
-          {toCheck && (
-            <span className={cn(caption, "flex items-start gap-1.5")}>
-              <IconTriangleWarning
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0"
-              />
-              {t.participations.sharedShort}
-            </span>
-          )}
-          {missing && (
-            <span className={WARNING}>
-              <IconTriangleWarning
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0"
-              />
-              {t.recap.contractMissing}
-            </span>
-          )}
-          {!dimmed && (
-            <WaiverLines waivers={participation.waivers} today={today} />
-          )}
+  const status = <ContactStatePill status={participation.status} />;
+  const name = (
+    <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
+      <span
+        className={cn(
+          "min-w-0 [overflow-wrap:anywhere]",
+          !active && "text-[color:var(--text-secondary)]",
+        )}
+      >
+        {href ? (
+          <ViewLink href={href} className={NAME_LINK}>
+            {artist}
+          </ViewLink>
+        ) : (
+          artist
+        )}
+      </span>
+      <span className={cn(muted, "shrink-0")}>
+        {`· ${t.participations.roles[participation.role]}`}
+      </span>
+    </span>
+  );
+  const notes = (
+    <>
+      {columns.notes && (
+        <NoteLine
+          projectId={projectId}
+          participationId={participation.id}
+          artist={artist}
+          note={facts.note}
+          canEdit={canManage}
+          open={noteOpen}
+          onOpenChange={setNoteOpen}
+        />
+      )}
+      {toCheck && (
+        <span className={cn(caption, "flex items-start gap-1.5")}>
+          <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {t.participations.sharedShort}
         </span>
-      </DataTableCell>
-      <DataTableCell className={cn(COLUMN.status, CELL)}>
-        <ContactStatePill status={participation.status} />
-      </DataTableCell>
-      <DataTableCell className={cn(COLUMN.contact, CELL)}>
-        {/* None and nothing to do: « — » (ContactFacts says nothing). */}
-        {facts.contact !== null || canManage ? (
+      )}
+      {missing && (
+        <span className={WARNING}>
+          <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {r.contractMissing}
+        </span>
+      )}
+      {!dimmed && <WaiverLines waivers={participation.waivers} today={today} />}
+    </>
+  );
+  const artistFacts: Fact[] = [
+    {
+      key: "contact",
+      label: r.columns.contact,
+      column: COLUMN.contact,
+      // None and nothing to do: « — » (ContactFacts says nothing).
+      node:
+        facts.contact !== null || canManage ? (
           <span className="flex min-w-0 flex-col items-start">
             <ContactFacts
               projectId={projectId}
@@ -948,12 +1073,15 @@ function ArtistRow({
           </span>
         ) : (
           <Empty />
-        )}
-      </DataTableCell>
-      {columns.accord && (
-        <>
-          <DataTableCell className={cn(COLUMN.accord, CELL)}>
-            {facts.accord ? (
+        ),
+    },
+    ...(columns.accord
+      ? [
+          {
+            key: "accord",
+            label: r.columns.accord,
+            column: COLUMN.accord,
+            node: facts.accord ? (
               <AccordFacts
                 accord={facts.accord}
                 artist={artist}
@@ -966,49 +1094,93 @@ function ArtistRow({
               />
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-          <DataTableCell className={cn(COLUMN.rate, CELL)}>
-            {facts.accord?.rate ? (
+            ),
+          },
+          {
+            key: "rate",
+            label: r.columns.rate,
+            column: COLUMN.rate,
+            node: facts.accord?.rate ? (
               <span className="text-[color:var(--text-secondary)] tabular-nums">
                 {facts.accord.rate}
               </span>
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-        </>
-      )}
-      {columns.legal && (
-        <>
-          <DataTableCell className={cn(COLUMN.fiche, CELL)}>
-            {facts.fiche ? (
+            ),
+          },
+        ]
+      : []),
+    ...(columns.legal
+      ? [
+          {
+            key: "fiche",
+            label: r.columns.fiche,
+            column: COLUMN.fiche,
+            node: facts.fiche ? (
               <FichePill fiche={facts.fiche} bare name={artist} />
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-          <DataTableCell className={cn(COLUMN.contract, CELL)}>
-            {facts.contract ? (
+            ),
+          },
+          {
+            key: "contract",
+            label: r.columns.contract,
+            column: COLUMN.contract,
+            node: facts.contract ? (
               <ContractFacts contract={facts.contract} />
             ) : (
               <Empty />
-            )}
-          </DataTableCell>
-        </>
-      )}
-      {titleCells}
+            ),
+          },
+        ]
+      : []),
+  ];
+  const menu = columns.actions && (
+    <RowMenu
+      projectId={projectId}
+      participation={participation}
+      label={label}
+      credit={credit}
+      canManage={canManage}
+      titleActions={titleActions}
+      onNote={columns.notes ? () => setNoteOpen(true) : undefined}
+    />
+  );
+
+  if (layout === "cards")
+    return (
+      <FactCard
+        head={
+          <span className="flex min-w-0 flex-col gap-0.5">
+            {name}
+            {titleLine}
+            <span className="mt-1 mb-0.5 flex">{status}</span>
+            {notes}
+          </span>
+        }
+        menu={menu}
+        facts={[...artistFacts, ...titleFacts]}
+      >
+        {dialogs}
+      </FactCard>
+    );
+
+  return (
+    <TableRow className={ROW}>
+      <DataTableCell className={cn(COLUMN.artist, CELL)}>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          {name}
+          {titleLine}
+          {notes}
+        </span>
+      </DataTableCell>
+      <DataTableCell className={cn(COLUMN.status, CELL)}>
+        {status}
+      </DataTableCell>
+      <FactCells facts={[...artistFacts, ...titleFacts]} />
       {columns.actions && (
         <DataTableActionsCell className={COLUMN.actions}>
-          <RowMenu
-            projectId={projectId}
-            participation={participation}
-            label={label}
-            credit={credit}
-            canManage={canManage}
-            titleActions={titleActions}
-            onNote={() => setNoteOpen(true)}
-          />
+          {menu}
           {dialogs}
         </DataTableActionsCell>
       )}
@@ -1260,8 +1432,8 @@ function RowMenu({
   // The artist's own gestures (not on a title abandoned).
   canManage: boolean;
   titleActions: RowAction[];
-  // The note's modal (NoteLine, under the name).
-  onNote: () => void;
+  // The note's modal (NoteLine, under the name); none without notes.
+  onNote?: () => void;
 }) {
   const t = fr.projectTitles.participations;
   const [open, setOpen] = useState<"status" | "withdraw" | null>(null);
@@ -1296,14 +1468,18 @@ function RowMenu({
           icon: IconPenWriting2,
           onSelect: () => setOpen("status"),
         },
-        {
-          key: "note",
-          label: participation.recap.note
-            ? fr.projectTitles.recap.note.change
-            : fr.projectTitles.recap.note.add,
-          icon: IconMsgWriting,
-          onSelect: onNote,
-        },
+        ...(onNote
+          ? [
+              {
+                key: "note",
+                label: participation.recap.note
+                  ? fr.projectTitles.recap.note.change
+                  : fr.projectTitles.recap.note.add,
+                icon: IconMsgWriting,
+                onSelect: onNote,
+              },
+            ]
+          : []),
         active
           ? {
               key: "withdraw",
