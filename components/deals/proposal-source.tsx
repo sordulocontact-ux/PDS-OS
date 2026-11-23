@@ -32,7 +32,9 @@ export function ProposalSource({ proposal }: { proposal: DealCallProposal }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="cursor-pointer underline underline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--selection)]"
+        // Inline and left: a button is an inline block, its text centred
+        // on a line of its own once it wraps (Sacha 23/11/2026).
+        className="inline cursor-pointer text-left underline underline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--selection)]"
       >
         {call}
       </button>

@@ -25,6 +25,18 @@ export function parseTermValue(
 
 /** « 25 % », « Avance de 2 000 € HT », « Oui · 12 mois »,
  * « Auteur·rice (paroles) 25 % · Compositeur·rice 25 % ». */
+/** A term's value shown on its own (a card, a memo line): its first letter
+ * upper-case, as PO reads it lower-case from a call (« licence », Sacha
+ * 23/11/2026). A contract keeps formatTermValue, the value may fall mid
+ * sentence there. */
+export function displayTermValue(
+  format: TermFormat,
+  value: TermValue | null,
+): string | null {
+  const text = formatTermValue(format, value);
+  return text ? text.charAt(0).toLocaleUpperCase("fr") + text.slice(1) : text;
+}
+
 export function formatTermValue(
   format: TermFormat,
   value: TermValue | null,

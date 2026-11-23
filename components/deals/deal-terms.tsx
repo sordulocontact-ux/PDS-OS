@@ -12,7 +12,7 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { DealCallProposal } from "@/lib/deals/call-queries";
 import { applyDealTermProposals } from "@/lib/deals/proposal-actions";
-import { formatTermValue } from "@/lib/deals/term-format";
+import { displayTermValue } from "@/lib/deals/term-format";
 import type { DealTerm, TermFormat } from "@/lib/deals/terms";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
@@ -111,8 +111,8 @@ export function DealTerms({
     const before =
       term.state === "to_define"
         ? null
-        : formatTermValue(term.format, term.value);
-    const after = formatTermValue(term.format, p.value) ?? "";
+        : displayTermValue(term.format, term.value);
+    const after = displayTermValue(term.format, p.value) ?? "";
     return (
       <FactCard
         key={term.key}
@@ -166,7 +166,7 @@ export function DealTerms({
               key={term.key}
               label={name}
               value={
-                formatTermValue(term.format, term.value) ?? t.states.to_define
+                displayTermValue(term.format, term.value) ?? t.states.to_define
               }
               text={TEXT_FORMATS.has(term.format)}
               state={{

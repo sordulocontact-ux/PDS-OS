@@ -13,7 +13,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { setDealMemoCheck } from "@/lib/deals/memo-actions";
 import type { CompareRow } from "@/lib/deals/memos";
-import { formatTermValue } from "@/lib/deals/term-format";
+import { displayTermValue } from "@/lib/deals/term-format";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
@@ -135,7 +135,7 @@ export function DealMemoCompare({
             <FactRow
               key={row.term.key}
               label={labelOf(row.term.key)}
-              value={formatTermValue(row.term.format, row.term.value)}
+              value={displayTermValue(row.term.format, row.term.value)}
               state={{
                 tone: row.differs ? "danger" : dealCheckTone[verdict],
                 label: row.differs ? t.verdicts.different : t.verdicts[verdict],
@@ -179,7 +179,9 @@ export function DealMemoCompare({
         onOpenChange={(next) => !next && setOpen(null)}
         title={open ? t.noteTitle(labelOf(open.term.key)) : ""}
         description={
-          open ? (formatTermValue(open.term.format, open.term.value) ?? "") : ""
+          open
+            ? (displayTermValue(open.term.format, open.term.value) ?? "")
+            : ""
         }
         closeLabel={fr.dialogs.close}
       >
