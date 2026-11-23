@@ -113,6 +113,12 @@ const lineInput = z.object({
     .pipe(z.iso.date().nullable()),
   rebillable: z.boolean().optional(),
   validatorId: optionalId,
+  // The part of its budget (« Sous-budget »): undefined leaves it as it is,
+  // "" takes the spend out of its part.
+  partId: z
+    .string()
+    .optional()
+    .pipe(z.union([z.uuid(), z.literal("")]).optional()),
   note: z
     .string()
     .trim()
@@ -216,6 +222,22 @@ export async function saveBudgetLine(
       .single();
     if (error) return failure(error);
     lineId = data.id;
+  }
+  if (p.data.partId !== undefined && can(access, "manage_finance")) {
+    // The same function as « Rattacher des dépenses » from the part.
+    const { error } = await supabase.rpc("assign_budget_part", {
+      p_line_ids: [lineId],
+      p_part_id: p.data.partId || null,
+    });
+    if (error) {
+      refresh(where.data);
+      return {
+        ok: false,
+        error: error.message.includes("part_other_budget")
+          ? t.partOther
+          : t.generic,
+      };
+    }
   }
   if (values.rebillable && can(access, "manage_finance"))
     await planRebilling(supabase, access.organizationId, lineId, {

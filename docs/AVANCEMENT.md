@@ -2515,8 +2515,9 @@ cliquer et tout s'enchaîner »).
   sur tout budget (`finance_budget_parts`), dépensé et reste par sous-budget, part non répartie ; dépenses rattachées
   depuis « ⋯ » du sous-budget (`assign_budget_part`), pré-cochées si leur sous-poste porte le nom. PO le lit.
 - Migration `20261120120101_finance_budget_envelopes.sql` **à pousser en prod** ; test `supabase/tests/finance-budget-envelopes.test.sql`.
-- Reste : champ « Sous-budget » dans le formulaire de dépense (`BudgetLineForm`), le rattachement ne se fait aujourd'hui que
-  depuis le sous-budget.
+- Fait le 23/11 : champ « Sous-budget » dans le formulaire de dépense (`BudgetPartField` dans `BudgetLineForm`) : affiché
+  seulement si le budget a des sous-budgets et que la personne les lit, « Aucun » ou un sous-budget, pré-rempli à la modification ;
+  enregistré par `assign_budget_part` (même fonction que « Rattacher des dépenses »), via `saveBudgetLine` (`partId`), sans migration.
 
 ## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
 

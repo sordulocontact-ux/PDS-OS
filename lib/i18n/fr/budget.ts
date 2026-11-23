@@ -116,6 +116,7 @@ export const budget = {
     followsInvoice:
       "Cette dépense suit une facture : son montant et son état changent avec elle.",
     generic: "La dépense n'a pas pu être enregistrée. Réessayez.",
+    partOther: "Ce sous-budget n'est pas celui du budget de la dépense.",
   },
   add: "Ajouter une dépense",
   // The quick entry of the phone's header (BUD 4).
@@ -166,6 +167,8 @@ export const budget = {
     // « loyer », « structure », « aucun ».
     offBudgetOption: "Loyer, abonnement, frais de structure (aucun projet)",
     subpost: "Sous-poste",
+    part: "Sous-budget",
+    partNone: "Aucun",
     offBudgetHint: "Sur aucun budget : les Alertes de Finance la signalent.",
     noTargets:
       "Vous ne menez aucun projet et ne lisez pas le budget des artistes : aucune dépense à saisir ici.",
