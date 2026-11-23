@@ -13,6 +13,9 @@ const t = deals.name;
 export type NewDealOptions = {
   participations: Record<string, string>;
   projects: Record<string, string>;
+  // Each project's artist, filled in when the project is chosen (Sacha
+  // 23/11/2026).
+  projectArtists: Record<string, string>;
   artists: Record<string, string>;
   negotiators: Record<string, string>;
   // The direction may open a deal on an artist alone; a project manager
@@ -45,7 +48,7 @@ export async function loadNewDealOptions(
     [
       supabase
         .from("projects")
-        .select("id, title, owner_person_id, collective")
+        .select("id, title, owner_person_id, collective, artist_id")
         .is("archived_at", null)
         .order("title"),
       supabase
@@ -96,6 +99,8 @@ export async function loadNewDealOptions(
       .join(" · ");
   };
 
+  const artistIds = new Set((artistsRes.data ?? []).map((a) => a.id));
+
   return {
     participations: Object.fromEntries(
       parts
@@ -106,6 +111,13 @@ export async function loadNewDealOptions(
     // never offered as « un projet ».
     projects: Object.fromEntries(
       projects.filter((p) => !p.collective).map((p) => [p.id, p.title]),
+    ),
+    projectArtists: Object.fromEntries(
+      projects.flatMap((p) =>
+        p.artist_id && artistIds.has(p.artist_id)
+          ? [[p.id, p.artist_id] as const]
+          : [],
+      ),
     ),
     artists: Object.fromEntries(
       (artistsRes.data ?? []).map((a) => [a.id, a.name]),

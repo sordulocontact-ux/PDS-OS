@@ -85,7 +85,7 @@ export const businessTopics: GuideTopic[] = [
       },
       {
         q: "Qui crée un deal et le confie ?",
-        a: "La direction, ou le responsable du projet lié, avec « Nouveau deal » sur la page Deals : on choisit d'abord le type (Musique, Label, Partenariat de marque) ; il se confie à un membre qui négocie (business manager, business). Le business manager ouvre aussi un deal sans projet (un artiste du Catalogue, un label, une marque), qui lui est confié ; un deal de projet ou de PDS MIC lui est confié par la direction ou le chef de projet. Le poste business n'ouvre pas de deal : « Ouvrir un deal » sur la page Deals lui dit à qui le demander. La direction change la personne qui négocie depuis le bloc Informations, en haut de la page du deal.",
+        a: "La direction, ou le responsable du projet lié, avec « Nouveau deal » sur la page Deals : on choisit d'abord le type (Musique, Label, Partenariat de marque) ; choisir un projet remplit son artiste, qu'on peut changer ; il se confie à un membre qui négocie (business manager, business). Le business manager ouvre aussi un deal sans projet (un artiste du Catalogue, un label, une marque), qui lui est confié ; un deal de projet ou de PDS MIC lui est confié par la direction ou le chef de projet. Le poste business n'ouvre pas de deal : « Ouvrir un deal » sur la page Deals lui dit à qui le demander. La direction change la personne qui négocie depuis le bloc Informations, en haut de la page du deal.",
       },
     ],
     permissions: ["negotiate", "validate", "pilot_projects"],
