@@ -12,6 +12,21 @@ const t = fr.participationWaivers;
 const caption =
   "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]";
 
+/** The words of a participation's waivers that still say something, as
+ * WaiverLines shows them (« Titres et artistes » puts them in a tooltip). */
+export function waiverTexts(
+  waivers: ParticipationWaiver[],
+  today: string,
+): string[] {
+  return waivers
+    .filter((w) => waiverState(w, today) !== "revoked")
+    .map((w) =>
+      waiverState(w, today) === "open"
+        ? t.line.open(t.scopeOf[w.scope], formatShortDate(w.dueOn))
+        : t.line.lapsed(t.scopeOf[w.scope], formatShortDate(w.dueOn)),
+    );
+}
+
 /**
  * A participation's waivers that still say something (lot 12): an open one
  * (« Dérogation de tournage jusqu'au 30 nov. 2026 »), a lapsed one (« échue

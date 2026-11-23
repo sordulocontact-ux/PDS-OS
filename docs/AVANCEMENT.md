@@ -2824,3 +2824,19 @@ d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune 
 - Reste : **Marketing**, déjà découpé par livrable et par activation (chacun dit les titres qu'il vise, les Activations
   se filtrent par titre) : choix du titre en Conception et en Production à décider avec Maël ; Travail et « Maintenant » ouvrent une démarche du
   Juridique sans `?titre=` (la première portée qui l'a).
+
+## « Titres et artistes » : retours de Maël, moins chargé (23/11/2026, branche `pre-prod`)
+
+- **Plus d'ombre portée** sur les colonnes fixes (Artiste, « ⋯ ») : pas dans la direction artistique. Leur filet reste.
+- **Deux lignes au plus par case.** Artiste : nom · rôle, puis titre (coupé, en entier au survol) et « Nommer » ; les
+  alertes (crédits à vérifier, contrat non signé, dérogations) passent dans une icône ⚠ avec infobulle. Contact : rôle
+  et nom, puis numéro et icônes (24 px). Accord : étape, puis « Caler le call » ou « Call le 23/11 · Malik Durand ».
+  Beatmaker : nom, puis sa fiche. Note : deux lignes. Titre sans artiste : « Aucun artiste invité » puis le titre,
+  « Ajouter un artiste » dans la cellule voisine. Colonne Contact élargie à 224 px pour que le numéro tienne. Les
+  cartes du téléphone reprennent ces cases (leur tête garde les alertes en toutes lettres).
+- **Tête d'un titre partagé** : « Titre Cap sur demain · 2 artistes », sur une ligne (le nom seul ne disait pas que
+  c'était un titre).
+- Vérifié dans Chrome (Assurance 30, Lina Haddad, 1280 px et cadre de 390 px) : aucune case ne dépasse deux lignes.
+  L'icône d'alertes n'a pas pu être vue : aucun artiste d'Assurance 30 n'en a pour Lina (elle lit le Juridique).
+- `components/legal/waiver-lines.tsx` exporte aussi `waiverTexts` (les mêmes mots que `WaiverLines`).
+

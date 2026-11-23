@@ -46,7 +46,7 @@ import {
   RenameTitleForm,
   type ArtistChoices,
 } from "@/components/projects/titles/title-forms";
-import { WaiverLines } from "@/components/legal/waiver-lines";
+import { WaiverLines, waiverTexts } from "@/components/legal/waiver-lines";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -69,6 +69,11 @@ import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useScrollFade } from "@/components/ui/use-scroll-fade";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -168,28 +173,28 @@ const masterHrefOf = (title: RecapTitle, links: BoardLinks) =>
 // nothing shows through, above the pills and buttons of the other cells
 // (`z-20` > their `z-10`); their column rule drawn by the cell itself
 // (`before:`, a border staying behind in a collapsed table, which paints no
-// box-shadow on a cell either), so it follows the cell; `after:` is the
-// shadow of what passes under, shown by SCROLL_SHADOWS on the cells marked
-// `scroll-start` / `scroll-end`. The cells wrap (their pills
-// too, recap-facts). Literal classes: Tailwind only generates what it reads
-// in full.
+// box-shadow on a cell either), so it follows the cell. `max-w-*`: a cell
+// cuts its lines short (`truncate`) instead of widening its column. No drop shadow:
+// not the site's art direction (Maël 23/11/2026). A cell says two lines at
+// most (« 2 lignes par case »). Literal classes: Tailwind only generates
+// what it reads in full.
 const COLUMN = {
   artist:
-    "scroll-start sticky left-0 z-20 w-44 min-w-44 bg-card not-last:border-r-0 before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-3 after:bg-[linear-gradient(to_right,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_right,rgb(0_0_0/0.4),transparent)] @min-[624px]:w-56 @min-[624px]:min-w-56",
+    "sticky left-0 z-20 w-44 min-w-44 max-w-44 bg-card not-last:border-r-0 before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden @min-[624px]:w-56 @min-[624px]:max-w-56 @min-[624px]:min-w-56",
   actions:
-    "scroll-end sticky right-0 z-20 w-16 bg-card pl-4 align-top py-2 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:right-full after:w-3 after:bg-[linear-gradient(to_left,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_left,rgb(0_0_0/0.4),transparent)]",
-  status: "w-32 min-w-32",
-  contact: "w-52 min-w-52",
-  accord: "w-44 min-w-44",
-  rate: "w-20 min-w-20",
-  fiche: "w-48 min-w-48",
-  contract: "w-44 min-w-44",
-  mix: "w-36 min-w-36",
-  release: "w-32 min-w-32",
-  distribution: "w-44 min-w-44",
-  beatmaker: "w-48 min-w-48",
-  // The note, three lines at most (the whole on hover).
-  note: "w-72 min-w-72",
+    "sticky right-0 z-20 w-16 bg-card pl-4 align-top py-2 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden",
+  status: "w-32 min-w-32 max-w-32",
+  contact: "w-56 min-w-56 max-w-56",
+  accord: "w-44 min-w-44 max-w-44",
+  rate: "w-20 min-w-20 max-w-20",
+  fiche: "w-48 min-w-48 max-w-48",
+  contract: "w-44 min-w-44 max-w-44",
+  mix: "w-36 min-w-36 max-w-36",
+  release: "w-32 min-w-32 max-w-32",
+  distribution: "w-44 min-w-44 max-w-44",
+  beatmaker: "w-48 min-w-48 max-w-48",
+  // The note, two lines at most (the whole on hover).
+  note: "w-72 min-w-72 max-w-72",
 } as const;
 
 // A row's cells read from the top: an artist's name may take several lines
@@ -202,12 +207,6 @@ const CELL = "align-top whitespace-normal";
 // card, as the band.
 const STICKY_HEAD =
   "[background-image:linear-gradient(var(--surface-soft),var(--surface-soft))] in-[.section-card_.table-flat]:[background-image:none]";
-
-// What passes under a sticky column casts a light shadow on its inner edge
-// (useScrollFade's `data-fade` on the table's own scrolling box: start,
-// end or both); nothing to scroll, no shadow.
-const SCROLL_SHADOWS =
-  "[&_[data-fade=start]_.scroll-start]:after:opacity-100 [&_[data-fade=both]_.scroll-start]:after:opacity-100 [&_[data-fade=end]_.scroll-end]:after:opacity-100 [&_[data-fade=both]_.scroll-end]:after:opacity-100";
 
 // Without « ⋯ » (a reader), the right edge fades out while columns remain
 // there.
@@ -222,15 +221,14 @@ const ROW = cn(
   ROW_INSET,
 );
 
-// The head of a title's group of artists: on the soft band, as a group
-// row of DataTable, never a rule between groups (no-dividers).
-const GROUP_ROW =
-  "bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] in-[.section-card_.table-flat]:bg-transparent";
-
 // A name that opens its page (the artist's démarche, the title's Master):
 // the link is the name itself.
 const NAME_LINK =
   "rounded-sm outline-none hover:underline focus-visible:underline";
+
+// A gesture said in a line of text (« Nommer »), underlined.
+const INLINE_ACTION =
+  "relative z-10 shrink-0 rounded-sm text-[length:var(--type-caption)] font-medium text-[color:var(--text-secondary)] underline underline-offset-2 outline-none hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
 
 const WARNING = cn(
   caption,
@@ -506,8 +504,7 @@ export function TitlesBoard({
 }
 
 /** The table in its frame, scrolling sideways when it is wider (the
- * shadcn Table's own box, `data-slot="table-container"`): what passes
- * under Artiste or « ⋯ » casts a light shadow on their edge; without « ⋯ »
+ * shadcn Table's own box, `data-slot="table-container"`); without « ⋯ »
  * (`fadeEnd`), the right edge fades while columns are hidden there. Mounted
  * with the table, so that it follows each table shown. `isolate`: what
  * stands above a cell (`relative z-10`, the sticky columns) stays inside
@@ -528,7 +525,7 @@ function ScrollingTable({
           node?.querySelector<HTMLElement>('[data-slot="table-container"]') ??
           null;
       }}
-      className={cn("@container isolate", SCROLL_SHADOWS, fadeEnd && END_FADE)}
+      className={cn("@container isolate", fadeEnd && END_FADE)}
     >
       <DataTable>{children}</DataTable>
     </div>
@@ -650,26 +647,7 @@ function TitleRows(props: TitleRowsProps) {
       key: "beatmaker",
       label: r.columns.beatmaker,
       column: COLUMN.beatmaker,
-      node:
-        title.recap.beatmakers.length > 0 ? (
-          <span className="flex min-w-0 flex-col items-start gap-1.5">
-            {title.recap.beatmakers.map((person) => (
-              <span
-                key={person.contactId ?? person.name}
-                className="flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1"
-              >
-                <span className="min-w-0 break-words text-[color:var(--text-secondary)]">
-                  {person.name}
-                </span>
-                {person.fiche && (
-                  <FichePill fiche={person.fiche} name={person.name} />
-                )}
-              </span>
-            ))}
-          </span>
-        ) : (
-          <Empty />
-        ),
+      node: <BeatmakerFacts people={title.recap.beatmakers} />,
     },
   ];
   const onName =
@@ -697,31 +675,41 @@ function TitleRows(props: TitleRowsProps) {
   );
 
   if (participations.length === 0) {
+    // Two lines in its cell; « Ajouter un artiste » in the artist's
+    // columns beside, empty without one (a card: under its head).
     const empty = (
-      <span className="flex min-w-0 flex-col items-start gap-0.5">
-        <span className={muted}>{t.board.noArtist}</span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className={cn(muted, "truncate")}>{t.board.noArtist}</span>
         {titleLine}
-        {canManage &&
-          !abandoned &&
-          Object.keys(props.artists.options).length > 0 && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-1.5"
-              onClick={() => setDialog("add")}
-            >
-              {t.participations.add.action}
-            </Button>
-          )}
       </span>
     );
+    const add = canManage &&
+      !abandoned &&
+      Object.keys(props.artists.options).length > 0 && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setDialog("add")}
+        >
+          {t.participations.add.action}
+        </Button>
+      );
     const menu = columns.actions && (
       <RowActions label={t.menu(label)} actions={titleActions} />
     );
     if (cards)
       return (
-        <FactCard head={empty} menu={menu} facts={titleFacts}>
+        <FactCard
+          head={
+            <span className="flex min-w-0 flex-col items-start gap-2">
+              {empty}
+              {add}
+            </span>
+          }
+          menu={menu}
+          facts={titleFacts}
+        >
           {dialogs}
         </FactCard>
       );
@@ -733,9 +721,9 @@ function TitleRows(props: TitleRowsProps) {
         {/* The artist's columns: nothing to say without one. */}
         <DataTableCell
           colSpan={2 + 2 * Number(columns.accord) + 2 * Number(columns.legal)}
-          className={CELL}
+          className={cn(CELL, "py-2")}
         >
-          {null}
+          {add || null}
         </DataTableCell>
         <FactCells facts={titleFacts} />
         {columns.notes && (
@@ -763,6 +751,7 @@ function TitleRows(props: TitleRowsProps) {
       label={label}
       href={masterHref}
       heading
+      artists={participations.length}
       onName={onName}
     />
   );
@@ -808,24 +797,82 @@ function TitleRows(props: TitleRowsProps) {
   return (
     <>
       {grouped && (
-        <TableRow className={cn(ROW, GROUP_ROW)}>
-          <DataTableCell
-            className={cn(
-              COLUMN.artist,
-              CELL,
-              STICKY_HEAD,
-              "py-2 before:hidden",
-            )}
-          >
-            {heading}
-          </DataTableCell>
-          <DataTableCell colSpan={columnCount(columns) - 1} className="py-2">
-            {null}
-          </DataTableCell>
-        </TableRow>
+        <DataTableGroupRow columns={columnCount(columns)}>
+          {/* On one line, kept in sight while the table scrolls sideways. */}
+          <span className="sticky left-4 inline-flex">{heading}</span>
+        </DataTableGroupRow>
       )}
       {artistRows}
     </>
+  );
+}
+
+/** An artist's alerts (credits to check, contract not signed, waivers)
+ * as one icon beside its name, their words in a tooltip and for a screen
+ * reader: the cell keeps two lines. `strong`: one waits for the contract,
+ * in the warning's ink. */
+function AlertsIcon({ alerts, strong }: { alerts: string[]; strong: boolean }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            aria-label={`${fr.projectTitles.board.alerts} : ${alerts.join(". ")}`}
+            className={cn(
+              "relative z-10 inline-flex shrink-0 self-center rounded-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
+              strong
+                ? "text-[color:var(--tone-warning-fg)]"
+                : "text-[color:var(--text-tertiary)]",
+            )}
+          />
+        }
+      >
+        <IconTriangleWarning aria-hidden className="size-4" />
+      </TooltipTrigger>
+      <TooltipContent side="bottom">
+        <span className="flex flex-col gap-0.5">
+          {alerts.map((alert) => (
+            <span key={alert}>{alert}</span>
+          ))}
+        </span>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+/** The title's beatmakers in two lines: their names (cut short, the whole
+ * on hover), then the fiche of the one, or how many of theirs are filled. */
+function BeatmakerFacts({
+  people,
+}: {
+  people: RecapTitle["recap"]["beatmakers"];
+}) {
+  const r = fr.projectTitles.recap;
+  if (people.length === 0) return <Empty />;
+  const names = people.map((person) => person.name).join(", ");
+  const fiches = people.flatMap((person) =>
+    person.fiche ? [{ fiche: person.fiche, name: person.name }] : [],
+  );
+  return (
+    <span className="flex max-w-full min-w-0 flex-col items-start gap-1">
+      <span
+        className="max-w-full truncate text-[color:var(--text-secondary)]"
+        title={names}
+      >
+        {names}
+      </span>
+      {fiches.length === 1 ? (
+        <FichePill fiche={fiches[0].fiche} name={fiches[0].name} />
+      ) : fiches.length > 1 ? (
+        <span className={cn(caption, "max-w-full truncate")}>
+          {r.legal.fichesFilled(
+            fiches.filter((f) => f.fiche.state === "filled").length,
+            fiches.length,
+          )}
+        </span>
+      ) : null}
+    </span>
   );
 }
 
@@ -882,22 +929,27 @@ function FactCard({
   );
 }
 
-/** Under the artist's name, its title: its label (to its Master), why it
- * was abandoned, and « Nommer » while it has no name (Ibé 18/11, 37:03:
- * « il faut les mettre dans le catalogue d'abord ? »). */
+/** Under the artist's name, its title on one line: its label (to its
+ * Master, cut short, the whole on hover) and « Nommer » while it has no name
+ * (Ibé 18/11, 37:03: « il faut les mettre dans le catalogue d'abord ? »);
+ * why it was abandoned on hover. `heading`: at the head of its artists'
+ * group, « Titre Cap sur demain · 2 artistes » (Maël 23/11/2026: the name
+ * alone did not say it is a title), why it was abandoned under it. */
 function TitleLine({
   title,
   label,
   href,
   onName,
   heading = false,
+  artists = 0,
 }: {
   title: RecapTitle;
   label: string;
   href: string | null;
   onName?: () => void;
-  // At the head of its artists' group (TitleGroupRow): in the cell's ink.
   heading?: boolean;
+  // Its artists, said by the group's head.
+  artists?: number;
 }) {
   const t = fr.projectTitles;
   const reason =
@@ -907,6 +959,7 @@ function TitleLine({
           title.abandonReason,
         )
       : null;
+  const hover = reason ? `${label} · ${reason}` : label;
   return (
     <span
       className={cn(
@@ -914,40 +967,63 @@ function TitleLine({
         "flex min-w-0 flex-col",
       )}
     >
-      <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+      <span
+        className={cn(
+          "flex min-w-0 items-baseline gap-x-1.5",
+          heading && "flex-wrap",
+        )}
+      >
+        {heading && (
+          <span className={cn(caption, "shrink-0 font-medium")}>
+            {t.board.group.title}
+          </span>
+        )}
         {href ? (
           <ViewLink
             href={href}
+            title={hover}
             // The links' own ink (globals) would outshine the artist's
             // name: the caption's grey, a step darker.
             className={cn(
               NAME_LINK,
-              "min-w-0 [overflow-wrap:anywhere]",
-              !heading && "text-[color:var(--text-secondary)]",
+              "min-w-0",
+              heading
+                ? "[overflow-wrap:anywhere]"
+                : "truncate text-[color:var(--text-secondary)]",
             )}
           >
             {label}
           </ViewLink>
         ) : (
-          <span className="min-w-0 [overflow-wrap:anywhere]">{label}</span>
+          <span
+            title={hover}
+            className={cn(
+              "min-w-0",
+              heading ? "[overflow-wrap:anywhere]" : "truncate",
+            )}
+          >
+            {label}
+          </span>
         )}
         {onName && (
           <button
             type="button"
             aria-label={t.recap.name.title(label)}
             onClick={onName}
-            className="relative z-10 shrink-0 rounded-sm text-[length:var(--type-caption)] font-medium text-[color:var(--text-secondary)] underline underline-offset-2 outline-none hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
+            className={INLINE_ACTION}
           >
             {t.recap.name.action}
           </button>
         )}
+        {heading && artists > 1 && (
+          <span className={cn(caption, "shrink-0 font-medium")}>
+            {`· ${t.board.group.artists(artists)}`}
+          </span>
+        )}
       </span>
-      {reason && (
+      {heading && reason && (
         <span
-          className={cn(
-            "line-clamp-2 break-words",
-            heading && cn(caption, "font-medium"),
-          )}
+          className={cn(caption, "line-clamp-2 font-medium break-words")}
           title={reason}
         >
           {reason}
@@ -1015,13 +1091,21 @@ function ArtistRow({
     !canReadLegal && contractGap(title, participation, today) !== null;
 
   const status = <ContactStatePill status={participation.status} />;
+  // The alerts in words: a tooltip beside the name in the table (two lines
+  // a cell), lines under the name on a card.
+  const alerts = [
+    ...(toCheck ? [t.participations.sharedShort] : []),
+    ...(missing ? [r.contractMissing] : []),
+    ...(dimmed ? [] : waiverTexts(participation.waivers, today)),
+  ];
   const name = (
-    <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
+    <span className="flex min-w-0 items-baseline gap-x-1">
       <span
         className={cn(
-          "min-w-0 [overflow-wrap:anywhere]",
+          "min-w-0 truncate",
           !active && "text-[color:var(--text-secondary)]",
         )}
+        title={artist}
       >
         {href ? (
           <ViewLink href={href} className={NAME_LINK}>
@@ -1034,6 +1118,9 @@ function ArtistRow({
       <span className={cn(muted, "shrink-0")}>
         {`· ${t.participations.roles[participation.role]}`}
       </span>
+      {alerts.length > 0 && layout === "table" && (
+        <AlertsIcon alerts={alerts} strong={missing} />
+      )}
     </span>
   );
   const warnings = (
@@ -1193,7 +1280,6 @@ function ArtistRow({
         <span className="flex min-w-0 flex-col gap-0.5">
           {name}
           {titleLine}
-          {warnings}
         </span>
       </DataTableCell>
       <DataTableCell className={cn(COLUMN.status, CELL)}>

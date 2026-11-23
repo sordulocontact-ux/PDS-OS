@@ -12,7 +12,7 @@ import {
   type RecapFiche,
 } from "@/lib/projects/recap-rules";
 import { cn } from "@/lib/utils";
-import { formatDay } from "@/lib/utils/day";
+import { formatShortDay } from "@/lib/utils/day";
 import type { Tone } from "@/lib/ui/state-tones";
 import {
   agreementTone,
@@ -124,12 +124,13 @@ function AccordPill({
 }
 
 /**
- * The accord of an artist (the Business module): its deal's stage in short
- * (« Accord à valider » while the direction decides), the rate, the day of the call
- * planned and who negotiates, linked to the deal. `planCall`: « Caler le
- * call », given by the board when the row may plan it (the compact recap
- * gives the words « Call à caler », linked to the board), instead of the
- * call's day, gone once one is planned. Nothing known: « — ».
+ * The accord of an artist (the Business module), two lines at most (Maël
+ * 23/11/2026: « 2 lignes par case »): its deal's stage in short (« Accord
+ * à valider » while the direction decides), linked to the deal; under it
+ * `planCall` (« Caler le call », given by the board when the row may plan
+ * it; « Call à caler » in the compact recap), else on one line the rate,
+ * the day of the call planned (« Call le 23/11 ») and who negotiates, the
+ * whole on hover. Nothing known: « — ».
  */
 export function AccordFacts({
   accord,
@@ -162,16 +163,16 @@ export function AccordFacts({
     : [
         rate ? accord.rate : null,
         accord.nextCallAt
-          ? r.accord.callOn(formatDay(accord.nextCallAt))
+          ? r.accord.callOn(formatShortDay(accord.nextCallAt, { bare: true }))
+          : null,
+        // Who negotiates, once the deal is read; « À affecter » before.
+        stage
+          ? (accord.negotiator ??
+            (accord.href && stage !== "abandoned"
+              ? fr.projectTitles.board.negotiation.unassigned
+              : null))
           : null,
       ].filter((d): d is string => Boolean(d));
-  // Who negotiates, once the deal is read; « À affecter » before.
-  const negotiator = brief
-    ? null
-    : (accord.negotiator ??
-      (accord.href && stage !== "abandoned"
-        ? fr.projectTitles.board.negotiation.unassigned
-        : null));
   return (
     <span className={factsClass(inline)}>
       {stage &&
@@ -192,17 +193,15 @@ export function AccordFacts({
         ) : (
           <AccordPill stage={stage} agreementStatus={accord.agreementStatus} />
         ))}
-      {details.length > 0 && (
-        <span className="text-[color:var(--text-secondary)] tabular-nums">
-          {details.join(" · ")}
-        </span>
-      )}
-      {negotiator && stage && (
-        <span className={cn(caption, "max-w-full break-words")}>
-          {negotiator}
-        </span>
-      )}
-      {planCall}
+      {planCall ??
+        (details.length > 0 && (
+          <span
+            className={cn(caption, "max-w-full truncate")}
+            title={details.join(" · ")}
+          >
+            {details.join(" · ")}
+          </span>
+        ))}
     </span>
   );
 }

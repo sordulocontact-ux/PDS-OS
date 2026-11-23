@@ -9,7 +9,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
 import { IconUserPlus } from "@/components/icons";
 import { PersonPickerField } from "@/components/network/person-picker-field";
-import { caption, factsClass } from "@/components/projects/titles/recap-facts";
+import { caption } from "@/components/projects/titles/recap-facts";
 import { buttonVariants } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
@@ -125,7 +125,7 @@ const isReleaseValue = (value: unknown): value is ReleaseValue =>
 
 // -------------------------------------------------------------------- Note
 
-/** The artist's note in its « Note » column (Maël 23/11/2026), three lines
+/** The artist's note in its « Note » column (Maël 23/11/2026), two lines
  * at most (the whole on hover); clicked, it opens to be changed. Empty:
  * « Ajouter une note » for whoever writes the title. Read only: the note
  * alone, or nothing. */
@@ -146,7 +146,7 @@ export function NoteLine({
   const [open, setOpen] = useState(false);
   const lines = cn(
     caption,
-    "line-clamp-3 whitespace-normal break-words",
+    "line-clamp-2 whitespace-normal break-words",
     note && "text-[color:var(--text-secondary)]",
   );
   if (!canEdit)
@@ -255,7 +255,7 @@ export function whatsappNumber(phone: string): string | null {
 }
 
 const ICON_LINK = cn(
-  buttonVariants({ variant: "ghost", size: "icon-sm" }),
+  buttonVariants({ variant: "ghost", size: "icon-xs" }),
   "relative z-10",
 );
 
@@ -361,45 +361,52 @@ export function ContactFacts({
     ) : null;
 
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;
+  // Two lines (Maël 23/11/2026): who, then the number and its gestures.
   return (
-    <span className={factsClass(true)}>
-      <span className={caption}>{contact.role ?? t.label}</span>
-      <span className="max-w-full break-words" title={contact.name}>
-        {contact.name}
+    <span className="flex max-w-full min-w-0 flex-col gap-0.5">
+      <span className="flex max-w-full min-w-0 items-baseline gap-1.5">
+        <span className={cn(caption, "shrink-0")}>
+          {contact.role ?? t.label}
+        </span>
+        <span className="min-w-0 truncate" title={contact.name}>
+          {contact.name}
+        </span>
       </span>
-      {contact.hidden ? (
-        <span className={caption}>{t.hidden}</span>
-      ) : (
-        contact.phone && (
-          <span className="whitespace-nowrap text-[color:var(--text-secondary)] tabular-nums">
-            {contact.phone}
+      {(contact.hidden || contact.phone || modes.length > 0) && (
+        <span className="flex max-w-full min-w-0 items-center gap-0.5">
+          {contact.hidden ? (
+            <span className={cn(caption, "truncate")}>{t.hidden}</span>
+          ) : (
+            contact.phone && (
+              <span className="truncate text-[color:var(--text-secondary)] tabular-nums">
+                {contact.phone}
+              </span>
+            )
+          )}
+          <span className="-my-0.5 -mr-1 flex shrink-0 items-center">
+            {contact.phone && (
+              <IconAction
+                label={t.call(contact.name)}
+                href={telHref(contact.phone)}
+              >
+                <IconPhone aria-hidden className="size-4" />
+              </IconAction>
+            )}
+            {whatsapp && (
+              <IconAction
+                label={t.whatsapp(contact.name)}
+                href={`https://wa.me/${whatsapp}`}
+                newTab
+              >
+                <IconMsgs aria-hidden className="size-4" />
+              </IconAction>
+            )}
+            {modes.length > 0 && (
+              <IconAction label={t.edit(artist)} onClick={() => setOpen(true)}>
+                <IconPenWriting2 aria-hidden className="size-4" />
+              </IconAction>
+            )}
           </span>
-        )
-      )}
-      {(contact.phone || modes.length > 0) && (
-        <span className="-my-1 flex items-center gap-0.5">
-          {contact.phone && (
-            <IconAction
-              label={t.call(contact.name)}
-              href={telHref(contact.phone)}
-            >
-              <IconPhone aria-hidden className="size-4" />
-            </IconAction>
-          )}
-          {whatsapp && (
-            <IconAction
-              label={t.whatsapp(contact.name)}
-              href={`https://wa.me/${whatsapp}`}
-              newTab
-            >
-              <IconMsgs aria-hidden className="size-4" />
-            </IconAction>
-          )}
-          {modes.length > 0 && (
-            <IconAction label={t.edit(artist)} onClick={() => setOpen(true)}>
-              <IconPenWriting2 aria-hidden className="size-4" />
-            </IconAction>
-          )}
         </span>
       )}
       {dialog}

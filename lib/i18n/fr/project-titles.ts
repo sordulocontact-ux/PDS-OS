@@ -129,6 +129,14 @@ export const projectTitles = {
   // per participation; where each stands, computed (lib/projects/
   // title-board-rules.ts).
   board: {
+    // The head of a title shared by several artists (Maël 23/11/2026: « on
+    // comprend pas trop ce que c'est »): « Titre Cap sur demain · 2 artistes ».
+    group: {
+      title: "Titre",
+      artists: (count: number) => `${count} artistes`,
+    },
+    // An artist's alerts, in a tooltip beside its name.
+    alerts: "Alertes",
     facts: {
       mainArtist: "Artiste principal",
       titles: "Titres",
@@ -513,6 +521,9 @@ export const projectTitles = {
         `Ouvrir la fiche de renseignement ${de(name)} : ${state}`,
       // No démarche yet (a guest not credited in the Catalogue): the fiche
       // has no page to open, read on hover.
+      // Several beatmakers: their fiches in one line.
+      fichesFilled: (filled: number, total: number) =>
+        `Fiches · ${filled} sur ${total} renseignées`,
       ficheLater:
         "Au Juridique une fois l'artiste crédité sur le titre au Catalogue",
       // The contract's state (participationContract) after « Contrat · ».
