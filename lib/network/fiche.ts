@@ -13,15 +13,24 @@ import { createClient } from "@/lib/supabase/server";
 
 const schema = z.object({
   id: z.string(),
-  status: z.enum(["link_generated", "sent", "action_required", "complete"]),
+  status: z.enum([
+    "link_generated",
+    "sent",
+    "action_required",
+    "complete",
+    "revoked",
+  ]),
   sentAt: z.string().nullable(),
   openedAt: z.string().nullable(),
   submittedAt: z.string().nullable(),
+  revokedAt: z.string().nullable().optional(),
   token: z.string().nullable(),
 });
 
-/** Not sent, sent, opened by the person, or filled (received or checked). */
-export type NetworkFicheState = "link_generated" | "sent" | "opened" | "filled";
+/** Not sent, sent, opened by the person, filled (received or checked), or
+ * its link revoked (« Révoquer le lien », no new one yet). */
+export type NetworkFicheState =
+  "link_generated" | "sent" | "opened" | "filled" | "revoked";
 
 export type NetworkFiche = {
   state: NetworkFicheState;
@@ -48,14 +57,20 @@ export async function loadNetworkFiche(
   const filled = f.status === "action_required" || f.status === "complete";
   const state: NetworkFicheState = filled
     ? "filled"
-    : f.status === "sent"
-      ? f.openedAt
-        ? "opened"
-        : "sent"
-      : "link_generated";
+    : f.status === "revoked"
+      ? "revoked"
+      : f.status === "sent"
+        ? f.openedAt
+          ? "opened"
+          : "sent"
+        : "link_generated";
   return {
     state,
-    at: filled ? f.submittedAt : (f.openedAt ?? f.sentAt),
+    at: filled
+      ? f.submittedAt
+      : f.status === "revoked"
+        ? (f.revokedAt ?? null)
+        : (f.openedAt ?? f.sentAt),
     url: f.token ? `${siteUrl()}${routes.legalForm(f.token)}` : null,
   };
 }

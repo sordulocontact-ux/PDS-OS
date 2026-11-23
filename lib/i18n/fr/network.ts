@@ -315,6 +315,7 @@ export const network = {
         sent: "Envoyée",
         opened: "Ouverte",
         filled: "Remplie",
+        revoked: "Lien révoqué",
       },
       on: (state: string, date: string) => `${state} le ${date}`,
       copy: "Copier le lien",
@@ -323,6 +324,14 @@ export const network = {
       renew: "Nouveau lien",
       renewHint: "L'ancien lien ne marchera plus.",
       renewed: "Nouveau lien prêt, l'ancien ne marche plus",
+      menu: "Fiche de renseignements",
+      revoke: {
+        label: "Révoquer le lien",
+        title: "Révoquer le lien de la fiche ?",
+        body: "Le lien ne marchera plus. « Nouveau lien » en donne un autre.",
+        done: "Lien révoqué",
+        pending: "Révocation…",
+      },
       emailed: {
         sent: (name: string) => `Fiche envoyée par e-mail à ${name}`,
         sentHere: "Fiche envoyée par e-mail",
@@ -336,6 +345,7 @@ export const network = {
       errors: {
         forbidden: "Vous ne pouvez pas gérer la fiche de ce contact.",
         failed: "La fiche n'a pas pu être mise à jour. Réessayez.",
+        no_open_link: "Ce lien est déjà révoqué ou la fiche est remplie.",
       },
     },
     projectsEmpty: "Rien dans un projet que vous pouvez voir.",

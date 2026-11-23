@@ -4026,6 +4026,7 @@ rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
   vérifier » (`action_required`) : pas de validation ni de complément depuis le Réseau, une correction
   d'une valeur déjà connue n'est donc pas appliquée. Supprimer le contact supprime ses fiches sans projet
   (trigger `a_drop_fiches`) ; une fiche de projet le garde « utilisé ».
+  **Révoquer le lien** (`20261123230101`) : `revoke_network_contact_fiche` révoque le lien ouvert sans en créer un autre ; `network_contact_fiche` lit la dernière fiche du contact quel que soit son état (révoquée : « Lien révoqué », pas de lien) et n'en crée une que pour un contact qui n'en a jamais eu. Sur la page : la ligne « Fiche » de « Coordonnées », copier en icône et « ⋯ » (envoyer, nouveau lien, révoquer).
 - **Personnes et organisations** (ticket « Retour PO / Réseau » du 11/10/2026 et retour
   Notion « Restructuration et enrichissement de la page Réseau » du 10/10,
   `…20261011200101_network_kinds_relations.sql`, test `network-kinds-relations.test.sql`) :

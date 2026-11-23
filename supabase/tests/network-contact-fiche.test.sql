@@ -5,7 +5,7 @@
 -- a project, renewed with « Nouveau lien », gone with the contact.
 -- Run with `supabase test db`.
 begin;
-select plan(30);
+select plan(35);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -183,6 +183,22 @@ select is((select count(*)::int from public.legal_forms
 select is((select count(*)::int from public.legal_forms
             where contact_id = pg_temp.id_of('label') and project_id is null
               and status = 'revoked'), 1, 'the former one stops working');
+
+-- « Révoquer le lien » (20261123230101) -------------------------------------------------------
+select pg_temp.act_as(pg_temp.id_of('alize'));
+select lives_ok($$ select public.revoke_network_contact_fiche(pg_temp.id_of('label')) $$,
+  'the open link is revoked');
+select is(public.network_contact_fiche(pg_temp.id_of('label')) ->> 'status', 'revoked',
+  'reading the page again keeps it revoked: no new fiche behind its back');
+select is(public.network_contact_fiche(pg_temp.id_of('label')) ->> 'token', null,
+  'a revoked fiche gives no link');
+select throws_ok($$ select public.revoke_network_contact_fiche(pg_temp.id_of('label')) $$,
+  'P0001', 'no_open_link', 'nothing left to revoke');
+reset role;
+select is((select count(*)::int from public.legal_form_secrets s
+             join public.legal_forms f on f.id = s.form_id
+            where f.contact_id = pg_temp.id_of('label') and f.project_id is null
+              and f.status = 'revoked'), 0, 'its sealed token is gone');
 
 -- Deleting the contact takes its Réseau fiche ------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('director'));

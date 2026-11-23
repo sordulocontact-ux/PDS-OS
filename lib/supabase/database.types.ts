@@ -23228,6 +23228,10 @@ export type Database = {
         Args: { p_contact_id: string }
         Returns: string
       }
+      revoke_network_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: undefined
+      }
       mark_network_contact_fiche_sent: {
         Args: { p_contact_id: string }
         Returns: undefined

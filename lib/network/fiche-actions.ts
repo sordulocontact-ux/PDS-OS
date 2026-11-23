@@ -24,7 +24,11 @@ function failed(where: string, error: { code?: string; message: string }) {
   console.error(`${where}:`, error.code, error.message);
   return {
     ok: false as const,
-    error: error.code === "42501" ? t.errors.forbidden : t.errors.failed,
+    error:
+      error.code === "42501"
+        ? t.errors.forbidden
+        : ((t.errors as Record<string, string>)[error.message] ??
+          t.errors.failed),
   };
 }
 
@@ -56,6 +60,22 @@ export async function renewNetworkFiche(
     p_contact_id: parsed.data,
   });
   if (error) return failed("renewNetworkFiche", error);
+  revalidatePath(routes.networkContact(parsed.data));
+  return { ok: true };
+}
+
+/** « Révoquer le lien »: the open link stops working, no new one. */
+export async function revokeNetworkFiche(
+  contactId: string,
+): Promise<WriteResult> {
+  const parsed = id.safeParse(contactId);
+  if (!parsed.success) return { ok: false, error: t.errors.failed };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("revoke_network_contact_fiche", {
+    p_contact_id: parsed.data,
+  });
+  if (error) return failed("revokeNetworkFiche", error);
   revalidatePath(routes.networkContact(parsed.data));
   return { ok: true };
 }
