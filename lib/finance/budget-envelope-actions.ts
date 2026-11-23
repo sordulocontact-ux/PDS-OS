@@ -127,3 +127,44 @@ export async function removeBudget(id: string): Promise<WriteResult> {
     done: data === "archived" ? done.archived : done.removed,
   };
 }
+
+const spendPartsInput = z.object({
+  kind: z.enum(ENVELOPE_KINDS),
+  targetId: z.uuid(),
+  lineId: z.uuid().optional(),
+});
+
+/** The parts of the budget a spend belongs to and the one it is in, for the
+ * « Sous-budget » choice of the spend form. Read with the session (the
+ * Finance reads parts; anyone else gets none, so no choice is shown). */
+export async function loadSpendParts(
+  input: z.input<typeof spendPartsInput>,
+): Promise<{ parts: { id: string; name: string }[]; current: string | null }> {
+  await requireApproved();
+  const p = spendPartsInput.safeParse(input);
+  if (!p.success) return { parts: [], current: null };
+  const supabase = await createClient();
+  const [parts, lines] = await Promise.all([
+    supabase
+      .from("finance_budget_parts")
+      .select("id, name")
+      .eq("target_kind", p.data.kind)
+      .eq("target_id", p.data.targetId)
+      .order("created_at"),
+    p.data.lineId
+      ? supabase.rpc("finance_budget_part_lines")
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (parts.error || lines.error) {
+    console.error("loadSpendParts:", (parts.error ?? lines.error)?.message);
+    return { parts: [], current: null };
+  }
+  const found = parts.data ?? [];
+  const mine = (lines.data ?? []).find((l) => l.line_id === p.data.lineId);
+  return {
+    parts: found,
+    current: found.some((x) => x.id === mine?.part_id)
+      ? (mine?.part_id ?? null)
+      : null,
+  };
+}

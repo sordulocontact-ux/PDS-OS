@@ -10,6 +10,7 @@ import {
   NONE,
   type Classification,
 } from "@/components/budget/budget-classification-fields";
+import { BudgetPartField } from "@/components/budget/budget-part-field";
 import { BudgetProofField } from "@/components/budget/budget-proof-field";
 import {
   BudgetSpendDetails,
@@ -103,6 +104,7 @@ export function BudgetLineForm({
     rebillable: line?.rebillable ?? false,
     validatorId: line?.validatorId ?? "",
   });
+  const [partId, setPartId] = useState<string | undefined>(undefined);
   const [proof, setProof] = useState<File | null>(null);
   const [chosen, setChosen] = useState("");
   const target =
@@ -172,6 +174,7 @@ export function BudgetLineForm({
         dueOn: details.dueOn,
         rebillable: details.rebillable,
         validatorId: details.validatorId,
+        partId,
         note: v.note,
       });
     });
@@ -234,6 +237,12 @@ export function BudgetLineForm({
                 onChange={setChosen}
               />
             )}
+            <BudgetPartField
+              target={target}
+              lineId={line?.id}
+              value={partId}
+              onChange={setPartId}
+            />
             <BudgetStatusDateFields
               status={v.status}
               spentOn={v.spentOn}

@@ -8326,6 +8326,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     du circuit (`lib/assistant/read/deals.ts`). Test : `supabase/tests/deal-memo-mail.test.sql`.
 - **Déposer le memo reçu** (Sacha 23/11/2026, `20261123220101_deal_memo_deposit.sql`) : le label envoie son memo à l'adresse de la personne qui négocie, pas à celle du deal (« bizarre de donner ça comme adresse ») : `DealMemoDepositButton` envoie le PDF dans `deal-files` sous `<organisation>/<deal>/` (politique `deal_files_insert` : qui écrit le deal ouvert, `can_drop_deal_file` ; `deal_files_delete_unfiled` retire un dépôt dont le memo a échoué), puis `deposit_deal_memo` en fait le memo du deal comme `receive_deal_memo` (brouillon « À valider », photo des termes, source `upload`, auteur = qui dépose, journal `memo_received` avec `deposited`). L'adresse du deal n'est plus affichée ; elle reste l'adresse de réponse des e-mails envoyés par PDS OS. Test : `supabase/tests/deal-memo-deposit.test.sql` (18).
 - **Le memo trouvé dans son Gmail** (Sacha 23/11/2026, `20261124110101_deal_memo_from_gmail.sql`) : quand « Maintenant » attend le memo du label, `DealGmailMemos` demande après l'affichage (`dealGmailMemos`, `lib/deals/gmail-memo-actions.ts`) les mails de **ses propres** comptes Gmail (`gmailAccounts`, sa session, ses désactivations de Paramètres › Connexions) envoyés depuis une adresse du deal (ses contacts, le label ou la marque, le contact de la participation, les managers de l'artiste ; `lib/deals/gmail-memos.ts`, recherche `from:(…) has:attachment filename:pdf newer_than:60d` par `searchGmailIds`, construite des seules adresses connues), avec un PDF, pas encore rangés (Message-ID). Rien n'est gardé ; « Ranger dans le deal » (`fileGmailMemo`) relit le mail, envoie ses PDF dans `deal-files` sous la session (`deal_files_insert`), puis `file_deal_memo_from_mail` en fait le memo comme un mail reçu sur po@ (source `email`, expéditeur, objet, jour, une fois par Message-ID ; le texte du mail reste dans sa boîte). Test : `supabase/tests/deal-memo-from-gmail.test.sql` (8).
+- **Qui signe le contrat d'un deal** (Sacha 23/11/2026, `20261124120101_deal_contract_party.sql`) : un contrat lié à un deal (importé, généré ou lié, `deals.contract_id`) sans partie reçoit celle du deal (`deal_contract_party`, déclencheur `z_contract_party`) : le label ou la marque (`counterpart_contact_id`, rôle « Label » / « Marque »), sinon la personne de l'artiste au Réseau (rôle « Artiste ») ; les contrats déjà liés sont complétés une fois. « Envoyer pour signature » trouve ainsi son destinataire, et part par PDS OS dès que « À » a une adresse (SMTP en place), écrite à la main au besoin. « Importer un contrat » = le formulaire du contrat pré-rempli depuis le deal avec son document (PDF ou Word, `ContractForm document`), lié et déposé en brouillon. Test : `supabase/tests/deal-contract-party.test.sql` (4).
 - **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
   métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
   `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et
@@ -8409,6 +8410,18 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   (`lib/deals/participation-states.ts`, `Map` par participation). Bouton : `<NegotiationCallButton
   data={await loadParticipationNegotiationCall(participationId, artistName)} />` quand `canPlanCall` sans `dealId`,
   sinon `loadDealNegotiationCall(deal)`. Test : `supabase/tests/deal-negotiation-call.test.sql`.
+- **Le business manager est prévenu d'un call calé pour lui** (retours d'Ibé du 18/11, fait le 23/11 ;
+  `20261124140101_deal_call_notice_and_contract_guard.sql`) : type `deal_call_planned`, écrit par le trigger
+  `z_notify_deal_negotiator` (`after insert on calls`, `deal_id` non nul) quel que soit le chemin
+  (`plan_deal_negotiation_call`, « Préparer un call » de la direction) ; destinataire = `deals.assignee_person_id`,
+  jamais l'auteur du call (`created_by`, et `notify()` saute l'acteur), personne sans négociateur. Sujet = le call
+  (la notification ouvre `routes.call`), projet = celui du deal ; famille « meeting ». Sur une participation sans
+  deal, « Caler le call » donne le deal et cale le call : `deal_assigned` puis `deal_call_planned`. Push :
+  `createDealCall` et `planNegotiationCall` appellent `schedulePendingPushes()`. **« Pas de contrat avant
+  l'accord » côté participations** : déjà en SQL depuis `20261121210101` (`b_agreement_before_contract` sur
+  `title_participations.contract_id`, `generate_legal_contract` pour un invité d'un collectif ; `link_deal_contract`
+  et `generate_deal_contract` refusent le deal d'une participation, `participation_contract`), rien d'ajouté ;
+  vérifié sur un deal ouvert par « Caler le call ». Test : `supabase/tests/deal-call-notice-contract-guard.test.sql`.
 - **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
   e-mails (BIZ 9), seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après

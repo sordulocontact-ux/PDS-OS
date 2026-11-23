@@ -181,7 +181,8 @@ export async function planNegotiationCall(
       ],
       guests,
     }));
-  // Giving the deal notifies its negotiator (deal_assigned).
+  // Giving the deal and planning its call notify its negotiator
+  // (deal_assigned, deal_call_planned).
   await schedulePendingPushes();
   if (planned) revalidatePath(routes.deal(planned.id));
   revalidatePath(routes.deals);

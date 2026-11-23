@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { FilePickField } from "@/components/ui/file-pick-field";
 import { saveContract } from "@/lib/contracts/actions";
 import {
   CONTRACT_TYPES,
@@ -29,6 +30,7 @@ export function ContractForm({
   options,
   onSaved,
   onCancel,
+  document,
 }: {
   // Absent: a new contract.
   contract?: ContractValues;
@@ -38,14 +40,21 @@ export function ContractForm({
   // Created from another page (PO's panel): stay there instead of opening it.
   stay?: boolean;
   options: ContractFormOptions;
-  onSaved: (id: string) => void;
+  // The file chosen goes with it (« Importer un contrat » of a deal).
+  onSaved: (id: string, file: File | null) => void;
   onCancel: () => void;
+  // A document to import with the new contract, required (Sacha
+  // 23/11/2026: « importer des docs », the form kept): kept in the browser,
+  // uploaded by the caller once the contract exists (`onSaved`).
+  document?: { label: string; hint: string; accept: string };
 }) {
   const t = fr.contracts.form;
   const [state, formAction, pending] = useActionState(saveContract, null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileMissing, setFileMissing] = useState(false);
 
   useEffect(() => {
-    if (state?.ok) onSaved(state.id);
+    if (state?.ok) onSaved(state.id, file);
     // onSaved changes with each render of the parent; the result is what counts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
@@ -53,7 +62,31 @@ export function ContractForm({
   const error = state && !state.ok ? state : null;
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form
+      action={formAction}
+      className="flex flex-col gap-5"
+      onSubmit={(event) => {
+        if (document && !file) {
+          event.preventDefault();
+          setFileMissing(true);
+        }
+      }}
+    >
+      {document && (
+        <FilePickField
+          id="contract-document"
+          label={document.label}
+          hint={document.hint}
+          accept={document.accept}
+          file={file}
+          chosenLabel={t.documentChosen}
+          error={fileMissing && !file ? t.documentMissing : null}
+          onFile={(chosen) => {
+            setFile(chosen);
+            setFileMissing(false);
+          }}
+        />
+      )}
       {contract && <input type="hidden" name="id" value={contract.id} />}
       {stay && <input type="hidden" name="stay" value="1" />}
       <Field

@@ -92,9 +92,6 @@ function SendForm({
 }) {
   const today = todayInParis(new Date());
   const [way, setWay] = useState<"mail" | "other">("mail");
-  // PDS OS sends this e-mail itself (SMTP set, an address, no private
-  // link to send it on): Sacha 22/11/2026.
-  const byPds = !mail.auto && Boolean(mail.smtp) && Boolean(mail.to?.email);
   const [message, setMessage] = useState(mail.message);
   const [envelope, setEnvelope] = useState<MailEnvelope>({
     to: mail.to?.email ?? "",
@@ -102,6 +99,11 @@ function SendForm({
     bcc: "",
     subject: mail.subject,
   });
+  // PDS OS sends this e-mail itself (SMTP set, no private link to send it
+  // on) to whoever « À » names: the party's address, or one written there
+  // (Sacha 22 and 23/11/2026).
+  const byPds =
+    !mail.auto && Boolean(mail.smtp) && addressesOf(envelope.to).length > 0;
   const [how, setHow] = useState<string | null>(null);
   const [on, setOn] = useState(today);
   const [tried, setTried] = useState(false);

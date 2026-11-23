@@ -64,7 +64,7 @@ export type NotificationFamily =
 // First match wins: a request before what its words would say otherwise.
 const FAMILIES: [RegExp, NotificationFamily][] = [
   [/invoice|bank_details|_paid$/, "money"],
-  [/^meeting_|^call_invited$/, "meeting"],
+  [/^meeting_|^call_invited$|_call_planned$/, "meeting"],
   [
     /feedback|signal|shared|clarification|blocker_reported|note_|reminder/,
     "message",

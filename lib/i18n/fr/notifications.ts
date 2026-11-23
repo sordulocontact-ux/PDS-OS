@@ -221,7 +221,7 @@ export const notifications = {
     deal_follow_up_due: (_actor: string, project: string) =>
       `Une relance est due aujourd'hui${dealOf(project)}.`,
     deal_memo_received: (_actor: string, project: string) =>
-      `Un deal memo est arrivé par e-mail${dealOf(project)}  : à envoyer à la direction pour validation.`,
+      `Un deal memo est arrivé par e-mail${dealOf(project)} : à envoyer à la direction pour validation.`,
     deal_memo_submitted: (actor: string, project: string) =>
       `${actor} vous montre un deal memo${dealOf(project)} : à valider.`,
     deal_memo_changes_requested: (actor: string, project: string) =>
@@ -230,6 +230,9 @@ export const notifications = {
       `${actor} a validé le deal memo${dealOf(project)} : renvoyez l'accord.`,
     deal_memo_sent: (actor: string, project: string) =>
       `${actor} a renvoyé l'accord validé${dealOf(project)}.`,
+    // A call of his deal planned by someone else: to the negotiator.
+    deal_call_planned: (actor: string, project: string) =>
+      `${actor} vous a calé un call pour un deal${dealOf(project)}.`,
     // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md):
     // no project yet.
     selection_transmitted: (actor: string, selection: string) =>

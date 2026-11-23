@@ -21,6 +21,7 @@ export function ContractNowFrame({
   eyebrow,
   title,
   line,
+  lineLink = null,
   facts = [],
   children,
 }: {
@@ -31,6 +32,8 @@ export function ContractNowFrame({
   title: string;
   // When, by whom, how: one quiet line under the title.
   line?: string | null;
+  // A link at the end of the line (the signed copy received, to open).
+  lineLink?: { href: string; label: string } | null;
   facts?: Array<[string, string] | null | false>;
   children?: React.ReactNode;
 }) {
@@ -54,7 +57,24 @@ export function ContractNowFrame({
         <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
           {title}
         </h2>
-        {line && <p className={cn(secondary, "text-pretty")}>{line}</p>}
+        {line && (
+          <p className={cn(secondary, "text-pretty")}>
+            {line}
+            {lineLink && (
+              <>
+                {" · "}
+                <a
+                  href={lineLink.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-foreground underline underline-offset-4"
+                >
+                  {lineLink.label}
+                </a>
+              </>
+            )}
+          </p>
+        )}
         {shown.length > 0 && (
           <dl className={cn(secondary, "flex flex-col gap-1")}>
             {shown.map(([label, value]) => (

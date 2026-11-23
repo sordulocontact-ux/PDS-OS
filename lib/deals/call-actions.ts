@@ -15,6 +15,7 @@ import { loadDeal } from "@/lib/deals/queries";
 import { loadDealTerms } from "@/lib/deals/term-queries";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { deals } from "@/lib/i18n/fr/deals";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -50,6 +51,9 @@ export async function createDealCall(
     });
     if (error) dealFailure("createDealCall", error);
   }
+  // A call planned by someone else than the negotiator tells him
+  // (deal_call_planned, written by the database).
+  await schedulePendingPushes();
   revalidatePath(routes.deal(deal.id));
   revalidatePath(routes.deals);
   // « Caler le call » stays on the deal (Sacha 21/11/2026).

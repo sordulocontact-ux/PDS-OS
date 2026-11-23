@@ -187,6 +187,9 @@ export const NOTIFICATION_KINDS = [
   "deal_memo_changes_requested",
   "deal_memo_validated",
   "deal_memo_sent",
+  // A call of his deal planned by someone else (20261124140101): to the
+  // negotiator; the subject is the call.
+  "deal_call_planned",
   // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md): its
   // page in the Catalogue, no project (the subject is the selection).
   "selection_transmitted",
@@ -294,6 +297,8 @@ export function notificationHref(
   // A call's report shared with a member: that report only (PROJ-AMEL-01).
   if (kind === "call_report_shared" && subjectId)
     return routes.callReport(subjectId);
+  // A call planned for the negotiator: that call (its slot, its agenda).
+  if (kind === "deal_call_planned" && subjectId) return routes.call(subjectId);
   // A deal opens its page, with or without a project (BIZ 4).
   if (kind.startsWith("deal_") && subjectId) return routes.deal(subjectId);
   // A template to validate: its page (the subject is the version), which
