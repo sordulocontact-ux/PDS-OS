@@ -1269,14 +1269,15 @@ export const projectTitleTone: Record<string, Tone> = {
   abandoned: "neutral",
 };
 
-/** A participation of an artist in a title (lot 3): proposed and invited
- * wait for an answer, confirmed is settled, declined is a refusal,
- * withdrawn is set aside (§ 3). */
+/** A participation of an artist in a title (lot 3), in the Excel's words
+ * (Maël 23/11/2026): « À contacter » is nothing done yet (neutral),
+ * « Contacté » waits for the artist's answer (warning), « D'accord » is
+ * settled (success); « A refusé » and « Retiré » are set aside (neutral). */
 export const participationStatusTone: Record<string, Tone> = {
-  proposed: "warning",
+  proposed: "neutral",
   invited: "warning",
   confirmed: "success",
-  declined: "danger",
+  declined: "neutral",
   withdrawn: "neutral",
 };
 

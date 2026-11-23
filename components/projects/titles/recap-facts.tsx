@@ -89,8 +89,8 @@ function LinkedPill({
   );
 }
 
-/** « À contacter », « Contacté » (orange), « D'accord » (green), « A
- * refusé », « Retiré »: where the artist stands. */
+/** « À contacter » (grey), « Contacté » (orange), « D'accord » (green),
+ * « A refusé », « Retiré » (grey): where the artist stands. */
 export function ContactStatePill({ status }: { status: ParticipationStatus }) {
   return (
     <StatusBadge tone={participationStatusTone[status]} size="sm">
