@@ -38,31 +38,36 @@ export function ContractNowFrame({
   const shown = facts.filter((f): f is [string, string] => Boolean(f));
   return (
     <NowFrame label={t.label}>
-      <div className="flex flex-wrap items-center gap-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
-        <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
-        {validate && (
-          <StatusBadge tone={myValidationTone} size="sm">
-            {t.toValidate}
-          </StatusBadge>
+      {/* The head read as one block (Sacha 23/11/2026: « problèmes de
+          gaps »): who it is for and the contract, what is awaited, when;
+          then a wider gap before the gestures. */}
+      <header className="flex flex-col gap-1.5 pb-1.5">
+        <div className="mb-1 flex flex-wrap items-center gap-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+          <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+          {validate && (
+            <StatusBadge tone={myValidationTone} size="sm">
+              {t.toValidate}
+            </StatusBadge>
+          )}
+          <span className="min-w-0 truncate">{eyebrow}</span>
+        </div>
+        <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
+          {title}
+        </h2>
+        {line && <p className={cn(secondary, "text-pretty")}>{line}</p>}
+        {shown.length > 0 && (
+          <dl className={cn(secondary, "flex flex-col gap-1")}>
+            {shown.map(([label, value]) => (
+              <div key={label} className="flex flex-wrap gap-1.5">
+                <dt>{label} :</dt>
+                <dd className="font-semibold text-[color:var(--text-primary)]">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
         )}
-        <span className="min-w-0 truncate">{eyebrow}</span>
-      </div>
-      <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
-        {title}
-      </h2>
-      {line && <p className={cn(secondary, "text-pretty")}>{line}</p>}
-      {shown.length > 0 && (
-        <dl className={cn(secondary, "flex flex-col gap-1")}>
-          {shown.map(([label, value]) => (
-            <div key={label} className="flex flex-wrap gap-1.5">
-              <dt>{label} :</dt>
-              <dd className="font-semibold text-[color:var(--text-primary)]">
-                {value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
+      </header>
       {children}
     </NowFrame>
   );
