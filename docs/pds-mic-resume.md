@@ -146,7 +146,10 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 - **Lot 8** (sans migration) : Master d'un collectif **un titre à la fois** (`?titre=<master>`),
   choisi dans le fil « Master ▸ titre ▸ étape » (`CrumbSwitcher` : titres du Master dans l'ordre,
   état Master en gris, coche du Master final, « Abandonné »), gardé d'étape en étape.
-  `loadMasterTitleScope` (`lib/master-workflow/title-scope.ts`, nul hors collectif). Filtré :
+  `loadMasterTitleScope` (`lib/master-workflow/title-scope.ts`, nul hors collectif). Depuis le
+  23/11/2026, la colonne et l'en-tête de l'étape lisent **le parcours du titre**
+  (`masterTitleJourney` : faits du seul master, `titleFacts`), et `/master?titre=` ouvre l'étape
+  qui attend pour ce titre. Filtré :
   Source, versions/retours/décisions (`loadRoundStep(…, masterId)`), Master final. Projet entier :
   Brief, paquet, lien, tarif, ingénieur, fil, facture, Historique ; « tout est validé » et le
   bilan du Master final comptent tous les titres. Par défaut : titre qui attend une décision
@@ -246,7 +249,10 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   `fonts.ts` (League Gothic 75 % pour SegmentA, Hanken Grotesk) ; logo tracé `pds-logo.ts`, à
   remplacer par le fichier officiel. Pages « Plans de sortie » (sous « Sorties »). Compte rendu :
   `docs/pds-mic-rapports/lot-14.md`.
-- **Lot 15** (`20261114140101_release_distribution`) : la **Distribution par sortie**.
+- **Lot 15** (`20261114140101_release_distribution`) : la **Distribution par sortie**. Depuis le
+  23/11/2026 : `/release` sans `?sortie=` ouvre la sortie où une étape attend le lecteur (sinon
+  une non finie ; « Sorties » s'il n'y en a aucune), et le fil « Distribution ▸ sortie » propose
+  les autres sorties avec l'état de leur dépôt.
   `release_id` sur les dix tables de la Distribution (nul = projet simple, inchangé ; index
   partiels ; garde-fou : un collectif écrit toujours avec sa sortie) ; fonctions avec
   `p_release_id` (nul par défaut, `release_required` pour un collectif sans sortie). Refus de

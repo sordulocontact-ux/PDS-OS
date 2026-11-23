@@ -5507,13 +5507,18 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
 `20261121210101_collective_title_contracts.sql` (**à pousser en prod par Sacha**). Résumé du domaine :
 `docs/pds-mic-resume.md` ; « Caler le call » et l'accord du deal : § 8 quaterdecies.
 
-- **Groupes par titre** : `lib/legal/title-groups.ts` (pur) et `lib/legal/title-layout.ts` (lecture serveur, `null` hors
-  collectif). Règle : un split, une SACEM ou un emprunt va au titre de son master ; une personne va au titre dont elle
-  est le seul invité (clé `artist:<id>` : artiste de la fiche, `network_contacts.artist_id`), sinon au groupe « Projet » ;
-  les titres abandonnés passent en dernier, « (abandonné) ». `layoutByTitle(…, extra)` ajoute en tête de groupe les
-  étapes propres à un titre (rattacher, contrats du titre) ; `TitleLayout.titleIds`, `titleOf[stepKey]`. Routes
-  `/legal/attach/<titleId>` et `/legal/title-contracts/<titleId>` (404 si inconnues), étapes propres à la colonne, sans
-  outils de blocage ni note. `JourneySpine foldable` replie les groupes.
+- **Un parcours par titre** (Maël 23/11/2026, « 1 par son ») : `lib/legal/title-groups.ts` (pur) et
+  `lib/legal/title-layout.ts` (lecture serveur, `null` hors collectif). `layoutByTitle` rend des **portées**
+  (`TitleLayout.scopes`, `LegalScope`) : « Projet » (Dossier, démarches du projet entier, Sortie), puis chaque titre qui a
+  des étapes. Règle (`titlesOfDemarche`) : un split, une SACEM ou un emprunt va au titre de son master ; une personne va
+  à **chaque** titre dont elle est invitée (clé `artist:<id>` : artiste de la fiche, `network_contacts.artist_id`) — la
+  même démarche dans les deux —, sinon à « Projet » ; les titres abandonnés passent en dernier, « (abandonné) ».
+  `layoutByTitle(…, extra)` ajoute en tête d'un titre ses étapes propres (rattacher, contrats du titre). Les étapes d'un
+  titre gardent `?titre=<project title id>` (`withTitre`) ; `scopeOfStep(layout, stepKey, titre)` choisit la portée
+  (celle de l'URL si elle a l'étape, sinon la première) ; `scopeEntry` = l'étape qui attend le lecteur, sinon la
+  première non faite. `LegalStepFrame titre` : colonne = la portée seule, fil « Juridique ▸ portée ▸ étape » avec les
+  autres portées en options (coche si tout est fait, compte « À vous »). Routes `/legal/attach/<titleId>` et
+  `/legal/title-contracts/<titleId>` (404 si inconnues), étapes propres à la colonne, sans outils de blocage ni note.
 - **Artiste principal une fois** (`lib/legal/main-artist.ts`) : à l'État des lieux, à la Confirmation et au Cadrage
   (« PDS · Artiste principal · tous les titres »).
 - **Noms de titre** : `withProjectTitleNames` (`journey-context.ts`) donne aux titres d'un collectif le libellé du projet

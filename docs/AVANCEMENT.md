@@ -2804,3 +2804,22 @@ envoyés ; chacun voit les siens, la direction tout ; écrire et répondre depui
   envoyé à po+ctr-<id>@ revient aussi au responsable du contrat.
 - Détail : `docs/ARCHITECTURE.md` § 8 quindecies.
 
+## PDS Mic : un parcours par titre (Juridique, Master, Distribution) (23/11/2026, branche `pre-prod`)
+
+Retour de Maël : les parcours d'un collectif mêlaient les titres ; un parcours par son, le titre choisi dans le fil
+d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune migration.
+
+- **Juridique** : « Projet » (Dossier, démarches du projet entier, Prêt pour la sortie), puis chaque titre (rattacher,
+  contrats du titre, fiche et contrat de ses invités, répartition, SACEM, emprunt). Un invité sur deux titres a sa
+  démarche dans les deux (la même, faite une fois). Le fil « Juridique ▸ Projet ⌄ ▸ étape » change de portée ; chaque
+  portée s'ouvre sur l'étape qui attend le lecteur. Les groupes repliables du 18/11 sont remplacés.
+- **Master** : le sélecteur de titre existait (lot 8) ; la colonne et l'en-tête de l'étape sont maintenant calculés sur
+  le titre seul (« Cap sur demain » : Source faite ; « Marée haute » : Source en cours). Brief, envois et factures
+  restent ceux du projet.
+- **Distribution** : `/release` s'ouvre sur la sortie qui attend le lecteur au lieu de renvoyer à « Sorties » ; le fil
+  propose les autres sorties avec l'état de leur dépôt.
+- **Pour Sacha** : `DistributionFrame` (fil de la sortie) et `/release/page.tsx` (entrée) touchés, collectif
+  seulement ; `masterJourneyContext` découpé (`journeyOf`, `titleFacts`, `masterTitleJourney`), sans changement pour un
+  projet simple.
+- Reste : **Marketing** (décision à prendre, voir ci-dessous) ; Travail et « Maintenant » ouvrent une démarche du
+  Juridique sans `?titre=` (la première portée qui l'a).
