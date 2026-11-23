@@ -228,15 +228,10 @@ export function DealTodoView({
         )}
       </div>
     ),
-    // Once a memo came, it says what was agreed: the terms fold under it,
-    // kept to check it and to fill the contract (Sacha 23/11/2026).
+    // Once a memo came, it says what was agreed: the terms come under it
+    // (worksOf), open, never folded (Sacha 23/11/2026).
     terms: (
-      <PageSection
-        id="termes"
-        title={t.terms.title}
-        collapsible={hasMemo}
-        defaultOpen={!hasMemo}
-      >
+      <PageSection id="termes" title={t.terms.title}>
         <DealTerms
           dealId={deal.id}
           terms={terms}
