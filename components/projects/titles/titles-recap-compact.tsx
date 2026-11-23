@@ -71,8 +71,8 @@ function StackedFact({
  * d'aller dans chaque module »): one row per artist in play (a
  * participation neither declined nor withdrawn, on a title not abandoned),
  * the title's label under the name (no note: too much here, Maël
- * 23/11/2026); Statut, Accord
- * (when the reader sees deals), Juridique (manage_legal), the title's Mix. Read only: the row
+ * 23/11/2026); Statut, Accord (its stage alone, same day; when the reader
+ * sees deals), Juridique (manage_legal), the title's Mix. Read only: the row
  * opens « Titres et artistes » (`href`), each pill its module. Rendered on
  * the server.
  */
@@ -143,6 +143,7 @@ export function TitlesRecapCompact({
                 accord={facts.accord}
                 artist={artist}
                 inline={inline}
+                brief
                 planCall={
                   awaitsCall(participation.status, facts.accord) ? (
                     <ViewLink

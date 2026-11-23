@@ -137,6 +137,7 @@ export function AccordFacts({
   planCall,
   inline = false,
   rate = true,
+  brief = false,
 }: {
   accord: RecapAccord;
   artist: string;
@@ -144,6 +145,9 @@ export function AccordFacts({
   inline?: boolean;
   // false: the rate has its own column (« Taux », the board).
   rate?: boolean;
+  // The stage alone, no rate, call nor negotiator (the overview's recap,
+  // Maël 23/11/2026: too much there).
+  brief?: boolean;
 }) {
   const r = fr.projectTitles.recap;
   const stage = accord.stage;
@@ -153,16 +157,21 @@ export function AccordFacts({
       ? fr.deals.agreement[accord.agreementStatus]
       : fr.deals.stages[stage]
     : null;
-  const details = [
-    rate ? accord.rate : null,
-    accord.nextCallAt ? r.accord.callOn(formatDay(accord.nextCallAt)) : null,
-  ].filter((d): d is string => Boolean(d));
+  const details = brief
+    ? []
+    : [
+        rate ? accord.rate : null,
+        accord.nextCallAt
+          ? r.accord.callOn(formatDay(accord.nextCallAt))
+          : null,
+      ].filter((d): d is string => Boolean(d));
   // Who negotiates, once the deal is read; « À affecter » before.
-  const negotiator =
-    accord.negotiator ??
-    (accord.href && stage !== "abandoned"
-      ? fr.projectTitles.board.negotiation.unassigned
-      : null);
+  const negotiator = brief
+    ? null
+    : (accord.negotiator ??
+      (accord.href && stage !== "abandoned"
+        ? fr.projectTitles.board.negotiation.unassigned
+        : null));
   return (
     <span className={factsClass(inline)}>
       {stage &&

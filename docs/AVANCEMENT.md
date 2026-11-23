@@ -2765,6 +2765,8 @@ Retours de Maël. Vérifié dans Chrome sur « Assurance 30 » (lancé).
   transmission. L'encart des contrats manquants reste en haut.
 - **Sans les notes** dans ces deux tableaux (récap compact et `TitlesBoard notes={false}`) : trop d'infos. Les notes
   restent lues et écrites dans l'onglet « Titres et artistes ».
+- **Accord** du récap compact : l'étape seule (« Négociation », « Accord validé »…), sans taux, jour du call ni
+  négociateur (`AccordFacts brief`). « Caler le call » reste quand l'artiste a dit oui sans call prévu.
 - **Pour Sacha** : « Ce qui dépend d'un autre workflow » est retiré de la Vue d'ensemble de **tous** les projets (à la
   demande de Maël). `DependencyRows`, `lib/overview/dependencies.ts` et les textes `projectShell.overview.dependencies`
   sont supprimés ; la phrase correspondante de l'assistant PO (`lib/assistant/guide/topics/projects.ts`) aussi.
