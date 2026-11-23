@@ -193,12 +193,6 @@ export const dealMemos = {
       "Le contrat principal du deal, parmi ceux de son projet ou de son artiste. Les autres contrats de l'opération restent dans Contrats.",
     pick: "Contrat",
     pickPlaceholder: "Choisir un contrat",
-    // « Créer le contrat » from the deal (DealContractCreate).
-    create: "Créer le contrat",
-    createTitle: "Créer le contrat du deal",
-    createDescription:
-      "Rempli depuis le deal ; il lui est lié dès sa création. Ses parties et ses fichiers s'ajoutent ensuite sur sa page.",
-    created: "Contrat créé et lié au deal",
     // « Générer le contrat » (DealContractGenerate, 20261122140101).
     generate: "Générer le contrat",
     generateTitle: "Générer le contrat",
@@ -211,6 +205,9 @@ export const dealMemos = {
     values: "Valeurs du contrat",
     missing: "Écrivez cette valeur.",
     import: "Importer un contrat",
+    importing: "Import…",
+    imported: "Contrat importé et lié au deal",
+    importFailed: "Le contrat n'a pas pu être importé. Réessayez.",
     openPdf: "Ouvrir le PDF",
     // The contracting's gesture in « Maintenant » (DealContractNow).
     now: {

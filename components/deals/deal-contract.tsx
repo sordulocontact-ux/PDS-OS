@@ -1,6 +1,6 @@
 "use client";
 
-import { IconPenWriting2, IconXmark } from "nucleo-sharp-essential";
+import { IconPenWriting2 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,7 +12,7 @@ import {
 } from "@/components/deals/deal-contract-create";
 import { ContractDepositButton } from "@/components/contracts/contract-deposit-button";
 import { DealContractGenerate } from "@/components/deals/deal-contract-generate";
-import { IconExternalLink } from "@/components/icons";
+import { IconExternalLink, IconLinkSlash } from "@/components/icons";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { IconAction } from "@/components/ui/icon-action";
 import { Button } from "@/components/ui/button";
@@ -185,10 +185,10 @@ export function DealContract({
                 />
               )}
               {canLink && (
+                // Outlined as its neighbours, a broken link (Sacha 23/11/2026).
                 <IconAction
                   label={t.unlink}
-                  icon={IconXmark}
-                  variant="ghost"
+                  icon={IconLinkSlash}
                   size="icon-sm"
                   disabled={unlink.pending}
                   onClick={() =>

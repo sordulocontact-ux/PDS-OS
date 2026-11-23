@@ -22,3 +22,4 @@ export { IconRefresh } from "./refresh";
 export { IconSidebar } from "./sidebar";
 export { IconStop } from "./stop";
 export { IconUserPlus } from "./user-plus";
+export { IconLinkSlash } from "./link-slash";

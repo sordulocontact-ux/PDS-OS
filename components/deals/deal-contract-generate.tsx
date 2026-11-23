@@ -94,7 +94,9 @@ function GenerateForm({
       />
       {template && (
         <fieldset className="flex flex-col gap-4">
-          <legend className="mb-3 text-sm font-medium">{t.values}</legend>
+          {/* Said to a screen reader only (Sacha 23/11/2026: a heading
+              that reads as one more field). */}
+          <legend className="sr-only">{t.values}</legend>
           {template.fields.map((id) => {
             const known = draft.values[id];
             const value = values[id] ?? "";

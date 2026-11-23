@@ -232,7 +232,7 @@ async function DealTodo({
       ? {
           participation: deal.participationId !== null,
           create: can(access, "manage_contracts")
-            ? dealContractDefaults(deal)
+            ? dealContractDefaults(deal, access.organizationId)
             : null,
         }
       : null;

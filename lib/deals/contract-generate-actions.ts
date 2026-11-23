@@ -65,7 +65,7 @@ export async function loadDealContractDraft(
     deal,
     organization?.billing?.[0]?.legal_name ?? organization?.name ?? null,
   );
-  const wanted = dealContractDefaults(deal).type;
+  const wanted = dealContractDefaults(deal, null).type;
   const filled = (fields: string[]) =>
     fields.filter((id) => values[id]).length / Math.max(fields.length, 1);
   // The deal's kind of contract first, made for deals (it asks for their

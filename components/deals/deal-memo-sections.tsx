@@ -177,9 +177,13 @@ export async function DealMemoSections({
               participation={deal.participationId !== null}
               contract={contract}
               options={options}
+              // Contracting, « Maintenant » holds « Importer » and « Générer »
+              // (DealContractNow): never twice (Sacha 23/11/2026).
               create={
-                canWrite && can(access, "manage_contracts")
-                  ? dealContractDefaults(deal)
+                canWrite &&
+                can(access, "manage_contracts") &&
+                deal.stage !== "contracting"
+                  ? dealContractDefaults(deal, access.organizationId)
                   : null
               }
               document={contractFile}
@@ -195,7 +199,8 @@ export async function DealMemoSections({
             {/* Written by PDS OS from the validated memo, the contract says
                 the same by construction: nothing to compare (Sacha
                 22/11/2026). Only a contract brought from elsewhere is. */}
-            {!written && (
+            {/* Nothing to compare before a contract is there. */}
+            {!written && contract && (
               <DealMemoCompare
                 dealId={deal.id}
                 memo={

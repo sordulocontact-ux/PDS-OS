@@ -5,8 +5,12 @@ import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 
 /** What a deal's new contract knows from it: its name, a licence with a
  * label, a partnership with a brand, an artist contract otherwise. */
-export function dealContractDefaults(deal: Deal): DealContractDefaults {
+export function dealContractDefaults(
+  deal: Deal,
+  organizationId: string | null,
+): DealContractDefaults {
   return {
+    organizationId,
     title: dealMemos.contract.title(dealName(deal)),
     type:
       deal.kind === "label"
