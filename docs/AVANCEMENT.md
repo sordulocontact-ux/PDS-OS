@@ -2576,10 +2576,11 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
   colonne « Taux / accord » et le bouton du tableau « Titres et artistes ».
 - Migration `20261120140101_deal_negotiation_call.sql` **à pousser en prod** ; test
   `supabase/tests/deal-negotiation-call.test.sql` (29 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
-- Reste : lire l'agenda Google du business manager (`calendar.freebusy` sur le nouveau jeton de po@), notifier le
-  business manager qu'un call lui est calé (nouveau type de notification), pré-remplir le contact de la participation
-  comme invité (`CallPlanForm` ne prend pas d'invités par défaut), garde SQL « pas de contrat avant l'accord » côté
-  contrats des participations.
+- Reste : lire l'agenda Google du business manager (`calendar.freebusy` sur le nouveau jeton de po@), pré-remplir le
+  contact de la participation comme invité (`CallPlanForm` ne prend pas d'invités par défaut). Fait le 23/11
+  (`20261124140101`, test `deal-call-notice-contract-guard.test.sql`) : le business manager est prévenu d'un call
+  calé pour lui (`deal_call_planned`) ; la garde « pas de contrat avant l'accord » des participations était déjà en
+  SQL depuis `20261121210101`, vérifiée.
 
 
 ## Circuit du deal memo par e-mail (20/11/2026, branche `pre-prod`, lot D des retours d'Ibé du 18/11)
@@ -2600,9 +2601,9 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
 - Migration `20261120150101_deal_memo_mail.sql` **à pousser en prod** (crée le bucket `deal-files`) ; test
   `supabase/tests/deal-memo-mail.test.sql` (42 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
 - Reste : le contenu du deal memo (exemple attendu d'Ibé, rien n'en est lu ni présumé) ; un vrai `Cc` dans
-  `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; textes des 5 notifications et lignes d'historique
-  des nouveaux types (fichiers partagés, à faire) ; dépôt à la main d'un memo reçu ailleurs (WhatsApp) : aujourd'hui,
-  le transférer par e-mail à l'adresse du deal.
+  `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; dépôt à la main d'un memo reçu ailleurs
+  (WhatsApp) : aujourd'hui, le transférer par e-mail à l'adresse du deal. Fait le 23/11 : les 5 notifications du
+  deal memo ont leur texte et leur lien (la page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
 
 
 ## Retours d'Ibé du 18/11 : parcours PDS Mic (21/11/2026, branche `pre-prod`)

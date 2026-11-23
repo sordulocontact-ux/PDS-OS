@@ -8410,6 +8410,18 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   (`lib/deals/participation-states.ts`, `Map` par participation). Bouton : `<NegotiationCallButton
   data={await loadParticipationNegotiationCall(participationId, artistName)} />` quand `canPlanCall` sans `dealId`,
   sinon `loadDealNegotiationCall(deal)`. Test : `supabase/tests/deal-negotiation-call.test.sql`.
+- **Le business manager est prévenu d'un call calé pour lui** (retours d'Ibé du 18/11, fait le 23/11 ;
+  `20261124140101_deal_call_notice_and_contract_guard.sql`) : type `deal_call_planned`, écrit par le trigger
+  `z_notify_deal_negotiator` (`after insert on calls`, `deal_id` non nul) quel que soit le chemin
+  (`plan_deal_negotiation_call`, « Préparer un call » de la direction) ; destinataire = `deals.assignee_person_id`,
+  jamais l'auteur du call (`created_by`, et `notify()` saute l'acteur), personne sans négociateur. Sujet = le call
+  (la notification ouvre `routes.call`), projet = celui du deal ; famille « meeting ». Sur une participation sans
+  deal, « Caler le call » donne le deal et cale le call : `deal_assigned` puis `deal_call_planned`. Push :
+  `createDealCall` et `planNegotiationCall` appellent `schedulePendingPushes()`. **« Pas de contrat avant
+  l'accord » côté participations** : déjà en SQL depuis `20261121210101` (`b_agreement_before_contract` sur
+  `title_participations.contract_id`, `generate_legal_contract` pour un invité d'un collectif ; `link_deal_contract`
+  et `generate_deal_contract` refusent le deal d'une participation, `participation_contract`), rien d'ajouté ;
+  vérifié sur un deal ouvert par « Caler le call ». Test : `supabase/tests/deal-call-notice-contract-guard.test.sql`.
 - **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
   e-mails (BIZ 9), seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
