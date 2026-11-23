@@ -35,8 +35,16 @@ export function RequesterNote({ requester }: { requester: FormRequester }) {
 // « À quoi servent vos données »: what an outside person is told before
 // sending personal data (RGPD, article 13: purposes, who reads them, how
 // long, their rights).
-export function DataUseNote({ requester }: { requester: FormRequester }) {
-  const t = fr.legalForms.public.dataUse;
+export function DataUseNote({
+  requester,
+  network = false,
+}: {
+  requester: FormRequester;
+  // A Réseau fiche: the texts without a project.
+  network?: boolean;
+}) {
+  const use = fr.legalForms.public.dataUse;
+  const t = network ? { ...use, ...use.network } : use;
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-sm font-medium">{t.title}</h2>

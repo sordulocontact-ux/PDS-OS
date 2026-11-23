@@ -7,7 +7,6 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import {
   getMasterRights,
-  listDeclarationEvents,
   listMasterDeclarations,
 } from "@/lib/catalog/master/queries";
 import { getMaster } from "@/lib/catalog/queries";
@@ -23,14 +22,12 @@ export default async function MasterRightsPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]/rights">) {
   const { masterId } = await params;
-  const [access, master, rights, { declarations, error }, history] =
-    await allInOrder([
-      requireApproved(),
-      getMaster(masterId),
-      getMasterRights(masterId),
-      listMasterDeclarations(masterId),
-      listDeclarationEvents(masterId),
-    ]);
+  const [access, master, rights, { declarations, error }] = await allInOrder([
+    requireApproved(),
+    getMaster(masterId),
+    getMasterRights(masterId),
+    listMasterDeclarations(masterId),
+  ]);
   if (!master || !rights) notFound();
   const canEdit = can(access, "manage_catalog");
   // Who the master split proposes today: a confirmed holder that differs is
@@ -51,7 +48,6 @@ export default async function MasterRightsPage({
         <DeclarationsSection
           masterId={master.id}
           declarations={declarations}
-          history={history}
           canEdit={canEdit}
         />
       )}

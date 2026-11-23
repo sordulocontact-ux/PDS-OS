@@ -5,7 +5,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   loadCallClosures,
   type CallClosure,
-  type CallShare,
 } from "@/lib/calls/closure-queries";
 import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
@@ -35,7 +34,6 @@ const PROPOSAL_KINDS = [
 export type CallPageData = {
   outcomes: CallOutcomes | null;
   closures: CallClosure[];
-  shares: CallShare[];
   summarySent: boolean;
   // Proposals of the report still « proposed » in their module.
   pendingProposals: number;
@@ -51,7 +49,6 @@ export type CallPageData = {
 const EMPTY: Omit<CallPageData, "emailEnabled"> = {
   outcomes: null,
   closures: [],
-  shares: [],
   summarySent: false,
   pendingProposals: 0,
   meeting: null,
@@ -80,27 +77,26 @@ export async function loadCallPage(
   const proposalIds = report.items
     .filter((item) => PROPOSAL_KINDS.includes(item.kind))
     .map((item) => item.id);
-  const [outcomes, { closures, shares }, summaries, base, pending] =
-    await Promise.all([
-      loadCallOutcomes(supabase, report),
-      loadCallClosures(call.id),
-      loadCallSummaries(call.id),
-      loadMeeting(call.id, { name: call.title, noun: "call" }),
-      // A deal's call (BIZ 6): its proposals are PO's deal_call_proposals.
-      call.dealId
+  const [outcomes, { closures }, summaries, base, pending] = await Promise.all([
+    loadCallOutcomes(supabase, report),
+    loadCallClosures(call.id),
+    loadCallSummaries(call.id),
+    loadMeeting(call.id, { name: call.title, noun: "call" }),
+    // A deal's call (BIZ 6): its proposals are PO's deal_call_proposals.
+    call.dealId
+      ? supabase
+          .from("deal_call_proposals")
+          .select("id", { count: "exact", head: true })
+          .eq("call_id", call.id)
+          .eq("status", "proposed")
+      : proposalIds.length
         ? supabase
-            .from("deal_call_proposals")
+            .from("current_field_values")
             .select("id", { count: "exact", head: true })
-            .eq("call_id", call.id)
+            .in("source_report_item_id", proposalIds)
             .eq("status", "proposed")
-        : proposalIds.length
-          ? supabase
-              .from("current_field_values")
-              .select("id", { count: "exact", head: true })
-              .in("source_report_item_id", proposalIds)
-              .eq("status", "proposed")
-          : Promise.resolve({ count: 0 }),
-    ]);
+        : Promise.resolve({ count: 0 }),
+  ]);
 
   // What the last closing kept reads « Confirmé par » whoever closed it.
   const closed = closures[0] ?? null;
@@ -124,7 +120,6 @@ export async function loadCallPage(
     emailEnabled: emailEnabled(),
     outcomes,
     closures,
-    shares,
     summarySent: summaries.length > 0,
     pendingProposals: pending.count ?? 0,
     meeting,

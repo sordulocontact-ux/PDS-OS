@@ -69,7 +69,6 @@ export const conceptionSheet = {
     items: "Éléments de la série",
     checks: "Avant de soumettre",
     review: "Validation",
-    history: "Historique",
   },
   fields: {
     title: "Nom",
@@ -187,8 +186,6 @@ export const conceptionSheet = {
     project: "Selon le mode du projet",
     rule: "Statut de la série : celui de son contenu le moins avancé (Refusé, puis Modifications demandées, puis En attente, puis Validé).",
     saved: "Suivi de la série enregistré.",
-    history:
-      "Les décisions déjà prises restent dans l'historique des versions.",
   },
 
   checks: {
@@ -295,27 +292,6 @@ export const conceptionSheet = {
     refresh: "Actualiser le transfert",
     cancel: "Annuler",
     close: "Fermer",
-  },
-
-  history: {
-    empty: "Rien pour l'instant.",
-    by: (name: string) => ` · ${name}`,
-    events: {
-      "deliverable_sheet.created": "Fiche créée",
-      "deliverable_sheet.updated": (fields: string) =>
-        `Fiche modifiée : ${fields}`,
-      "deliverable_sheet.submitted": (n: number) => `V${n} soumise`,
-      "deliverable_sheet.approved": (n: number) => `V${n} validée`,
-      "deliverable_sheet.changes_requested": (n: number) =>
-        `Modifications demandées sur la V${n}`,
-      "deliverable_sheet.rejected": (n: number) => `V${n} refusée`,
-      "decision.approved": "Section validée",
-      "decision.changes_requested": "Modifications demandées sur une section",
-      "decision.rejected": "Section refusée",
-      "assignment.confirmed": "Responsable désigné",
-      "production_handoff.confirmed": "Transmise à Production",
-    },
-    other: "Modification",
   },
 
   errors: {

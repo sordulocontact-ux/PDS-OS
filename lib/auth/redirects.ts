@@ -153,7 +153,7 @@ export const routes = {
   financeReceipts: "/app/finance/justificatifs",
   financeAlerts: "/app/finance/alertes",
   financeExports: "/app/finance/exports",
-  // A CSV of Finance (lot 7): ?type=depenses|factures|encaissements|banque|historique.
+  // A CSV of Finance (lot 7): ?type=depenses|factures|encaissements|banque.
   financeExport: (type: string) => `/api/finance/export?type=${type}`,
   // One envelope (lot 4): projet | artiste | centre.
   financeBudget: (kind: "projet" | "artiste" | "centre", id: string) =>
@@ -197,7 +197,6 @@ export const routes = {
   // « Business » of an artist (BIZ 10): its deals, then its budget.
   artistBusiness: (id: string) => `/app/catalog/artists/${id}/business`,
   artistBudget: (id: string) => `/app/catalog/artists/${id}/business#budget`,
-  artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
   // Selections of artists, before a project (lot 4 of docs/pds-mic-plan.md):
   // under the artists, a static segment beside [artistId].
@@ -228,7 +227,6 @@ export const routes = {
     `/app/catalog/masters/${id}/projects#distribution`,
   masterProjects: (id: string) => `/app/catalog/masters/${id}/projects`,
   masterFiles: (id: string) => `/app/catalog/masters/${id}/files`,
-  masterActivity: (id: string) => `/app/catalog/masters/${id}#activity`,
   // Title form pre-filled from another title (name, credits): a variant.
   mastersNewVariantOf: (masterId: string) =>
     `/app/catalog/masters/new?variantOf=${masterId}`,
@@ -456,7 +454,6 @@ export const routes = {
   projectPlanning: (id: string) => `/app/projects/${id}/planning`,
   projectBudget: (id: string) => `/app/projects/${id}/budget`,
   projectValidations: (id: string) => `/app/projects/${id}/validations`,
-  projectActivity: (id: string) => `/app/projects/${id}/activity`,
   // Public, no account: smartlink of a release.
   smartlink: (token: string) => `/l/${token}`,
   // Public, no account: a fiche de renseignements (Juridique 02).

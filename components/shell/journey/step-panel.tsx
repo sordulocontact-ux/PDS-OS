@@ -29,8 +29,7 @@ const t = fr.journey;
  * banner of the last gesture (just above the content, where the gesture
  * is; ResultBanner by default), the step's content (facts, what is missing, the action), its final
  * result, the noted informations, the tools (« Signaler un blocage »,
- * « Noter une information ») and, at the very bottom, « Déjà fait »
- * (StepHistory).
+ * « Noter une information »).
  *
  * `lead`: the viewer's gesture, given when the step's page puts it first
  * (lot 4 of Ibé's feedback: « l'action attendue en tête de page, les
@@ -49,7 +48,6 @@ export type StepSlots = {
   result?: React.ReactNode;
   notes?: React.ReactNode;
   tools?: React.ReactNode;
-  history?: React.ReactNode;
 };
 
 /**
@@ -140,11 +138,10 @@ export function StepPanel({
           ))}
         {slots.result}
         {/* The rarely used footer (notes, « Signaler un blocage » / « Noter
-            une information », « Déjà fait »): well apart from the content. */}
+            une information »): well apart from the content. */}
         <div className="mt-6 flex flex-col gap-3.5 empty:hidden">
           {slots.notes}
           {!locked && slots.tools}
-          {slots.history}
         </div>
       </section>
     </StepResultProvider>

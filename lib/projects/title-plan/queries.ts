@@ -258,17 +258,6 @@ export type PlanVersion = {
   linkLive: boolean;
 };
 
-export type PlanEvent = {
-  id: string;
-  from: TitlePlanStatus | null;
-  to: TitlePlanStatus;
-  reason: string | null;
-  note: string | null;
-  version: number | null;
-  by: string | null;
-  at: string;
-};
-
 export type TitlePlanDetail = {
   planId: string;
   titleId: string;
@@ -289,7 +278,6 @@ export type TitlePlanDetail = {
   visuals: PlanVisual[];
   defaultCover: string | null;
   versions: PlanVersion[];
-  events: PlanEvent[];
   // Since the latest version: the actions added, removed or changed.
   changes: ReturnType<typeof changedSince> | null;
   members: Member[];
@@ -332,19 +320,12 @@ export async function loadTitlePlan(
   if (!title || !planRow.data) return null;
   const plan = planRow.data;
   const config = titlePlanConfigOf(plan.config);
-  const [versions, events, links] = await Promise.all([
+  const [versions, links] = await Promise.all([
     supabase
       .from("title_release_plan_versions")
       .select("id, version, status, note, created_by, created_at, sources")
       .eq("plan_id", plan.id)
       .order("version", { ascending: false }),
-    supabase
-      .from("title_release_plan_events")
-      .select(
-        "id, from_status, to_status, reason, note, version_id, created_by, created_at",
-      )
-      .eq("plan_id", plan.id)
-      .order("created_at", { ascending: false }),
     supabase
       .from("share_links")
       .select("title_plan_version_id, expires_at")
@@ -354,8 +335,6 @@ export async function loadTitlePlan(
   ]);
   if (versions.error)
     console.error("loadTitlePlan versions:", versions.error.message);
-  if (events.error)
-    console.error("loadTitlePlan events:", events.error.message);
   const name = (id: string | null) =>
     id ? (members.find((m) => m.personId === id)?.name ?? null) : null;
   const now = Date.now();
@@ -436,16 +415,6 @@ export async function loadTitlePlan(
       by: name(v.created_by),
       at: v.created_at,
       linkLive: live.has(v.id),
-    })),
-    events: (events.data ?? []).map((e) => ({
-      id: e.id,
-      from: e.from_status ? titlePlanStatusOf(e.from_status) : null,
-      to: titlePlanStatusOf(e.to_status),
-      reason: e.reason,
-      note: e.note,
-      version: versionList.find((v) => v.id === e.version_id)?.version ?? null,
-      by: name(e.created_by),
-      at: e.created_at,
     })),
     changes: latest
       ? changedSince(sourcesOf(latest.sources), sourcesFor(planActions))

@@ -6,7 +6,6 @@ import type {
   SplitReviewState,
   SplitValidation,
 } from "@/lib/catalog/master/split-review";
-import type { SplitEvent } from "@/lib/catalog/master/split-queries";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 
 const fr = { masterPage };
@@ -59,45 +58,5 @@ export function SplitGapsNote({ gaps }: { gaps: SplitGap[] }) {
         .join(" ")}{" "}
       {t.gaps.note}
     </ToneCallout>
-  );
-}
-
-/** Every change of a split, newest first (retour 47). */
-export function SplitHistory({ events }: { events: SplitEvent[] }) {
-  if (events.length === 0) return null;
-  const h = t.history;
-  const sentence = (e: SplitEvent) => {
-    if (e.action === "validated") return h.validated;
-    if (e.action === "added" && e.after)
-      return h.added(e.after.party, formatShare(e.after.share));
-    if (e.action === "removed" && e.before)
-      return h.removed(e.before.party, formatShare(e.before.share));
-    if (e.before && e.after)
-      return h.updated(
-        `${e.before.party} ${formatShare(e.before.share)}`,
-        `${e.after.party} ${formatShare(e.after.share)}`,
-      );
-    return null;
-  };
-  return (
-    <details>
-      <summary className="cursor-pointer text-sm font-medium text-[color:var(--text-secondary)] select-none">
-        {h.title(events.length)}
-      </summary>
-      <ul className="mt-2 flex flex-col gap-1 text-sm">
-        {events.map((e) => (
-          <li key={e.id} className="flex flex-wrap gap-x-2">
-            <Timestamp
-              iso={e.createdAt}
-              className="text-[color:var(--text-tertiary)] tabular-nums"
-            />
-            <span>
-              {sentence(e)}
-              {h.by(e.actorName)}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </details>
   );
 }

@@ -3,7 +3,7 @@ import { IconMoneyBillCoin } from "nucleo-sharp-essential";
 import { FormMessage } from "@/components/auth/form-message";
 import { BudgetLines } from "@/components/budget/budget-lines";
 import { EnvelopeButton } from "@/components/budget/envelope/envelope-button";
-import { EnvelopeHistory } from "@/components/budget/envelope/envelope-history";
+import { ClosedEnvelopes } from "@/components/budget/envelope/closed-envelopes";
 import { EnvelopePosts } from "@/components/budget/envelope/envelope-posts";
 import { EnvelopeSummary } from "@/components/budget/envelope/envelope-summary";
 import { EmptyState } from "@/components/shell/empty-state";
@@ -16,7 +16,7 @@ import { formatDay } from "@/lib/utils/day";
 /**
  * The Budget of an artist (BUD 2, Ibé 11/11/2026): its envelope by poste
  * (planned, spent, rest), its spends (direct ones written here, its
- * projects' read under their own rule), the history of the envelopes. For
+ * projects' read under their own rule), the closed envelopes. For
  * whoever reads the artists' budgets; the direction alone sets the
  * envelope. Under « Business » of the artist's page, after the deals
  * (BIZ 10).
@@ -97,7 +97,7 @@ export async function ArtistBudgetSections({
           canEdit
         />
       </PageSection>
-      <EnvelopeHistory history={data.history} events={data.events} />
+      <ClosedEnvelopes closed={data.closed} />
     </>
   );
 }

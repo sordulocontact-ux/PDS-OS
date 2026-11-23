@@ -259,17 +259,6 @@ export async function loadClearances(
               },
             ];
           }),
-        history: (events.data ?? [])
-          .filter((e) => e.clearance_id === row.id)
-          .map((e) => ({
-            id: e.id,
-            kind: e.kind,
-            from: e.from_status,
-            to: e.to_status,
-            note: e.note,
-            at: e.created_at,
-            by: who(e.actor_person_id),
-          })),
       };
     }),
   );

@@ -1,5 +1,5 @@
 // The steps of the Plan du projet, made pilotable (PROJ-UX-07): real state,
-// pilot and executor, due date, dependencies, history.
+// pilot and executor, due date, dependencies.
 export const planSteps = {
   pilot: "Pilote",
   executor: "Exécutant",
@@ -56,30 +56,5 @@ export const planSteps = {
     },
     step: "Étape",
     empty: "Aucune étape dans cette vue.",
-  },
-  history: {
-    title: "Historique du plan",
-    empty: "Aucun changement depuis le lancement.",
-    kinds: {
-      launched: (n: number) =>
-        `Plan lancé (${n} ${n === 1 ? "étape" : "étapes"})`,
-      workflow_launched: (name: string) => `${name} lancé`,
-      step_added: (name: string) => `Étape ajoutée : ${name}`,
-      step_updated: (name: string) => `Étape modifiée : ${name}`,
-      step_moved: (name: string) => `Étape déplacée : ${name}`,
-      step_done: (name: string) => `Étape faite : ${name}`,
-      step_reopened: (name: string) => `Étape rouverte : ${name}`,
-    },
-    changes: {
-      column: "colonne",
-      owner: "pilote",
-      executor: "exécutant",
-      dueDate: "échéance",
-      dependsOn: "dépendances",
-      title: "nom",
-    },
-    changed: (fields: string) => `Changé : ${fields}`,
-    by: (name: string | null, date: string) =>
-      name ? `${name}, le ${date}` : `Le ${date}`,
   },
 } as const;

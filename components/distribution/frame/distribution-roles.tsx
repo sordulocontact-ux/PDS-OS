@@ -43,18 +43,9 @@ export function DistributionRolesButton({ ctx }: { ctx: DistributionContext }) {
       what: t.distributorWhat,
     },
   ];
-  const history = ctx.closure.events
-    .filter((e) => e.kind === "validator.set")
-    .map((e) => ({
-      id: e.id,
-      text: t.validatorSet,
-      who: e.actor,
-      at: e.at,
-    }));
   return (
     <WhoDoesWhatButton
       roles={roles}
-      history={history}
       personLinks={<ContactLinksSection projectId={ctx.project.id} />}
     />
   );

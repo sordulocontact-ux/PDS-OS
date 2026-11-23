@@ -26,9 +26,6 @@ export const productionSchedule = {
     `Tournage le ${day}, de ${start} à ${end}`,
   decidedBy: (who: string) => ` · décidé par ${who}`,
   none: (who: string) => `Aucune décision validée · à fixer par ${who}`,
-  history: "Décisions sur la date",
-  historyLine: (text: string, by: string, at: string) =>
-    `${at} · ${by} : ${text}`,
   replaced: (at: string) => `remplacée le ${at}`,
   rework:
     "La date a changé depuis la confirmation : la préparation est à confirmer de nouveau.",

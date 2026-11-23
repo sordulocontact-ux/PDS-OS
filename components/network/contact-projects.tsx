@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { RemindContactButton } from "@/components/network/remind-contact-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -206,15 +208,21 @@ export function ContactInProjects({
 }
 
 /** The fiches de renseignements sent to the contact, one per project:
- * returned or not. None: no card. */
-export function ContactFiches({ projects }: { projects: ContactProject[] }) {
+ * returned or not, after `lead` (its own Réseau fiche). None: no card. */
+export function ContactFiches({
+  projects,
+  lead,
+}: {
+  projects: ContactProject[];
+  lead?: ReactNode;
+}) {
   const p = fr.network.page;
   const fiches = projects.flatMap((project) =>
     project.items
       .filter((i) => i.kind === "form")
       .map((item) => ({ project, item })),
   );
-  if (fiches.length === 0) return null;
+  if (fiches.length === 0 && !lead) return null;
   return (
     <PageSection
       card
@@ -222,33 +230,38 @@ export function ContactFiches({ projects }: { projects: ContactProject[] }) {
       title={p.fiche}
       description={p.ficheDescription}
     >
-      <DataTable framed>
-        <DataTableHeader>
-          <DataTableHead>{p.columns.project}</DataTableHead>
-          <DataTableHead hideBelow="sm">{p.columns.sentOn}</DataTableHead>
-          <DataTableHead fill>{p.columns.state}</DataTableHead>
-        </DataTableHeader>
-        <DataTableBody>
-          {fiches.map(({ project, item }) => (
-            <DataTableRow key={item.id}>
-              <DataTableCell className="break-words">
-                {project.title}
-              </DataTableCell>
-              <DataTableCell hideBelow="sm" className="tabular-nums">
-                {formatDate(item.at)}
-              </DataTableCell>
-              <DataTableCell fill>
-                <StatusBadge
-                  tone={item.state === "done" ? "success" : "info"}
-                  size="sm"
-                >
-                  {item.state === "done" ? p.ficheDone : p.ficheTodo}
-                </StatusBadge>
-              </DataTableCell>
-            </DataTableRow>
-          ))}
-        </DataTableBody>
-      </DataTable>
+      {lead && (
+        <div className={fiches.length > 0 ? "mb-4" : undefined}>{lead}</div>
+      )}
+      {fiches.length > 0 && (
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{p.columns.project}</DataTableHead>
+            <DataTableHead hideBelow="sm">{p.columns.sentOn}</DataTableHead>
+            <DataTableHead fill>{p.columns.state}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {fiches.map(({ project, item }) => (
+              <DataTableRow key={item.id}>
+                <DataTableCell className="break-words">
+                  {project.title}
+                </DataTableCell>
+                <DataTableCell hideBelow="sm" className="tabular-nums">
+                  {formatDate(item.at)}
+                </DataTableCell>
+                <DataTableCell fill>
+                  <StatusBadge
+                    tone={item.state === "done" ? "success" : "info"}
+                    size="sm"
+                  >
+                    {item.state === "done" ? p.ficheDone : p.ficheTodo}
+                  </StatusBadge>
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
+      )}
     </PageSection>
   );
 }

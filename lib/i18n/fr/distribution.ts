@@ -635,8 +635,6 @@ export const distribution = {
     withdrawn: "Déclaration retirée",
     withdrawnLine: (who: string | null, date: string, note: string | null) =>
       `Retirée le ${date}${who ? ` par ${who}` : ""}${note ? ` : « ${note} »` : ""}`,
-    history: "Chronologie",
-    historyEmpty: "Aucune déclaration pour l'instant.",
     errors: {
       forbidden:
         "Seul le responsable du projet déclare le dépôt et ses suites.",
@@ -939,9 +937,6 @@ export const distribution = {
       "La décision de clôture reste dans l'historique ; la réouverture y est ajoutée avec votre motif.",
     reopenNote: "Motif",
     reopened: "Suivi rouvert",
-    historyTitle: "Clôtures",
-    historyLine: (kind: string, status: string, date: string) =>
-      `${kind} · ${status} · proposée le ${date}`,
     statuses: {
       pending: "en attente",
       closed: "clôturée",
@@ -978,52 +973,5 @@ export const distribution = {
       proofRequired: "Joignez la preuve : un fichier ou un lien.",
       generic: "L'action a échoué. Réessayez.",
     },
-  },
-  history: {
-    title: "Historique",
-    description:
-      "Qui a déclaré, validé, corrigé, vérifié ou clôturé, quand et avec quelle preuve. Rien n'en est effacé.",
-    empty: "Rien n'a encore été fait sur la distribution.",
-    events: {
-      parameters: (fields: string) =>
-        `Paramètres de distribution enregistrés (${fields})`,
-      parametersConfirmed: "Paramètres de distribution confirmés",
-      validatorSet: "Validateur Distribution désigné",
-      validatorCleared: "Validateur Distribution retiré",
-      check: (label: string, result: string) =>
-        `Contrôle « ${label} » : ${result}`,
-      submitted: (n: number) => `V${n} du dossier soumise à validation`,
-      approved: (n: number) => `V${n} du dossier validée`,
-      rejected: (n: number) => `V${n} du dossier refusée`,
-      superseded: (n: number) => `Nouvelle version préparée après la V${n}`,
-      declaration: (what: string, proof: boolean) =>
-        `${what} (${proof ? "preuve jointe" : "sans preuve"})`,
-      withdrawn: (what: string) => `Déclaration retirée : ${what}`,
-      proofAdded: (what: string) =>
-        what ? `Preuve ajoutée : ${what}` : "Preuve ajoutée",
-      platformSaved: (name: string) => `Plateforme ${name} renseignée`,
-      platformVerified: (name: string, seen: string, match: string) =>
-        `${name} vérifiée : ${seen}, ${match}`,
-      anomaly: (kind: string) => `Anomalie signalée : ${kind}`,
-      anomalyState: (state: string) => `Anomalie passée à : ${state}`,
-      closureProposed: (kind: string) => `${kind} proposée`,
-      closureClosed: (kind: string) => `${kind} validée`,
-      closureRejected: (kind: string) => `${kind} refusée`,
-      closureReopened: "Suivi rouvert après clôture",
-      rejectedModules: (n: number, modules: string) =>
-        `V${n} du dossier refusée · à corriger dans : ${modules}`,
-      checksReset: (labels: string, reason: string) =>
-        `Contrôles à refaire (${reason}) : ${labels}`,
-      derogationGranted: (scope: string, due: string) =>
-        `Dérogation de la direction : ${scope}, à régler avant le ${due}`,
-      derogationRevoked: "Dérogation retirée",
-      submittedDerogated: (n: number) =>
-        `V${n} du dossier soumise à validation avec une dérogation de la direction`,
-      reserveLiftRequested: (label: string) => `Levée demandée : ${label}`,
-      reserveLifted: (label: string) => `Réserve levée : ${label}`,
-      reserveLiftRefused: (label: string) => `Levée refusée : ${label}`,
-      other: (kind: string) => kind,
-    },
-    note: (text: string) => `« ${text} »`,
   },
 };

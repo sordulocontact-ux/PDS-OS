@@ -541,15 +541,6 @@ export const masterPage = {
       notLegal:
         "Une répartition complète n'est pas une preuve de droits : seule sa validation l'atteste.",
     },
-    // Retour 47: every change, with before and after.
-    history: {
-      title: (count: number) => `Historique des modifications (${count})`,
-      added: (party: string, share: string) => `${party} ajouté à ${share}`,
-      updated: (before: string, after: string) => `${before} → ${after}`,
-      removed: (party: string, share: string) => `${party} retiré (${share})`,
-      validated: "Répartition validée",
-      by: (who: string) => (who ? ` · ${who}` : ""),
-    },
     // Retour 52: never a share added, only said.
     gaps: {
       title: "Cohérence à vérifier",
@@ -679,17 +670,6 @@ export const masterPage = {
     followedBy: (who: string) => `Suivie par ${who}`,
     proof: "Justificatif",
     noProof: "Aucun justificatif",
-    history: "Historique",
-    historyEmpty: "Aucun changement enregistré.",
-    historyLine: (field: string, before: string, after: string) =>
-      `${field} : ${before} → ${after}`,
-    historyFields: {
-      status: "Statut",
-      reference: "Référence",
-      declared_on: "Date",
-      third_party: "Suivi par",
-      proof_file_id: "Justificatif",
-    } as Record<string, string>,
     empty: "—",
     declare: "Qualifier",
     columns: {
@@ -789,48 +769,6 @@ export const masterPage = {
     emptyBody:
       "Glissez un fichier ici, ou cliquez pour le choisir : stems, pochette, contrats. Les fichiers audio successifs sont dans l'onglet Audio.",
     emptyBodyReadOnly: "Les fichiers du titre apparaîtront ici.",
-  },
-
-  activity: {
-    emptyBody: "Ce qui se passe autour de ce titre apparaîtra ici.",
-    sections: {
-      session: "la session",
-      track: "la piste",
-      contributor: "le contributeur",
-      split: "la part de",
-      declaration: "la déclaration",
-    },
-    fields: {
-      identity: "l'identité",
-      audio: "l'état audio",
-      rights: "les droits",
-    },
-    sentences: {
-      masterCreated: "Titre créé",
-      masterUpdated: (fields: string) => `Modification de ${fields}`,
-      masterUpdatedNoField: "Titre modifié",
-      itemAdded: (what: string) => `Ajout de ${what}`,
-      itemUpdated: (what: string) => `Modification de ${what}`,
-      itemRemoved: (what: string) => `Suppression de ${what}`,
-      fileAdded: (name: string) => `Fichier ${name} ajouté`,
-      fileRemoved: (name: string) => `Fichier ${name} supprimé`,
-      fileUpdated: (name: string) => `Fichier ${name} modifié`,
-      fileMoved: (name: string, category: string) =>
-        `Fichier ${name} classé dans ${category}`,
-      audioAdded: (state: string, name: string) =>
-        `Fichier audio ${name} ajouté (${state})`,
-      audioRemoved: (state: string, name: string) =>
-        `Fichier audio ${name} supprimé (${state})`,
-      audioStateSet: (state: string) => `État audio : ${state}`,
-      audioReclassified: (name: string, from: string, to: string) =>
-        `Fichier audio ${name} reclassé de ${from} en ${to}`,
-      audioApproved: (state: string, name: string) =>
-        `Version ${state} ${name} validée`,
-      audioChangesRequested: (state: string, name: string) =>
-        `Corrections demandées sur la version ${state} ${name}`,
-      projectCreated: (title: string) => `Projet ${title} créé avec ce titre`,
-      projectLinked: (title: string) => `Titre rattaché au projet ${title}`,
-    },
   },
 
   remove,

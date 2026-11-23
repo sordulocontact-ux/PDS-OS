@@ -118,16 +118,6 @@ export const transmission = {
     forPo: (subject: string, question: string, answer: string) =>
       `Précision demandée (${subject}) : ${question}\nRéponse de la direction : ${answer}`,
   },
-  history: {
-    title: "Historique des transmissions",
-    transmitted: (by: string, to: string) => `${by} → ${to}`,
-    decisions: {
-      pending: "En attente",
-      accepted: "Accepté",
-      refused: "Refusé",
-      clarification_requested: "Précision demandée",
-    },
-  },
 
   errors: {
     assigneeRequired: "Choisissez un chef de projet.",

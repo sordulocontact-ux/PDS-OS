@@ -87,7 +87,6 @@ export const catalog = {
       projects: "Projets",
       sessions: "Sessions",
       files: "Fichiers",
-      activity: "Activité",
       discography: "Discographie",
     },
     noProjects:

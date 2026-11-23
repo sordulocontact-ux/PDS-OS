@@ -111,11 +111,6 @@ export function RightsSection({
                   current={current}
                 />
               )}
-              {blocks.length > 1 && (
-                <p className="text-caption text-[color:var(--text-secondary)]">
-                  {t.history} : {blocks.filter((b) => b.superseded_at).length}
-                </p>
-              )}
             </StepSection>
           );
         })}

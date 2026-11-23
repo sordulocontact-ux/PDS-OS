@@ -15,7 +15,6 @@ import { activationJourney } from "./activation-journey";
 import { activationCreator } from "./activation-creator";
 import { dialogs } from "./dialogs";
 import { decisions } from "./decisions";
-import { artistActivity } from "./artist-activity";
 import { assistant } from "./assistant";
 import { assistantRecords } from "./assistant-records";
 import { auth } from "./auth";
@@ -63,7 +62,6 @@ import { legalDemarches } from "./legal-demarches";
 import { legalDocuments } from "./legal-documents";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
-import { legalHistory } from "./legal-history";
 import { invoices } from "./invoices";
 import { legalInvoices } from "./legal-invoices";
 import { signedReturns } from "./signed-returns";
@@ -128,7 +126,6 @@ import { productionPlace } from "./production-place";
 import { productionProducer } from "./production-producer";
 import { productionReady } from "./production-ready";
 import { productionShootExternal } from "./production-shoot-external";
-import { productionHistory } from "./production-history";
 import { productionProvider } from "./production-provider";
 import { productionNext } from "./production-next";
 import { productionImport } from "./production-import";
@@ -244,7 +241,6 @@ export const fr = {
   productionClosure,
   productionCorrections,
   productionProvider,
-  productionHistory,
   productionJourney,
   journey,
   moduleFrame,
@@ -295,7 +291,6 @@ export const fr = {
   legalDocuments,
   legalFormalities,
   legalForms,
-  legalHistory,
   invoices,
   legalInvoices,
   signedReturns,
@@ -322,7 +317,6 @@ export const fr = {
   titleReleasePlans,
   legalParticipations,
   masterSource,
-  artistActivity,
   masterPage,
   records,
   feedback,

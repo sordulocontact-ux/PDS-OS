@@ -1,5 +1,4 @@
 import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
-import { JournalSection } from "@/components/activations/journal-section";
 import { BlockersSection } from "@/components/activations/pilot/blockers-section";
 import { ClosureSection } from "@/components/activations/pilot/closure-section";
 import { DependenciesSection } from "@/components/activations/pilot/dependencies-section";
@@ -10,7 +9,6 @@ import { canWriteActivation } from "@/lib/activations/access";
 import { loadDependencyOptions } from "@/lib/activations/dependency-options";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
-import { loadActivationJournal } from "@/lib/activations/journal";
 import type { Access } from "@/lib/auth/access";
 import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { activations } from "@/lib/i18n/fr/activations";
@@ -26,7 +24,7 @@ const ta = fr.activations;
  * « Informations », folded (proto details.infos): type, lever, owner, due
  * date, proof and statistics computed — then what the ticket « pilotage »
  * keeps at hand: identity (« Modifier »), blockers, dependencies, every
- * proof with its checks, the closure and the journal.
+ * proof with its checks, the closure.
  */
 export async function Informations({
   fiche,
@@ -45,10 +43,9 @@ export async function Informations({
     canValidate,
     project,
   } = fiche;
-  const [options, files, journal] = await Promise.all([
+  const [options, files] = await Promise.all([
     canWrite ? loadDependencyOptions(project.id) : null,
     loadActivationFiles(a.id),
-    loadActivationJournal(a.id, members),
   ]);
   const scope = {
     organizationId: access.organizationId ?? "",
@@ -141,7 +138,6 @@ export async function Informations({
           canReopen={canReopen}
         />
       )}
-      <JournalSection entries={journal} />
     </Fold>
   );
 }

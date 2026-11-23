@@ -46,8 +46,7 @@ export function EvidenceSection({
   title?: string;
 }) {
   const nameOf = (id: string | null) =>
-    members.find((m) => m.personId === id)?.name ??
-    fr.activations.journal.system;
+    members.find((m) => m.personId === id)?.name ?? fr.activations.system;
   return (
     <ActivationSection
       id="evidence"

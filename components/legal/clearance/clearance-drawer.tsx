@@ -30,8 +30,7 @@ const fr = { dialogs, legal, legalClearance };
 /**
  * The drawer of a borrowing (the ticket's « drawer validé »), in three
  * moments — Demander, Négocier, Signer — the current one open with the one
- * action that ends it, as in the prototype of 07/10/2026. The exchanges and
- * the history fold under it; the one other way out: withdraw the element
+ * action that ends it, as in the prototype of 07/10/2026. The exchanges fold under it; the one other way out: withdraw the element
  * from the title (a refusal is recorded from their answer).
  */
 export function ClearanceDrawer({

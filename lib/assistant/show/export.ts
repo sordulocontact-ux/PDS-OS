@@ -28,7 +28,7 @@ const t = assistantShow.files;
 export function exportListTool(access: Access) {
   return tool({
     description:
-      "Prépare un fichier CSV (s'ouvre dans Excel ou Numbers) d'une liste entière, à télécharger sous la réponse : titres = titres du catalogue (artistes, état audio, ISRC, durée) ; artistes ; projets (type, étape actuelle, responsable, échéance) ; contacts = Réseau ; contrats ; fichiers = bibliothèque ; et pour la Finance (direction et Finance seulement) depenses, factures, encaissements, banque, historique. À appeler pour « exporte… », « la liste de… en Excel / CSV / tableur », « télécharger tous les… ».",
+      "Prépare un fichier CSV (s'ouvre dans Excel ou Numbers) d'une liste entière, à télécharger sous la réponse : titres = titres du catalogue (artistes, état audio, ISRC, durée) ; artistes ; projets (type, étape actuelle, responsable, échéance) ; contacts = Réseau ; contrats ; fichiers = bibliothèque ; et pour la Finance (direction et Finance seulement) depenses, factures, encaissements, banque. À appeler pour « exporte… », « la liste de… en Excel / CSV / tableur », « télécharger tous les… ».",
     inputSchema: z.object({ list: z.enum(EXPORT_LISTS) }),
     toModelOutput: modelOutput,
     execute: async ({ list }): Promise<ReadResult> => {

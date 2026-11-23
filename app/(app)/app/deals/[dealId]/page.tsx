@@ -101,7 +101,7 @@ export async function generateMetadata({
  * « Maintenant » when the reader has a gesture, PO's proposals, the next
  * action, then what the stage works on (DealTodoView); signed or abandoned,
  * the whole deal to read. « Informations » beside the title (DealInfoButton):
- * its facts, people and calls the stage does not show, its history (Sacha
+ * its facts, people and calls the stage does not show (Sacha
  * 23/11/2026, in place of the « Dossier » tab). Not found for whoever may
  * not read it.
  */
@@ -135,7 +135,6 @@ export default async function DealPage({
             negotiators={negotiators}
             contacts={contacts}
             calls={calls}
-            events={events}
           />
           {deal.canWrite && deal.stage !== "abandoned" && (
             <DealStageMenu deal={deal} name={dealName(deal)} />

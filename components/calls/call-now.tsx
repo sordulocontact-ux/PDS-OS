@@ -2,7 +2,6 @@ import { CallNowAction } from "@/components/calls/call-now-action";
 import { CallNowBlock } from "@/components/calls/call-now-block";
 import { CallProcessing } from "@/components/calls/call-processing";
 import { ClosureActions } from "@/components/calls/closure/closure-actions";
-import { ClosureHistory } from "@/components/calls/closure/closure-history";
 import { formatTime } from "@/lib/calls/format";
 import type { CallModule, CallStage, CallTodo } from "@/lib/calls/now";
 import type { CallPageData } from "@/lib/calls/page-data";
@@ -148,7 +147,6 @@ export function CallNow({
           guestEmails={call.guests.map((g) => g.email)}
           emailEnabled={data.emailEnabled}
         />
-        <ClosureHistory closures={data.closures} shares={data.shares} />
       </CallNowBlock>
     );
 

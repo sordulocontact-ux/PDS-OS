@@ -83,7 +83,7 @@ export const productionProducer = {
     open: "Changer qui produit",
     title: (deliverable: string) => `Changer qui produit · ${deliverable}`,
     description:
-      "Ce parcours n'est pas effacé : il reste dans l'historique avec ses décisions.",
+      "Ce parcours n'est pas effacé : ses décisions restent lisibles.",
     today: "Aujourd'hui",
     done: "Déjà fait",
     carried: "Repris dans le nouveau parcours",
@@ -101,11 +101,6 @@ export const productionProducer = {
       reason: "Dites pourquoi la production change.",
       same: "C'est déjà qui produit.",
     },
-    history: "Choix précédents",
-    historyLine: (who: string, day: string, by: string, reason: string) =>
-      `${who} · arrêté ${day} par ${by} : « ${reason} »`,
-    historyDone: (list: string) => `Déjà fait : ${list}`,
-    historyRevoked: "lien privé révoqué",
     carriedFact: "Repris du parcours précédent",
     stepDone: (title: string, summary: string | null) =>
       `${title} (${summary ?? "fait"})`,

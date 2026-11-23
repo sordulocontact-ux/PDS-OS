@@ -74,8 +74,7 @@ function ProposalsBar({
  * valider »): the value read — the one written before struck through —, its
  * state, who said it and where (the call opens its transcript), « Valider »,
  * « Modifier » and « Écarter » as icons (TermProposalActions); « Tout valider » writes them all as read. A term read twice
- * shows the latest. A card or a slot opens the term in a dialog; the history
- * is in the deal's journal.
+ * shows the latest. A card or a slot opens the term in a dialog.
  */
 export function DealTerms({
   dealId,

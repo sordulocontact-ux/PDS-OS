@@ -1,7 +1,6 @@
 import { Avatar } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { roles } from "@/lib/i18n/fr/roles";
-import { formatShortInstant } from "@/lib/utils/instant";
 
 import { PrivateLinks, type PrivateLinkRow } from "./private-links";
 
@@ -24,17 +23,9 @@ export type RoleRow = {
   action?: React.ReactNode;
 };
 
-export type RoleHistoryLine = {
-  id: string;
-  text: string;
-  who: string | null;
-  at: string;
-};
-
 export type RolesPanelProps = {
   roles: RoleRow[];
   links?: PrivateLinkRow[];
-  history?: RoleHistoryLine[];
   // Each person's page by project (lot 11, `ContactLinksSection`).
   personLinks?: React.ReactNode;
 };
@@ -42,12 +33,11 @@ export type RolesPanelProps = {
 /**
  * « Qui fait quoi » (proto BODY.org): each role with its kind (Exécute,
  * Coordonne, Valide) and holder, then the private links (the module's,
- * then each person's page by project), then the changes of role. Shown in a step or in `RolesDialog`.
+ * then each person's page by project), Shown in a step or in `RolesDialog`.
  */
 export function RolesPanel({
   roles,
   links = [],
-  history = [],
   personLinks,
 }: RolesPanelProps) {
   const count = new Map<string, number>();
@@ -101,23 +91,6 @@ export function RolesPanel({
         <p className="text-caption text-muted-foreground">
           {multi.map(([name, n]) => t.multi(name, n)).join(" ")}
         </p>
-      )}
-      {history.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h3 className="text-body-md font-semibold">{t.history}</h3>
-          <ul className="flex flex-col gap-1 text-caption">
-            {history.map((h) => (
-              <li key={h.id} className="flex gap-2">
-                <span aria-hidden className="text-muted-foreground">
-                  ↺
-                </span>
-                <span>
-                  {t.historyLine(h.text, h.who, formatShortInstant(h.at))}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
       )}
       {links.length > 0 ? (
         <PrivateLinks links={links}>{personLinks}</PrivateLinks>

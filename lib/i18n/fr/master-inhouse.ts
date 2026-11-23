@@ -22,8 +22,4 @@ export const masterInHouse = {
       "Les voix définitives sont attendues : le mix ne peut pas encore partir.",
     failed: "L'assignation n'a pas abouti. Réessayez.",
   },
-  history: {
-    assigned: (name: string, stage: "mix" | "mastering") =>
-      stage === "mix" ? `Mix assigné à ${name}` : `Mastering assigné à ${name}`,
-  },
 } as const;

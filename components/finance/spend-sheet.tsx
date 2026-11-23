@@ -1,4 +1,3 @@
-import { RecordHistory } from "@/components/finance/record-history";
 import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
 import Link from "next/link";
 
@@ -128,7 +127,6 @@ export function SpendSheet({
           })}
         </div>
       )}
-      <RecordHistory rowId={spend.id} />
     </>
   );
 }

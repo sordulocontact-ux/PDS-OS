@@ -7,7 +7,6 @@ import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-import { HistoryView } from "@/components/legal/history/history-view";
 import { ParticipationsPage } from "@/components/legal/participations/participations-page";
 import { AttachTitleStep } from "@/components/legal/steps/attach-title-step";
 import { ConfirmationStep } from "@/components/legal/steps/confirmation-step";
@@ -18,9 +17,6 @@ import { PlanStep } from "@/components/legal/steps/plan-step";
 import { ReadyStep } from "@/components/legal/steps/ready-step";
 import { TitleContractsStep } from "@/components/legal/steps/title-contracts-step";
 import { demarcheTarget, entryHref } from "@/lib/legal/demarches/where";
-import { isMonth } from "@/lib/legal/history/filter";
-import { loadLegalHistory } from "@/lib/legal/history/queries";
-import { isHistoryBranch } from "@/lib/legal/history/types";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRouteOf } from "@/lib/ui/legal-steps";
 
@@ -110,20 +106,5 @@ export default async function ProjectLegalPage({
   }
 
   const ctx = await legalJourneyContext(projectId);
-  if (route.key !== "history")
-    redirect(
-      demarcheTarget(projectId, ctx.demarches, route.key, one("emprunt")),
-    );
-  const history = await loadLegalHistory(ctx.project, ctx.access);
-  return (
-    <HistoryView
-      projectId={projectId}
-      history={history}
-      filter={{
-        branch: isHistoryBranch(query.branche) ? query.branche : null,
-        person: one("par"),
-        month: isMonth(query.mois) ? query.mois : null,
-      }}
-    />
-  );
+  redirect(demarcheTarget(projectId, ctx.demarches, route.key, one("emprunt")));
 }

@@ -78,7 +78,6 @@ export const legalClearance = {
       overview: "Vue d'ensemble",
       exchanges: "Échanges",
       documents: "Documents",
-      history: "Historique",
     },
     close: "Fermer",
     next: "Prochaine action",
@@ -177,7 +176,6 @@ export const legalClearance = {
       "Qualifiez d'abord l'usage : il dit quels droits demandent un contrat.",
     nothing: "Rien à sécuriser : aucun contrat n'est demandé.",
   },
-  history: { empty: "Aucun changement pour l'instant." },
   // The drawer in three moments (Sacha, 07/10/2026: « simplifie-la au max
   // et rends-la plus fluide »). The nine states of the ticket stay
   // underneath; each moment ends with one action.

@@ -1,4 +1,3 @@
-import { PlanHistory } from "@/components/plan/plan-history";
 import {
   PlanStepsTable,
   type StepGroup,
@@ -27,7 +26,7 @@ const GROUP: Record<CommonStatus, StepGroup> = {
 
 /**
  * The launched plan's steps on the overview (PROJ-UX-07): each one's real
- * state read from its workflow (an added step: its done mark), and the plan's history; who launched it, and when.
+ * state read from its workflow (an added step: its done mark); who launched it, and when.
  */
 export function PlanStepsSection({
   projectId,
@@ -113,7 +112,6 @@ export function PlanStepsSection({
           members={members}
           editable={editable}
         />
-        <PlanHistory events={plan.events} items={plan.items} />
       </div>
     </PageSection>
   );

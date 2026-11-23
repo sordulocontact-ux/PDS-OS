@@ -29,17 +29,4 @@ export const masterInvoice = {
     expected: "facture attendue",
     paid: "facture payée",
   },
-  history: {
-    requested: (name: string) => `Facture demandée à ${name} par PDS OS`,
-    requestedCause: "Master final validé",
-    received: (n: string, name: string, viaLink: boolean, amount: string) =>
-      `Facture n° ${n} de ${name} ${viaLink ? "reçue par son lien" : "ajoutée"} : ${amount}`,
-    receivedCause: "Facture demandée à la validation du master final",
-    ribChanged: (name: string) =>
-      `Nouveau RIB de ${name} reçu : à confirmer par la direction avant tout paiement`,
-    ribCause: (n: string) => `Facture n° ${n}`,
-    paid: (n: string, name: string, day: string, amount: string) =>
-      `Facture n° ${n} de ${name} payée le ${day} : ${amount}`,
-    paidCause: (at: string) => `Facture reçue le ${at}`,
-  },
 } as const;

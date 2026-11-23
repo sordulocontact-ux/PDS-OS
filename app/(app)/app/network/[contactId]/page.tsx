@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ContactActions } from "@/components/network/contact-actions";
 import { ContactCoordinates } from "@/components/network/contact-coordinates";
+import { ContactFiche } from "@/components/network/contact-fiche";
 import { ContactHistory } from "@/components/network/contact-history";
 import { ContactMarketing } from "@/components/network/contact-marketing";
 import { ContactPrivacy } from "@/components/network/contact-privacy";
@@ -31,6 +32,7 @@ import { todayInParis } from "@/lib/insights/dates";
 import { loadContactMarketing } from "@/lib/network/campaigns";
 import { loadContactHistory } from "@/lib/network/contact-history";
 import { loadContactProjects } from "@/lib/network/contact-projects";
+import { loadNetworkFiche } from "@/lib/network/fiche";
 import { loadContactPrivacy } from "@/lib/network/privacy-queries";
 import { getNetworkContact } from "@/lib/network/queries";
 import { rolesText } from "@/lib/network/types";
@@ -51,7 +53,7 @@ export default async function NetworkContactPage({
 }: PageProps<"/app/network/[contactId]">) {
   const access = await requireApproved();
   const { contactId } = await params;
-  const [contact, marketing, projects, history] = await Promise.all([
+  const [contact, marketing, projects, history, fiche] = await Promise.all([
     getNetworkContact(contactId),
     loadContactMarketing(contactId, {
       target: routes.projectActivationTarget,
@@ -59,6 +61,8 @@ export default async function NetworkContactPage({
     }),
     loadContactProjects(contactId),
     loadContactHistory(contactId),
+    // Its own fiche (null for who may not manage it).
+    loadNetworkFiche(contactId),
   ]);
   if (!contact) notFound();
   const t = fr.network;
@@ -77,7 +81,7 @@ export default async function NetworkContactPage({
   const sharing =
     canMakeShared || (isPrivate && !privacy.hidden)
       ? await loadContactPrivacy(access, contact.id)
-      : { deals: [], events: [] };
+      : { deals: [] };
 
   return (
     <SectionFrame
@@ -165,10 +169,21 @@ export default async function NetworkContactPage({
               canMakePrivate={canMakePrivate}
               canMakeShared={canMakeShared}
               deals={sharing.deals}
-              events={sharing.events}
             />
           )}
-          <ContactFiches projects={projects} />
+          <ContactFiches
+            projects={projects}
+            lead={
+              fiche &&
+              !contact.archived && (
+                <ContactFiche
+                  contactId={contact.id}
+                  fiche={fiche}
+                  canEmail={emailEnabled() && !!contact.email}
+                />
+              )
+            }
+          />
         </div>
       </div>
     </SectionFrame>

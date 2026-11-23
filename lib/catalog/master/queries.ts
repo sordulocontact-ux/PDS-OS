@@ -18,7 +18,6 @@ import {
   type MasterSession,
   type MasterSplit,
   type MasterTrack,
-  type Organism,
   type WorkItem,
 } from "@/lib/catalog/master/rules";
 import { FILE_BUCKETS, withDownloadName } from "@/lib/catalog/file-rules";
@@ -334,57 +333,4 @@ export async function listMasterDeclarations(
     })),
     error: false,
   };
-}
-
-export type DeclarationEvent = {
-  id: string;
-  organism: Organism;
-  at: string;
-  by: string | null;
-  // field → [before, after], as the database recorded them.
-  changes: Record<string, [unknown, unknown]>;
-};
-
-/**
- * Each change of a title's declarations, newest first (retour 62): who,
- * when, the old and the new value of status, reference, date, third party
- * and proof. Written by a trigger, never rewritten.
- */
-export async function listDeclarationEvents(
-  masterId: string,
-): Promise<DeclarationEvent[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("master_declaration_events")
-    .select("id, organism, changes, actor_person_id, created_at")
-    .eq("master_id", masterId)
-    .order("created_at", { ascending: false })
-    .limit(200);
-  if (error) {
-    failed("listDeclarationEvents", error.message);
-    return [];
-  }
-  const ids = [
-    ...new Set(
-      (data ?? []).flatMap((e) =>
-        e.actor_person_id ? [e.actor_person_id] : [],
-      ),
-    ),
-  ];
-  const { data: people } = ids.length
-    ? await supabase
-        .from("people")
-        .select("id, first_name, last_name")
-        .in("id", ids)
-    : { data: [] };
-  const nameOf = new Map(
-    (people ?? []).map((p) => [p.id, personName(p.first_name, p.last_name)]),
-  );
-  return (data ?? []).map((e) => ({
-    id: e.id,
-    organism: oneOf(ORGANISMS, e.organism, "sacem"),
-    at: e.created_at,
-    by: e.actor_person_id ? (nameOf.get(e.actor_person_id) ?? null) : null,
-    changes: (e.changes ?? {}) as Record<string, [unknown, unknown]>,
-  }));
 }

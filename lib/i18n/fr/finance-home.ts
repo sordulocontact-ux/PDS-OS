@@ -125,11 +125,6 @@ export const financeHome = {
  * right, the list still in sight. */
 export const financeSheet = {
   close: "Fermer",
-  history: "Historique",
-  historyEmpty: "Aucune modification enregistrée.",
-  historyLoading: "Lecture de l'historique…",
-  historyBy: (who: string, action: string) => `${who} · ${action}`,
-  historyFields: (fields: string) => `Champs : ${fields}`,
   someone: "PDS OS",
   actions: "Gestes",
   none: "—",

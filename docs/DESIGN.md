@@ -749,6 +749,7 @@ demander si l'utilisateur en a besoin **pour agir** ; sinon, elle ne s'écrit pa
 - **Pas de règle du code à l'écran** (« jamais un zéro », « additionnés seulement entre… ») : le code
   l'applique, l'écran montre le résultat.
 - **Dans le doute, retirer** : un texte manquant se rajoute sur demande ; un texte en trop fatigue tout le monde.
+- **Aucun historique à l'écran** (Ibé, 23/11/2026 : « ça ne sert à rien, on dirait que c'est pour des robots ») : ni section, ni page, ni bloc « Historique » / « Déjà fait » ; les journaux restent en base pour la frise, les notifications et PO. Restent à l'écran les listes qui sont des objets qu'on ouvre : versions de fichiers, conversations de PO, validations, fichiers à retélécharger.
 
 ### Sections d'une étape
 

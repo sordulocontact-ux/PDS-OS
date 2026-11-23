@@ -13,8 +13,6 @@ import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
-import { routes } from "@/lib/auth/redirects";
-import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import { legalJourney } from "@/lib/i18n/fr/legal-journey";
 import { legalParticipations } from "@/lib/i18n/fr/legal-participations";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
@@ -23,7 +21,7 @@ import { isLocked } from "@/lib/ui/journey";
 import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 
-const fr = { legalHistory, legalJourney, legalParticipations };
+const fr = { legalJourney, legalParticipations };
 
 /**
  * The frame of a Juridique step (docs/VISION-UX.md § 4, JourneyLayout): the
@@ -81,10 +79,6 @@ export async function LegalStepFrame({
           steps={spine}
           openKey={stepKey}
           foldable={layout?.foldable}
-          footer={{
-            href: routes.projectLegalStep(projectId, "history"),
-            label: fr.legalHistory.link,
-          }}
         />
       }
       head={

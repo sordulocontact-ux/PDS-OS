@@ -406,12 +406,6 @@ export const contracts = {
     changed: (version: number, what: string, by: string, day: string) =>
       `Changé depuis la v${version - 1} : ${what} (${by}, ${day})`,
   },
-  // « Déjà fait »: versions and journal, folded.
-  journal: {
-    title: "Déjà fait",
-    summary: (n: number) => `Versions et journal (${n})`,
-    empty: "Rien encore dans le journal.",
-  },
   errors: {
     invalid: "Vérifiez le titre, le type et les dates.",
     dates: "La fin ne peut pas précéder le début.",

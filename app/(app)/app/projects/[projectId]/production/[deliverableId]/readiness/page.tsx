@@ -22,7 +22,7 @@ import { ScheduleButton } from "@/components/production/schedule/schedule-button
 import { hourFr } from "@/lib/production/schedule/model";
 import { can } from "@/lib/auth/access";
 import { todayInParis } from "@/lib/insights/dates";
-import { formatDay, formatShortInstant } from "@/lib/utils/day";
+import { formatDay } from "@/lib/utils/day";
 import { createClient } from "@/lib/supabase/server";
 
 const r = fr.productionReady;
@@ -163,32 +163,6 @@ export default async function ProductionReadinessStepPage({
           rows={rows}
           actions={scheduleButton ? { date: scheduleButton } : undefined}
         />
-        {schedules.length > 1 && (
-          <section className="flex flex-col gap-1.5">
-            <h3 className="font-semibold">{s.history}</h3>
-            <ul className="flex flex-col gap-1">
-              {schedules.map((d) => (
-                <li key={d.at} className="flex gap-2">
-                  <span
-                    aria-hidden
-                    className="text-[color:var(--text-tertiary)]"
-                  >
-                    {d.replacedAt ? "↺" : "✓"}
-                  </span>
-                  <span>
-                    {s.historyLine(
-                      s.text(formatDay(d.date), hourFr(d.start), hourFr(d.end)),
-                      d.by ?? "—",
-                      formatShortInstant(d.at),
-                    )}
-                    {d.replacedAt &&
-                      ` · ${s.replaced(formatShortInstant(d.replacedAt))}`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
         {data.canOrganize && (
           <ReadyConfirmForm
             projectId={projectId}

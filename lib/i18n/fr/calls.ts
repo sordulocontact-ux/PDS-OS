@@ -493,14 +493,6 @@ export const calls = {
         `Compte rendu partagé, envoyé par e-mail à ${addresses.join(", ")} seulement : écrivez aux autres vous-même.`,
     },
     pdf: "Télécharger le PDF",
-    history: "Historique",
-    sharedLine: (
-      name: string,
-      date: string,
-      scope: string,
-      recipients: string,
-    ) =>
-      `${name} a partagé ${scope.toLowerCase()} le ${date} avec ${recipients}`,
     version: (n: number) => `Version ${n}`,
     report: {
       heading: (title: string, date: string) =>

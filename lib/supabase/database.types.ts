@@ -8755,6 +8755,24 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_form_secrets: {
+        Row: {
+          created_at: string
+          form_id: string
+          token_secret: string
+        }
+        Insert: {
+          created_at?: string
+          form_id: string
+          token_secret: string
+        }
+        Update: {
+          created_at?: string
+          form_id?: string
+          token_secret?: string
+        }
+        Relationships: []
+      }
       legal_form_submissions: {
         Row: {
           contact_id: string
@@ -8767,7 +8785,7 @@ export type Database = {
           organization_id: string
           other_role: string | null
           person: Json
-          project_id: string
+          project_id: string | null
           roles: string[]
         }
         Insert: {
@@ -8781,7 +8799,7 @@ export type Database = {
           organization_id: string
           other_role?: string | null
           person: Json
-          project_id: string
+          project_id: string | null
           roles: string[]
         }
         Update: {
@@ -8795,7 +8813,7 @@ export type Database = {
           organization_id?: string
           other_role?: string | null
           person?: Json
-          project_id?: string
+          project_id?: string | null
           roles?: string[]
         }
         Relationships: []
@@ -9048,7 +9066,7 @@ export type Database = {
           link_sealed: string | null
           organization_id: string
           prefill: Json
-          project_id: string
+          project_id: string | null
           revoked_at: string | null
           revoked_by: string | null
           revoked_reason: string | null
@@ -9075,7 +9093,7 @@ export type Database = {
           link_sealed?: string | null
           organization_id: string
           prefill?: Json
-          project_id: string
+          project_id: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           revoked_reason?: string | null
@@ -9102,7 +9120,7 @@ export type Database = {
           link_sealed?: string | null
           organization_id?: string
           prefill?: Json
-          project_id?: string
+          project_id?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           revoked_reason?: string | null
@@ -23192,6 +23210,22 @@ export type Database = {
       can_read_contact_details: {
         Args: { p_contact_id: string }
         Returns: boolean
+      }
+      can_manage_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: boolean
+      }
+      network_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: Json
+      }
+      renew_network_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: string
+      }
+      mark_network_contact_fiche_sent: {
+        Args: { p_contact_id: string }
+        Returns: undefined
       }
       link_deal_contact: {
         Args: { p_contact_id: string; p_deal_id: string }

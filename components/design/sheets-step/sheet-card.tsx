@@ -3,7 +3,6 @@ import { DesignateInline } from "@/components/design/people/designate-inline";
 import { SheetActions } from "@/components/design/sheets-step/sheet-actions";
 import { SheetFieldRow } from "@/components/design/sheets-step/sheet-field-row";
 import { SheetItemRow } from "@/components/design/sheets-step/sheet-item-row";
-import { StepHistory } from "@/components/shell/journey/step-history";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { FactRows } from "@/components/ui/fact-row";
 import { ReturnCallout } from "@/components/ui/return-callout";
@@ -22,7 +21,7 @@ const t = fr.designSteps.sheets;
  * One Fiche Livrable in the step (proto ficheCard), folded once
  * transferred: who is responsible (designated in place by the owner) and
  * who validates, its fields one by one, a series' elements, « Soumettre »,
- * the direction's decision, the transfer to the Production, its history.
+ * the direction's decision, the transfer to the Production.
  */
 export function SheetCard({
   ctx,
@@ -49,33 +48,6 @@ export function SheetCard({
     phase.phase === "transferred"
       ? { tone: SHEET_PHASE_TONE.transferred, label: t.phases.transferred }
       : { tone: SHEET_PHASE_TONE[phase.phase], label: t.phases[phase.phase] };
-  const history = [...facts.versions]
-    .filter((x) => x.status !== "withdrawn")
-    .reverse()
-    .flatMap((x) => [
-      {
-        key: `${x.id}-s`,
-        text: t.history.submitted(
-          x.number,
-          ctx.nameOf(x.submittedBy) || "—",
-          formatShortInstant(x.submittedAt),
-        ),
-      },
-      ...x.decisions.map((d, i) => ({
-        key: `${x.id}-${i}`,
-        text:
-          (d.decision === "approved"
-            ? t.history.approved
-            : d.decision === "rejected"
-              ? t.history.refused
-              : t.history.changes)(
-            x.number,
-            ctx.nameOf(d.decidedBy) || "—",
-            formatShortInstant(d.decidedAt),
-          ) + (d.comment ? t.history.comment(d.comment) : ""),
-      })),
-    ]);
-
   return (
     <VersionCard
       id={`sheet-${sheet.id}`}
@@ -260,7 +232,6 @@ export function SheetCard({
           )}
         </p>
       )}
-      <StepHistory items={history} />
     </VersionCard>
   );
 }

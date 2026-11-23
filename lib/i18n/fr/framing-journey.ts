@@ -290,6 +290,6 @@ export const framingJourney = {
     columnOf: (name: string) => `Colonne de ${name}`,
     pilotOf: (name: string) => `Pilote de ${name}`,
     details: "Détail de chaque étape, ajouts et revue",
-    stepsTitle: "Étapes du plan et historique",
+    stepsTitle: "Étapes du plan",
   },
 } as const;

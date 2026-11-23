@@ -214,13 +214,21 @@ export const FORM_FIELDS: readonly FormField[] = [
   { id: "territory", block: "publisher", type: "text", target: "contribution" },
 ];
 
-/** The fields shown for these roles: the common trunk, then their blocks. */
-export function fieldsFor(roles: readonly FormRole[]): FormField[] {
+/** The fields shown for these roles: the common trunk, then their blocks.
+ * `network`: a Réseau fiche (no project) asks only what is kept on the
+ * person, never a project's contribution. */
+export function fieldsFor(
+  roles: readonly FormRole[],
+  { network = false }: { network?: boolean } = {},
+): FormField[] {
   const blocks = new Set<FormBlock>([
     "common",
     ...roles.flatMap((role) => BLOCKS_OF[role]),
   ]);
-  return FORM_FIELDS.filter((field) => blocks.has(field.block));
+  return FORM_FIELDS.filter(
+    (field) =>
+      blocks.has(field.block) && (!network || field.target === "person"),
+  );
 }
 
 export const MAX_ANSWER = 2000;

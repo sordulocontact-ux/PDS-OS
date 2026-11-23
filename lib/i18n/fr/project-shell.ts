@@ -126,10 +126,4 @@ export const projectShell = {
     listLabel: "Vos actions dans ce projet",
     due: (day: string) => `avant le ${day}`,
   },
-  activity: {
-    empty: "Rien ne s'est encore passé dans ce projet.",
-    label: "Journal du projet",
-    // « Juridique · Contrat de Sami Kader signé · Lina Haddad 19/10, 11:16 »
-    project: "Projet",
-  },
 } as const;

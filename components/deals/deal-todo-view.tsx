@@ -118,9 +118,8 @@ function StageFrieze({ deal, events }: { deal: Deal; events: DealEvent[] }) {
  * only what its stage works on, its main work first (WORKS) — the calls
  * around the call, the terms (with PO's proposals in place of their terms)
  * while negotiating, the next action, the deal memo and the contract to
- * agree and sign; signed or abandoned, the whole deal to read. Its facts,
- * history and what the stage does not show are in « Informations »
- * (DealInfoButton).
+ * agree and sign; signed or abandoned, the whole deal to read. Its facts
+ * and what the stage does not show are in « Informations » (DealInfoButton).
  */
 export function DealTodoView({
   access,

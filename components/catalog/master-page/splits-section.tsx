@@ -14,7 +14,6 @@ import {
   type SplitKind,
 } from "@/lib/catalog/master/rules";
 import { masterPage } from "@/lib/i18n/fr/master-page";
-import type { SplitEvent } from "@/lib/catalog/master/split-queries";
 import {
   splitReviewState,
   type SplitGap,
@@ -30,11 +29,7 @@ import {
 } from "./item-dialogs";
 import { ConfirmedSplitNote } from "./confirmed-split-note";
 import { SplitReviewBar } from "./split-review-bar";
-import {
-  SplitGapsNote,
-  SplitHistory,
-  SplitValidationNote,
-} from "./split-review-notes";
+import { SplitGapsNote, SplitValidationNote } from "./split-review-notes";
 import { SplitForm } from "./split-form";
 import { SplitsTable } from "./splits-table";
 
@@ -51,7 +46,6 @@ export function SplitsSection({
   canEdit,
   confirmed = null,
   validations = {},
-  events = [],
   gaps = [],
   canValidate = false,
 }: {
@@ -61,7 +55,6 @@ export function SplitsSection({
   // The Juridique's confirmed publishing split, when there is one.
   confirmed?: ConfirmedSplit | null;
   validations?: Partial<Record<SplitKind, SplitValidation>>;
-  events?: SplitEvent[];
   gaps?: SplitGap[];
   // The legal side (manage_legal) validates a complete split.
   canValidate?: boolean;
@@ -138,7 +131,6 @@ export function SplitsSection({
             <p className="text-sm text-muted-foreground tabular-nums">
               {t.total(formatShare(total.total))}
             </p>
-            <SplitHistory events={events.filter((e) => e.kind === kind)} />
           </PageSection>
         );
       })}

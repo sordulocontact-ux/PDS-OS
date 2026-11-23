@@ -202,13 +202,9 @@ Principes :
   **Tableaux de fichiers** (Sacha, 05/11) : l'onglet Fichiers (`FilesList`, recherche comme partout) et
   la page Fichiers partagent leurs cellules (`file-cells.tsx`) ; une image que le navigateur montre est
   sa propre miniature (`previewUrl` : la copie de 320 px d'une pochette, sinon l'image signée).
-  **Activité**
-  (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
-  l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
-  moment de l'événement, historique antérieur reconstitué par la migration ; lecture filtrée
-  par RLS (contacts et contrats : `manage_catalog`, événements de projet : `can_see_project`).
-  Phrases et jours (heure de Paris) composés par le code (`lib/catalog/activity*.ts`,
-  `components/catalog/artist-page/activity/`).
+  **Activité** (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
+  l'artiste, contacts, fichiers, masters, projets liés, transmissions) ; il reste en base mais
+  **n'a plus d'écran** (onglet Activité retiré le 23/11/2026, `docs/DESIGN.md`) : PO le lit par `loadRecentActivity`.
 - Projet créé **avec son équipe** : le formulaire exige un chef de projet (le projet lui est
   transmis d'office, il accepte / refuse / demande une précision comme avant) et propose
   les directeurs créatifs (pastilles `PeoplePicker`). Ni étape, ni responsable avant
@@ -335,7 +331,7 @@ Activité `#activity`) · Audio (+ Sessions & pistes `#sessions`) · Crédits (+
 Distribution `#distribution`) · Fichiers. Les sections ci-dessous sont des blocs
 (`PageSection`) de ces pages, plus des onglets : onze onglets débordaient de la barre, et
 un second niveau (pastilles) aurait mélangé navigation et filtres. Les anciennes URL
-(`/sessions`, `/variants`, `/splits`, `/distribution`, `/activity`) redirigent vers le
+(`/sessions`, `/variants`, `/splits`, `/distribution`) redirigent vers le
 bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
 
 - **Vue d'ensemble** : tuiles cliquables (fichiers audio, variantes, sessions,
@@ -876,7 +872,7 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   positionnées (le `sticky` du parcours n'est pas un ancêtre de l'en-tête). Plus de
   `ProjectNowCard` dans ces cadres : l'attente se dit dans l'étape (`StepPanel` pose
   `StepWaiting auto`, effacé en CSS — `group/step` + `data-step-waiting=page` — quand la page
-  rend le sien). Les vues sans étape (Anomalies, Historique de la Distribution et du Master)
+  rend le sien). Les vues sans étape (Anomalies)
   gardent l'en-tête du module en pleine largeur.
 - **Parcours** (`lib/ui/journey.ts`). `JourneyStep` : statuts `done | current | waiting | rework |
   blocked | upcoming | obsolete` (calculés, jamais stockés), `roles` (`exec`/`coord`/`valid`/`owner`
@@ -2949,11 +2945,13 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   Distribution est `not_started` dans `loadWorkflowStates` dans le même cas.
 - **Travail / Validations** : `MyActions` sur `mine` / `validations` (`actor.kind === "validate"`). Les tâches
   libres (`tasks`) restent en base et dans le Travail global, plus dans le Travail du projet (VISION-UX § 3 : pas de
-  liste à part). L'historique des validations décidées est dans l'Activité (`loadRecentActivity`).
-- **Activité** (`loadProjectActivity`, `lib/overview/activity.ts`) : journal du projet (`loadRecentActivity`),
-  `marketing_events`, `production_events` (lien vers le livrable ; un contact du Réseau est dit « Quelqu'un »),
-  Juridique (`loadLegalHistory`, seulement avec `manage_legal`), `distribution_events` (`eventText`) ; triés par
-  date, 200 au plus. Le Master n'a pas encore de journal.
+  liste à part). Les validations décidées restent listées sur la page Validations.
+- **Plus d'Activité ni d'Historique à l'écran** (Ibé, 23/11/2026) : la page `/activity` du projet, l'onglet Activité
+  de l'artiste, le bloc Activité d'un titre, les pages `/master/history`, `/review/history`, `/release/history`,
+  `/legal/history` et `production/<livrable>/history`, « Déjà fait » (`StepHistory`) et les blocs d'historique
+  (plan, deal, call clos, enveloppe, fiches Finance, répartitions, déclarations, contrat, activations, contact
+  privé, plan de sortie d'un titre) sont supprimés avec leurs chargeurs. Les journaux (`*_events`) restent en base : ils
+  nourrissent la frise des étapes, les notifications et l'outil `recent_activity` de PO (`lib/insights/activity.ts`).
 
 Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
 (404 avant lancement), titre = nom de la section (`ProjectPageTitle` dans le layout,
@@ -3066,11 +3064,10 @@ date de sortie de la Stratégie, NDA : à décider).
   seulement par le responsable et la direction** (`can_read_project_contracts` :
   `is_project_owner` ou `view_all_projects`), écrits (ajout, modification, suppression)
   par **le responsable seul**, comme tout le projet lancé ; le DG lit sans écrire. Un
-  ajout apparaît dans le journal (« Document ajouté »). Dessous, sans être copiés dans la
+  ajout est tracé en base. Dessous, sans être copiés dans la
   bibliothèque : versions déposées en conception, puis audio des calls
   (téléchargement par URL signée de 15 min, session utilisateur) ; historique des
-  validations, en attente d'abord, décision sur la page de l'étape (`stageHref`) ; journal
-  reconstruit par `loadRecentActivity` (filtré par projet dans la requête), groupé par jour.
+  validations, en attente d'abord, décision sur la page de l'étape (`stageHref`).
 - **Budget** (`lib/budget/`) : enveloppe = `projects.budget_cents` (fixée à la création),
   dépassement écrit en toutes lettres. Le responsable seul écrit ; PO ne lit pas la table.
   Retours Marketing du 11/10/2026 (MKT-S1-11, 12, 15 ; migration `…20261012101101_budget_model`) :
@@ -3203,8 +3200,7 @@ date de sortie de la Stratégie, NDA : à décider).
   modale `RolesDialog` ouverte par `WhoDoesWhatButton` (bouton autonome destiné à `ModuleHeader`).
   Chaque module construit ses rôles : Production (`WhoDoesWhat` / `ProductionWhoDoesWhatButton` :
   responsable du projet et de production = Coordonne, société / réalisation / image = Exécute,
-  validation budgétaire = Valide ; historique = organisation et liens, `loadProductionHistory(…,
-  only)` ; le changement passe toujours par « Modifier l'organisation »), Conception
+  validation budgétaire = Valide ; plus de journal de rôles à l'écran (23/11/2026) ; le changement passe toujours par « Modifier l'organisation »), Conception
   (`DesignRoles` / `DesignWhoDoesWhatButton` : responsable du projet, responsable, validateurs, avec
   « Changer » = les sélecteurs existants en `compact` ; délégations et gouvernance restent dessous).
 - **Liens privés** : n° du lien (compte des liens du contact sur la fiche), créé le … par …
@@ -3624,8 +3620,8 @@ valeur ».
 - **Exports** (`lib/finance/exports.ts`, route `/api/finance/export?type=depenses|factures|encaissements|banque|
   historique`, `read_finance`, lu avec la session) : CSV « ; » avec BOM, montants à la virgule, pour
   l'expert-comptable. Page `/app/finance/exports` : un téléchargement par sujet.
-- **Historique** (`lib/finance/history.ts`) : les 100 dernières lignes de `finance_events` (qui, quand, quelle
-  donnée, quels champs) sur la page Exports, et en entier dans l'export « historique ».
+- **Historique** : `finance_events` reste écrit par trigger mais n'est plus montré ni exporté (23/11/2026) ; la page
+  Exports ne propose que les quatre CSV comptables.
 - **Accueil** (test UX du 15/11/2026) : `finance_urgent_count()` (SQL, `security definer`, 0 sans
   `read_finance`) compte les enveloppes dépassées (projets, centres de coût), les entrées échues non reçues et
   les dépenses facturées échues non payées, sans lire toute la trésorerie ; `HomeSummary` l'ajoute au résumé
@@ -4009,6 +4005,27 @@ rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
   jours. Profil privé, absent ou refus de la plateforme : pas de photo, jamais une erreur. Un contact
   existant prend la sienne au prochain « Modifier › Enregistrer ». Fichiers d'un contact supprimé non
   effacés (politique Storage à faire).
+- **Fiche de renseignements du Réseau** (Sacha, 23/11/2026, `…20261123210101_network_contact_fiche.sql`,
+  `lib/network/fiche.ts`, `fiche-actions.ts`, `components/network/contact-fiche*.tsx`) : chaque contact,
+  personne ou structure, a une fiche **sans projet** (`legal_forms.project_id` nul), créée par la base
+  (trigger `z_issue_fiche` AFTER INSERT sur `network_contacts`, donc quel que soit le chemin de création ;
+  contacts existants repris par la migration). Le jeton n'est gardé que haché (`token_hash`, ce que lit
+  `/f/<jeton>`) et chiffré avec la clé Vault des liens privés (`master_link_key`, comme
+  `project_contact_links`) dans `legal_form_secrets`, table lue par aucun rôle : c'est ce qui permet de la
+  créer en SQL, sans `LEGAL_LINK_KEY`. Elle n'expire pas (`expires_at` = `infinity`) ; « Nouveau lien »
+  (`renew_network_contact_fiche`) révoque le lien ouvert et en crée un, aussi pour redemander une mise à jour
+  une fois remplie. Lue (`network_contact_fiche`, qui la recrée si elle manque) et gérée par qui a
+  `manage_network` **et** `manage_legal` ou `manage_contracts` **et** lit les coordonnées du contact
+  (`can_manage_contact_fiche`, aussi la politique RLS des fiches et envois sans projet). Page publique : pas
+  de projet ni de contribution (`fieldsFor(roles, { network: true })`, textes « Réseau »), rôles à cocher
+  tirés des métiers du Réseau et une structure partant en société (`network_fiche_prefill`, lu à
+  l'ouverture) ; les réponses vont dans `contact_legal_details` par le même `submit_legal_form`. Sur la page
+  du contact, en tête de « Fiche de renseignements » : état (Pas encore envoyée, Envoyée, Ouverte, Remplie),
+  « Copier le lien » (copié = marqué envoyé), « Envoyer par e-mail » (`emailLink`, adresse lue avec la
+  session) et « Nouveau lien ». Reçue, elle ne notifie personne (pas de projet à ouvrir) et reste « à
+  vérifier » (`action_required`) : pas de validation ni de complément depuis le Réseau, une correction
+  d'une valeur déjà connue n'est donc pas appliquée. Supprimer le contact supprime ses fiches sans projet
+  (trigger `a_drop_fiches`) ; une fiche de projet le garde « utilisé ».
 - **Personnes et organisations** (ticket « Retour PO / Réseau » du 11/10/2026 et retour
   Notion « Restructuration et enrichissement de la page Réseau » du 10/10,
   `…20261011200101_network_kinds_relations.sql`, test `network-kinds-relations.test.sql`) :

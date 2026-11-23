@@ -1,6 +1,7 @@
 import { ExternalTeamTable } from "@/components/project-work/external-team-table";
 import { TeamWorkloadTable } from "@/components/project-work/team-workload-table";
-import { AssignmentHistory } from "@/components/projects/assignment-history";
+import { ClarificationList } from "@/components/projects/clarification-list";
+import { clarificationsOf } from "@/lib/projects/clarifications";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
@@ -67,8 +68,7 @@ export default async function ProjectTeamPage({
         <ExternalTeamTable projectId={project.id} members={external} />
       </PageSection>
 
-      {/* Who handed the project to whom: off the overview (proto). */}
-      <AssignmentHistory assignments={project.assignments} />
+      <ClarificationList items={clarificationsOf(project.assignments)} />
     </div>
   );
 }

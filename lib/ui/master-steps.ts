@@ -8,8 +8,7 @@ const fr = { masterWorkflow };
 // Brief Mix/Master → Mix (versions, feedback, validation) → Mastering →
 // Master final. Its own, never the project's 7 steps. Each step has its URL
 // (/master/source, /brief, /mix, /mastering, /final); /master opens the step
-// that waits for the person (proto « Projet complet »), /master/history the
-// Historique du master.
+// that waits for the person (proto « Projet complet »).
 export const MASTER_STEP_KEYS = [
   "source",
   "brief",
@@ -23,10 +22,8 @@ export type MasterStepKey = (typeof MASTER_STEP_KEYS)[number];
 export const isMasterStepKey = (value: string): value is MasterStepKey =>
   (MASTER_STEP_KEYS as readonly string[]).includes(value);
 
-export const masterStepHref = (
-  projectId: string,
-  key: MasterStepKey | "history",
-) => routes.projectMasterStep(projectId, key);
+export const masterStepHref = (projectId: string, key: MasterStepKey) =>
+  routes.projectMasterStep(projectId, key);
 
 // What the person sees (Sacha, 11/10/2026, after the four milestones of
 // 08/10 hid the Brief under Préparation): the five steps of the ticket's

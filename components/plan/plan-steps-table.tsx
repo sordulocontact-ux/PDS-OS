@@ -67,8 +67,7 @@ const VIEWS = ["all", "active", "next", "blocked", "done"] as const;
 /**
  * The launched plan, step by step (PROJ-UX-07): real state, pilot,
  * executor, due date, dependencies, filtered by
- * state. The owner changes, adds, moves or marks an added step done; every
- * change goes to the plan's history.
+ * state. The owner changes, adds, moves or marks an added step done.
  */
 export function PlanStepsTable({
   projectId,

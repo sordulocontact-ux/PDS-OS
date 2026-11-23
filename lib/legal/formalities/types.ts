@@ -56,13 +56,6 @@ export type FormalityView = {
   }>;
   // The viewer may sign PDS Éditions' line: the direction (validate).
   canSignHouse: boolean;
-  history: Array<{
-    id: string;
-    kind: string;
-    note: string | null;
-    at: string;
-    by: string;
-  }>;
 };
 
 export type TitleFormality = {

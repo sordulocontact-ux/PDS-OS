@@ -22,17 +22,13 @@ type Owner = {
 /**
  * Who answers for a démarche and by when, as the Master shows a fact
  * (`FactRow change`): one row, « Changer » opens the delegation's form in
- * place under it (no modal), « Modifié par … » once someone changed it,
- * « Échéance dépassée » when it is late.
+ * place under it (no modal), « Échéance dépassée » when it is late.
  */
 export function DemarcheOwner({
   owner,
-  changedBy,
   overdue,
 }: {
   owner: Owner;
-  // The last person who changed the responsible or the date (plan journal).
-  changedBy: string | null;
   overdue: boolean;
 }) {
   const t = fr.legalDemarches.launched;
@@ -48,7 +44,6 @@ export function DemarcheOwner({
         label={fr.legalDemarches.responsible}
         value={value}
         source={fr.legal.plan.title}
-        changedBy={changedBy}
         state={overdue ? { tone: "danger", label: t.state.overdue } : null}
         change={
           owner.people.length > 0

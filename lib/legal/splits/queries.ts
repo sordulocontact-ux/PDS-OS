@@ -77,7 +77,6 @@ export type TitleSplit = {
   // The version people answer (or answered), and a draft being prepared.
   active: SplitVersionView | null;
   draft: SplitVersionView | null;
-  history: SplitVersionView[];
   // What the editor starts from when nothing is written yet: the split of
   // the title's page when it makes 100 % without a publisher, else the
   // creators credited on the title, with no part (PO never proposes one).
@@ -272,7 +271,6 @@ export async function loadSplits(
       title: master.title,
       active,
       draft,
-      history: theirs.filter((v) => v.status === "superseded"),
       proposal: fromTitle
         ? titleLines.map((line) => ({
             id: null,

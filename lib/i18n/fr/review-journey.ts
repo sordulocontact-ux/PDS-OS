@@ -12,31 +12,6 @@ export const reviewJourney = {
     prereqs.includes(" et ")
       ? `S'ouvre quand ${prereqs} sont faits.`
       : `S'ouvre quand ${prereqs} est fait.`,
-  history: {
-    link: "Historique",
-    title: "Historique du suivi & bilan",
-    empty: "Rien n'a encore été fait sur le suivi & bilan.",
-    generated: (v: number) => `Bilan Marketing V${v} généré`,
-    submitted: (v: number, to: string) => `Bilan V${v} soumis à ${to}`,
-    decided: (v: number, decision: string) => `Bilan V${v} : ${decision}`,
-    decisions: {
-      approved_provisional: "bilan provisoire approuvé",
-      changes_requested: "corrections demandées",
-      postponed: "validation reportée",
-    },
-    quote: (text: string) => ` · « ${text} »`,
-    arbitrated: (text: string, decision: string) =>
-      `Réserve « ${text} » : ${decision}`,
-    lifted: (text: string) => `Réserve levée : « ${text} »`,
-    requested: "Clôture du Marketing demandée",
-    closed: (withReserves: boolean | null) =>
-      withReserves === null
-        ? "Marketing clôturé"
-        : `Marketing clôturé ${withReserves ? "avec" : "sans"} réserve`,
-    closureChanges: "Clôture : corrections demandées",
-    closurePostponed: "Clôture : décision reportée",
-    reopened: "Marketing rouvert",
-  },
   roles: {
     owner: "Responsable du projet",
     ownerWhat:

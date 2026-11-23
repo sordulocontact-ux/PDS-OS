@@ -48,22 +48,10 @@ export const artistBudget = {
   lines: {
     title: "Dépenses",
   },
-  history: {
-    title: "Historique",
-    closedLabel: (period: string, amount: string, spent: string) =>
+  closed: {
+    title: "Enveloppes closes",
+    line: (period: string, amount: string, spent: string) =>
       `${period} · ${amount} · ${spent} dépensés`,
-    events: {
-      opened: (who: string, amount: string) =>
-        `${who} a ouvert l'enveloppe (${amount}).`,
-      changed: (who: string, before: string | null, amount: string) =>
-        before && before !== amount
-          ? `${who} a modifié l'enveloppe (${before} → ${amount}).`
-          : `${who} a modifié la répartition de l'enveloppe.`,
-      closed: (who: string) =>
-        `${who} a clos l'enveloppe en ouvrant la suivante.`,
-    },
-    someone: "Quelqu'un",
-    empty: "Aucun changement pour l'instant.",
   },
   form: {
     newTitle: "Ouvrir l'enveloppe",
@@ -72,7 +60,7 @@ export const artistBudget = {
     description:
       "Un montant, une période et sa répartition par poste. Ce qui n'est donné à aucun poste reste « non réparti ».",
     reopenDescription:
-      "L'enveloppe en cours sera close la veille du premier jour et gardée dans l'historique.",
+      "L'enveloppe en cours sera close la veille du premier jour et gardée parmi les enveloppes closes.",
     amount: "Montant de l'enveloppe HT (€)",
     amountMissing: "Indiquez le montant, par exemple 60000.",
     startsOn: "Premier jour",

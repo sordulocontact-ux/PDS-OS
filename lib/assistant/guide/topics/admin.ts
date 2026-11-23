@@ -151,7 +151,7 @@ export const adminTopics: GuideTopic[] = [
       "Dans un projet lancé, seul son responsable écrit. La direction lit et valide.",
       "Un poste n'est pas une permission : un poste donne un ensemble de droits, et c'est ce droit que l'application vérifie.",
       "Les trois postes sont Directeur général, Chef de projet et Directeur créatif. Un projet n'est visible que de la direction, de son responsable, de la personne à qui il est transmis, de sa direction artistique, des ingénieurs internes de son Master et de son équipe de production.",
-      "Seule la direction archive, restaure ou supprime un artiste, un titre, un projet ou un contact. Archiver garde tout l'historique ; supprimer est définitif et refusé tant que l'élément est utilisé ailleurs.",
+      "Seule la direction archive, restaure ou supprime un artiste, un titre, un projet ou un contact. Archiver garde tout ; supprimer est définitif et refusé tant que l'élément est utilisé ailleurs.",
       "Les états (en cours, en retard, terminé), compteurs, dates et calculs sont toujours faits par le code, jamais par PO.",
       "PO peut préparer un brouillon qui ouvre le vrai formulaire pré-rempli : c'est toujours une personne qui enregistre. PO ne valide, ne signe et ne transmet jamais à la place de quelqu'un.",
       "Le thème de l'interface peut être Clair, Sombre ou suivre l'ordinateur.",
@@ -163,7 +163,7 @@ export const adminTopics: GuideTopic[] = [
       },
       {
         q: "Peut-on supprimer un projet ?",
-        a: "Seule la direction, avec confirmation, et c'est définitif : le projet part avec tout son contenu. L'archivage garde l'historique.",
+        a: "Seule la direction, avec confirmation, et c'est définitif : le projet part avec tout son contenu. L'archivage garde tout.",
       },
     ],
     permissions: ["archive_records"],

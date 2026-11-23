@@ -1,28 +1,20 @@
 import { IconDownload } from "@/components/icons";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import { HistoryList } from "@/components/finance/history-list";
 import { buttonVariants } from "@/components/ui/button";
 import { MetricCard } from "@/components/ui/metric-card";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { EXPORT_TYPES } from "@/lib/finance/exports";
-import { loadHistory } from "@/lib/finance/history";
 import { financeExports as t } from "@/lib/i18n/fr/finance-exports";
-import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: t.title };
 
 /**
- * Finance › Exports (Ibé's ticket, « export comptable » and « historique »,
- * lot 7): one CSV per subject for the accountant, and the changes of
- * every Finance datum (who, when, what, which fields), kept by trigger, the
- * last 20 first and « Voir plus ».
+ * Finance › Exports (Ibé's ticket, « export comptable », lot 7): one CSV per
+ * subject for the accountant.
  */
 export default async function FinanceExportsPage() {
-  const [, history] = await allInOrder([
-    requirePermission("read_finance"),
-    loadHistory(),
-  ]);
+  await requirePermission("read_finance");
 
   return (
     <FinanceFrame section="exports">
@@ -51,9 +43,6 @@ export default async function FinanceExportsPage() {
           </MetricCard>
         ))}
       </div>
-      <MetricCard title={t.history.title} count={history.total}>
-        <HistoryList first={history.entries} total={history.total} />
-      </MetricCard>
     </FinanceFrame>
   );
 }

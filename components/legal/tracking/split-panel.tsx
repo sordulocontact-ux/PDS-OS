@@ -1,18 +1,13 @@
 import { ProposeSplitButton } from "@/components/legal/splits/split-actions";
 import { SplitLines } from "@/components/legal/splits/split-lines";
 import { SplitLinks } from "@/components/legal/splits/split-links";
-import { SplitVersionChanges } from "@/components/legal/splits/split-version-changes";
 import { NextCard } from "@/components/ui/next-card";
 import { SplitEditorInline } from "@/components/legal/tracking/split-editor-inline";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legal } from "@/lib/i18n/fr/legal";
 import { legalSplits } from "@/lib/i18n/fr/legal-splits";
-import type {
-  SplitLine,
-  SplitVersionView,
-  TitleSplit,
-} from "@/lib/legal/splits/queries";
+import type { SplitLine, TitleSplit } from "@/lib/legal/splits/queries";
 
 const fr = { legal, legalSplits };
 
@@ -36,17 +31,6 @@ export function SplitPanel({
   const t = fr.legal.panels.split;
   const page = fr.legalSplits.page;
   const { active, draft, hints } = split;
-  // JUR-29: a version against the one it follows.
-  const before = (v: SplitVersionView) =>
-    [...(active ? [active] : []), ...split.history]
-      .filter((x) => x.version < v.version)
-      .sort((a, b) => b.version - a.version)[0];
-  const changes = (v: SplitVersionView) => {
-    const previous = before(v);
-    return previous ? (
-      <SplitVersionChanges previous={previous} version={v} />
-    ) : null;
-  };
   const editor = (
     initial: SplitLine[],
     version: number | null,
@@ -73,7 +57,6 @@ export function SplitPanel({
   if (draft)
     return (
       <NextCard kind="act" label={t.next} title={t.send}>
-        {changes(draft)}
         <SplitLines
           projectId={projectId}
           title={split.title}
@@ -128,7 +111,6 @@ export function SplitPanel({
   );
   const lines = (
     <>
-      {changes(active)}
       <SplitLines
         projectId={projectId}
         title={split.title}

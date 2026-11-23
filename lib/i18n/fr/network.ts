@@ -307,6 +307,37 @@ export const network = {
       "Ses réponses complètent cette fiche : on ne lui redemande que ce qui manque.",
     ficheDone: "Rendue",
     ficheTodo: "Envoyée, pas encore rendue",
+    // Its own fiche, without a project (Sacha, 23/11/2026).
+    networkFiche: {
+      label: "Sa fiche",
+      states: {
+        link_generated: "Pas encore envoyée",
+        sent: "Envoyée",
+        opened: "Ouverte",
+        filled: "Remplie",
+      },
+      on: (state: string, date: string) => `${state} le ${date}`,
+      copy: "Copier le lien",
+      copied: "Lien copié",
+      email: "Envoyer par e-mail",
+      renew: "Nouveau lien",
+      renewHint: "L'ancien lien ne marchera plus.",
+      renewed: "Nouveau lien prêt, l'ancien ne marche plus",
+      emailed: {
+        sent: (name: string) => `Fiche envoyée par e-mail à ${name}`,
+        sentHere: "Fiche envoyée par e-mail",
+        failed:
+          "L'e-mail n'est pas parti : copiez le lien et envoyez-le vous-même.",
+        noAddress: "Ce contact n'a pas d'adresse e-mail.",
+        subject: "Votre fiche de renseignements",
+        body: "Pour travailler avec vous, nous avons besoin de quelques informations vous concernant : coordonnées, informations légales et de facturation. Cela prend quelques minutes, sans compte.",
+        open: "Remplir votre fiche :",
+      },
+      errors: {
+        forbidden: "Vous ne pouvez pas gérer la fiche de ce contact.",
+        failed: "La fiche n'a pas pu être mise à jour. Réessayez.",
+      },
+    },
     projectsEmpty: "Rien dans un projet que vous pouvez voir.",
     projectAwaited: (n: number) => `${n} en attente`,
     invitedToCall: "Invité à un call",
