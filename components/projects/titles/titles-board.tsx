@@ -161,16 +161,21 @@ const masterHrefOf = (title: RecapTitle, links: BoardLinks) =>
 // The columns, as wide as their facts need, never squeezed (`min-w-*`):
 // the table is the Excel's width (Maël 22/11/2026: « toutes les colonnes de
 // la feuille Excel »), wider than the page, and scrolls inside its frame,
-// the page never does. Artiste stays on the left (`sticky`) while it
-// scrolls, on its own ground so that nothing shows through, above the pills
-// and buttons of the other cells (`z-20` > their `z-10`); its column rule
-// drawn by the cell itself (a 1 px shadow in place of its right border, which
-// a collapsed table leaves behind), so it follows the cell. The cells wrap
-// (their pills too, recap-facts). Literal classes: Tailwind only generates
-// what it reads in full.
+// the page never does. Artiste stays on the left and « ⋯ » on the right
+// (`sticky`, Maël 23/11/2026) while it scrolls, on their own ground so that
+// nothing shows through, above the pills and buttons of the other cells
+// (`z-20` > their `z-10`); their column rule drawn by the cell itself
+// (`before:`, a border staying behind in a collapsed table, which paints no
+// box-shadow on a cell either), so it follows the cell; `after:` is the
+// shadow of what passes under, shown by SCROLL_SHADOWS on the cells marked
+// `scroll-start` / `scroll-end`. The cells wrap (their pills
+// too, recap-facts). Literal classes: Tailwind only generates what it reads
+// in full.
 const COLUMN = {
   artist:
-    "sticky left-0 z-20 w-44 min-w-44 bg-card not-last:border-r-0 shadow-[1px_0_0_0_var(--border-hairline)] in-[.section-card_.table-flat]:shadow-none @min-[624px]:w-56 @min-[624px]:min-w-56",
+    "scroll-start sticky left-0 z-20 w-44 min-w-44 bg-card not-last:border-r-0 before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-3 after:bg-[linear-gradient(to_right,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_right,rgb(0_0_0/0.4),transparent)] @min-[624px]:w-56 @min-[624px]:min-w-56",
+  actions:
+    "scroll-end sticky right-0 z-20 bg-card align-top py-2 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:right-full after:w-3 after:bg-[linear-gradient(to_left,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_left,rgb(0_0_0/0.4),transparent)]",
   status: "w-32 min-w-32",
   contact: "w-52 min-w-52",
   accord: "w-44 min-w-44",
@@ -187,14 +192,21 @@ const COLUMN = {
 // (its title, its waivers), its pills stay beside its first one.
 const CELL = "align-top whitespace-normal";
 
-// The header's Artiste on the header's band: the card's ground under the
-// band's tint (translucent in the dark theme, it would let the columns
-// scrolled under it show through); bare in a section card, as the band.
-const ARTIST_HEAD =
+// The header's sticky cells (Artiste, « ⋯ ») on the header's band: the
+// card's ground under the band's tint (translucent in the dark theme, it
+// would let the columns scrolled under it show through); bare in a section
+// card, as the band.
+const STICKY_HEAD =
   "[background-image:linear-gradient(var(--surface-soft),var(--surface-soft))] in-[.section-card_.table-flat]:[background-image:none]";
 
-// The edge with more columns to see fades out (useScrollFade on the
-// table's own scrolling box); never the left one, where Artiste stays.
+// What passes under a sticky column casts a light shadow on its inner edge
+// (useScrollFade's `data-fade` on the table's own scrolling box: start,
+// end or both); nothing to scroll, no shadow.
+const SCROLL_SHADOWS =
+  "[&_[data-fade=start]_.scroll-start]:after:opacity-100 [&_[data-fade=both]_.scroll-start]:after:opacity-100 [&_[data-fade=end]_.scroll-end]:after:opacity-100 [&_[data-fade=both]_.scroll-end]:after:opacity-100";
+
+// Without « ⋯ » (a reader), the right edge fades out while columns remain
+// there.
 const END_FADE =
   "[&_[data-slot=table-container][data-fade=both]]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] [&_[data-slot=table-container][data-fade=end]]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)]";
 
@@ -379,9 +391,9 @@ export function TitlesBoard({
       {groups.length === 0 ? (
         <EmptyNote>{r.filteredEmpty}</EmptyNote>
       ) : (
-        <ScrollingTable>
+        <ScrollingTable fadeEnd={!columns.actions}>
           <DataTableHeader>
-            <DataTableHead className={cn(COLUMN.artist, ARTIST_HEAD)}>
+            <DataTableHead className={cn(COLUMN.artist, STICKY_HEAD)}>
               {r.columns.artist}
             </DataTableHead>
             <DataTableHead className={COLUMN.status}>
@@ -425,7 +437,10 @@ export function TitlesBoard({
               {r.columns.beatmaker}
             </DataTableHead>
             {columns.actions && (
-              <DataTableActionsHead label={t.columns.actions} />
+              <DataTableActionsHead
+                label={t.columns.actions}
+                className={cn(COLUMN.actions, STICKY_HEAD)}
+              />
             )}
           </DataTableHeader>
           <DataTableBody>
@@ -450,11 +465,19 @@ export function TitlesBoard({
 }
 
 /** The table in its frame, scrolling sideways when it is wider (the
- * shadcn Table's own box, `data-slot="table-container"`), its right edge
- * fading while columns are hidden there. Mounted with the table, so the
- * fade follows each table shown. `isolate`: what stands above a cell
- * (`relative z-10`, the sticky Artiste) stays inside the table. */
-function ScrollingTable({ children }: { children: ReactNode }) {
+ * shadcn Table's own box, `data-slot="table-container"`): what passes
+ * under Artiste or « ⋯ » casts a light shadow on their edge; without « ⋯ »
+ * (`fadeEnd`), the right edge fades while columns are hidden there. Mounted
+ * with the table, so that it follows each table shown. `isolate`: what
+ * stands above a cell (`relative z-10`, the sticky columns) stays inside
+ * the table. */
+function ScrollingTable({
+  fadeEnd,
+  children,
+}: {
+  fadeEnd: boolean;
+  children: ReactNode;
+}) {
   const box = useRef<HTMLElement | null>(null);
   useScrollFade(box, "x");
   return (
@@ -464,7 +487,7 @@ function ScrollingTable({ children }: { children: ReactNode }) {
           node?.querySelector<HTMLElement>('[data-slot="table-container"]') ??
           null;
       }}
-      className={cn("@container isolate", END_FADE)}
+      className={cn("@container isolate", SCROLL_SHADOWS, fadeEnd && END_FADE)}
     >
       <DataTable>{children}</DataTable>
     </div>
@@ -644,7 +667,7 @@ function TitleRows(props: TitleRowsProps) {
         </DataTableCell>
         {titleCells}
         {columns.actions && (
-          <DataTableActionsCell>
+          <DataTableActionsCell className={COLUMN.actions}>
             <RowActions label={t.menu(label)} actions={titleActions} />
             {dialogs}
           </DataTableActionsCell>
@@ -926,7 +949,7 @@ function ArtistRow({
       )}
       {titleCells}
       {columns.actions && (
-        <DataTableActionsCell>
+        <DataTableActionsCell className={COLUMN.actions}>
           <RowMenu
             projectId={projectId}
             participation={participation}
