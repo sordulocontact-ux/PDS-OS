@@ -19,8 +19,12 @@ const linkClass =
  * catalog artist (a person), its notes. */
 export function ContactCoordinates({
   contact,
+  fiche,
 }: {
   contact: NetworkContactDetail;
+  // Its own fiche de renseignements, the first line (Sacha 23/11/2026:
+  // « dans coordonnées ou plus haut », Figma node 317:5819).
+  fiche?: ReactNode;
 }) {
   const p = fr.network.page;
   const accounts = socialLinksOf(contact);
@@ -41,6 +45,8 @@ export function ContactCoordinates({
       <FactList
         emptyLabel={p.none}
         facts={[
+          // Its fiche first (Figma node 317:5819).
+          ...(fiche ? [{ label: p.networkFiche.label, value: fiche }] : []),
           ...privateFact({
             label: p.email,
             value: contact.email && (
@@ -122,6 +128,29 @@ export function ContactCoordinates({
                     >
                       {contact.artistName}
                     </Link>
+                  ),
+                },
+              ]
+            : []),
+          // The artists it manages (Sacha 23/11/2026), only when it does.
+          ...(contact.managedArtists.length > 0
+            ? [
+                {
+                  label: p.managedArtists,
+                  value: (
+                    <span className="flex flex-wrap gap-x-1">
+                      {contact.managedArtists.map((a, i) => (
+                        <span key={a.id}>
+                          <Link
+                            href={routes.artist(a.id)}
+                            className={linkClass}
+                          >
+                            {a.name}
+                          </Link>
+                          {i < contact.managedArtists.length - 1 && ","}
+                        </span>
+                      ))}
+                    </span>
                   ),
                 },
               ]

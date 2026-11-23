@@ -11,7 +11,7 @@ import { parisPlace } from "@/lib/utils/calendar-period";
 
 /**
  * « Export comptable » (Ibé's ticket, lot 7): one CSV of Finance
- * (?type=depenses|factures|encaissements|banque|historique), for whoever
+ * (?type=depenses|factures|encaissements|banque), for whoever
  * reads Finance; the data read with their session.
  */
 export async function GET(request: NextRequest) {

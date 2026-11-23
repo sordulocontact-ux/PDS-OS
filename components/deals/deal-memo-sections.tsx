@@ -129,7 +129,7 @@ export async function DealMemoSections({
                 .flatMap((e) => (e.email ? [e.email] : [])),
               canEmail: mail.canEmail,
             }}
-            address={mail.address}
+            organizationId={access.organizationId}
           />
         </PageSection>
       )}
@@ -161,6 +161,7 @@ export async function DealMemoSections({
                   : null
               }
               document={contractFile}
+              returned={contract?.status === "sent" && pick("signed") !== null}
               deposit={
                 canWrite &&
                 can(access, "manage_contracts") &&

@@ -79,7 +79,6 @@ export default async function MasterCreditsPage({
             canEdit
             confirmed={confirmed}
             validations={review?.validations}
-            events={review?.events}
             gaps={publishingGaps(contributors, shares.splits)}
             canValidate={can(access, "manage_legal")}
           />

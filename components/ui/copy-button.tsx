@@ -23,6 +23,7 @@ export function CopyButton({
   variant = "outline",
   size = "lg",
   className,
+  onCopied,
 }: {
   value: string | (() => string);
   label: string;
@@ -33,6 +34,8 @@ export function CopyButton({
   variant?: React.ComponentProps<typeof Button>["variant"];
   size?: React.ComponentProps<typeof Button>["size"];
   className?: string;
+  // After a copy that worked (a link copied to send by hand = sent).
+  onCopied?: () => void;
 }) {
   return (
     <Button
@@ -47,6 +50,7 @@ export function CopyButton({
             typeof value === "function" ? value() : value,
           );
           toast.success(copiedLabel);
+          onCopied?.();
         } catch {
           if (failedLabel) toast.error(failedLabel);
         }

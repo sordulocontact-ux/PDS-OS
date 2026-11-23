@@ -230,6 +230,23 @@ export async function saveNetworkContact(
     remove: form.get("pictureRemove") === "1",
   });
   if (!pictured && id) return { ok: false, error: t.picture, field: "picture" };
+  // A manager's artists (Sacha 23/11/2026): none once « Management » is off.
+  if (form.get("managedArtistsShown") === "1") {
+    const artistIds = values.roles.includes("manager")
+      ? jsonListOf(form.get("managedArtists")).filter(
+          (v) => z.uuid().safeParse(v).success,
+        )
+      : [];
+    const { error: managedError } = await supabase.rpc(
+      "set_contact_managed_artists",
+      { p_contact_id: data.id, p_artist_ids: artistIds },
+    );
+    if (managedError) {
+      console.error("saveNetworkContact managed:", managedError.message);
+      return { ok: false, error: t.managedArtists };
+    }
+    for (const artistId of artistIds) revalidatePath(routes.artist(artistId));
+  }
   // A new contact takes the unlinked credits of its exact name.
   if (!id)
     await linkCreditsOfNewContact(supabase, access, {
@@ -254,6 +271,7 @@ export async function loadContactEdit(id: string): Promise<{
   contact: NetworkContactValues & {
     memberCount: number;
     coordinatesHidden: boolean;
+    managedArtistIds: string[];
   };
   options: NetworkFormOptions;
 } | null> {
@@ -266,19 +284,23 @@ export async function loadContactEdit(id: string): Promise<{
   ]);
   if (!contact || contact.archived) return null;
   return {
+    options: { ...options, canLinkArtists: can(access, "manage_catalog") },
     contact: {
       ...contact,
+      managedArtistIds: contact.managedArtists.map((a) => a.id),
       memberCount: contact.members.length,
       coordinatesHidden: contact.privacy.hidden,
     },
-    options,
   };
 }
 
 /** The form's choices alone, for "Nouveau contact". */
 export async function loadContactOptions(): Promise<NetworkFormOptions> {
-  await requireApproved();
-  return loadNetworkFormOptions();
+  const access = await requireApproved();
+  return {
+    ...(await loadNetworkFormOptions()),
+    canLinkArtists: can(access, "manage_catalog"),
+  };
 }
 
 /** Whether a contact is private and its coordinates readable (BIZ 8). */

@@ -27,10 +27,7 @@ export function entryHref(
   return target?.href ?? legalStepHref(projectId, "inventory");
 }
 
-const KINDS_OF: Record<
-  Exclude<LegalBranchPage, "history"> | "tracking",
-  LegalDemarcheKind[]
-> = {
+const KINDS_OF: Record<LegalBranchPage | "tracking", LegalDemarcheKind[]> = {
   forms: ["person"],
   contracts: ["person"],
   splits: ["split"],
@@ -62,7 +59,7 @@ function lineKey(
 export function demarcheTarget(
   projectId: string,
   demarches: Demarche[],
-  page: Exclude<LegalBranchPage, "history"> | "tracking",
+  page: LegalBranchPage | "tracking",
   named: string | null,
 ): string {
   const kinds = KINDS_OF[page];

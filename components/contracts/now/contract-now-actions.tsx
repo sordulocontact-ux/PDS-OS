@@ -185,14 +185,13 @@ export function ContractNowActions({
             organizationId={contract.organizationId}
             pdsSigned={Boolean(proof?.pdsSigned)}
             person={person}
-            version={version}
             canSign={contract.can.sign}
             signedOn={backOn}
             document={
               deposit && (
                 <DocumentCard
                   name={deposit.fileName}
-                  line={team.depositedBy(
+                  line={(deposit.byEmail ? team.emailedBy : team.depositedBy)(
                     person,
                     formatShortDay(deposit.at, { bare: true }),
                   )}

@@ -112,7 +112,6 @@ export const productionPrep = {
     shoot: "Tournage",
     post: "Postproduction",
     delivery: "Livraison",
-    history: "Historique",
   },
   phases: {
     to_prepare: "À préparer",

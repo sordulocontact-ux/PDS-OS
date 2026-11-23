@@ -2,7 +2,6 @@
 
 import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
 import { ReasonChips } from "@/components/finance/reason-chips";
-import { RecordHistory } from "@/components/finance/record-history";
 import { proofFrom } from "@/components/finance/receipts/receipt-card";
 import { ReceiptGestures } from "@/components/finance/receipts/receipt-gestures";
 import { ReceiptPreview } from "@/components/finance/receipts/receipt-preview";
@@ -194,7 +193,6 @@ export function ReceiptSheet({
           {canManage && <ReceiptGestures row={row} choices={choices} />}
         </>
       )}
-      <RecordHistory rowId={proof.id} />
     </>
   );
 }

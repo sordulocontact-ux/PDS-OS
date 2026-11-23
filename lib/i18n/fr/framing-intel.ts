@@ -682,7 +682,6 @@ export const framingIntel = {
     emptyBody:
       "Le Brief se crée quand toutes les informations nécessaires sont confirmées.",
     toFraming: "Continuer le cadrage",
-    history: "Historique",
     changesFrom: (n: number) => `Changements depuis la version ${n}`,
     noChange: "Aucun changement de contenu.",
     reopened: (dimensions: string) => `Rouvert : ${dimensions}`,

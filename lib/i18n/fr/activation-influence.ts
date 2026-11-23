@@ -172,7 +172,6 @@ export const activationInfluence = {
     decided: "Décision enregistrée.",
     adsBlocked:
       "Usage payant bloqué : droits publicitaires non acceptés ou expirés.",
-    history: "Versions remplacées",
   },
   contents: {
     title: "Contenus et retours",

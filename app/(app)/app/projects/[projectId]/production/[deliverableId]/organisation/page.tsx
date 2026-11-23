@@ -251,36 +251,6 @@ export default async function ProductionOrganisationPage({
           revokeName={companyLink ? (org.company?.name ?? null) : null}
         />
       )}
-      {changes.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h3 className="font-semibold">{c.history}</h3>
-          <ul className="flex flex-col gap-1.5">
-            {changes.map((h) => (
-              <li key={h.id} className="flex gap-2">
-                <span aria-hidden className="text-[color:var(--text-tertiary)]">
-                  ↺
-                </span>
-                <span className="flex flex-col">
-                  <span>
-                    {c.historyLine(
-                      whoOf(h.kind, h.company),
-                      formatShortDay(h.stoppedAt),
-                      h.stoppedBy ?? "—",
-                      h.reason,
-                    )}
-                    {h.linkRevoked ? ` · ${c.historyRevoked}` : ""}
-                  </span>
-                  {h.done.length > 0 && (
-                    <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
-                      {c.historyDone(h.done.join(" · "))}
-                    </span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
       <PageSection
         id="production-frame"
         title={t.more}

@@ -35,8 +35,6 @@ export const journey = {
     joined(titles)
       ? `Se débloque quand ${titles} sont faits.`
       : `Se débloque quand ${titles} est fait.`,
-  history: "Déjà fait",
-  historyAfter: (cause: string) => `suite à : ${cause}`,
   now: {
     label: "Maintenant",
     mine: "À vous",

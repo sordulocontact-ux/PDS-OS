@@ -21,7 +21,7 @@ const fr = { legalDocuments, legalFormalities };
  * c'est un peu un document ») — one `DocumentCard` per title: in its head
  * the title, the bulletin, when it was generated, where it stands and
  * « Télécharger »; in its body the dossier in its five sections — each miss
- * on its own line (JUR-02) —, the history. Under the card, not in it (Sacha,
+ * on its own line (JUR-02) —. Under the card, not in it (Sacha,
  * 10/11/2026): the signatures, each signer's link card as on the Master,
  * then what follows (partial declaration, deposit, answer). */
 export function FormalityCard({
@@ -103,23 +103,6 @@ export function FormalityCard({
             {/* The values in place, no fold: the signatures are under the
                 card now (Sacha, 10/11/2026). */}
             <DossierForm projectId={projectId} title={title} />
-            {f.history.length > 0 && (
-              <section className="flex flex-col gap-2 border-t border-[color:var(--border-hairline)] pt-6">
-                <h3 className="font-medium">{t.page.history}</h3>
-                <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
-                  {f.history.map((e) => (
-                    <li key={e.id}>
-                      {[t.events[e.kind] ?? e.kind, e.by, formatInstant(e.at)]
-                        .filter(Boolean)
-                        .join(" · ")}
-                      {e.note && (
-                        <span className="text-foreground"> — {e.note}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
           </div>
         )}
       </DocumentCard>

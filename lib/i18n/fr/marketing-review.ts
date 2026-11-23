@@ -681,8 +681,6 @@ export const marketingReview = {
       who
         ? `Rouvert par ${who} le ${date} · Motif : ${reason}`
         : `Rouvert le ${date} · Motif : ${reason}`,
-    history: "Historique du suivi & bilan",
-    historyEmpty: "Aucune décision pour l'instant.",
     errors: {
       alreadyClosed:
         "Le Marketing est déjà clôturé : consultez la décision ou demandez une réouverture.",

@@ -13,6 +13,9 @@ const t = deals.name;
 export type NewDealOptions = {
   participations: Record<string, string>;
   projects: Record<string, string>;
+  // Each project's artist, filled in when the project is chosen (Sacha
+  // 23/11/2026).
+  projectArtists: Record<string, string>;
   artists: Record<string, string>;
   negotiators: Record<string, string>;
   // The direction may open a deal on an artist alone; a project manager
@@ -45,7 +48,7 @@ export async function loadNewDealOptions(
     [
       supabase
         .from("projects")
-        .select("id, title, owner_person_id, collective")
+        .select("id, title, owner_person_id, collective, artist_id")
         .is("archived_at", null)
         .order("title"),
       supabase
@@ -81,9 +84,36 @@ export async function loadNewDealOptions(
   const masterIds = parts.flatMap((p) =>
     p.title?.master_id ? [p.title.master_id] : [],
   );
-  const { data: masters } = masterIds.length
-    ? await supabase.from("masters").select("id, title").in("id", masterIds)
-    : { data: [] };
+  const solo = projects.filter((p) => !p.collective).map((p) => p.id);
+  const [{ data: masters }, { data: projectMasters }] = await Promise.all([
+    masterIds.length
+      ? supabase.from("masters").select("id, title").in("id", masterIds)
+      : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+    solo.length
+      ? supabase
+          .from("project_masters")
+          .select("project_id, master_id, position")
+          .in("project_id", solo)
+          .order("position")
+      : Promise.resolve({
+          data: [] as { project_id: string; master_id: string }[],
+        }),
+  ]);
+  const firstMaster = new Map<string, string>();
+  for (const pm of projectMasters ?? [])
+    if (!firstMaster.has(pm.project_id))
+      firstMaster.set(pm.project_id, pm.master_id);
+  const { data: masterArtists } = firstMaster.size
+    ? await supabase
+        .from("master_artists")
+        .select("master_id, artist_id, position")
+        .in("master_id", [...firstMaster.values()])
+        .order("position")
+    : { data: [] as { master_id: string; artist_id: string }[] };
+  const masterArtist = new Map<string, string>();
+  for (const ma of masterArtists ?? [])
+    if (!masterArtist.has(ma.master_id))
+      masterArtist.set(ma.master_id, ma.artist_id);
   const masterTitle = new Map((masters ?? []).map((m) => [m.id, m.title]));
 
   const label = (p: (typeof parts)[number]) => {
@@ -96,6 +126,8 @@ export async function loadNewDealOptions(
       .join(" · ");
   };
 
+  const artistIds = new Set((artistsRes.data ?? []).map((a) => a.id));
+
   return {
     participations: Object.fromEntries(
       parts
@@ -106,6 +138,15 @@ export async function loadNewDealOptions(
     // never offered as « un projet ».
     projects: Object.fromEntries(
       projects.filter((p) => !p.collective).map((p) => [p.id, p.title]),
+    ),
+    // The project's artist as project_artist_id reads it: the first
+    // artist of its first master, else projects.artist_id.
+    projectArtists: Object.fromEntries(
+      projects.flatMap((p) => {
+        const master = firstMaster.get(p.id);
+        const id = (master && masterArtist.get(master)) || p.artist_id;
+        return id && artistIds.has(id) ? [[p.id, id] as const] : [];
+      }),
     ),
     artists: Object.fromEntries(
       (artistsRes.data ?? []).map((a) => [a.id, a.name]),

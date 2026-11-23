@@ -1,6 +1,6 @@
 // The Master as a journey of five steps (docs/VISION-UX.md § 4, proto
 // `master-v2.html`): title, why, what each person does now and what a done
-// step gave, then « Déjà fait » and the « Historique du master ». Written
+// step gave. Written
 // here, never in the components.
 
 const titles = (n: number) => (n > 1 ? `${n} titres` : "1 titre");
@@ -65,7 +65,6 @@ export const masterJourney = {
       title: "Master final",
       why: "Le master validé devient le master final du titre au Catalogue ; la Distribution et le Juridique le lisent directement. Restent les autres livrables et la facture.",
     },
-    history: { title: "Historique" },
   },
   prereq: {
     plan: "Plan du projet lancé",
@@ -154,72 +153,4 @@ export const masterJourney = {
   notNeeded: "Non nécessaire",
   versionLabel: { mix: "Mix", mastering: "Master" },
   lowerFirst,
-  // « Déjà fait » and the Historique du master (lib/master-workflow/history.ts).
-  history: {
-    link: "Historique du master",
-    title: "Historique du master",
-    description:
-      "Chaque geste, qui l'a fait, quand, et ce qui l'a déclenché. Une version validée ne se remplace jamais en silence.",
-    everyone: "Tout le monde",
-    filterLabel: "Filtrer par personne",
-    csv: "Exporter en CSV",
-    csvHead: ["Date", "Qui", "Geste", "Suite à"],
-    csvName: "historique-master.csv",
-    back: "← Parcours",
-    empty: "Rien n'a encore été fait sur le Master.",
-    pdsName: "PDS OS",
-    viaLink: (name: string) => `${name} (lien privé)`,
-    of: (title: string) => `« ${title} »`,
-    sourceConfirmed: (file: string, title: string | null) =>
-      `Source confirmée : ${file}${title ? ` (« ${title} »)` : ""}`,
-    // A collective's title: its name in the project, then the Catalogue's.
-    titleInCatalogue: (label: string, catalogue: string) =>
-      `${label} · ${catalogue} au Catalogue`,
-    // Lot 12 bis: « Demander des fichiers » (lot 9 bis).
-    filesRequested: (
-      person: string,
-      title: string | null,
-      note: string | null,
-    ) =>
-      `Fichiers demandés à ${person}${title ? ` (« ${title} »)` : ""}${note ? ` · ${note}` : ""}`,
-    filesReceived: (file: string, title: string | null) =>
-      `Fichier demandé reçu : ${file}${title ? ` (« ${title} »)` : ""}`,
-    filesAskedOf: (person: string) => `Fichiers demandés à ${person}`,
-    filesCancelled: (person: string, title: string | null) =>
-      `Demande de fichiers à ${person} annulée${title ? ` (« ${title} »)` : ""}`,
-    filesReplaced: (person: string, title: string | null) =>
-      `Demande de fichiers à ${person} remplacée${title ? ` (« ${title} »)` : ""}`,
-    sourceChosen: (choice: string) => `Choix · ${choice}`,
-    existingMix: (file: string) => `Mix déclaré mix final : ${file}`,
-    briefSaved: "Brief enregistré",
-    questionAsked: (to: string) => `Question de PO posée à ${to}`,
-    questionAnswered: "Réponse à la question du Brief",
-    questionApplied: "Réponse ajoutée au Brief",
-    exchangeCreated: (title: string) => `Échange prévu : ${title}`,
-    sent: (who: string, stage: "mix" | "mastering") =>
-      stage === "mix"
-        ? `Dossier envoyé à ${who}`
-        : `Dossier du mastering envoyé à ${who}`,
-    linkSent: "Lien marqué comme envoyé",
-    opened: "Lien ouvert",
-    acknowledged: "Dossier pris en charge",
-    revoked: (reason: string) => `Lien révoqué : « ${reason} »`,
-    deposited: (label: string, n: number, title: string | null) =>
-      `${label} V${n} déposé${title ? ` (« ${title} »)` : ""}`,
-    feedbackSent: (label: string, n: number) =>
-      `Retours transmis sur le ${label} V${n}`,
-    approved: (label: string, n: number) => `${label} V${n} validé`,
-    changes: (label: string, n: number) =>
-      `Modification demandée sur le ${label} V${n}`,
-    reopened: (label: string, reason: string) =>
-      `${label} rouvert : « ${reason} »`,
-    catalogued: (n: number) =>
-      `Master V${n} rattaché au titre du Catalogue : master final`,
-    deliverable: (label: string) => `${label} reçu`,
-    message: (kind: string) => `Message de l'ingénieur : ${kind}`,
-    after: {
-      approved: (label: string, n: number) => `${label} V${n} validé`,
-      sent: "Dossier envoyé",
-    },
-  },
 } as const;

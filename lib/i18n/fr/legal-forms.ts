@@ -5,6 +5,9 @@ export const legalForms = {
     title: "Fiche de renseignements",
     intro: (person: string, project: string, organization: string | null) =>
       `Bonjour ${person}. ${organization ?? "L'équipe"} prépare le projet « ${project} » et a besoin de quelques informations vous concernant. Remplissez seulement ce qui vous concerne : vous n'avez pas besoin de compte.`,
+    // A Réseau fiche, without a project (Sacha, 23/11/2026).
+    introNetwork: (person: string, organization: string | null) =>
+      `Bonjour ${person}. ${organization ?? "L'équipe"} a besoin de quelques informations vous concernant pour travailler avec vous. Remplissez seulement ce qui vous concerne : vous n'avez pas besoin de compte.`,
     // Who asks and whom to write to (UX test of 09/10/2026).
     requester: {
       title: "Une question ?",
@@ -23,6 +26,17 @@ export const legalForms = {
         "Elles sont gardées tant que les titres du projet sont exploités, puis le temps que la loi impose au label.",
       rights:
         "Vous pouvez les consulter, les corriger ou demander leur suppression en écrivant au responsable du projet (RGPD, articles 15 à 17).",
+      // A Réseau fiche: no project to name.
+      network: {
+        purposes:
+          "À vos crédits, à vos contrats, à vos paiements et aux déclarations auprès des organismes de gestion des droits (SACEM, SCPP…).",
+        access: (organization: string | null) =>
+          `Seule l'équipe ${organization ? `de ${organization} ` : ""}qui travaille avec vous y a accès.`,
+        retention:
+          "Elles sont gardées tant que vous travaillez avec l'équipe, puis le temps que la loi impose au label.",
+        rights:
+          "Vous pouvez les consulter, les corriger ou demander leur suppression en écrivant à l'équipe (RGPD, articles 15 à 17).",
+      },
     },
     afterSubmit: {
       title: "Et ensuite ?",
@@ -31,6 +45,7 @@ export const legalForms = {
         "Si votre rôle demande un contrat ou une répartition des droits, l'équipe vous les enverra à relire avant toute signature.",
     },
     rolesTitle: "Quel est votre rôle sur ce projet ?",
+    rolesTitleNetwork: "Que faites-vous ?",
     rolesHint: "Plusieurs choix possibles.",
     otherRole: "Précisez votre rôle",
     next: "Continuer",

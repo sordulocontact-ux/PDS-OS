@@ -57,7 +57,8 @@ insert into public.legal_forms (organization_id, project_id, contact_id, status,
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('contact'), 'sent',
         encode(sha256(convert_to((select v from vars where k = 'token'), 'UTF8')), 'hex'),
         now() + interval '30 days', 2);
-insert into ids select 'form', id from public.legal_forms where contact_id = pg_temp.id_of('contact');
+insert into ids select 'form', id from public.legal_forms where contact_id = pg_temp.id_of('contact')
+   and project_id is not null;
 update public.legal_forms set created_by = pg_temp.id_of('preparer_person')
  where id = pg_temp.id_of('form');
 

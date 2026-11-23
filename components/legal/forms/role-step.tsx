@@ -13,22 +13,26 @@ const fr = { legalForms };
 export function RoleStep({
   roles,
   otherRole,
+  network = false,
   onToggle,
   onOtherRole,
   onNext,
 }: {
   roles: FormRole[];
   otherRole: string;
+  // A Réseau fiche: no project to name.
+  network?: boolean;
   onToggle: (role: FormRole) => void;
   onOtherRole: (value: string) => void;
   onNext: () => void;
 }) {
   const t = fr.legalForms;
+  const title = network ? t.public.rolesTitleNetwork : t.public.rolesTitle;
   return (
     <fieldset className="flex flex-col gap-4 rounded-2xl border bg-background p-6">
-      <legend className="sr-only">{t.public.rolesTitle}</legend>
+      <legend className="sr-only">{title}</legend>
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">{t.public.rolesTitle}</h2>
+        <h2 className="text-lg font-semibold">{title}</h2>
         <p className="text-sm text-muted-foreground">{t.public.rolesHint}</p>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">

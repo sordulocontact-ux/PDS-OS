@@ -9,7 +9,6 @@ import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
-import { StepHistory } from "@/components/shell/journey/step-history";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import {
   StepBlockers,
@@ -53,34 +52,6 @@ export async function DesignStepFrame({
     key: stepChoiceKey({ module: "design", stepKey: s.key }),
     label: s.title,
   }));
-  const history =
-    stepKey !== "direction"
-      ? []
-      : [...ctx.direction.submissions]
-          .filter((s) => s.status !== "withdrawn")
-          .reverse()
-          .flatMap((s) => [
-            {
-              key: `${s.id}-s`,
-              text: fr.designSteps.direction.history.submitted(s.number),
-              who: s.submittedByName,
-              at: s.submittedAt,
-            },
-            ...s.decisions.map((d) => ({
-              key: d.id,
-              text:
-                (d.decision === "approved"
-                  ? fr.designSteps.direction.history.approved
-                  : d.decision === "rejected"
-                    ? fr.designSteps.direction.history.refused
-                    : fr.designSteps.direction.history.changes) +
-                (d.comment
-                  ? fr.designSteps.sheets.history.comment(d.comment)
-                  : ""),
-              who: d.decidedByName,
-              at: d.decidedAt,
-            })),
-          ]);
   const open = data.stage?.state === "in_progress";
   return (
     <JourneyLayout
@@ -115,13 +86,7 @@ export async function DesignStepFrame({
         </>
       }
     >
-      <StepPanel
-        step={step}
-        steps={steps}
-        blockedLabel={t.blocked}
-        history={<StepHistory items={history} />}
-        {...slots}
-      >
+      <StepPanel step={step} steps={steps} blockedLabel={t.blocked} {...slots}>
         <StepBlockers stepRef={stepRef} steps={choices} />
         {children}
         <StepToolsBlock

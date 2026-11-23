@@ -34,11 +34,13 @@ export function formPortalCard({
     body:
       form.state === "open" ? (
         <PublicForm
-          intro={t.intro(
-            form.person,
-            form.project,
-            form.requester.organization,
-          )}
+          intro={
+            form.project === null
+              ? t.introNetwork(form.person, form.requester.organization)
+              : t.intro(form.person, form.project, form.requester.organization)
+          }
+          // A Réseau fiche: no project, only what is kept on the person.
+          network={form.project === null}
           token={linkKey}
           prefillRoles={form.prefill.roles}
           // Their own earlier answers win over what the project knows.

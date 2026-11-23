@@ -21,6 +21,8 @@ export type DealCallFormData = {
   dealId: string;
   title: string;
   contacts: CallContact[];
+  // The Réseau contacts invited by default (pickCallGuests).
+  guests: string[];
   googleMeet: boolean;
   // "YYYY-MM-DDTHH:mm", the next round hour in Paris (« Autre horaire »).
   defaultOccurredAt: string;
@@ -82,6 +84,7 @@ export function DealCallButton({
             }
             memberDetail={t.who}
             defaultMemberIds={negotiator ? [negotiator.id] : []}
+            defaultContactIds={data.guests}
             contacts={data.contacts}
             googleMeet={data.googleMeet}
             submitLabel={t.submit}

@@ -621,6 +621,8 @@ export const contractStateTone: Record<string, Tone> = {
   in_review: "warning",
   approved: "action",
   sent: "info",
+  // Sent and back signed (not a status: the signed copy is there), PDS signs.
+  returned: "action",
   signed: "success",
   expired: "neutral",
   terminated: "neutral",

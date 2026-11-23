@@ -144,6 +144,8 @@ export const network = {
     // « Garder seulement le nom » on the organization: a name is not a link.
     artist: "Artiste du catalogue",
     artistNone: "Aucun",
+    managedArtists: "Artistes managés",
+    managedArtistsPlaceholder: "Choisir les artistes",
     // A new contact named exactly as an artist of the catalog (UX test of
     // 09/10/2026, section 8): linked unless removed.
     artistLinked: (name: string) => `Relié à l'artiste du catalogue ${name}`,
@@ -240,6 +242,8 @@ export const network = {
     },
     forbidden: "Vous ne pouvez pas modifier le réseau.",
     parent: "L'organisation choisie n'existe plus dans le réseau.",
+    managedArtists:
+      "Le contact est enregistré, mais ses artistes n'ont pas pu être rattachés. Réessayez.",
     members:
       "Des personnes sont rattachées à cette organisation : détachez-les avant d'en faire une personne.",
     failed: "Le contact n'a pas pu être enregistré. Réessayez.",
@@ -247,6 +251,7 @@ export const network = {
       "L'image n'a pas pu être enregistrée. Réessayez avec un JPEG, un PNG ou un WebP.",
   },
   page: {
+    managedArtists: "Artistes managés",
     back: "Tout le réseau",
     facts: "Coordonnées",
     kind: "Type",
@@ -307,6 +312,47 @@ export const network = {
       "Ses réponses complètent cette fiche : on ne lui redemande que ce qui manque.",
     ficheDone: "Rendue",
     ficheTodo: "Envoyée, pas encore rendue",
+    // Its own fiche, without a project (Sacha, 23/11/2026).
+    networkFiche: {
+      label: "Fiche",
+      states: {
+        link_generated: "Pas encore envoyée",
+        sent: "Envoyée",
+        opened: "Ouverte",
+        filled: "Remplie",
+        revoked: "Lien révoqué",
+      },
+      on: (state: string, date: string) => `${state} le ${date}`,
+      copy: "Copier le lien",
+      copied: "Lien copié",
+      email: "Envoyer par e-mail",
+      renew: "Nouveau lien",
+      renewHint: "L'ancien lien ne marchera plus.",
+      renewed: "Nouveau lien prêt, l'ancien ne marche plus",
+      menu: "Fiche de renseignements",
+      revoke: {
+        label: "Révoquer le lien",
+        title: "Révoquer le lien de la fiche ?",
+        body: "Le lien ne marchera plus. « Nouveau lien » en donne un autre.",
+        done: "Lien révoqué",
+        pending: "Révocation…",
+      },
+      emailed: {
+        sent: (name: string) => `Fiche envoyée par e-mail à ${name}`,
+        sentHere: "Fiche envoyée par e-mail",
+        failed:
+          "L'e-mail n'est pas parti : copiez le lien et envoyez-le vous-même.",
+        noAddress: "Ce contact n'a pas d'adresse e-mail.",
+        subject: "Votre fiche de renseignements",
+        body: "Pour travailler avec vous, nous avons besoin de quelques informations vous concernant : coordonnées, informations légales et de facturation. Cela prend quelques minutes, sans compte.",
+        open: "Remplir votre fiche :",
+      },
+      errors: {
+        forbidden: "Vous ne pouvez pas gérer la fiche de ce contact.",
+        failed: "La fiche n'a pas pu être mise à jour. Réessayez.",
+        no_open_link: "Ce lien est déjà révoqué ou la fiche est remplie.",
+      },
+    },
     projectsEmpty: "Rien dans un projet que vous pouvez voir.",
     projectAwaited: (n: number) => `${n} en attente`,
     invitedToCall: "Invité à un call",

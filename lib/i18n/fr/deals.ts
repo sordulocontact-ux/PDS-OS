@@ -268,18 +268,14 @@ export const deals = {
     abandon: "Abandonner",
     abandonTitle: "Abandonner ce deal",
     abandonDescription:
-      "Le deal et son historique restent ; il ne change plus ensuite.",
+      "Le deal reste consultable ; il ne change plus ensuite.",
     abandonReason: "Pourquoi ce deal s'arrête",
     abandonSubmit: "Abandonner le deal",
-    // The deal's two views (Ibé 18/11/2026: « on ne sait pas si on doit
-    // remplir ce qu'il y a en bas »): what to do now, and the file to read.
-    tabs: { label: "Vues du deal", todo: "À faire", file: "Dossier" },
-    // A signed deal: nothing left to do.
-    signedNote: "Deal signé : son dossier reste consultable dans « Dossier ».",
+    // « Informations » beside the title (DealInfoButton).
+    infoDescription: "Le deal et ses personnes.",
     sections: {
       next: "Prochaine action",
       info: "Informations",
-      history: "Historique",
     },
     next: {
       action: "Prochaine action",
@@ -324,38 +320,6 @@ export const deals = {
       declined: "A refusé",
       withdrawn: "Retiré",
     } as Record<string, string>,
-    history: {
-      created: "Deal créé",
-      assigned: (who: string | null) => (who ? `Confié à ${who}` : "Repris"),
-      stage: (from: string, to: string) => `${from} → ${to}`,
-      agreementValidated: "Accord de principe validé",
-      agreementRefused: "Accord de principe renvoyé en négociation",
-      abandoned: "Deal abandonné",
-      nextAction: "Prochaine action mise à jour",
-      term: (label: string, value: string) => `${label} : ${value}`,
-      memo: (agreement: boolean) =>
-        agreement
-          ? "Deal memo pris à l'accord de principe"
-          : "Nouveau deal memo",
-      memoValidated: "Deal memo validé",
-      memoReceived: (n: string, from: string) =>
-        `Deal memo n°${n} reçu par e-mail${from ? ` de ${from}` : ""}`,
-      memoSubmitted: (n: string) =>
-        `Deal memo n°${n} envoyé à la direction pour validation`,
-      memoChangesRequested: (n: string) =>
-        `Modifications demandées au deal memo n°${n}`,
-      memoSent: (n: string, to: string) =>
-        to
-          ? `Accord du deal memo n°${n} renvoyé à ${to}`
-          : `Accord du deal memo n°${n} renvoyé autrement`,
-      memoLoop: (added: boolean) =>
-        added ? "Ajouté à la boucle" : "Retiré de la boucle",
-      contractLinked: "Contrat lié",
-      contractUnlinked: "Lien du contrat retiré",
-      contractCheck: (label: string, different: boolean) =>
-        `${label} : ${different ? "le contrat diffère" : "conforme au contrat"}`,
-      by: (who: string) => `par ${who}`,
-    },
   },
   // PO's reading of the deals (BIZ 4, lib/assistant/read/deals.ts).
   po: {

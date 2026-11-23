@@ -12,45 +12,19 @@ import {
   type BudgetFamily,
   type BudgetLine,
 } from "@/lib/budget/types";
-import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
-
-/** A line of the envelope's journal (opened, changed, closed). */
-export type EnvelopeEvent = {
-  id: string;
-  kind: "opened" | "changed" | "closed";
-  at: string;
-  actorName: string | null;
-  amountCents: number | null;
-  // The amount before a change.
-  previousCents: number | null;
-};
 
 export type ArtistBudgetData = {
   error: boolean;
   current: (ArtistEnvelope & { view: EnvelopeView }) | null;
   // Closed envelopes, newest first, each with what it consumed.
-  history: (ArtistEnvelope & { spentCents: number })[];
-  events: EnvelopeEvent[];
+  closed: (ArtistEnvelope & { spentCents: number })[];
   // The artist's direct spends and the lines of its projects the reader may
   // read (a project's own rule), newest first.
   lines: BudgetLine[];
 };
-
-const amountOf = (detail: unknown, key: string): number | null => {
-  const value =
-    detail && typeof detail === "object"
-      ? (detail as Record<string, unknown>)[key]
-      : null;
-  return typeof value === "number" ? value : null;
-};
-
-const beforeOf = (detail: unknown): unknown =>
-  detail && typeof detail === "object"
-    ? (detail as Record<string, unknown>).before
-    : null;
 
 async function usage(supabase: Supabase, budgetId: string) {
   const { data, error } = await supabase.rpc("artist_budget_usage", {
@@ -69,7 +43,7 @@ export async function loadArtistBudget(
   artistId: string,
 ): Promise<ArtistBudgetData> {
   const supabase = await createClient();
-  const [envelopesRes, eventsRes, directRes, projectsRes] = await Promise.all([
+  const [envelopesRes, directRes, projectsRes] = await Promise.all([
     supabase
       .from("artist_budgets")
       .select(
@@ -77,15 +51,6 @@ export async function loadArtistBudget(
       )
       .eq("artist_id", artistId)
       .order("starts_on", { ascending: false }),
-    supabase
-      .from("artist_budget_events")
-      .select(
-        "id, kind, detail, created_at, actor:people!artist_budget_events_actor_person_id_fkey(first_name, last_name)",
-      )
-      .eq("artist_id", artistId)
-      .order("created_at", { ascending: false })
-      .order("seq", { ascending: false })
-      .limit(30),
     selectBudgetLines(supabase).eq("artist_id", artistId),
     supabase.rpc("artist_project_ids", { p_artist_id: artistId }),
   ]);
@@ -93,7 +58,7 @@ export async function loadArtistBudget(
   const projectRes = projectIds.length
     ? await selectBudgetLines(supabase).in("project_id", projectIds)
     : { data: [], error: null };
-  const error = [envelopesRes, eventsRes, directRes, projectRes].find(
+  const error = [envelopesRes, directRes, projectRes].find(
     (r) => r.error,
   )?.error;
   if (error) console.error("loadArtistBudget:", error.message);
@@ -125,26 +90,10 @@ export async function loadArtistBudget(
   return {
     error: Boolean(error),
     current: open ? { ...open, view: envelopeView(open, openUsage) } : null,
-    history: closed.map((e, i) => ({
+    closed: closed.map((e, i) => ({
       ...e,
       spentCents: closedUsage[i].reduce((t, u) => t + u.spentCents, 0),
     })),
-    events: (eventsRes.data ?? []).flatMap((row): EnvelopeEvent[] =>
-      row.kind === "opened" || row.kind === "changed" || row.kind === "closed"
-        ? [
-            {
-              id: row.id,
-              kind: row.kind,
-              at: row.created_at,
-              actorName: row.actor
-                ? personName(row.actor.first_name, row.actor.last_name)
-                : null,
-              amountCents: amountOf(row.detail, "amount_cents"),
-              previousCents: amountOf(beforeOf(row.detail), "amount_cents"),
-            },
-          ]
-        : [],
-    ),
     lines,
   };
 }

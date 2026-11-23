@@ -248,12 +248,6 @@ export const designSteps = {
     waitingDecision: "valider la direction artistique",
     waitingSubmit: (validator: string) =>
       `soumettre la direction à ${validator}`,
-    history: {
-      submitted: (n: number) => `Version ${n} soumise`,
-      approved: "Validée",
-      changes: "Modifications demandées",
-      refused: "Refusée",
-    },
     outdated:
       "Ce qui a été soumis a changé depuis : la décision porte sur une version qui n'est plus à jour.",
   },
@@ -363,17 +357,6 @@ export const designSteps = {
       `Transférée en Production par ${name} le ${at} · version V${n}`,
     newerNotTransferred: (n: number) =>
       `la V${n} n'est pas encore transférée : la Production sera prévenue`,
-    history: {
-      submitted: (n: number, name: string, at: string) =>
-        `V${n} soumise par ${name} le ${at}`,
-      approved: (n: number, name: string, at: string) =>
-        `V${n} validée par ${name} le ${at}`,
-      changes: (n: number, name: string, at: string) =>
-        `V${n} renvoyée pour modifications par ${name} le ${at}`,
-      refused: (n: number, name: string, at: string) =>
-        `V${n} refusée par ${name} le ${at}`,
-      comment: (text: string) => ` : « ${text} »`,
-    },
     subtitles: [
       "Oui, intégrés aux exports",
       "Oui, fichier séparé",

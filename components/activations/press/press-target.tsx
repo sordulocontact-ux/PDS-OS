@@ -1,5 +1,4 @@
 import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
-import { JournalSection } from "@/components/activations/journal-section";
 import { MessagesSection } from "@/components/activations/messages/messages-section";
 import { readablePlatforms } from "@/lib/activations/stats-links";
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
@@ -7,7 +6,6 @@ import { Fold } from "@/components/ui/fold";
 import { TargetHeader } from "@/components/activations/targets/target-header";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
-import { loadActivationJournal } from "@/lib/activations/journal";
 import { loadMessages } from "@/lib/activations/messages/queries";
 import { loadPressKit } from "@/lib/activations/press-kit";
 import { composeInterviewBrief } from "@/lib/activations/press/brief";
@@ -27,7 +25,7 @@ const fr = { activationPress, activationJourney };
  * One press target in house (ticket RP § 5.2 to 5.7) : its messages — pitch
  * from the common template, follow-ups held back after a refusal —, its
  * opportunities and interviews, its coverage declared then verified, the
- * audience figures when there are any, and its journal.
+ * audience figures when there are any,.
  */
 export async function PressTarget({
   fiche,
@@ -49,15 +47,13 @@ export async function PressTarget({
     canWrite,
     canValidate,
   } = fiche;
-  const [messages, opportunities, sheets, kit, files, journal] =
-    await Promise.all([
-      loadMessages(a.id),
-      loadOpportunities(a.id),
-      loadSheets(a.id, a.kind),
-      loadPressKit(project.id),
-      loadActivationFiles(a.id),
-      loadActivationJournal(a.id, members, target.id),
-    ]);
+  const [messages, opportunities, sheets, kit, files] = await Promise.all([
+    loadMessages(a.id),
+    loadOpportunities(a.id),
+    loadSheets(a.id, a.kind),
+    loadPressKit(project.id),
+    loadActivationFiles(a.id),
+  ]);
   const scope = {
     organizationId: access.organizationId ?? "",
     projectId: project.id,
@@ -97,7 +93,6 @@ export async function PressTarget({
         )}
         defaultSource="media"
       />
-      <JournalSection entries={journal} />
     </>
   );
 

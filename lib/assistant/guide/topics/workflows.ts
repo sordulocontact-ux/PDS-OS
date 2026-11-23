@@ -30,7 +30,6 @@ export const workflowsTopics: GuideTopic[] = [
       "Un tarif peut être accepté ou refusé avec un motif ; il alimente le Budget.",
       "Un mix validé ne change plus. Le mastering s'ouvre quand le mix final est validé.",
       "Master final : le master validé devient celui du titre dans le Catalogue ; la Distribution et le Juridique le lisent directement.",
-      "Un Historique du master garde tous les gestes.",
     ],
     faq: [
       {
@@ -72,7 +71,7 @@ export const workflowsTopics: GuideTopic[] = [
       "Cadrage juridique : PO pose une question à la fois sur ce qui manque. Élément repris, accords et éditeur se répondent d'abord par Oui ou Non : Non enregistre « aucun » tout de suite, Oui ouvre le champ. Vous répondez librement et vérifiez ce que PO relève avant qu'il soit gardé.",
       "Confirmation : une synthèse, confirmée par une personne. Cela ne vaut ni signature, ni autorisation, ni dépôt.",
       "Plan d'action : PDS OS propose les démarches et les contrats à prévoir ; on les confirme, puis on attribue et date chaque démarche.",
-      "Suivi : chaque démarche se fait depuis sa ligne. Les pages de démarche sont les fiches de renseignements, les contrats, les répartitions, les autorisations, la SACEM et l'historique.",
+      "Suivi : chaque démarche se fait depuis sa ligne. Les pages de démarche sont les fiches de renseignements, les contrats, les répartitions, les autorisations et la SACEM.",
       "Une œuvre existante non autorisée (un sample par exemple) bloque la sortie.",
       "PO n'écrit jamais de clause ni de modèle de contrat. Le Juridique n'est visible que de la direction et des chefs de projet.",
     ],

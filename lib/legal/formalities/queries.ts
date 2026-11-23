@@ -15,8 +15,6 @@ import type {
   TitleFormality,
 } from "@/lib/legal/formalities/types";
 import { exactShare, unitsOf } from "@/lib/legal/splits/shares";
-import { personName } from "@/lib/projects/types";
-import { listLegalPeople } from "@/lib/legal/legal-people";
 import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,7 +45,6 @@ export async function loadFormalities(
     credits,
     clearances,
     formalities,
-    people,
     publishing,
     publisherSplits,
     release,
@@ -76,9 +73,6 @@ export async function loadFormalities(
       )
       .eq("project_id", project.id)
       .eq("definition_key", SACEM_725),
-    access.organizationId
-      ? listLegalPeople(access.organizationId)
-      : Promise.resolve(none),
     // A signed publishing contract of the project (RLS: the contracts the
     // viewer may read).
     supabase
@@ -129,7 +123,7 @@ export async function loadFormalities(
     ]),
   ];
   const fIds = (formalities.data ?? []).map((f) => f.id);
-  const [details, values, documents, signatures, events, splits, links] =
+  const [details, values, documents, signatures, splits, links] =
     await Promise.all([
       contactIds.length > 0
         ? supabase
@@ -157,13 +151,6 @@ export async function loadFormalities(
               "id, formality_id, document_version, signer, role, status, proof, signed_at, contact_id, via, signed_on, file_path, house, superseded_at",
             )
             .in("formality_id", fIds)
-        : Promise.resolve(none),
-      fIds.length > 0
-        ? supabase
-            .from("legal_formality_events")
-            .select("id, formality_id, kind, note, actor_person_id, created_at")
-            .in("formality_id", fIds)
-            .order("created_at", { ascending: false })
         : Promise.resolve(none),
       confirmedSplits(supabase, masterIds),
       // Who has a private page on this project (/c/): they sign there.
@@ -204,12 +191,6 @@ export async function loadFormalities(
   }
   const detailsOf = new Map(
     (details.data ?? []).map((d) => [d.contact_id, asText(d.details)]),
-  );
-  const nameOf = new Map(
-    (people.data ?? []).map((p) => [
-      p.person_id,
-      personName(p.first_name, p.last_name),
-    ]),
   );
 
   return Promise.all(
@@ -336,17 +317,6 @@ export async function loadFormalities(
             ),
           ),
           canSignHouse: can(access, "validate"),
-          history: (events.data ?? [])
-            .filter((e) => e.formality_id === f.id)
-            .map((e) => ({
-              id: e.id,
-              kind: e.kind,
-              note: e.note,
-              at: e.created_at,
-              by: e.actor_person_id
-                ? (nameOf.get(e.actor_person_id) ?? "")
-                : "",
-            })),
         };
       }
       return {

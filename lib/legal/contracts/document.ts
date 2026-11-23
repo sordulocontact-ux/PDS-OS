@@ -28,13 +28,6 @@ export type ContractDocument = {
   // Its template's language (Ibé, 18/11/2026): the PDF's.
   language: ContractLanguage;
   fields: Array<{ id: string; label: string; value: string; source: string }>;
-  events: Array<{
-    id: string;
-    label: string;
-    by: string;
-    at: string;
-    note: string | null;
-  }>;
   financialNeedCents: number | null;
   proof: { signed: boolean; evidence: boolean };
 };
@@ -43,7 +36,7 @@ export async function getContractDocument(
   contractId: string,
 ): Promise<ContractDocument | null> {
   const supabase = await createClient();
-  const [documents, events, money, files] = await Promise.all([
+  const [documents, money, files] = await Promise.all([
     supabase
       .from("contract_documents")
       .select(
@@ -51,12 +44,6 @@ export async function getContractDocument(
       )
       .eq("contract_id", contractId)
       .order("version", { ascending: false }),
-    supabase
-      .from("contract_events")
-      .select("id, kind, actor_person_id, note, created_at")
-      .eq("contract_id", contractId)
-      .order("created_at", { ascending: false })
-      .limit(100),
     supabase
       .from("financial_needs")
       .select("amount_cents")
@@ -73,12 +60,7 @@ export async function getContractDocument(
   if (rows.length === 0) return null;
 
   const peopleIds = [
-    ...new Set([
-      ...rows.flatMap((r) => (r.created_by ? [r.created_by] : [])),
-      ...(events.data ?? []).flatMap((e) =>
-        e.actor_person_id ? [e.actor_person_id] : [],
-      ),
-    ]),
+    ...new Set([...rows.flatMap((r) => (r.created_by ? [r.created_by] : []))]),
   ];
   const [template, people] = await Promise.all([
     supabase
@@ -125,13 +107,6 @@ export async function getContractDocument(
       label: fr.legalContracts.fields[id] ?? id,
       value: String(v?.value ?? ""),
       source: String(v?.source ?? ""),
-    })),
-    events: (events.data ?? []).map((e) => ({
-      id: e.id,
-      label: fr.legalContracts.document.events[e.kind] ?? e.kind,
-      by: who(e.actor_person_id),
-      at: e.created_at,
-      note: e.note,
     })),
     financialNeedCents: money.data?.amount_cents ?? null,
     proof: {

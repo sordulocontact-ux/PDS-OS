@@ -1,5 +1,4 @@
 import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
-import { RecordHistory } from "@/components/finance/record-history";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "@/components/ui/row-actions";
 import type { RowAction } from "@/components/ui/row-actions";
@@ -142,7 +141,6 @@ export function IncomeSheet({
           </ol>
         </section>
       )}
-      <RecordHistory rowId={income.id} />
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 
 import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
-import { JournalSection } from "@/components/activations/journal-section";
 import { MessagesSection } from "@/components/activations/messages/messages-section";
 import { readablePlatforms } from "@/lib/activations/stats-links";
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
@@ -19,7 +18,6 @@ import {
   collabFocus,
   type CollabPart,
 } from "@/lib/activations/influence/stage";
-import { loadActivationJournal } from "@/lib/activations/journal";
 import { loadMessages } from "@/lib/activations/messages/queries";
 import { loadSheets, versionsOf } from "@/lib/activations/sheet-queries";
 import { sheetFieldKeys, type SheetFields } from "@/lib/activations/sheets";
@@ -44,7 +42,7 @@ const fr = { activationWork, activationInfluence, activationJourney };
 /**
  * The single fiche of a collaboration (ticket Influence § 5) : its concept,
  * the negotiation and the express agreement, messages, rights, contents,
- * publication, results, the administrative payment and its journal.
+ * publication, results, the administrative payment.
  */
 export async function InfluenceCollaboration({
   fiche,
@@ -66,12 +64,11 @@ export async function InfluenceCollaboration({
     canWrite,
     canValidate,
   } = fiche;
-  const [sheets, messages, influence, files, journal] = await Promise.all([
+  const [sheets, messages, influence, files] = await Promise.all([
     loadSheets(a.id, a.kind),
     loadMessages(a.id),
     loadInfluenceData(a.id),
     loadActivationFiles(a.id),
-    loadActivationJournal(a.id, members, target.id),
   ]);
   const [row] = collaborationRows(
     [target],
@@ -246,7 +243,6 @@ export async function InfluenceCollaboration({
         canSeeBudget={canSeeBudget}
       />,
     ],
-    ["journal", <JournalSection key="journal" entries={journal} />],
   ];
 
   return (

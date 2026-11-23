@@ -8,7 +8,6 @@ import { loadReconciliation } from "@/lib/finance/reconcile-queries";
 import { spendTtc } from "@/lib/finance/spends";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { treasury } from "@/lib/i18n/fr/treasury";
-import { createClient } from "@/lib/supabase/server";
 import { csv, csvEuros } from "@/lib/utils/csv";
 
 // « Export comptable » (Ibé's ticket, lot 7): Finance's figures as CSV for
@@ -20,7 +19,6 @@ export const EXPORT_TYPES = [
   "factures",
   "encaissements",
   "banque",
-  "historique",
 ] as const;
 export type ExportType = (typeof EXPORT_TYPES)[number];
 
@@ -136,42 +134,16 @@ export async function financeCsv(
         ]),
       ),
     ]);
-  if (type === "banque") {
-    const bank = await loadReconciliation(data.incomes);
-    return csv([
-      [t.date, t.counterparty, t.reference, t.amount, t.matched, t.ignored],
-      ...bank.transactions.map((x) => [
-        x.bookedOn,
-        x.counterparty ?? x.label,
-        x.reference,
-        euros(x.cents),
-        x.matches.map((m) => `${m.label} (${euros(m.cents)})`).join(" + "),
-        x.ignoreReason,
-      ]),
-    ]);
-  }
-  const supabase = await createClient();
-  const { data: events } = await supabase
-    .from("finance_events")
-    .select(
-      "created_at, entity, action, before, after, actor:people(first_name, last_name)",
-    )
-    .order("seq", { ascending: false })
-    .limit(5000);
+  const bank = await loadReconciliation(data.incomes);
   return csv([
-    [t.at, t.who, t.entity, t.action, t.before, t.after],
-    ...(events ?? []).map((e) => [
-      e.created_at,
-      e.actor
-        ? `${e.actor.first_name ?? ""} ${e.actor.last_name ?? ""}`.trim()
-        : "",
-      financeExports.entities[
-        e.entity as keyof typeof financeExports.entities
-      ] ?? financeExports.entityOther,
-      financeExports.actions[e.action as keyof typeof financeExports.actions] ??
-        e.action,
-      e.before ? JSON.stringify(e.before) : "",
-      e.after ? JSON.stringify(e.after) : "",
+    [t.date, t.counterparty, t.reference, t.amount, t.matched, t.ignored],
+    ...bank.transactions.map((x) => [
+      x.bookedOn,
+      x.counterparty ?? x.label,
+      x.reference,
+      euros(x.cents),
+      x.matches.map((m) => `${m.label} (${euros(m.cents)})`).join(" + "),
+      x.ignoreReason,
     ]),
   ]);
 }

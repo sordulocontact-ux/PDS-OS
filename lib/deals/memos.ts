@@ -18,10 +18,11 @@ export type DealMemo = {
   id: string;
   number: number;
   status: "draft" | "validated";
-  // Made in PDS OS (the photo of the terms) or received by e-mail from the
-  // label or the brand (its PDFs are the memo; the photo of the terms then
-  // serves the comparison with the contract).
-  source: "pds" | "email";
+  // Made in PDS OS (the photo of the terms), or the label's or the brand's:
+  // received by e-mail, or its PDF dropped by whoever writes the deal
+  // (« upload », Sacha 23/11/2026). The label's PDFs are the memo; the photo
+  // of the terms then serves the comparison with the contract.
+  source: "pds" | "email" | "upload";
   terms: MemoTerm[];
   stage: string;
   createdBy: string | null;
@@ -46,6 +47,10 @@ export type DealMemo = {
   // `to`: « Nom (adresse), … »; null when sent another way.
   sent: { by: string | null; at: string; to: string | null } | null;
 };
+
+/** The label's or the brand's memo (its PDF), not a photo made here. */
+export const isReceivedMemo = (memo: Pick<DealMemo, "source">) =>
+  memo.source !== "pds";
 
 /** The deal's contract: its participation's, or its own (deals.contract_id). */
 export type DealContract = {

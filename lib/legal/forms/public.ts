@@ -27,7 +27,8 @@ const publicSchema = z.discriminatedUnion("state", [
     state: z.literal("open"),
     version: z.number(),
     person: z.string(),
-    project: z.string(),
+    // Null for a Réseau fiche (no project: 20261123210101).
+    project: z.string().nullable(),
     requester: requesterSchema,
     // What PDS OS knows: the roles to tick, and answers to confirm (nom
     // d'artiste, nom à créditer, catégorie).
@@ -51,7 +52,7 @@ const publicSchema = z.discriminatedUnion("state", [
   z.object({
     state: z.literal("complement"),
     person: z.string(),
-    project: z.string(),
+    project: z.string().nullable(),
     requester: requesterSchema,
     missing: z.array(z.string()).default([]),
     note: z.string().nullable().default(null),

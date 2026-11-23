@@ -96,7 +96,10 @@ export function DealContract({
   create = null,
   document = null,
   deposit = null,
+  returned = false,
 }: {
+  // Sent, and its signed copy is back: « Revenu signé ».
+  returned?: boolean;
   dealId: string;
   participation: boolean;
   contract: Contract | null;
@@ -151,12 +154,17 @@ export function DealContract({
           action={
             <span className="flex flex-wrap items-center gap-2">
               <StatusBadge
-                tone={contractStateTone[contract.status] ?? "neutral"}
+                tone={
+                  contractStateTone[returned ? "returned" : contract.status] ??
+                  "neutral"
+                }
                 size="sm"
               >
-                {fr.contracts.states[
-                  contract.status as keyof typeof fr.contracts.states
-                ] ?? contract.status}
+                {returned
+                  ? fr.contracts.states.returned
+                  : (fr.contracts.states[
+                      contract.status as keyof typeof fr.contracts.states
+                    ] ?? contract.status)}
               </StatusBadge>
               {/* The secondary gestures as icons, the main one last, at the
                   right: open its PDF, or deposit it (Sacha 22/11/2026). */}

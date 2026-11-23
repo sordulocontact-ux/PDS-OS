@@ -62,7 +62,6 @@ async function writerOrganization(): Promise<string | null> {
 function refresh(artistId: string) {
   revalidatePath(routes.artistIdentity(artistId));
   revalidatePath(routes.artistFiles(artistId));
-  revalidatePath(routes.artistActivity(artistId));
 }
 
 /** « Nouveau moodboard »: an empty folder, filled afterwards. */

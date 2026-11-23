@@ -22,7 +22,6 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { productionDeliverables } from "@/lib/journey/production";
 import { journeyContext } from "@/lib/production/journey/context";
-import { loadProductionHistory } from "@/lib/production/history";
 import {
   productionStepChoices,
   productionStepRef,
@@ -57,17 +56,12 @@ export default async function ProductionSheetLayout({
   const started = Boolean(data.heritage.fiche || data.heritage.source);
   const sheet = data.sheet;
   const organized = Boolean(sheet?.organization.kind);
-  const [links, history, revoked] = sheet
+  const [links, revoked] = sheet
     ? await Promise.all([
         loadProviderLinks(await createClient(), sheet.id),
-        loadProductionHistory(sheet.id, data, [
-          "sheet.organized",
-          "link.sent",
-          "link.revoked",
-        ]),
         loadRevokedLinks(sheet.id),
       ])
-    : [{}, [], {}];
+    : [{}, {}];
   // The creative side, as the journey resolved it (direction's coordinator).
   const creativeName =
     steps
@@ -115,7 +109,6 @@ export default async function ProductionSheetLayout({
               revoked={revoked}
               creativeName={creativeName}
               canOrganize={data.canOrganize}
-              history={history}
               personLinks={
                 <ContactLinksSection
                   projectId={projectId}
@@ -158,22 +151,7 @@ export default async function ProductionSheetLayout({
       </div>
     );
   return (
-    <JourneyLayout
-      spine={
-        <JourneySpine
-          steps={steps}
-          footer={{
-            href: routes.projectProductionStep(
-              projectId,
-              deliverableId,
-              "history",
-            ),
-            label: fr.productionJourney.history,
-          }}
-        />
-      }
-      head={head}
-    >
+    <JourneyLayout spine={<JourneySpine steps={steps} />} head={head}>
       {children}
     </JourneyLayout>
   );

@@ -56,6 +56,7 @@ export function CallPlanForm({
   members,
   memberDetail,
   defaultMemberIds,
+  defaultContactIds = [],
   contacts,
   participantsHint,
   googleMeet,
@@ -85,6 +86,8 @@ export function CallPlanForm({
   members: Member[];
   memberDetail: string;
   defaultMemberIds: string[];
+  // Réseau contacts checked from the start (a deal's guests, pickCallGuests).
+  defaultContactIds?: string[];
   contacts: CallContact[];
   participantsHint?: string;
   googleMeet: boolean;
@@ -141,8 +144,10 @@ export function CallPlanForm({
   const [people, setPeople] = useState<PrepPerson[]>(
     () =>
       current?.value ??
-      pool.filter(
-        (p) => defaultMemberIds.includes(p.key.slice(2)) && !p.external,
+      pool.filter((p) =>
+        p.external
+          ? defaultContactIds.includes(p.key.slice(2))
+          : defaultMemberIds.includes(p.key.slice(2)),
       ),
   );
 

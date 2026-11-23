@@ -68,9 +68,6 @@ export const conceptionIntents = {
     impactsDeliverables: "Livrables qui en héritent :",
     impactsNone: "Aucun livrable n'en hérite : chacun a sa propre réponse.",
     sheetValidated: "fiche déjà validée",
-    historyTitle: "Confirmations précédentes",
-    historyLine: (name: string, date: string) =>
-      name ? `${date} · ${name}` : date,
     cancel: "Annuler",
     close: "Fermer",
   },

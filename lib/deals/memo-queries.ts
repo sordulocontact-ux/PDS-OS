@@ -95,14 +95,15 @@ export async function loadDealMemos(
   const files = withFiles
     ? await memoFiles(
         supabase,
-        rows.filter((m) => m.source === "email").map((m) => m.id),
+        rows.filter((m) => m.source !== "pds").map((m) => m.id),
       )
     : new Map<string, MemoFile[]>();
   return rows.map((m) => ({
     id: m.id,
     number: m.number,
     status: m.status === "validated" ? "validated" : "draft",
-    source: m.source === "email" ? "email" : "pds",
+    source:
+      m.source === "email" ? "email" : m.source === "upload" ? "upload" : "pds",
     terms: termsOf(kind, m.terms),
     stage: m.stage,
     createdBy: nameOf(m.author),

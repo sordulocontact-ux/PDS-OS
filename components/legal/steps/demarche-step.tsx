@@ -3,14 +3,11 @@ import { notFound, redirect } from "next/navigation";
 import { DemarcheBody } from "@/components/legal/demarches/demarche-body";
 import { ProposedDemarche } from "@/components/legal/demarches/proposed-demarche";
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
-import { StepHistory } from "@/components/shell/journey/step-history";
 import { contractProofOf } from "@/lib/contracts/proof";
 import { generateReadyAgreements } from "@/lib/legal/contracts/auto-generate";
 import { loadContractCards } from "@/lib/legal/contracts/document-card";
 import { loadProjectInvoices } from "@/lib/invoices/queries";
 import { loadInvoiceStates } from "@/lib/invoices/states";
-import { demarcheHistory } from "@/lib/legal/demarches/history";
-import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRefSlug, type LegalDemarcheKind } from "@/lib/ui/legal-steps";
@@ -58,15 +55,12 @@ export async function DemarcheStep({
       ? [p.panel.row.contract.id]
       : [],
   );
-  const [proof, history, cards, invoiceView, invoiceStates] = await Promise.all(
-    [
-      contractProofOf(contractIds),
-      loadLegalHistory(ctx.project, ctx.access),
-      loadContractCards(contractIds),
-      loadProjectInvoices(projectId, ctx.project.ownerPersonId),
-      loadInvoiceStates(projectId),
-    ],
-  );
+  const [proof, cards, invoiceView, invoiceStates] = await Promise.all([
+    contractProofOf(contractIds),
+    loadContractCards(contractIds),
+    loadProjectInvoices(projectId, ctx.project.ownerPersonId),
+    loadInvoiceStates(projectId),
+  ]);
   // A contract's invoice: read by the owner and the direction, where it
   // stands for the Juridique (one invoice system, 20/10/2026).
   const byContract = Object.fromEntries(
@@ -79,13 +73,7 @@ export async function DemarcheStep({
     ]),
   );
   return (
-    <LegalStepFrame
-      projectId={projectId}
-      stepKey={demarche.step.key}
-      history={
-        <StepHistory items={demarcheHistory(demarche, history.events)} />
-      }
-    >
+    <LegalStepFrame projectId={projectId} stepKey={demarche.step.key}>
       <DemarcheBody
         projectId={projectId}
         projectTitle={ctx.project.title}
@@ -102,16 +90,6 @@ export async function DemarcheStep({
           fr.legalDemarches.direction
         }
         people={ctx.tracking.state === "tracking" ? ctx.tracking.people : []}
-        ownerChangedBy={
-          // The plan journal's last change of who or when (« Modifié par »).
-          history.events
-            .filter(
-              (e) =>
-                demarche.own !== null &&
-                e.object === `plan-item:${demarche.own.id}`,
-            )
-            .sort((a, b) => b.at.localeCompare(a.at))[0]?.by ?? null
-        }
       />
     </LegalStepFrame>
   );

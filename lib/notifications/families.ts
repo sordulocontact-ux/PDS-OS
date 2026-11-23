@@ -13,6 +13,7 @@ export const REQUEST_KINDS = [
   "design_version_submitted",
   "design_submission_requested",
   "contract_review_requested",
+  "contract_signed_emailed",
   "master_bank_details_changed",
   "master_delay_escalated",
   "master_invoice_received",

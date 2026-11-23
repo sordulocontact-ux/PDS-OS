@@ -35,6 +35,10 @@ export type OutgoingEmail = {
   alsoTo?: string[];
   cc?: string[];
   bcc?: string[];
+  // An answer: the Message-ID it answers and its whole thread, so mail apps
+  // keep it in the same conversation (the page « Mails »).
+  inReplyTo?: string;
+  references?: string[];
 };
 
 export type EmailAttachment = {
@@ -52,7 +56,9 @@ function replyToOf(mail: OutgoingEmail): string[] | undefined {
 
 export async function sendEmail(
   mail: OutgoingEmail,
-): Promise<{ ok: true } | { ok: false; reason: "disabled" | "failed" }> {
+): Promise<
+  { ok: true; messageId: string } | { ok: false; reason: "disabled" | "failed" }
+> {
   const env = getServerEnv();
   if (!env.EMAIL_SMTP_USER || !env.EMAIL_SMTP_PASSWORD)
     return { ok: false, reason: "disabled" };
@@ -63,7 +69,7 @@ export async function sendEmail(
     auth: { user: env.EMAIL_SMTP_USER, pass: env.EMAIL_SMTP_PASSWORD },
   });
   try {
-    await transport.sendMail({
+    const info = await transport.sendMail({
       from: { name: `${mail.sender.name} · PDS`, address: env.EMAIL_SMTP_USER },
       to: [
         { name: mail.to.name, address: mail.to.email },
@@ -75,13 +81,15 @@ export async function sendEmail(
       subject: mail.subject,
       text: mail.text,
       html: mail.html,
+      inReplyTo: mail.inReplyTo,
+      references: mail.references?.length ? mail.references : undefined,
       attachments: mail.attachments?.map((a) => ({
         filename: a.filename,
         content: Buffer.from(a.content),
         contentType: a.contentType,
       })),
     });
-    return { ok: true };
+    return { ok: true, messageId: info.messageId };
   } catch (error) {
     // Never the message nor the addresses in the logs.
     console.error(

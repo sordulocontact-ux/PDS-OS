@@ -37,7 +37,6 @@ export function DemarcheBody({
   direction,
   owner,
   people,
-  ownerChangedBy,
 }: {
   projectId: string;
   projectTitle: string;
@@ -53,8 +52,6 @@ export function DemarcheBody({
   owner: string;
   // Who may answer for it (delegation).
   people: Array<{ personId: string; name: string }>;
-  // Who last changed its responsible or due date (plan journal).
-  ownerChangedBy: string | null;
 }) {
   const { parts, current, own } = demarche;
   const part = (row: BoardRow) => (
@@ -138,7 +135,6 @@ export function DemarcheBody({
               dueOn: own.dueOn,
               people,
             }}
-            changedBy={ownerChangedBy}
             overdue={demarche.step.alert === "overdue"}
           />
         )}

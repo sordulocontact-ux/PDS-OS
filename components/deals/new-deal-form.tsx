@@ -57,6 +57,9 @@ export function NewDealForm({
   const [participation, setParticipation] = useState("");
   const [project, setProject] = useState("");
   const [artist, setArtist] = useState(preset);
+  // The artist the chosen project filled in, followed by another project
+  // until someone picks an artist himself.
+  const [filled, setFilled] = useState("");
   const [missing, setMissing] = useState<Missing[]>([]);
   const { pending, error, run } = useWriteSubmit(() => {
     onDone();
@@ -164,6 +167,13 @@ export function NewDealForm({
             project: setProject,
             artist: setArtist,
           })[field](value);
+          if (field === "project" && (!artist || artist === filled)) {
+            // What PDS OS knows of the project: its artist, still changeable.
+            const own = options.projectArtists[value] ?? "";
+            setArtist(own || (artist === filled ? "" : artist));
+            setFilled(own);
+          }
+          if (field === "artist") setFilled("");
           setMissing([]);
         }}
         missing={missing}

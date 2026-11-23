@@ -59,14 +59,16 @@ export function ContractReceived({
     // between sections (8 px of the step's section + 20), whatever wraps it
     // (Sacha, 06/11/2026: « pourquoi si peu de gap »).
     <div className="mt-5 flex flex-col gap-3.5 modern:gap-4">
-      <StepSection title={t.received(person)}>
+      <StepSection
+        title={(deposit.byEmail ? t.receivedByEmail : t.received)(person)}
+      >
         <FactRows>
           <FactRow
             label={t.signedFile}
             value={
               <b className="font-semibold break-all">{deposit.fileName}</b>
             }
-            source={t.depositedBy(
+            source={(deposit.byEmail ? t.emailedBy : t.depositedBy)(
               person,
               formatShortDay(deposit.at, { bare: true }),
             )}

@@ -2,11 +2,13 @@
 
 import { IconCheck, IconFile } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast";
 
+import { Button } from "@/components/ui/button";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
+import { latestContractFile } from "@/lib/contracts/proof-file-actions";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 
 const fr = { legalClearance };
@@ -15,7 +17,8 @@ const fr = { legalClearance };
  * Where the signed copy or its proof is dropped, inside the borrowing's
  * panel: the file goes to the contract's files, in its category (« Signé »,
  * « Preuve de signature »), as from the contract's page — the person never
- * has to leave the panel (Sacha, 07/10/2026). Already there: said, done.
+ * has to leave the panel (Sacha, 07/10/2026). Already there: said, done,
+ * with « Remplacer » when the wrong file was dropped (a new version).
  */
 export function ContractProofSlot({
   organizationId,
@@ -39,6 +42,37 @@ export function ContractProofSlot({
   const t = fr.legalClearance.stages.sign;
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+  const picker = useRef<HTMLInputElement>(null);
+  // Dropped: the file's own name (Sacha 23/11/2026), read once there.
+  const [fileName, setFileName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!present) return;
+    let alive = true;
+    void latestContractFile({ contractId, category }).then(
+      (file) => alive && setFileName(file?.name ?? null),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [present, contractId, category]);
+
+  // A new version of the file already there (the wrong one was dropped).
+  const replace = async (file: File) => {
+    setBusy(true);
+    const replacesId = (await latestContractFile({ contractId, category }))?.id;
+    const result = await uploadCatalogFile({
+      organizationId,
+      owner: { kind: "contract", id: contractId },
+      category,
+      file,
+      replacesId,
+    });
+    setBusy(false);
+    if (!result.ok) return void toast.error(result.error);
+    toast.success(t.replaced);
+    setFileName(file.name);
+    router.refresh();
+  };
 
   if (present)
     return (
@@ -47,8 +81,35 @@ export function ContractProofSlot({
           aria-hidden
           className="size-4 text-[color:var(--tone-success-fg)]"
         />
-        <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">· {t.deposited}</span>
+        <span className="min-w-0 truncate font-medium" title={label}>
+          {fileName ?? label}
+        </span>
+        {/* The tick and the frame say it is there (Sacha 23/11/2026: « le
+            déposé ne sert à rien »); only the upload in progress is said. */}
+        {busy && <span className="text-muted-foreground">· {t.uploading}</span>}
+        <input
+          ref={picker}
+          type="file"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void replace(file);
+          }}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          className="ml-auto"
+          disabled={busy}
+          aria-busy={busy || undefined}
+          aria-label={t.replace(label)}
+          onClick={() => picker.current?.click()}
+        >
+          {t.replaceShort}
+        </Button>
       </div>
     );
 

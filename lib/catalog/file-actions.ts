@@ -166,7 +166,6 @@ function refresh(owner: FileOwner) {
   switch (owner.kind) {
     case "artist":
       revalidatePath(routes.artistFiles(owner.id));
-      revalidatePath(routes.artistActivity(owner.id));
       // Its moodboards show on the Identité tab too.
       revalidatePath(routes.artistIdentity(owner.id));
       return;
@@ -178,7 +177,6 @@ function refresh(owner: FileOwner) {
       return;
     case "project":
       revalidatePath(routes.projectFiles(owner.id));
-      revalidatePath(routes.projectActivity(owner.id));
       return;
     case "contract":
       revalidatePath(routes.contract(owner.id));

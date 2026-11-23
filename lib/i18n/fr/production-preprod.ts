@@ -590,7 +590,7 @@ export const productionPreprod = {
     editDates: "Modifier les dates",
     datesTitle: "Dates et enveloppe",
     datesDescription:
-      "Les valeurs de la Fiche Livrable sont reprises : enregistrer les confirme. Un changement reste visible face à la Fiche et dans l'Historique.",
+      "Les valeurs de la Fiche Livrable sont reprises : enregistrer les confirme. Un changement reste visible face à la Fiche.",
     fields: {
       shootDate: "Date de tournage",
       postStart: "Début de postproduction",
@@ -833,7 +833,7 @@ export const productionPreprod = {
     derogate: "Déroger",
     derogateTitle: (check: string) => `Déroger à « ${check} » ?`,
     derogateDescription:
-      "Le contrôle compte comme confirmé sans sa preuve habituelle. Le motif, votre nom et la date restent visibles et dans l'Historique.",
+      "Le contrôle compte comme confirmé sans sa preuve habituelle. Le motif, votre nom et la date restent visibles.",
     derogateReason: "Motif",
     derogateMissing: "Écrivez pourquoi.",
     derogated: "Dérogation enregistrée.",

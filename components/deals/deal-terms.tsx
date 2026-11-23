@@ -74,18 +74,21 @@ function ProposalsBar({
  * valider »): the value read — the one written before struck through —, its
  * state, who said it and where (the call opens its transcript), « Valider »,
  * « Modifier » and « Écarter » as icons (TermProposalActions); « Tout valider » writes them all as read. A term read twice
- * shows the latest. A card or a slot opens the term in a dialog; the history
- * is in the deal's journal.
+ * shows the latest. A card or a slot opens the term in a dialog.
  */
 export function DealTerms({
   dealId,
   terms,
   canWrite,
   proposals = [],
+  writtenOnly = false,
 }: {
   dealId: string;
   terms: DealTerm[];
   canWrite: boolean;
+  // The accord validated: the terms not written were not negotiated, their
+  // empty slots are noise (Sacha 23/11/2026).
+  writtenOnly?: boolean;
   // PO's term proposals from the deal's calls, still to check, oldest first.
   proposals?: TermProposal[];
 }) {
@@ -100,9 +103,9 @@ export function DealTerms({
   const filled = terms.filter(
     (term) => term.state !== "to_define" || read.has(term.key),
   );
-  const empty = terms.filter(
-    (term) => term.state === "to_define" && !read.has(term.key),
-  );
+  const empty = writtenOnly
+    ? []
+    : terms.filter((term) => term.state === "to_define" && !read.has(term.key));
 
   const proposedCard = (term: DealTerm, p: TermProposal) => {
     const before =

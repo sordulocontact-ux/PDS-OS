@@ -206,7 +206,8 @@ export function ContactInProjects({
 }
 
 /** The fiches de renseignements sent to the contact, one per project:
- * returned or not. None: no card. */
+ * returned or not. None: no card. Its own Réseau fiche is in
+ * « Coordonnées » (ContactFiche). */
 export function ContactFiches({ projects }: { projects: ContactProject[] }) {
   const p = fr.network.page;
   const fiches = projects.flatMap((project) =>
@@ -222,33 +223,35 @@ export function ContactFiches({ projects }: { projects: ContactProject[] }) {
       title={p.fiche}
       description={p.ficheDescription}
     >
-      <DataTable framed>
-        <DataTableHeader>
-          <DataTableHead>{p.columns.project}</DataTableHead>
-          <DataTableHead hideBelow="sm">{p.columns.sentOn}</DataTableHead>
-          <DataTableHead fill>{p.columns.state}</DataTableHead>
-        </DataTableHeader>
-        <DataTableBody>
-          {fiches.map(({ project, item }) => (
-            <DataTableRow key={item.id}>
-              <DataTableCell className="break-words">
-                {project.title}
-              </DataTableCell>
-              <DataTableCell hideBelow="sm" className="tabular-nums">
-                {formatDate(item.at)}
-              </DataTableCell>
-              <DataTableCell fill>
-                <StatusBadge
-                  tone={item.state === "done" ? "success" : "info"}
-                  size="sm"
-                >
-                  {item.state === "done" ? p.ficheDone : p.ficheTodo}
-                </StatusBadge>
-              </DataTableCell>
-            </DataTableRow>
-          ))}
-        </DataTableBody>
-      </DataTable>
+      {fiches.length > 0 && (
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{p.columns.project}</DataTableHead>
+            <DataTableHead hideBelow="sm">{p.columns.sentOn}</DataTableHead>
+            <DataTableHead fill>{p.columns.state}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {fiches.map(({ project, item }) => (
+              <DataTableRow key={item.id}>
+                <DataTableCell className="break-words">
+                  {project.title}
+                </DataTableCell>
+                <DataTableCell hideBelow="sm" className="tabular-nums">
+                  {formatDate(item.at)}
+                </DataTableCell>
+                <DataTableCell fill>
+                  <StatusBadge
+                    tone={item.state === "done" ? "success" : "info"}
+                    size="sm"
+                  >
+                    {item.state === "done" ? p.ficheDone : p.ficheTodo}
+                  </StatusBadge>
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
+      )}
     </PageSection>
   );
 }

@@ -105,6 +105,9 @@ export type NetworkContactDetail = NetworkContactValues & {
   };
   parentName: string | null;
   artistName: string | null;
+  // The artists it manages (Catalogue › Contacts, role « manager »), for
+  // whoever reads the artists' contacts (manage_catalog).
+  managedArtists: { id: string; name: string }[];
   // People of the network who work for this organization.
   members: { id: string; name: string; roles: NetworkContactRow["roles"] }[];
   // Contracts naming this contact, among those the viewer may read.
@@ -122,7 +125,7 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
   id: string,
 ): Promise<NetworkContactDetail | null> {
   const supabase = await createClient();
-  const [contact, members, parties] = await Promise.all([
+  const [contact, members, parties, managed] = await Promise.all([
     supabase
       .from("network_contacts")
       .select(
@@ -143,6 +146,11 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
         "role, contract:contracts!contract_parties_contract_same_org(id, title, status)",
       )
       .eq("contact_id", id),
+    supabase
+      .from("artist_contacts")
+      .select("artist:artists!artist_contacts_artist_same_org(id, name)")
+      .eq("contact_id", id)
+      .eq("role", "manager"),
   ]);
   if (contact.error) console.error("getNetworkContact:", contact.error.message);
   if (!contact.data) return null;
@@ -188,6 +196,9 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
     },
     parentName: row.parent_id ? (parents.get(row.parent_id) ?? null) : null,
     artistName: row.artist?.name ?? null,
+    managedArtists: (managed.data ?? [])
+      .flatMap((m) => (m.artist ? [m.artist] : []))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr")),
     members: (members.data ?? []).map((m) => ({
       id: m.id,
       name: m.name,

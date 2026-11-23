@@ -51,6 +51,8 @@ export function EmptyState({
 // in the same dashed frame, without icon or title. `action`: the button that
 // fills it, inside the frame under the line, both centred (Sacha 20/11/2026,
 // Mobbin: Cloudflare, Mercury, v0 — never a button left under the frame).
+// Its line one step stronger than a section's description (--text-secondary
+// over --text-tertiary, Sacha 23/11/2026: « ça permet de hiérarchiser »).
 export function EmptyNote({
   children,
   action,
@@ -60,7 +62,7 @@ export function EmptyNote({
 }) {
   // On a section card, a plain line: no frame inside a card.
   const frame =
-    "rounded-xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground in-[.section-card]:border-0 in-[.section-card]:p-0";
+    "rounded-xl border border-dashed border-border bg-card p-4 text-sm text-[color:var(--text-secondary)] in-[.section-card]:border-0 in-[.section-card]:p-0";
   if (!action) return <p className={frame}>{children}</p>;
   return (
     <div

@@ -30,8 +30,8 @@ import { applicableWorkflows } from "@/lib/workflow-status/rules";
  * Focus, Ensuite, Pendant ce temps, À anticiper, one row per workflow — the
  * owner opens a row to change it and « Lancer le plan » starts every
  * workflow, said under it before the gesture. Launched, the same card says
- * who launched it and each row its real state; the steps' table and
- * history stay folded.
+ * who launched it and each row its real state; the steps' table
+ * stays folded.
  */
 export default async function FramingPlanPage({
   params,

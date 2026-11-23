@@ -155,13 +155,13 @@ select is(public.contract_gaps_text(pg_temp.id_of('c1'), 'release'),
   'Lou ' || pg_temp.tag() || ' (Titre de Lou ' || pg_temp.tag() || ' (à nommer))',
   'nor the locks');
 
--- The deal reads the same contract and may be signed.
-select pg_temp.act_as(pg_temp.id_of('glen'));
-select lives_ok($$ select public.set_deal_stage(pg_temp.id_of('d_nadia'), 'contracting') $$,
-  'the deal goes to contracting');
-select lives_ok($$ select public.set_deal_stage(pg_temp.id_of('d_nadia'), 'signed') $$,
-  'and to « Signé »: its contract is signed');
-reset role;
+-- The deal reads the same contract, and follows it: signed, the deal is signed
+-- (20261123100101, deal_follows_contract).
+select is((select stage from public.deals where id = pg_temp.id_of('d_nadia')), 'signed',
+  'the deal is signed with its contract');
+select is((select detail ->> 'contract' from public.deal_events
+            where deal_id = pg_temp.id_of('d_nadia') and kind = 'stage' and to_stage = 'signed'),
+  'signed', 'journaled with the contract''s status');
 select is((select contract_id from public.read_deal_contract(pg_temp.id_of('d_nadia'))),
   pg_temp.id_of('k_nadia'), 'the deal names the person''s contract');
 

@@ -36,6 +36,7 @@ export const shell = {
     members: "Équipe",
     feedback: "Retours",
     labo: "Repérage",
+    mailbox: "Mails",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
     pendingMembers: (count: number) =>
       count === 1
@@ -527,7 +528,6 @@ export const shell = {
       planning: "Planning",
       budget: "Budget",
       validations: "Validations",
-      activity: "Activité",
     },
     // The project's pages read again after a change (JUR-12 / JUR-28).
     live: { updating: "Mise à jour…" },
@@ -549,7 +549,6 @@ export const shell = {
         // element taken from another work is an « Autorisation » on screen (JUR-09).
         clearances: "Autorisations",
         formalities: "SACEM",
-        history: "Historique",
       },
     },
     // Le workflow Marketing (ticket « Architecture globale », § 4) : une

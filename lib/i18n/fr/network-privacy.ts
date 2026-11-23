@@ -21,16 +21,6 @@ export const networkPrivacy = {
     "Ses coordonnées reviennent dans le Réseau, lues par tous les membres.",
   sharedWith: "Partagé avec",
   sharedNone: "Partagé avec aucun deal.",
-  journal: "Journal",
-  events: {
-    made_private: "Rendu privé",
-    made_shared: "Rendu partagé avec tout le Réseau",
-    deal_shared: "Partagé avec un deal",
-    deal_unshared: "Retiré d'un deal",
-    share_refused: "Partage refusé",
-    details_changed: "Coordonnées modifiées",
-  } as Record<string, string>,
-  by: (who: string) => `par ${who}`,
   done: {
     private: "Contact rendu privé",
     shared: "Contact partagé avec tout le Réseau",

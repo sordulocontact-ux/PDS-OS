@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import type { DealCallFormData } from "@/components/deals/deal-call-button";
-import { DealFileView } from "@/components/deals/deal-file-view";
+import { DealInfoButton } from "@/components/deals/deal-info-button";
 import type { ContractStep } from "@/components/deals/deal-contract-now";
 import type { MemoStep } from "@/components/deals/deal-memo-now";
 import { DealStageMenu } from "@/components/deals/deal-stage-menu";
@@ -11,7 +11,6 @@ import { DealTodoView } from "@/components/deals/deal-todo-view";
 import { NewDealButton } from "@/components/deals/new-deal-button";
 import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
-import { TabBar } from "@/components/ui/tab-bar";
 import { can } from "@/lib/auth/access";
 import {
   dealMailSetup,
@@ -27,6 +26,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts } from "@/lib/calls/invite";
+import { loadCallGuests } from "@/lib/deals/call-guests";
 import { dealCallTitle, dealCallTopics } from "@/lib/deals/call-prep";
 import {
   loadDealCallProposals,
@@ -73,6 +73,12 @@ async function callFormFor(
     dealId: deal.id,
     title: dealCallTitle(dealName(deal)),
     contacts: await loadCallContacts(),
+    guests: await loadCallGuests({
+      dealId: deal.id,
+      participationId: deal.participationId,
+      artistId: deal.artistId,
+      counterpartId: deal.counterpartId,
+    }),
     googleMeet: googleMeetConfigured(),
     defaultOccurredAt: nextRoundHourInput(new Date()),
     topics: dealCallTopics(deal, terms),
@@ -97,35 +103,32 @@ export async function generateMetadata({
 }
 
 /**
- * A deal's page (BIZ 4), its stage beside its name, in two views (Ibé
- * 18/11/2026: « il faut faire comme si la personne en face ne réfléchissait
- * pas »). « À faire » (DealTodoView): « Maintenant » when the reader has a
- * gesture, PO's proposals, the next action, then what the stage works on.
- * « Dossier » (`?vue=dossier`, DealFileView): everything about the deal,
- * to read. Not found for whoever may not read it.
+ * A deal's page (BIZ 4), its stage beside its name (Ibé 18/11/2026: « il
+ * faut faire comme si la personne en face ne réfléchissait pas »):
+ * « Maintenant » when the reader has a gesture, PO's proposals, the next
+ * action, then what the stage works on (DealTodoView); signed or abandoned,
+ * the whole deal to read. « Informations » beside the title (DealInfoButton):
+ * its facts, people and calls the stage does not show (Sacha
+ * 23/11/2026, in place of the « Dossier » tab). Not found for whoever may
+ * not read it.
  */
 export default async function DealPage({
   params,
-  searchParams,
 }: PageProps<"/app/deals/[dealId]">) {
-  const [{ dealId }, query] = await Promise.all([params, searchParams]);
+  const { dealId } = await params;
   if (!z.uuid().safeParse(dealId).success) notFound();
   const access = await requireApproved();
   const deal = await loadDeal(access, dealId);
   if (!deal) notFound();
-  const file = query.vue === "dossier";
   const [events, terms, negotiators, calls, proposals, contacts] =
     await Promise.all([
       loadDealEvents(deal.id),
       loadDealTerms(deal.id, deal.kind),
-      negotiatorsFor(deal.canAssign && file),
+      negotiatorsFor(deal.canAssign),
       loadDealCalls(deal.id),
-      file ? Promise.resolve([]) : loadDealCallProposals(deal.id, deal.kind),
+      loadDealCallProposals(deal.id, deal.kind),
       loadDealContacts(deal.id),
     ]);
-  const href = routes.deal(deal.id);
-  const tabs = t.page.tabs;
-
   return (
     <SectionFrame
       list={false}
@@ -133,40 +136,28 @@ export default async function DealPage({
       title={dealName(deal)}
       badge={<DealStageBadge deal={deal} size="md" />}
       action={
-        deal.canWrite &&
-        deal.stage !== "abandoned" && (
-          <DealStageMenu deal={deal} name={dealName(deal)} />
-        )
+        <div className="flex items-center gap-2">
+          <DealInfoButton
+            deal={deal}
+            negotiators={negotiators}
+            contacts={contacts}
+            calls={calls}
+          />
+          {deal.canWrite && deal.stage !== "abandoned" && (
+            <DealStageMenu deal={deal} name={dealName(deal)} />
+          )}
+        </div>
       }
     >
-      <TabBar
-        label={tabs.label}
-        items={[
-          { href, label: tabs.todo, current: !file },
-          { href: `${href}?vue=dossier`, label: tabs.file, current: file },
-        ]}
+      <DealTodo
+        access={access}
+        deal={deal}
+        terms={terms}
+        events={events}
+        calls={calls}
+        proposals={proposals}
+        contacts={contacts}
       />
-      {file ? (
-        <DealFileView
-          access={access}
-          deal={deal}
-          terms={terms}
-          negotiators={negotiators}
-          contacts={contacts}
-          calls={calls}
-          events={events}
-        />
-      ) : (
-        <DealTodo
-          access={access}
-          deal={deal}
-          terms={terms}
-          events={events}
-          calls={calls}
-          proposals={proposals}
-          contacts={contacts}
-        />
-      )}
     </SectionFrame>
   );
 }
@@ -202,8 +193,9 @@ async function DealTodo({
           deal.agreementStatus === "validated"))) ||
     // The direction decides an accord on its memo, read first.
     deal.canDecide;
-  // Contracting, whoever writes the deal sees the contract's step.
-  const contractTime = deal.canWrite && deal.stage === "contracting";
+  // Contracting, whoever reads the deal and its contract sees the contract's
+  // step: who it waits for, when not their own (Sacha 23/11/2026).
+  const contractTime = deal.stage === "contracting";
   const [callForm, negotiationCall, memos, loop, contract] = await Promise.all([
     callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
@@ -219,7 +211,7 @@ async function DealTodo({
     ? { contract: detail, data: await loadContractPage(detail, access) }
     : null;
   const contractStep: ContractStep | null =
-    contractTime && !circuit
+    contractTime && deal.canWrite && !circuit
       ? {
           participation: deal.participationId !== null,
           create: can(access, "manage_contracts")
@@ -241,7 +233,7 @@ async function DealTodo({
             changes: latest.changes?.reason ?? null,
             correctionSent: latest.correction !== null,
             toSend: latest.status === "validated" && !latest.sent,
-            received: latest.source === "email",
+            received: latest.source !== "pds",
             receivedSubject: latest.email?.subject ?? null,
             toValidate: latest.status === "draft" && !latest.changes,
             file: latest.files.find((f) => f.url) ?? null,
@@ -257,7 +249,7 @@ async function DealTodo({
                 ? latest.files.map((f) => f.name).join(", ")
                 : dealMemos.pdf.file(dealName(deal), latest.number),
           },
-          address: mail.address,
+          organizationId: access.organizationId,
           counterpart: deal.counterpartName,
           director: can(access, "validate"),
           dealName: dealName(deal),

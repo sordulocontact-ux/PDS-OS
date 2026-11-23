@@ -1,7 +1,6 @@
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { StepHistory } from "@/components/shell/journey/step-history";
 import {
   StepPanel,
   type StepSlots,
@@ -14,7 +13,6 @@ import {
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { reviewJourneyContext } from "@/lib/marketing/review/context";
-import { reviewHistory } from "@/lib/marketing/review/history";
 import { loadStanding } from "@/lib/marketing/review/standing-data";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
@@ -57,22 +55,9 @@ export async function ReviewStepFrame({
     key: stepChoiceKey({ module: "review", stepKey: s.key }),
     label: s.title,
   }));
-  const history = reviewHistory({
-    ...ctx,
-    validatorName: validator?.name ?? null,
-  })[stepKey];
   return (
     <JourneyLayout
-      spine={
-        <JourneySpine
-          steps={steps}
-          openKey={stepKey}
-          footer={{
-            href: reviewStepHref(projectId, "history"),
-            label: t.history.link,
-          }}
-        />
-      }
+      spine={<JourneySpine steps={steps} openKey={stepKey} />}
       head={
         <>
           <ProjectHeader
@@ -112,13 +97,7 @@ export async function ReviewStepFrame({
         </>
       }
     >
-      <StepPanel
-        step={step}
-        steps={steps}
-        blockedLabel={t.blocked}
-        history={<StepHistory items={history} />}
-        {...slots}
-      >
+      <StepPanel step={step} steps={steps} blockedLabel={t.blocked} {...slots}>
         <StepBlockers stepRef={stepRef} steps={choices} />
         {children}
         <StepToolsBlock

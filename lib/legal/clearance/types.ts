@@ -78,15 +78,6 @@ export type Clearance = {
     ownerName: string | null;
     ownerIsViewer: boolean;
   }>;
-  history: Array<{
-    id: string;
-    kind: string;
-    from: string | null;
-    to: string | null;
-    note: string | null;
-    at: string;
-    by: string;
-  }>;
 };
 
 export type Clearances = {

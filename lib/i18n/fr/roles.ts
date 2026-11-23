@@ -11,10 +11,7 @@ export const roles = {
   change: "Changer",
   multi: (name: string, count: number) =>
     `${name} tient ${count} rôles : chaque action dit à quel titre elle est faite.`,
-  history: "Changements de rôle",
   // « Lina Haddad a confié la production à Studio Ressac · 19/10, 11:16 ».
-  historyLine: (text: string, who: string | null, at: string) =>
-    who ? `${who} ${text} · ${at}` : `${text} · ${at}`,
   production: {
     company: "Production exécutive",
     owner: "Responsable du projet",

@@ -92,6 +92,7 @@ export function NegotiationCallButton({
                   members={[{ personId: negotiator.id, name: negotiator.name }]}
                   memberDetail={t.who}
                   defaultMemberIds={[negotiator.id]}
+                  defaultContactIds={data.guests}
                   contacts={data.contacts}
                   googleMeet={data.googleMeet}
                   submitLabel={t.submit}

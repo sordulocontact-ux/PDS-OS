@@ -52,7 +52,7 @@ export function PublicForm({
       <p className="text-muted-foreground">{intro}</p>
       <FormSteps {...props} requester={requester} onSent={setSent} />
       <RequesterNote requester={requester} />
-      <DataUseNote requester={requester} />
+      <DataUseNote requester={requester} network={props.network} />
     </>
   );
 }
@@ -65,6 +65,8 @@ type Sent = {
 
 type FormStepsProps = {
   token: string;
+  // A Réseau fiche (no project): no project question, no contribution.
+  network?: boolean;
   prefillRoles: FormRole[];
   known: Record<string, string>;
   requester: FormRequester;
@@ -73,6 +75,7 @@ type FormStepsProps = {
 
 function FormSteps({
   token,
+  network = false,
   prefillRoles,
   known,
   requester,
@@ -118,13 +121,14 @@ function FormSteps({
       <RoleStep
         roles={roles}
         otherRole={otherRole}
+        network={network}
         onToggle={toggle}
         onOtherRole={setOtherRole}
         onNext={() => setStep("fields")}
       />
     );
 
-  const fields = fieldsFor(roles);
+  const fields = fieldsFor(roles, { network });
   // Required: the fiche's own, and what the contract needs (an address for
   // a person, the company's details for a company, the IPI for a creator).
   const needed = new Set(ficheNeeded(roles, answers));

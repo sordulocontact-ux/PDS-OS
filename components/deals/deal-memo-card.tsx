@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
-import type { DealMemo, MemoFile } from "@/lib/deals/memos";
+import {
+  isReceivedMemo,
+  type DealMemo,
+  type MemoFile,
+} from "@/lib/deals/memos";
 import { formatTermValue } from "@/lib/deals/term-format";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -42,7 +46,7 @@ export function MemoFileButton({
 function stateOf(memo: DealMemo): string {
   if (memo.status === "validated") return t.statuses.validated;
   if (memo.changes) return t.changes.done;
-  return memo.source === "email" ? t.toValidate : t.statuses.draft;
+  return isReceivedMemo(memo) ? t.toValidate : t.statuses.draft;
 }
 
 /** Where it comes from, then what happened to it: one line under its name. */
@@ -51,7 +55,9 @@ function lineOf(memo: DealMemo): string {
   return [
     memo.email
       ? t.receivedFrom(memo.email.from, day(memo.email.receivedAt))
-      : t.meta(memo.createdBy, day(memo.createdAt)),
+      : memo.source === "upload"
+        ? t.depositedBy(memo.createdBy, day(memo.createdAt))
+        : t.meta(memo.createdBy, day(memo.createdAt)),
     memo.validatedAt
       ? t.validatedBy(memo.validatedBy, day(memo.validatedAt))
       : memo.submitted && !memo.changes
@@ -90,44 +96,42 @@ export function DealMemoCard({
 }) {
   const [first, ...others] = memo.files;
   const email = memo.email;
-  const body =
-    memo.source === "email" ? (
-      <FactRows className="rounded-none border-0">
-        {others.map((file) => (
-          <FactRow
-            key={file.id}
-            label={t.file}
-            value={file.name}
-            side={<MemoFileButton file={file} />}
-          />
-        ))}
-        {email?.subject && <FactRow label={t.subject} value={email.subject} />}
-        {email?.text && (
-          <FactRow
-            label={t.message}
-            value={<span className="whitespace-pre-line">{email.text}</span>}
-          />
-        )}
-      </FactRows>
-    ) : memo.terms.length > 0 ? (
-      <FactRows className="rounded-none border-0">
-        {memo.terms.map((term) => (
-          <FactRow
-            key={term.key}
-            label={fr.deals.terms.labels[term.key] ?? term.key}
-            value={formatTermValue(term.format, term.value)}
-            state={{
-              tone: dealTermTone[term.state],
-              label: fr.deals.terms.states[term.state],
-            }}
-          />
-        ))}
-      </FactRows>
-    ) : null;
-  const hasBody =
-    memo.source === "email"
-      ? others.length > 0 || Boolean(email?.subject || email?.text)
-      : memo.terms.length > 0;
+  const body = isReceivedMemo(memo) ? (
+    <FactRows className="rounded-none border-0">
+      {others.map((file) => (
+        <FactRow
+          key={file.id}
+          label={t.file}
+          value={file.name}
+          side={<MemoFileButton file={file} />}
+        />
+      ))}
+      {email?.subject && <FactRow label={t.subject} value={email.subject} />}
+      {email?.text && (
+        <FactRow
+          label={t.message}
+          value={<span className="whitespace-pre-line">{email.text}</span>}
+        />
+      )}
+    </FactRows>
+  ) : memo.terms.length > 0 ? (
+    <FactRows className="rounded-none border-0">
+      {memo.terms.map((term) => (
+        <FactRow
+          key={term.key}
+          label={fr.deals.terms.labels[term.key] ?? term.key}
+          value={formatTermValue(term.format, term.value)}
+          state={{
+            tone: dealTermTone[term.state],
+            label: fr.deals.terms.states[term.state],
+          }}
+        />
+      ))}
+    </FactRows>
+  ) : null;
+  const hasBody = isReceivedMemo(memo)
+    ? others.length > 0 || Boolean(email?.subject || email?.text)
+    : memo.terms.length > 0;
   const change = memo.changes
     ? t.changesBy(
         memo.changes.by,

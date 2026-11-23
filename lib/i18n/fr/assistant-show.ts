@@ -65,7 +65,6 @@ export const assistantShow = {
       factures: "Factures et encaissements",
       encaissements: "Encaissements",
       banque: "Opérations bancaires",
-      historique: "Historique Finance",
     } as Record<string, string>,
     columns: {
       title: "Titre",

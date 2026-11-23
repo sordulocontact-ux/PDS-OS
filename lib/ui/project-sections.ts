@@ -5,7 +5,6 @@ import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
-import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import { projectReview } from "@/lib/i18n/fr/production";
 import { shell } from "@/lib/i18n/fr/shell";
@@ -18,7 +17,6 @@ const fr = {
   legalContracts,
   legalFormalities,
   legalForms,
-  legalHistory,
   legalSplits,
 };
 
@@ -192,13 +190,6 @@ export function projectSections(
       "steering",
       "overview",
     ),
-    section(
-      "activity",
-      t.activity,
-      routes.projectActivity(projectId),
-      "steering",
-      "overview",
-    ),
     ...(budget
       ? [
           section(
@@ -270,7 +261,6 @@ export function projectTrail(
     [`${legal}/splits`]: [plan, { label: fr.legalSplits.page.title }],
     [`${legal}/clearances`]: [plan, { label: fr.legalClearance.page.title }],
     [`${legal}/formalities`]: [plan, { label: fr.legalFormalities.page.title }],
-    [`${legal}/history`]: [{ label: fr.legalHistory.title }],
     // Marketing › Conception (proto « Projet complet »): the open step ends
     // the trail (ProjectHeader `steps`), « Conception » before it.
     [routes.projectDesign(projectId)]: [{ label: fr.conception.title }],

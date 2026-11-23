@@ -59,14 +59,9 @@ export const projectHistory = {
     openStage: "Ouvrir l'étape",
     unknownPerson: "—",
   },
+  // The headings of a day-grouped list (DayGroups).
   activity: {
-    title: "Activité",
-    description:
-      "Tout ce qui s'est passé sur ce projet, du plus récent au plus ancien.",
     today: "Aujourd'hui",
     yesterday: "Hier",
-    emptyTitle: "Aucune activité",
-    emptyBody:
-      "Les calls, validations, tâches et changements d'étape s'afficheront ici.",
   },
 } as const;

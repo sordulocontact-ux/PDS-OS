@@ -32,8 +32,7 @@ export const legalFormalities = {
     processing: "Marquée en traitement par la SACEM.",
     correction:
       "Correction demandée : les champs concernés sont rouverts dans le dossier.",
-    complete:
-      "Enregistrée par la SACEM : la déclaration est terminée et reste dans l'Historique du dossier.",
+    complete: "Enregistrée par la SACEM : la déclaration est terminée.",
     reject: "Rejet enregistré : préparez une nouvelle déclaration.",
     restart:
       "Nouvelle déclaration : le dossier est rouvert, l'historique reste.",
@@ -435,7 +434,6 @@ export const legalFormalities = {
     externalId: "Identifiant SACEM de l'œuvre",
     iswc: "ISWC reçu",
     completed: (date: string) => `Enregistrée le ${date}`,
-    history: "Historique",
     confirm: "Enregistrer",
     cancel: "Annuler",
     submittedNote: (date: string) => `Déposée le ${date}`,

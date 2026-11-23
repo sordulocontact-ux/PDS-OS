@@ -40,7 +40,6 @@ export function ArtistTabs({
             ]
           : []),
         { href: routes.artistFiles(artistId), label: t.tabs.files },
-        { href: routes.artistActivity(artistId), label: t.tabs.activity },
         ...(hasDeezer
           ? [
               {

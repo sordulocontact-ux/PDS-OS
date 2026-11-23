@@ -1,7 +1,6 @@
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { StepHistory } from "@/components/shell/journey/step-history";
 import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import {
@@ -12,7 +11,6 @@ import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { TitlesOverview } from "@/components/master-workflow/titles-overview";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
-import { masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { masterRoles } from "@/lib/master-workflow/roles";
 import {
@@ -22,7 +20,7 @@ import {
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { projectHeaderData } from "@/lib/projects/header";
 import type { ModuleFact } from "@/lib/ui/module-frame";
-import { masterStepHref, type MasterStepKey } from "@/lib/ui/master-steps";
+import type { MasterStepKey } from "@/lib/ui/master-steps";
 import { formatDay } from "@/lib/utils/day";
 
 const fr = { masterJourney };
@@ -57,7 +55,7 @@ export async function masterFacts(projectId: string): Promise<ModuleFact[]> {
  * The frame of a Master step (docs/VISION-UX.md § 4, JourneyLayout): the
  * journey on the left with « Historique du master » at its foot, on its
  * right the head (h1 = the step's title, its why, « Qui fait quoi », the
- * Master's facts) then the step's content and « Déjà fait ».
+ * Master's facts) then the step's content.
  */
 export async function MasterStepFrame({
   projectId,
@@ -94,29 +92,10 @@ export async function MasterStepFrame({
     key: stepChoiceKey({ module: "master", stepKey: s.key }),
     label: s.title,
   }));
-  const history = masterHistory(rows)
-    .filter(
-      (item) =>
-        item.step === stepKey &&
-        // A collective: the active title's, and the project's own (lot 8).
-        (!titleScope ||
-          !item.masterId ||
-          item.masterId === titleScope.active.masterId),
-    )
-    .reverse();
   const roles = masterRoles(rows, project.ownerName);
   return (
     <JourneyLayout
-      spine={
-        <JourneySpine
-          steps={titled}
-          openKey={stepKey}
-          footer={{
-            href: masterStepHref(projectId, "history"),
-            label: t.history.link,
-          }}
-        />
-      }
+      spine={<JourneySpine steps={titled} openKey={stepKey} />}
       head={
         <>
           <ProjectHeader
@@ -160,13 +139,7 @@ export async function MasterStepFrame({
         </>
       }
     >
-      <StepPanel
-        step={step}
-        steps={titled}
-        blockedLabel={t.blocked}
-        history={<StepHistory items={history} />}
-        {...slots}
-      >
+      <StepPanel step={step} steps={titled} blockedLabel={t.blocked} {...slots}>
         <StepBlockers stepRef={stepRef} steps={choices} />
         {children}
         <StepToolsBlock

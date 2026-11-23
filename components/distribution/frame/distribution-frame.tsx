@@ -189,16 +189,10 @@ export async function DistributionFrame({
           <JourneySpine
             steps={ctx.steps}
             openKey={shown.key}
-            footer={[
-              {
-                href: distributionViewHref(projectId, "anomalies", scope),
-                label: open ? t.footer.anomaliesOpen(open) : t.footer.anomalies,
-              },
-              {
-                href: distributionViewHref(projectId, "history", scope),
-                label: t.footer.history,
-              },
-            ]}
+            footer={{
+              href: distributionViewHref(projectId, "anomalies", scope),
+              label: open ? t.footer.anomaliesOpen(open) : t.footer.anomalies,
+            }}
           />
         }
         head={

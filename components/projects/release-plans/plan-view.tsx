@@ -1289,40 +1289,6 @@ function VersionsSection({ projectId, plan }: Ctx) {
           </DataTable>
         )}
         {write.error && <p className="text-sm text-error">{write.error}</p>}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">{v.journal}</h3>
-          {plan.events.length === 0 ? (
-            <p className={caption}>{v.noJournal}</p>
-          ) : (
-            <ul className="flex flex-col gap-1.5">
-              {plan.events.map((event) => (
-                <li key={event.id} className="text-sm">
-                  <span>
-                    {event.from === event.to && event.reason
-                      ? v.linkEvents[event.reason]
-                      : event.from
-                        ? v.move(t.statuses[event.from], t.statuses[event.to])
-                        : `${v.born} · ${t.statuses[event.to]}`}
-                  </span>
-                  <span className={secondary}>
-                    {[
-                      event.version ? v.versionOf(event.version) : null,
-                      event.reason && event.from !== event.to
-                        ? v.reasons[event.reason]
-                        : null,
-                      event.note ? `« ${event.note} »` : null,
-                      event.by ?? (event.reason ? v.system : null),
-                      formatDateTime(event.at),
-                    ]
-                      .filter(Boolean)
-                      .map((x) => ` · ${x}`)
-                      .join("")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
       </div>
     </PageSection>
   );

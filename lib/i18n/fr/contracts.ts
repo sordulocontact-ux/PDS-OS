@@ -36,6 +36,9 @@ export const contracts = {
     approved: "Validé, à signer",
     sent: "Envoyé pour signature",
     signed: "Signé",
+    // Sent, and its signed copy is back: PDS signs, then it is « Signé »
+    // (Sacha 23/11/2026: « Envoyé pour signature » once back was half true).
+    returned: "Revenu signé",
     expired: "Expiré",
     terminated: "Résilié",
   },
@@ -363,8 +366,9 @@ export const contracts = {
     countersign: {
       button: "Signer pour PDS",
       title: "Signer pour PDS ?",
-      body: (person: string, version: number | null) =>
-        `${person} a signé le contrat${version ? ` v${version}` : ""}. Votre signature conclut le contrat ; il ne se modifie plus ensuite.`,
+      // One sentence: the gesture and what it concludes (Sacha 23/11/2026:
+      // « trop de texte »); who signed is on the file's card below.
+      body: "Signez ce PDF pour PDS avec votre outil habituel, puis déposez-le. Le contrat ne se modifie plus ensuite.",
       done: "Contrat signé pour PDS.",
     },
     // A contract back signed outside its link, or one already signed.
@@ -401,12 +405,6 @@ export const contracts = {
     // « Changé depuis la v1 : Part 50 % → 40 % (Lina Haddad, 30/10) ».
     changed: (version: number, what: string, by: string, day: string) =>
       `Changé depuis la v${version - 1} : ${what} (${by}, ${day})`,
-  },
-  // « Déjà fait »: versions and journal, folded.
-  journal: {
-    title: "Déjà fait",
-    summary: (n: number) => `Versions et journal (${n})`,
-    empty: "Rien encore dans le journal.",
   },
   errors: {
     invalid: "Vérifiez le titre, le type et les dates.",

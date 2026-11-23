@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { MasterActivitySection } from "@/components/catalog/master-page/master-activity-section";
 import { TitleDossier } from "@/components/catalog/master-page/title-dossier";
 import { TitleInfo } from "@/components/catalog/master-page/title-info";
 import { TitleNow } from "@/components/catalog/master-page/title-now";
@@ -13,7 +12,6 @@ import {
   audioOverview,
   numberAudioVersions,
 } from "@/lib/catalog/audio-versions";
-import { listMasterActivity } from "@/lib/catalog/master/activity";
 import { listAudioVersions } from "@/lib/catalog/master/audio";
 import { loadTitleDossier, missingOf } from "@/lib/catalog/master/dossier";
 import { loadDistributionState } from "@/lib/catalog/master/overview";
@@ -30,16 +28,15 @@ import { allInOrder } from "@/lib/utils/parallel";
 // line of facts, « Maintenant » (the next action computed by code), the
 // dossier — each piece with its value, or filled on the spot, what the
 // release needs first —, the other facts and artists, its variants
-// (#variants) and its activity (#activity).
+// (#variants).
 export default async function MasterOverviewPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]">) {
   const { masterId } = await params;
-  const [access, master, rights, activity, audio, studio] = await allInOrder([
+  const [access, master, rights, audio, studio] = await allInOrder([
     requireApproved(),
     getMaster(masterId),
     getMasterRights(masterId),
-    listMasterActivity(masterId),
     listAudioVersions(masterId),
     listStudioSessions({ masterId }),
   ]);
@@ -133,10 +130,6 @@ export default async function MasterOverviewPage({
           canArchive: can(access, "archive_records"),
           archived: false,
         }}
-      />
-      <MasterActivitySection
-        entries={activity.entries}
-        error={activity.error}
       />
     </>
   );

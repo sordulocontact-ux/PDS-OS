@@ -1,6 +1,5 @@
 import { SheetHead } from "@/components/ui/side-sheet";
 import { ReasonChips } from "@/components/finance/reason-chips";
-import { RecordHistory } from "@/components/finance/record-history";
 import { TransactionProposal } from "@/components/finance/transaction-proposal";
 import { Button } from "@/components/ui/button";
 import type { RowAction } from "@/components/ui/row-actions";
@@ -164,7 +163,6 @@ export function TransactionSheet({
           })}
         </div>
       )}
-      <RecordHistory rowId={tx.id} />
     </>
   );
 }

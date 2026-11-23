@@ -19,8 +19,7 @@ const LONG = 240;
  * bottom of the panel, a folded card (`VersionCard`, as every group that
  * folds: framed, the chevron on the left, the content inside), what was
  * sent and received, newest first — the request e-mailed (its proof), the
- * replies filed from PO's mailbox or pasted, the notes. The states' history
- * lives in the dossier's history only. Nothing when there is none.
+ * replies filed from PO's mailbox or pasted, the notes. Nothing when there is none.
  */
 export function ClearanceExchanges({
   clearance,

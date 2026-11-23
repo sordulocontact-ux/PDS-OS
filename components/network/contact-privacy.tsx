@@ -7,16 +7,13 @@ import {
   makeContactPrivate,
   makeContactShared,
 } from "@/lib/network/privacy-actions";
-import type { ContactPrivacyEvent } from "@/lib/network/privacy-queries";
-import { formatInstantDay } from "@/lib/utils/instant";
 
 const t = networkPrivacy;
 
 /**
  * Whether a contact is private (BIZ 8), for who may change it: its creator
  * makes it private (« Rendre privé »), its owner or the direction share it
- * again; the deals it is shared with, and the journal of its shares,
- * take-backs and refusals for its owner and the direction.
+ * again; the deals it is shared with.
  */
 export function ContactPrivacy({
   contactId,
@@ -25,7 +22,6 @@ export function ContactPrivacy({
   canMakePrivate,
   canMakeShared,
   deals,
-  events,
 }: {
   contactId: string;
   ownerName: string | null;
@@ -33,7 +29,6 @@ export function ContactPrivacy({
   canMakePrivate: boolean;
   canMakeShared: boolean;
   deals: { id: string; name: string }[];
-  events: ContactPrivacyEvent[];
 }) {
   return (
     <PageSection card id="confidentialite" title={t.section}>
@@ -57,27 +52,6 @@ export function ContactPrivacy({
               ))
             )}
           </FactRows>
-        )}
-        {events.length > 0 && (
-          <details>
-            <summary className="w-fit cursor-pointer text-body-md font-medium text-[color:var(--text-secondary)]">
-              {t.journal}
-            </summary>
-            <ul className="mt-2 flex flex-col gap-1 text-body-sm">
-              {events.map((e) => (
-                <li key={e.id}>
-                  {formatInstantDay(e.at)} · {t.events[e.kind] ?? e.kind}
-                  {e.dealName && ` · ${e.dealName}`}
-                  {e.actor && (
-                    <span className="text-[color:var(--text-secondary)]">
-                      {" "}
-                      {t.by(e.actor)}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </details>
         )}
         {canMakePrivate && !isPrivate && (
           <ConfirmButton

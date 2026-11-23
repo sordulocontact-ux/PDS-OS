@@ -59,9 +59,6 @@ export const conceptionClosure = {
   reopenReason: "Motif de la réouverture",
   reopenSubmit: "Rouvrir",
   reopened: "Conception rouverte",
-  history: "Réouvertures",
-  historyLine: (date: string, name: string | null, reason: string) =>
-    `${date}${name ? ` · ${name}` : ""} : ${reason}`,
   // Errors of pass_to_production / reopen_design.
   errors: {
     notValidated:

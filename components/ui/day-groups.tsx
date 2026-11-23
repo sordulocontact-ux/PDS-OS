@@ -7,9 +7,8 @@ import { formatLongDay, groupByDay } from "@/lib/project-history/format";
 const fr = { projectHistory };
 
 /**
- * A journal, newest first, one block per Paris day (« Aujourd'hui »,
- * « Hier », then the date): the project's Activité and the Historique du
- * Juridique. Each item is drawn by the caller.
+ * A list, newest first, one block per Paris day (« Aujourd'hui », « Hier »,
+ * then the date): PO's past conversations. Each item is drawn by the caller.
  */
 export function DayGroups<T extends { at: string }>({
   items,

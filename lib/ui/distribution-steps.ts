@@ -36,7 +36,7 @@ const SLUG: Record<DistributionStep, string> = {
   closure: "closure",
 };
 
-export const DISTRIBUTION_VIEWS = ["anomalies", "history"] as const;
+export const DISTRIBUTION_VIEWS = ["anomalies"] as const;
 export type DistributionView = (typeof DISTRIBUTION_VIEWS)[number];
 
 export const distributionPages = (projectId: string) => [

@@ -2787,3 +2787,20 @@ Retours de Maël. Vérifié dans Chrome sur « Assurance 30 » (lancé).
   contient aussi le travail d'une autre session lancée en parallèle : section dépendances retirée de la Vue d'ensemble
   (`components/overview/dependency-rows.tsx`, `lib/overview/dependencies.ts`, `page.tsx`, `unlaunched-overview.tsx`,
   guide, textes) et la note retirée du récap compact. Le contenu est juste, seul le message ne le dit pas.
+
+## Page « Mails » : la boîte de PDS OS (23/11/2026, branche `pre-prod`)
+
+Demande de Sacha : récupérer tous les mails que PDS OS reçoit (signatures, devis…) et voir les mails
+envoyés ; chacun voit les siens, la direction tout ; écrire et répondre depuis l'app ; PO lit les mails.
+
+- Migration `20261123200101_mailbox.sql` : table `mailbox_messages` (RLS : `person_ids` ou
+  `read_mailbox`, insert limité à son propre envoi), permission `read_mailbox` (DG).
+- Copie de INBOX et Envoyés par le cron `/api/cron/inbox` (`lib/mailbox/sync.ts`, `owners.ts`).
+- Page `/app/mail` (entrée « Mails » pour tous), panneau, pièces jointes à la demande, liens vers le
+  deal / l'autorisation / les justificatifs, « Écrire un mail », « Répondre ».
+- PO : outil de lecture `mailbox`, sujet « Mails » du guide.
+- Tests : `supabase/tests/mailbox.test.sql` (10), `team.test.sql` mis à jour.
+- Même jour : « Mon Gmail » (les comptes Google du membre lus en direct, privés, lecture seule) ; un mail
+  envoyé à po+ctr-<id>@ revient aussi au responsable du contrat.
+- Détail : `docs/ARCHITECTURE.md` § 8 quindecies.
+

@@ -202,13 +202,9 @@ Principes :
   **Tableaux de fichiers** (Sacha, 05/11) : l'onglet Fichiers (`FilesList`, recherche comme partout) et
   la page Fichiers partagent leurs cellules (`file-cells.tsx`) ; une image que le navigateur montre est
   sa propre miniature (`previewUrl` : la copie de 320 px d'une pochette, sinon l'image signée).
-  **Activité**
-  (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
-  l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
-  moment de l'événement, historique antérieur reconstitué par la migration ; lecture filtrée
-  par RLS (contacts et contrats : `manage_catalog`, événements de projet : `can_see_project`).
-  Phrases et jours (heure de Paris) composés par le code (`lib/catalog/activity*.ts`,
-  `components/catalog/artist-page/activity/`).
+  **Activité** (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
+  l'artiste, contacts, fichiers, masters, projets liés, transmissions) ; il reste en base mais
+  **n'a plus d'écran** (onglet Activité retiré le 23/11/2026, `docs/DESIGN.md`) : PO le lit par `loadRecentActivity`.
 - Projet créé **avec son équipe** : le formulaire exige un chef de projet (le projet lui est
   transmis d'office, il accepte / refuse / demande une précision comme avant) et propose
   les directeurs créatifs (pastilles `PeoplePicker`). Ni étape, ni responsable avant
@@ -335,7 +331,7 @@ Activité `#activity`) · Audio (+ Sessions & pistes `#sessions`) · Crédits (+
 Distribution `#distribution`) · Fichiers. Les sections ci-dessous sont des blocs
 (`PageSection`) de ces pages, plus des onglets : onze onglets débordaient de la barre, et
 un second niveau (pastilles) aurait mélangé navigation et filtres. Les anciennes URL
-(`/sessions`, `/variants`, `/splits`, `/distribution`, `/activity`) redirigent vers le
+(`/sessions`, `/variants`, `/splits`, `/distribution`) redirigent vers le
 bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
 
 - **Vue d'ensemble** : tuiles cliquables (fichiers audio, variantes, sessions,
@@ -876,7 +872,7 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   positionnées (le `sticky` du parcours n'est pas un ancêtre de l'en-tête). Plus de
   `ProjectNowCard` dans ces cadres : l'attente se dit dans l'étape (`StepPanel` pose
   `StepWaiting auto`, effacé en CSS — `group/step` + `data-step-waiting=page` — quand la page
-  rend le sien). Les vues sans étape (Anomalies, Historique de la Distribution et du Master)
+  rend le sien). Les vues sans étape (Anomalies)
   gardent l'en-tête du module en pleine largeur.
 - **Parcours** (`lib/ui/journey.ts`). `JourneyStep` : statuts `done | current | waiting | rework |
   blocked | upcoming | obsolete` (calculés, jamais stockés), `roles` (`exec`/`coord`/`valid`/`owner`
@@ -1655,8 +1651,11 @@ Google (Gmail perso…) se connecte par un bouton. Tout est **en lecture seule**
   liens privés du Juridique) et l'enregistre avec la session (`google_accounts`, RLS : ses lignes seules).
   Son compte pro déjà branché n'est pas gardé deux fois (« already », jeton révoqué). « Déconnecter »
   (« ⋯ ») révoque l'accès chez Google puis oublie le compte et ses choix. Retour dans les Paramètres par
-  `?google=connected|already|cancelled|failed`. Écran de consentement « External » publié : tant que Google
-  n'a pas vérifié l'application, un Gmail perso passe une fois l'écran « non validée » (100 comptes au plus).
+  `?google=connected|already|cancelled|failed`. Écran de consentement « Externe » **en Test** depuis le 23/11/2026 (il était « Interne » : aucun
+  Gmail perso ne passait) : seuls les utilisateurs tests de Google Cloud (Audience) se connectent, 100 au plus, et
+  Google coupe l'accès tous les 7 jours (se reconnecter). Publier demande une page d'accueil, une page de
+  confidentialité et leurs domaines dans Branding. Variables `GOOGLE_CONNECT_*` et `GOOGLE_TOKEN_KEY` posées en
+  local et sur Vercel le 23/11 (nouveau secret client ; l'ancien, perdu, reste actif).
 - **Choix du membre** : `google_service_opt_outs` (compte, service) — branché par défaut, une ligne = un
   service coupé. Un service décoché sur l'écran de Google = « À autoriser ».
 - **Écran** (`GoogleConnectionsSection` sous `Suspense`, `GoogleAccountServices` par compte) : adresse et
@@ -2946,11 +2945,13 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   Distribution est `not_started` dans `loadWorkflowStates` dans le même cas.
 - **Travail / Validations** : `MyActions` sur `mine` / `validations` (`actor.kind === "validate"`). Les tâches
   libres (`tasks`) restent en base et dans le Travail global, plus dans le Travail du projet (VISION-UX § 3 : pas de
-  liste à part). L'historique des validations décidées est dans l'Activité (`loadRecentActivity`).
-- **Activité** (`loadProjectActivity`, `lib/overview/activity.ts`) : journal du projet (`loadRecentActivity`),
-  `marketing_events`, `production_events` (lien vers le livrable ; un contact du Réseau est dit « Quelqu'un »),
-  Juridique (`loadLegalHistory`, seulement avec `manage_legal`), `distribution_events` (`eventText`) ; triés par
-  date, 200 au plus. Le Master n'a pas encore de journal.
+  liste à part). Les validations décidées restent listées sur la page Validations.
+- **Plus d'Activité ni d'Historique à l'écran** (Ibé, 23/11/2026) : la page `/activity` du projet, l'onglet Activité
+  de l'artiste, le bloc Activité d'un titre, les pages `/master/history`, `/review/history`, `/release/history`,
+  `/legal/history` et `production/<livrable>/history`, « Déjà fait » (`StepHistory`) et les blocs d'historique
+  (plan, deal, call clos, enveloppe, fiches Finance, répartitions, déclarations, contrat, activations, contact
+  privé, plan de sortie d'un titre) sont supprimés avec leurs chargeurs. Les journaux (`*_events`) restent en base : ils
+  nourrissent la frise des étapes, les notifications et l'outil `recent_activity` de PO (`lib/insights/activity.ts`).
 
 Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
 (404 avant lancement), titre = nom de la section (`ProjectPageTitle` dans le layout,
@@ -3063,11 +3064,10 @@ date de sortie de la Stratégie, NDA : à décider).
   seulement par le responsable et la direction** (`can_read_project_contracts` :
   `is_project_owner` ou `view_all_projects`), écrits (ajout, modification, suppression)
   par **le responsable seul**, comme tout le projet lancé ; le DG lit sans écrire. Un
-  ajout apparaît dans le journal (« Document ajouté »). Dessous, sans être copiés dans la
+  ajout est tracé en base. Dessous, sans être copiés dans la
   bibliothèque : versions déposées en conception, puis audio des calls
   (téléchargement par URL signée de 15 min, session utilisateur) ; historique des
-  validations, en attente d'abord, décision sur la page de l'étape (`stageHref`) ; journal
-  reconstruit par `loadRecentActivity` (filtré par projet dans la requête), groupé par jour.
+  validations, en attente d'abord, décision sur la page de l'étape (`stageHref`).
 - **Budget** (`lib/budget/`) : enveloppe = `projects.budget_cents` (fixée à la création),
   dépassement écrit en toutes lettres. Le responsable seul écrit ; PO ne lit pas la table.
   Retours Marketing du 11/10/2026 (MKT-S1-11, 12, 15 ; migration `…20261012101101_budget_model`) :
@@ -3200,8 +3200,7 @@ date de sortie de la Stratégie, NDA : à décider).
   modale `RolesDialog` ouverte par `WhoDoesWhatButton` (bouton autonome destiné à `ModuleHeader`).
   Chaque module construit ses rôles : Production (`WhoDoesWhat` / `ProductionWhoDoesWhatButton` :
   responsable du projet et de production = Coordonne, société / réalisation / image = Exécute,
-  validation budgétaire = Valide ; historique = organisation et liens, `loadProductionHistory(…,
-  only)` ; le changement passe toujours par « Modifier l'organisation »), Conception
+  validation budgétaire = Valide ; plus de journal de rôles à l'écran (23/11/2026) ; le changement passe toujours par « Modifier l'organisation »), Conception
   (`DesignRoles` / `DesignWhoDoesWhatButton` : responsable du projet, responsable, validateurs, avec
   « Changer » = les sélecteurs existants en `compact` ; délégations et gouvernance restent dessous).
 - **Liens privés** : n° du lien (compte des liens du contact sur la fiche), créé le … par …
@@ -3621,8 +3620,8 @@ valeur ».
 - **Exports** (`lib/finance/exports.ts`, route `/api/finance/export?type=depenses|factures|encaissements|banque|
   historique`, `read_finance`, lu avec la session) : CSV « ; » avec BOM, montants à la virgule, pour
   l'expert-comptable. Page `/app/finance/exports` : un téléchargement par sujet.
-- **Historique** (`lib/finance/history.ts`) : les 100 dernières lignes de `finance_events` (qui, quand, quelle
-  donnée, quels champs) sur la page Exports, et en entier dans l'export « historique ».
+- **Historique** : `finance_events` reste écrit par trigger mais n'est plus montré ni exporté (23/11/2026) ; la page
+  Exports ne propose que les quatre CSV comptables.
 - **Accueil** (test UX du 15/11/2026) : `finance_urgent_count()` (SQL, `security definer`, 0 sans
   `read_finance`) compte les enveloppes dépassées (projets, centres de coût), les entrées échues non reçues et
   les dépenses facturées échues non payées, sans lire toute la trésorerie ; `HomeSummary` l'ajoute au résumé
@@ -4006,6 +4005,29 @@ rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
   jours. Profil privé, absent ou refus de la plateforme : pas de photo, jamais une erreur. Un contact
   existant prend la sienne au prochain « Modifier › Enregistrer ». Fichiers d'un contact supprimé non
   effacés (politique Storage à faire).
+- **Fiche de renseignements du Réseau** (Sacha, 23/11/2026, `…20261123210101_network_contact_fiche.sql`,
+  `lib/network/fiche.ts`, `fiche-actions.ts`, `components/network/contact-fiche*.tsx`) : chaque contact,
+  personne ou structure, a une fiche **sans projet** (`legal_forms.project_id` nul), créée par la base
+  (trigger `z_issue_fiche` AFTER INSERT sur `network_contacts`, donc quel que soit le chemin de création ;
+  contacts existants repris par la migration). Le jeton n'est gardé que haché (`token_hash`, ce que lit
+  `/f/<jeton>`) et chiffré avec la clé Vault des liens privés (`master_link_key`, comme
+  `project_contact_links`) dans `legal_form_secrets`, table lue par aucun rôle : c'est ce qui permet de la
+  créer en SQL, sans `LEGAL_LINK_KEY`. Elle n'expire pas (`expires_at` = `infinity`) ; « Nouveau lien »
+  (`renew_network_contact_fiche`) révoque le lien ouvert et en crée un, aussi pour redemander une mise à jour
+  une fois remplie. Lue (`network_contact_fiche`, qui la recrée si elle manque) et gérée par qui a
+  `manage_network` **et** `manage_legal` ou `manage_contracts` **et** lit les coordonnées du contact
+  (`can_manage_contact_fiche`, aussi la politique RLS des fiches et envois sans projet). Page publique : pas
+  de projet ni de contribution (`fieldsFor(roles, { network: true })`, textes « Réseau »), rôles à cocher
+  tirés des métiers du Réseau et une structure partant en société (`network_fiche_prefill`, lu à
+  l'ouverture) ; les réponses vont dans `contact_legal_details` par le même `submit_legal_form`. Sur la page
+  du contact, en tête de « Fiche de renseignements » : état (Pas encore envoyée, Envoyée, Ouverte, Remplie),
+  « Copier le lien » (copié = marqué envoyé), « Envoyer par e-mail » (`emailLink`, adresse lue avec la
+  session) et « Nouveau lien ». Reçue, elle ne notifie personne (pas de projet à ouvrir) et reste « à
+  vérifier » (`action_required`) : pas de validation ni de complément depuis le Réseau, une correction
+  d'une valeur déjà connue n'est donc pas appliquée. Supprimer le contact supprime ses fiches sans projet
+  (trigger `a_drop_fiches`) ; une fiche de projet le garde « utilisé ».
+  **Révoquer le lien** (`20261123230101`) : `revoke_network_contact_fiche` révoque le lien ouvert sans en créer un autre ; `network_contact_fiche` lit la dernière fiche du contact quel que soit son état (révoquée : « Lien révoqué », pas de lien) et n'en crée une que pour un contact qui n'en a jamais eu. Sur la page : la ligne « Fiche » de « Coordonnées », copier en icône et « ⋯ » (envoyer, nouveau lien, révoquer).
+  **Artistes managés** (Sacha 23/11/2026, `20261124100101_contact_managed_artists.sql`) : dans le formulaire d'un contact au rôle « Management », « Artistes managés » (pour qui a `manage_catalog`, comme les contacts d'un artiste) ; `set_contact_managed_artists` écrit les lignes « manager » de Catalogue › Contacts de chaque artiste (`contact_id` = le contact, nom et coordonnées partagées recopiés, jamais celles d'un contact privé ; le contact principal de l'artiste ne change pas) et retire celles des artistes décochés ou quand « Management » est retiré. La page du contact les montre en « Artistes managés » dans « Coordonnées ». Ce manager est invité d'office aux calls de deal de l'artiste (`pickCallGuests`). Test : `supabase/tests/contact-managed-artists.test.sql` (11).
 - **Personnes et organisations** (ticket « Retour PO / Réseau » du 11/10/2026 et retour
   Notion « Restructuration et enrichissement de la page Réseau » du 10/10,
   `…20261011200101_network_kinds_relations.sql`, test `network-kinds-relations.test.sql`) :
@@ -8036,8 +8058,13 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `20261121150101`, journalisé avec le call ; PO ne le propose plus ; un call prévu plus tard dont l'échange est
   enregistré a eu lieu : son heure passe à celle de l'enregistrement, durée gardée, trigger `transcripts_call_held`,
   `20261122100101`), `signed` le contrat du deal signé
-  (`deal_contract_id`, `contract_not_signed`), et le deal en contractualisation passe seul à `signed` quand son
-  contrat l'est (trigger `z_deal_follows_contract` sur `contracts`, ligne de journal `detail.contract = signed`).
+  (`deal_contract_id`, `contract_not_signed`), et **l'étape suit le contrat du deal, d'où qu'il vienne** (trigger `z_deal_follows_contract` sur `contracts`,
+  `20261123100101`, Sacha 23/11/2026 : un contrat d'invité fait au Juridique laissait le deal en accord de principe) :
+  envoyé pour signature, un accord validé passe en `contracting` ; signé, un deal en accord validé ou en
+  contractualisation passe en `signed` (journal `detail.contract` = l'état du contrat). Page : « Revenu signé » sur la
+  carte du contrat (`DealContract returned`, envoyé + exemplaire signé déposé), le « Maintenant » du contrat montré à
+  tout lecteur du deal (qui on attend), termes vides cachés une fois l'accord validé (`DealTerms writtenOnly`),
+  « Prochaine action » vide cachée en contractualisation.
   Côté page, « Maintenant » ne propose plus que le vrai geste de l'étape (`DealNow` : « Préparer un call » à
   contacter, l'accord dès qu'un terme est confirmé, rien en contractualisation). **L'accord de principe est une étape** : l'affecté la propose
   (`agreement_status = pending`), la direction (`validate`) la valide ou la renvoie en négociation avec un
@@ -8212,6 +8239,16 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     part de po@ quand le SMTP est en place (`emailContractForSignature` : son dernier projet déposé ou imprimé à la
     génération, sinon imprimé à l'envoi, en pièce jointe), puis `send_contract` « Envoyé par PDS OS » ; sans SMTP,
     « Ouvrir dans ma messagerie » / « Marquer comme envoyé ».
+  - **Contrat signé revenu par e-mail** (`20261123110101`, Sacha 23/11/2026, coordonné avec la page Mails) :
+    l'e-mail de signature a pour Reply-To l'adresse du contrat, `po+ctr-<id>@` (`lib/email/contract-address.ts`, sur
+    `plus-address.ts` commun avec `po+deal-` et `po+aut-`). Le cron `/api/cron/inbox` (`fileEmailedSignedContracts`,
+    `lib/contracts/signed-by-email.ts`, même passage, `inbox.recent` + `read`) range une réponse portant des PDF dans un
+    contrat « Envoyé » encore sans signé : PDF → « Signé », l'e-mail (.eml) → « Preuve de signature »
+    (`uploadSignedCopy`, partagé avec les autorisations ; `receive_contract_signed_copy`, service role seul, la partie
+    dont l'adresse du Réseau a écrit en `via_contact_id`, journal `signature.emailed`, notification
+    `contract_signed_emailed` au suivi du contrat). Le contrat passe en « Revenu signé » (« Reçu de … par e-mail ») ;
+    PDS signe ensuite et une personne vérifie la signature. Page Mails : ce mail est « Signature » + « Contrat », lien
+    vers le contrat pour qui le lit (`lib/mailbox/kinds.ts`, `links.ts`). Test : `contract-signed-by-email.test.sql`.
   - **Suivi du contrat généré** (`20261122160101`) : il est suivi par la personne qui négocie le deal (`owner_person_id`
     = l'affecté), qui l'envoie pour signature et le marque signé ; le « Maintenant » d'un contrat ouvre son PDF avant de
     l'envoyer à valider ou de le valider (`ContractPageData.pdf`), et « Ensuite » dit « Vous l'envoyez pour signature »
@@ -8276,6 +8313,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   - Page : `DealMemos` → `DealMemoCard` (PDF reçu « Ouvrir le PDF », objet et message repliés, demande de
     modifications signée en bandeau) + `DealMemoGestures` ; section « Dans la boucle » (`DealMemoLoop`). PO lit l'état
     du circuit (`lib/assistant/read/deals.ts`). Test : `supabase/tests/deal-memo-mail.test.sql`.
+- **Déposer le memo reçu** (Sacha 23/11/2026, `20261123220101_deal_memo_deposit.sql`) : le label envoie son memo à l'adresse de la personne qui négocie, pas à celle du deal (« bizarre de donner ça comme adresse ») : `DealMemoDepositButton` envoie le PDF dans `deal-files` sous `<organisation>/<deal>/` (politique `deal_files_insert` : qui écrit le deal ouvert, `can_drop_deal_file` ; `deal_files_delete_unfiled` retire un dépôt dont le memo a échoué), puis `deposit_deal_memo` en fait le memo du deal comme `receive_deal_memo` (brouillon « À valider », photo des termes, source `upload`, auteur = qui dépose, journal `memo_received` avec `deposited`). L'adresse du deal n'est plus affichée ; elle reste l'adresse de réponse des e-mails envoyés par PDS OS. Test : `supabase/tests/deal-memo-deposit.test.sql` (18).
 - **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
   métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
   `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et
@@ -8319,6 +8357,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   (`DealsTable groups`), avec étape, prochaine action, **contrat** (`read_deal_contract`, `DealsTable
   contracts`), projet dans le nom du deal, négociateur ; jamais un contact. `routes.artistBudget` mène à
   `…/business#budget` (lien « Budget de l'artiste » d'un projet).
+- **Invités d'un call de deal** (Sacha 23/11/2026 : « s'il n'y a que l'artiste dans les contacts ok, mais s'il y a un manager ou un label on ne met pas l'artiste ») : « Caler le call » (direction, business manager, chef de projet, récap des titres) coche d'office les contacts du Réseau choisis par `pickCallGuests` (`lib/deals/call-guests-rules.ts`, lus par `loadCallGuests`) : les contacts du deal, le contact de la participation et le manager principal de l'artiste (Catalogue › Contacts, lié au Réseau) ; personne : le label ou la marque du deal ; sinon l'artiste (son contact du Réseau, `network_contacts.artist_id`), jamais à côté des autres. Chacun se retire d'un clic. Dans le récap des titres, le manager sinon l'artiste (les contacts du deal se lisent sur sa page).
 - **Call de négociation avant tout contrat** (réunion avec Ibé du 18/11/2026, 52:10, 1:00:07 à 1:04:28, 1:17:44 à
   1:19:23 ; `20261120140101_deal_negotiation_call.sql`) : dès que l'artiste est d'accord, la cheffe de projet cale un call
   entre le business manager et le manager (ou producteur) de l'artiste ; elle n'est pas dedans. **Décision (droits)** :
@@ -8363,6 +8402,65 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.
+
+## 8 quindecies. Mails : la boîte de PDS OS (`/app/mail`, `lib/mailbox/`, `components/mailbox/`)
+
+Sacha, 23/11/2026 : « une page qui me permet de récupérer tous les mails que PDS OS reçoit, les
+signatures, les devis, voir les mails envoyés », puis « tout le monde voit les mails qu'il a reçus,
+la direction voit tout », « écrire / répondre à un mail depuis l'app », « PO lit les mails ».
+Ticket : `.tickets/archive/2026-11-23-page-mails/TICKET.md`.
+
+- **Copie, pas de lecture IMAP à l'ouverture.** Le cron `/api/cron/inbox` (toutes les 10 min, service
+  role) appelle `syncMailbox()` (`lib/mailbox/sync.ts`) après les trois rangements existants : INBOX
+  et le dossier spécial `\Sent` de Gmail (Gmail y garde ce que son SMTP envoie : tout mail de PDS
+  OS, et ce qu'on écrit depuis po@ à la main), 365 jours, 30 nouveaux messages par dossier et par
+  passage (le retard se rattrape en quelques heures), source lue jusqu'à 1 Mo pour le texte. Un
+  message est connu par son Message-ID dans son dossier : copié une fois, jamais réécrit.
+  Organisation de la boîte = la plus ancienne (une seule en prod). `lib/email/inbox.ts` reste le
+  seul point d'entrée IMAP : `withInbox(work, { folder })`, `entries(uids)` (en-tête, fil, texte —
+  le HTML changé en texte s'il n'y a pas de partie texte —, pièces jointes nommées par la structure,
+  `lib/email/inbox-entries.ts`), `attachment({ uid, messageId }, part)`.
+- **Table `mailbox_messages`** (migration `20261123200101_mailbox.sql`) : texte entier (100 000
+  caractères), extrait, pièces jointes en `[{ part, name, type, size }]` (jamais copiées : lues dans
+  la boîte à la demande par `/api/mailbox/[id]/attachments/[part]`, sous la session, RLS), fil
+  (`thread_ids` = In-Reply-To puis References).
+- **Qui lit quoi** : `person_ids` décidés par le code à la copie (`lib/mailbox/owners.ts`, pur ;
+  contexte `owners-context.ts`) : envoyé → le membre du premier Reply-To (sendEmail met son adresse
+  en premier) et tout membre en De/À/Cc ; reçu → membre expéditeur, membre en À/Cc, personnes de
+  l'autorisation (po+aut-<id>@) ou du deal (po+deal-<id>@), propriétaires des messages du fil. RLS :
+  un membre lit les siens, la direction tout (permission `read_mailbox`, DG seul). Sans propriétaire,
+  seule la direction le voit. Personne ne modifie ni ne supprime un message ; la boîte Gmail n'est
+  jamais modifiée (lecture en `BODY.PEEK`).
+- **Type d'un mail** (`lib/mailbox/kinds.ts`, à chaque lecture, jamais stocké, jamais par l'IA) :
+  signature, devis, facture, contrat (mots de l'objet et des noms de fichiers), justificatif
+  (po+justificatifs@), deal memo (po+deal-), autorisation (po+aut-). Lien vers l'objet PDS OS
+  (`links.ts`) : le deal, la demande d'autorisation, Finance › Justificatifs (si la personne lit la
+  Finance).
+- **Écrire / répondre** (`lib/mailbox/compose-actions.ts`) : `sendEmail` (from po@ au nom du membre),
+  Reply-To = le membre **puis po@** pour que la réponse revienne aussi dans la boîte ; une réponse
+  porte In-Reply-To et References (`OutgoingEmail.inReplyTo` / `references`, `sendEmail` renvoie le
+  `messageId`). Le membre enregistre aussitôt son envoi (insert RLS : dossier `sent`, lui seul, dans
+  les 5 minutes, sans UID ni pièce jointe) ; le cron le reconnaît ensuite par son Message-ID. Pas de
+  pièce jointe à l'écriture.
+- **Page** : vues Tous / Reçus / Envoyés (`?vue=recus|envoyes`), filtre Type (`?type=`), recherche,
+  500 mails les plus récents ; panneau `SideSheet` (texte brut chargé à l'ouverture par
+  `readMailboxBody`, jamais le HTML : pas de XSS). PO : outil de lecture `mailbox`
+  (`lib/assistant/read/mailbox.ts`, `docs/ASSISTANT.md`), le texte d'un mail encadré comme donnée.
+- **Icônes des expéditeurs** (Sacha, même jour) : `MailAvatar` demande `/api/mailbox/icon?domain=` (session
+  approuvée), qui lit l'icône chez DuckDuckGo (`lib/integrations/favicon.ts`, seul point d'entrée, hôte fixe : le
+  domaine lu dans un mail n'est qu'un nom dans le chemin, pas d'SSRF ; gardée une semaine) ; domaine de marque par
+  `lib/mailbox/sender-domain.ts`, jamais pour une boîte de particulier (gmail.com, outlook…) : les initiales.
+- **« Mon Gmail »** (Sacha, même jour : « ajoute aussi la lecture de mon Gmail », puis « dans Tous je dois avoir
+  mon Gmail ») : demandé **après l'affichage** de la page (`loadMyGmail`, `useMyGmail`) pour qu'elle ne l'attende
+  jamais ; ses mails entrent dans Tous, Reçus et Envoyés avec la boîte de PDS OS, et la vue `?vue=gmail` les
+  montre seuls (liste de chaque compte gardée une minute par l'instance) ; tout cela seulement pour qui a un compte Google avec Gmail (§ 4 quater : compte pro par délégation, comptes connectés,
+  sans ceux où Gmail est coupé ; `lib/mailbox/gmail-accounts.ts`). Les 50 mails les plus récents de chaque
+  compte sont lus **en direct** à l'ouverture de la vue (`lib/mailbox/gmail.ts`, seul point d'entrée de l'API
+  Gmail : `lib/integrations/google-gmail.ts`, `gmail.readonly`), jamais copiés : privés à leur propriétaire,
+  la direction ne les voit pas. Texte lu à l'ouverture d'un mail (`readGmailBody`), pièce jointe par
+  `/api/mailbox/gmail/[account]/[message]/[part]` (le message est relu : Gmail change l'id de la pièce à chaque
+  lecture). Lecture seule : pas de « Répondre » (il enverrait depuis po@). Une adresse po+ctr-<id>@ rattache
+  aussi un mail au responsable du contrat (`owners-context.ts`).
 
 ## 9. Design (`docs/DESIGN.md`)
 

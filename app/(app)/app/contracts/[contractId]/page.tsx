@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { FileLibrary } from "@/components/catalog/files/file-library";
 import { ContractDocumentSection } from "@/components/contracts/contract-document-section";
 import { ContractInfo } from "@/components/contracts/contract-info";
-import { ContractJournal } from "@/components/contracts/contract-journal";
 import { ContractParties } from "@/components/contracts/contract-parties";
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import { EditContractButton } from "@/components/contracts/edit-contract-button";
@@ -95,7 +94,6 @@ export default async function ContractPage({
             signerId={signer?.contactId ?? null}
             canEdit={contract.can.edit}
           />
-          <ContractJournal events={data.journal} />
         </div>
         <ContractInfo contract={contract} />
       </div>

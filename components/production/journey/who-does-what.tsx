@@ -1,7 +1,6 @@
 import { ProviderLinkButton } from "@/components/production/post/provider-link-button";
 import {
   RolesPanel,
-  type RoleHistoryLine,
   type RoleRow,
 } from "@/components/shell/module/roles-panel";
 import type { PrivateLinkRow } from "@/components/shell/module/private-links";
@@ -29,7 +28,6 @@ type Props = {
   canOrganize: boolean;
   // The creative side (responsable créatif, validation créative interne).
   creativeName?: string | null;
-  history?: RoleHistoryLine[];
   // Each person's page by project (lot 11), given by the server page.
   personLinks?: React.ReactNode;
 };
@@ -68,7 +66,6 @@ function productionRoles({
   revoked = {},
   canOrganize,
   creativeName,
-  history,
 }: Props) {
   const sheet = data.sheet;
   if (!sheet?.organization.kind) return null;
@@ -257,5 +254,5 @@ function productionRoles({
       ) : null,
     };
   });
-  return { roles, links: privateLinks, history };
+  return { roles, links: privateLinks };
 }

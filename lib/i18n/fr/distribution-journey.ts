@@ -699,7 +699,6 @@ export const distributionJourney = {
     anomalies: "Anomalies",
     anomaliesOpen: (n: number) =>
       `Anomalies (${plural(n, "ouverte", "ouvertes")})`,
-    history: "Historique de la distribution",
   },
   back: "← Parcours",
   // The workflow's status next to the title (wfStatus of the proto).
@@ -725,10 +724,6 @@ export const distributionJourney = {
   releases: "Sorties",
   views: {
     anomalies: "Anomalies",
-    history: "Historique de la distribution",
-    historyBody:
-      "Chaque geste, qui l'a fait et quand, avec ou sans preuve. Une déclaration retirée ou une version remplacée reste ici.",
-    historyEmpty: "Rien pour l'instant.",
   },
   // The UPC, in the Paramètres de distribution (lib/distribution/upc.ts).
   upc: {

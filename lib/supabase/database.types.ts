@@ -8755,6 +8755,24 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_form_secrets: {
+        Row: {
+          created_at: string
+          form_id: string
+          token_secret: string
+        }
+        Insert: {
+          created_at?: string
+          form_id: string
+          token_secret: string
+        }
+        Update: {
+          created_at?: string
+          form_id?: string
+          token_secret?: string
+        }
+        Relationships: []
+      }
       legal_form_submissions: {
         Row: {
           contact_id: string
@@ -8767,7 +8785,7 @@ export type Database = {
           organization_id: string
           other_role: string | null
           person: Json
-          project_id: string
+          project_id: string | null
           roles: string[]
         }
         Insert: {
@@ -8781,7 +8799,7 @@ export type Database = {
           organization_id: string
           other_role?: string | null
           person: Json
-          project_id: string
+          project_id: string | null
           roles: string[]
         }
         Update: {
@@ -8795,7 +8813,7 @@ export type Database = {
           organization_id?: string
           other_role?: string | null
           person?: Json
-          project_id?: string
+          project_id?: string | null
           roles?: string[]
         }
         Relationships: []
@@ -9048,7 +9066,7 @@ export type Database = {
           link_sealed: string | null
           organization_id: string
           prefill: Json
-          project_id: string
+          project_id: string | null
           revoked_at: string | null
           revoked_by: string | null
           revoked_reason: string | null
@@ -9075,7 +9093,7 @@ export type Database = {
           link_sealed?: string | null
           organization_id: string
           prefill?: Json
-          project_id: string
+          project_id: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           revoked_reason?: string | null
@@ -9102,7 +9120,7 @@ export type Database = {
           link_sealed?: string | null
           organization_id?: string
           prefill?: Json
-          project_id?: string
+          project_id?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           revoked_reason?: string | null
@@ -9941,6 +9959,69 @@ export type Database = {
             referencedColumns: ["id", "organization_id"]
           },
         ]
+      }
+      mailbox_messages: {
+        Row: {
+          attachments: Json
+          body_text: string
+          cc_addresses: string[]
+          created_at: string
+          folder: string
+          from_address: string | null
+          from_name: string | null
+          id: string
+          imap_uid: number | null
+          message_id: string
+          names: Json
+          organization_id: string
+          person_ids: string[]
+          sent_at: string
+          snippet: string
+          subject: string
+          thread_ids: string[]
+          to_addresses: string[]
+        }
+        Insert: {
+          attachments?: Json
+          body_text?: string
+          cc_addresses?: string[]
+          created_at?: string
+          folder: string
+          from_address?: string | null
+          from_name?: string | null
+          id?: string
+          imap_uid?: number | null
+          message_id: string
+          names?: Json
+          organization_id: string
+          person_ids?: string[]
+          sent_at: string
+          snippet?: string
+          subject?: string
+          thread_ids?: string[]
+          to_addresses?: string[]
+        }
+        Update: {
+          attachments?: Json
+          body_text?: string
+          cc_addresses?: string[]
+          created_at?: string
+          folder?: string
+          from_address?: string | null
+          from_name?: string | null
+          id?: string
+          imap_uid?: number | null
+          message_id?: string
+          names?: Json
+          organization_id?: string
+          person_ids?: string[]
+          sent_at?: string
+          snippet?: string
+          subject?: string
+          thread_ids?: string[]
+          to_addresses?: string[]
+        }
+        Relationships: []
       }
       marketing_activations: {
         Row: {
@@ -23044,6 +23125,11 @@ export type Database = {
         Args: { p_deal_id: string }
         Returns: string
       }
+      deposit_deal_memo: {
+        Args: { p_deal_id: string; p_name: string; p_path: string }
+        Returns: string
+      }
+      can_drop_deal_file: { Args: { p_name: string }; Returns: boolean }
       link_deal_contract: {
         Args: { p_contract_id: string | null; p_deal_id: string }
         Returns: undefined
@@ -23129,6 +23215,30 @@ export type Database = {
       can_read_contact_details: {
         Args: { p_contact_id: string }
         Returns: boolean
+      }
+      can_manage_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: boolean
+      }
+      network_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: Json
+      }
+      renew_network_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: string
+      }
+      set_contact_managed_artists: {
+        Args: { p_artist_ids: string[]; p_contact_id: string }
+        Returns: undefined
+      }
+      revoke_network_contact_fiche: {
+        Args: { p_contact_id: string }
+        Returns: undefined
+      }
+      mark_network_contact_fiche_sent: {
+        Args: { p_contact_id: string }
+        Returns: undefined
       }
       link_deal_contact: {
         Args: { p_contact_id: string; p_deal_id: string }
@@ -23692,6 +23802,10 @@ export type Database = {
           p_files: Json
           p_from: string
         }
+        Returns: boolean
+      }
+      receive_contract_signed_copy: {
+        Args: { p_contract_id: string; p_files: Json; p_from: string }
         Returns: boolean
       }
       rename_project_title: {

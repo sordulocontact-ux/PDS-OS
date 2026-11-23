@@ -286,22 +286,6 @@ export const titleReleasePlans = {
       revoke: "Retirer le lien",
       revoked: "Lien retiré : il ne s'ouvre plus.",
       rowLabel: (n: number) => `Actions pour la version ${n}`,
-      journal: "Journal des statuts",
-      noJournal: "Rien pour l'instant.",
-      born: "Plan créé avec le titre",
-      linkEvents: {
-        shared: "Lien de partage donné",
-        unshared: "Lien de partage retiré",
-      } as Record<string, string>,
-      reasons: {
-        title_abandoned: "titre abandonné",
-        title_reactivated: "titre réactivé",
-        shared: "lien de partage donné",
-        unshared: "lien de partage retiré",
-      } as Record<string, string>,
-      move: (from: string, to: string) => `${from} → ${to}`,
-      versionOf: (n: number) => `version ${n}`,
-      system: "PDS OS",
     },
   },
 

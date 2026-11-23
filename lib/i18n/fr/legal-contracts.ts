@@ -410,25 +410,5 @@ export const legalContracts = {
       "Avant de marquer le contrat signé, ajoutez dans ses fichiers le contrat signé et la preuve de signature.",
     sendLabel: "Comment l'avez-vous envoyé ?",
     sendHint: "Canal, destinataire, date : c'est la preuve d'envoi.",
-    events: {
-      "contract_mapping.approved": "Contrats nécessaires confirmés",
-      "contract.generated": "Contrat généré",
-      "contract.revised": "Clause modifiée",
-      "contract.countersign_voided":
-        "Signature de PDS annulée : la version signée a été modifiée",
-      "contract.submitted": "Envoyé en validation",
-      "contract.approved": "Approuvé",
-      "contract.changes_requested": "Modifications demandées",
-      "signature.requested": "Envoyé en signature",
-      "signature.received": "Contrat signé reçu par son lien privé",
-      "signature.emailed": "Contrat signé reçu par e-mail",
-      "contract.signed": "Signé",
-      "contract.terminated": "Résilié",
-      "financial_need.created": "Besoin financier créé",
-      "invoice.received": "Facture reçue",
-      "invoice.paid": "Facture payée",
-    } as Record<string, string>,
-    eventLine: (event: string, who: string, date: string) =>
-      who ? `${event} · ${who} · ${date}` : `${event} · ${date}`,
   },
 } as const;

@@ -174,14 +174,6 @@ export type ActivationSummary = ActivationRecord & {
   lastChangeAt: string;
 };
 
-export type JournalEntry = {
-  id: string;
-  kind: string;
-  note: string | null;
-  actorName: string | null;
-  at: string;
-};
-
 /** Where a client form writes: the upload path needs the organization. */
 export type ActivationScope = {
   organizationId: string;

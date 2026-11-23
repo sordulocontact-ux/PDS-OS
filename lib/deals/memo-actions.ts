@@ -22,6 +22,25 @@ export async function createDealMemo(dealId: string): Promise<WriteResult> {
   );
 }
 
+/** « Déposer le memo reçu »: the PDF the label sent, already uploaded in
+ * the deal's folder of deal-files, becomes the deal's memo (Sacha
+ * 23/11/2026). */
+export async function depositDealMemo(
+  dealId: string,
+  path: string,
+  fileName: string,
+): Promise<WriteResult> {
+  if (!path.startsWith(`${path.split("/")[0]}/${dealId}/`))
+    return { ok: false, error: deals.errors.invalid };
+  return run(dealId, "depositDealMemo", t.deposit.done, (s) =>
+    s.rpc("deposit_deal_memo", {
+      p_deal_id: dealId,
+      p_path: path,
+      p_name: fileName.slice(0, 255),
+    }),
+  );
+}
+
 /** « Valider le deal memo » (the direction). */
 export async function validateDealMemo(
   dealId: string,

@@ -170,7 +170,6 @@ export const productionJourney = {
     creativeExt: "Validation créative externe",
     post: "Postproduction",
   },
-  history: "Historique",
   header: {
     organization: {
       internal: "Interne",

@@ -3,7 +3,7 @@ import "server-only";
 import { can, type Access } from "@/lib/auth/access";
 import { siteUrl } from "@/lib/auth/site-url";
 import { listCatalogFiles } from "@/lib/catalog/files";
-import { loadContractJournal } from "@/lib/contracts/journal";
+import { loadContractSentBy } from "@/lib/contracts/sent-by";
 import { legalOriginOf } from "@/lib/contracts/legal-origin";
 import { routes } from "@/lib/auth/redirects";
 import { contractNowOf } from "@/lib/contracts/now";
@@ -17,7 +17,7 @@ import { loadContactLinks } from "@/lib/portal/contact-links";
 
 // Everything a contract's page shows (proto « Contrats », 29/10/2026), read
 // at once: its document and what changed, its proof of sending and of
-// signature, its journal, where it comes from in the Juridique, who signs
+// signature, where it comes from in the Juridique, who signs
 // it and their private link, the direction, and « Maintenant ».
 
 export type ContractSigner = ContractParty & {
@@ -31,13 +31,13 @@ export async function loadContractPage(
   access: Access,
 ) {
   const owner = { kind: "contract" as const, id: contract.id };
-  const [library, document, origin, proofs, journal, cards, direction] =
+  const [library, document, origin, proofs, sentBy, cards, direction] =
     await Promise.all([
       listCatalogFiles(owner),
       getContractDocument(contract.id),
       legalOriginOf(contract.id),
       contractProofOf([contract.id]),
-      loadContractJournal(contract.id),
+      loadContractSentBy(contract.id),
       loadContractCards([contract.id]),
       loadDirectionPerson(),
     ]);
@@ -84,8 +84,6 @@ export async function loadContractPage(
         ["draft", "signed", "pds_signed"].includes(f.category),
       ),
   });
-  // Who sent it: the last « Envoyé en signature » of the journal.
-  const sentBy = journal.find((e) => e.kind === "signature.requested")?.by;
 
   return {
     library,
@@ -93,11 +91,10 @@ export async function loadContractPage(
     card: cards[contract.id] ?? null,
     origin,
     proof,
-    journal,
     signer,
     now,
     canValidate,
-    sentBy: sentBy ?? "",
+    sentBy,
     direction: direction?.name ?? null,
     me: personName(access.firstName, access.lastName),
     // The viewer follows it: « Ensuite » says « vous ».

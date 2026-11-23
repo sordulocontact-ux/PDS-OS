@@ -34,10 +34,6 @@ export const masterDelay = {
     kept: (by: string | null) => `Dates gardées${by ? ` par ${by}` : ""}`,
     refused: (by: string | null) => `Retard refusé${by ? ` par ${by}` : ""}`,
   },
-  history: {
-    escalated:
-      "Retard envoyé à la direction : le master final passerait après la sortie",
-  },
   errors: {
     forbidden: "Ce retard ne vous attend plus : la page va se recharger.",
     replyRequired: "Écrivez votre réponse : l'ingénieur la lit sur son lien.",
