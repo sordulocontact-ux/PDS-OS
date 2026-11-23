@@ -138,6 +138,7 @@ export async function DealMemoSections({
                 .filter((e) => e.kind === "contact" && e.email)
                 .flatMap((e) => (e.email ? [e.email] : [])),
               canEmail: mail.canEmail,
+              atAccord: deal.stage === "agreement",
             }}
             organizationId={access.organizationId}
           />

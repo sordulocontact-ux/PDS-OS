@@ -30,6 +30,10 @@ export type MemoSendSetup = {
   // The loop's contacts' addresses, prefilled in « Cc ».
   copies: string[];
   canEmail: boolean;
+  // The deal is at the accord (« Accord de principe »): sending the
+  // validated memo back moves it to contracting, so it is never offered
+  // after (Sacha 23/11/2026: « j'ai déjà envoyé l'accord validé »).
+  atAccord: boolean;
 };
 
 /**
@@ -109,44 +113,47 @@ export function DealMemoGestures({
           {t.submit}
         </Button>
       )}
-      {memo.status === "validated" && !memo.sent && canWrite && (
-        <DialogButton
-          label={t.send.button}
-          variant="default"
-          title={t.send.title}
-          description={t.send.description}
-          wide
-        >
-          {(close) => (
-            <DealMemoSendForm
-              dealId={dealId}
-              dealName={dealName}
-              memoId={memo.id}
-              receivedSubject={memo.email?.subject ?? null}
-              attachment={attachment}
-              replyTo={send.replyTo}
-              copies={send.copies}
-              canEmail={send.canEmail}
-              open={
-                memo.files[0]?.url ? (
-                  <MemoFileButton file={memo.files[0]} />
-                ) : (
-                  <PdfExportButton
-                    href={routes.dealMemoPdf(dealId, memo.id)}
-                    fileName={t.pdf.file(dealName, memo.number)}
-                    label={t.openFile}
-                    pendingLabel={t.pdf.pending}
-                    failedLabel={t.pdf.failed}
-                    variant="outline"
-                    size="sm"
-                  />
-                )
-              }
-              onDone={close}
-            />
-          )}
-        </DialogButton>
-      )}
+      {memo.status === "validated" &&
+        !memo.sent &&
+        send.atAccord &&
+        canWrite && (
+          <DialogButton
+            label={t.send.button}
+            variant="default"
+            title={t.send.title}
+            description={t.send.description}
+            wide
+          >
+            {(close) => (
+              <DealMemoSendForm
+                dealId={dealId}
+                dealName={dealName}
+                memoId={memo.id}
+                receivedSubject={memo.email?.subject ?? null}
+                attachment={attachment}
+                replyTo={send.replyTo}
+                copies={send.copies}
+                canEmail={send.canEmail}
+                open={
+                  memo.files[0]?.url ? (
+                    <MemoFileButton file={memo.files[0]} />
+                  ) : (
+                    <PdfExportButton
+                      href={routes.dealMemoPdf(dealId, memo.id)}
+                      fileName={t.pdf.file(dealName, memo.number)}
+                      label={t.openFile}
+                      pendingLabel={t.pdf.pending}
+                      failedLabel={t.pdf.failed}
+                      variant="outline"
+                      size="sm"
+                    />
+                  )
+                }
+                onDone={close}
+              />
+            )}
+          </DialogButton>
+        )}
     </>
   );
 }
