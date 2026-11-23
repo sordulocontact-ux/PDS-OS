@@ -161,31 +161,39 @@ export function DealTodoView({
   const nextProposals = proposals.filter((p) => p.kind === "next_action");
   // Calls right above: the next one is not repeated beside the action.
   const callsFirst = WORKS[deal.stage]?.[0] === "calls";
+  // Contracting, the next gesture is the contract's: an empty « Prochaine
+  // action » says nothing (Sacha 23/11/2026).
+  const nextShown =
+    deal.stage !== "contracting" ||
+    deal.nextAction !== null ||
+    nextProposals.length > 0;
   const sections: Record<Work, ReactNode> = {
     // The next action and the loop side by side: two small blocks (Sacha
     // 22/11/2026); the loop only where a deal memo is worked on.
     next: !isClosedStage(deal.stage) && (
       <div className="grid gap-6 md:grid-cols-2 [&>*:only-child]:md:col-span-2">
-        <PageSection id="prochaine-action" title={s.next}>
-          <div className="flex flex-col gap-3">
-            {nextProposals.length > 0 && (
-              <DealCallProposals deal={deal} proposals={nextProposals} />
-            )}
-            <DealNextAction
-              deal={deal}
-              call={
-                upcomingCall &&
-                !callsFirst && (
-                  <DealCallCard
-                    call={upcomingCall}
-                    now={new Date()}
-                    movable={movable(upcomingCall)}
-                  />
-                )
-              }
-            />
-          </div>
-        </PageSection>
+        {nextShown && (
+          <PageSection id="prochaine-action" title={s.next}>
+            <div className="flex flex-col gap-3">
+              {nextProposals.length > 0 && (
+                <DealCallProposals deal={deal} proposals={nextProposals} />
+              )}
+              <DealNextAction
+                deal={deal}
+                call={
+                  upcomingCall &&
+                  !callsFirst && (
+                    <DealCallCard
+                      call={upcomingCall}
+                      now={new Date()}
+                      movable={movable(upcomingCall)}
+                    />
+                  )
+                }
+              />
+            </div>
+          </PageSection>
+        )}
         {MEMO_STAGES.includes(deal.stage) && (
           <DealMemoSections
             access={access}
@@ -202,6 +210,7 @@ export function DealTodoView({
           dealId={deal.id}
           terms={terms}
           canWrite={deal.canWrite}
+          writtenOnly={deal.agreementStatus === "validated"}
           proposals={termProposals}
         />
       </PageSection>

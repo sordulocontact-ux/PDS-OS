@@ -202,8 +202,9 @@ async function DealTodo({
           deal.agreementStatus === "validated"))) ||
     // The direction decides an accord on its memo, read first.
     deal.canDecide;
-  // Contracting, whoever writes the deal sees the contract's step.
-  const contractTime = deal.canWrite && deal.stage === "contracting";
+  // Contracting, whoever reads the deal and its contract sees the contract's
+  // step: who it waits for, when not their own (Sacha 23/11/2026).
+  const contractTime = deal.stage === "contracting";
   const [callForm, negotiationCall, memos, loop, contract] = await Promise.all([
     callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
@@ -219,7 +220,7 @@ async function DealTodo({
     ? { contract: detail, data: await loadContractPage(detail, access) }
     : null;
   const contractStep: ContractStep | null =
-    contractTime && !circuit
+    contractTime && deal.canWrite && !circuit
       ? {
           participation: deal.participationId !== null,
           create: can(access, "manage_contracts")

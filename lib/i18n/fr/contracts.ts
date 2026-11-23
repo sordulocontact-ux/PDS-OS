@@ -36,6 +36,9 @@ export const contracts = {
     approved: "Validé, à signer",
     sent: "Envoyé pour signature",
     signed: "Signé",
+    // Sent, and its signed copy is back: PDS signs, then it is « Signé »
+    // (Sacha 23/11/2026: « Envoyé pour signature » once back was half true).
+    returned: "Revenu signé",
     expired: "Expiré",
     terminated: "Résilié",
   },

@@ -8036,8 +8036,13 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `20261121150101`, journalisé avec le call ; PO ne le propose plus ; un call prévu plus tard dont l'échange est
   enregistré a eu lieu : son heure passe à celle de l'enregistrement, durée gardée, trigger `transcripts_call_held`,
   `20261122100101`), `signed` le contrat du deal signé
-  (`deal_contract_id`, `contract_not_signed`), et le deal en contractualisation passe seul à `signed` quand son
-  contrat l'est (trigger `z_deal_follows_contract` sur `contracts`, ligne de journal `detail.contract = signed`).
+  (`deal_contract_id`, `contract_not_signed`), et **l'étape suit le contrat du deal, d'où qu'il vienne** (trigger `z_deal_follows_contract` sur `contracts`,
+  `20261123100101`, Sacha 23/11/2026 : un contrat d'invité fait au Juridique laissait le deal en accord de principe) :
+  envoyé pour signature, un accord validé passe en `contracting` ; signé, un deal en accord validé ou en
+  contractualisation passe en `signed` (journal `detail.contract` = l'état du contrat). Page : « Revenu signé » sur la
+  carte du contrat (`DealContract returned`, envoyé + exemplaire signé déposé), le « Maintenant » du contrat montré à
+  tout lecteur du deal (qui on attend), termes vides cachés une fois l'accord validé (`DealTerms writtenOnly`),
+  « Prochaine action » vide cachée en contractualisation.
   Côté page, « Maintenant » ne propose plus que le vrai geste de l'étape (`DealNow` : « Préparer un call » à
   contacter, l'accord dès qu'un terme est confirmé, rien en contractualisation). **L'accord de principe est une étape** : l'affecté la propose
   (`agreement_status = pending`), la direction (`validate`) la valide ou la renvoie en négociation avec un

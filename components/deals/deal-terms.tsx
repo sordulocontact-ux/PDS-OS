@@ -82,10 +82,14 @@ export function DealTerms({
   terms,
   canWrite,
   proposals = [],
+  writtenOnly = false,
 }: {
   dealId: string;
   terms: DealTerm[];
   canWrite: boolean;
+  // The accord validated: the terms not written were not negotiated, their
+  // empty slots are noise (Sacha 23/11/2026).
+  writtenOnly?: boolean;
   // PO's term proposals from the deal's calls, still to check, oldest first.
   proposals?: TermProposal[];
 }) {
@@ -100,9 +104,9 @@ export function DealTerms({
   const filled = terms.filter(
     (term) => term.state !== "to_define" || read.has(term.key),
   );
-  const empty = terms.filter(
-    (term) => term.state === "to_define" && !read.has(term.key),
-  );
+  const empty = writtenOnly
+    ? []
+    : terms.filter((term) => term.state === "to_define" && !read.has(term.key));
 
   const proposedCard = (term: DealTerm, p: TermProposal) => {
     const before =

@@ -161,6 +161,7 @@ export async function DealMemoSections({
                   : null
               }
               document={contractFile}
+              returned={contract?.status === "sent" && pick("signed") !== null}
               deposit={
                 canWrite &&
                 can(access, "manage_contracts") &&

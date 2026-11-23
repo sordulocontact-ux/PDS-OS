@@ -46,7 +46,12 @@ export function DealFileView({
         <DealInfo deal={deal} negotiators={negotiators} />
       </PageSection>
       <PageSection id="termes" title={t.terms.title}>
-        <DealTerms dealId={deal.id} terms={terms} canWrite={false} />
+        <DealTerms
+          dealId={deal.id}
+          terms={terms}
+          canWrite={false}
+          writtenOnly={deal.agreementStatus === "validated"}
+        />
       </PageSection>
       <PageSection id="contacts" title={dealContacts.section}>
         <DealContacts dealId={deal.id} contacts={contacts} canWrite={false} />
