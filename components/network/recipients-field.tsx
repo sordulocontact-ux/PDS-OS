@@ -209,7 +209,9 @@ export function RecipientsField({
             role="listbox"
             aria-label={t.suggestions}
             onKeyDown={onListKeyDown}
-            className="absolute inset-x-0 top-full z-30 mt-1 max-h-[17.5rem] overflow-y-auto rounded-[10px] border border-[var(--border-default)] bg-popover py-1 shadow-elevation-2"
+            // In the flow, under the field: the mail's card and its rows clip
+            // what overflows them (Sacha 23/11/2026, a list cut off).
+            className="mt-1 max-h-[17.5rem] overflow-y-auto rounded-[10px] border border-[var(--border-default)] bg-popover py-1 shadow-elevation-2"
           >
             {matches.map((p) => (
               <button
