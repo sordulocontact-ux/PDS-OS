@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { DemarcheBody } from "@/components/legal/demarches/demarche-body";
 import { ProposedDemarche } from "@/components/legal/demarches/proposed-demarche";
+import { withTitre } from "@/lib/legal/title-groups";
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
 import { contractProofOf } from "@/lib/contracts/proof";
 import { generateReadyAgreements } from "@/lib/legal/contracts/auto-generate";
@@ -25,12 +26,15 @@ export async function DemarcheStep({
   kind,
   slug,
   part = null,
+  titre = null,
 }: {
   projectId: string;
   kind: LegalDemarcheKind;
   slug: string;
   // « fiche »: the person's fiche shown instead of the part at work.
   part?: string | null;
+  // A collective: the title whose journey shows it (a guest of two titles).
+  titre?: string | null;
 }) {
   const ctx = await legalJourneyContext(projectId);
   const demarche = ctx.demarches.find(
@@ -39,7 +43,11 @@ export async function DemarcheStep({
   if (!demarche) notFound();
   if (demarche.proposed)
     return (
-      <LegalStepFrame projectId={projectId} stepKey={demarche.step.key}>
+      <LegalStepFrame
+        projectId={projectId}
+        stepKey={demarche.step.key}
+        titre={titre}
+      >
         <ProposedDemarche demarche={demarche} />
       </LegalStepFrame>
     );
@@ -48,7 +56,7 @@ export async function DemarcheStep({
     kind === "person" &&
     (await generateReadyAgreements(ctx.agreements, ctx.access)) > 0
   )
-    redirect(demarche.step.href);
+    redirect(titre ? withTitre(demarche.step.href, titre) : demarche.step.href);
 
   const contractIds = demarche.parts.flatMap((p) =>
     p.panel.kind === "contract" && p.panel.row.contract
@@ -73,7 +81,11 @@ export async function DemarcheStep({
     ]),
   );
   return (
-    <LegalStepFrame projectId={projectId} stepKey={demarche.step.key}>
+    <LegalStepFrame
+      projectId={projectId}
+      stepKey={demarche.step.key}
+      titre={titre}
+    >
       <DemarcheBody
         projectId={projectId}
         projectTitle={ctx.project.title}

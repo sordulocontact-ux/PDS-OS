@@ -77,6 +77,8 @@ export default async function ProjectLegalPage({
         slug={route.slug}
         // « Voir sa fiche » from a contract's value (JUR-10).
         part={one("partie")}
+        // A collective: the title whose journey shows it.
+        titre={one("titre")}
       />
     );
   if (route.type === "ready") return <ReadyStep projectId={projectId} />;

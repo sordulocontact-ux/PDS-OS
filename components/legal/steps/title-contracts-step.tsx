@@ -7,7 +7,7 @@ import { can } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
-import { titleGroupKey } from "@/lib/legal/title-groups";
+import { scopeEntry } from "@/lib/legal/title-groups";
 import { legalTitleLayout } from "@/lib/legal/title-layout";
 import {
   loadAwaitingAgreements,
@@ -43,10 +43,9 @@ export async function TitleContractsStep({
   ]);
   if (!layout || !layout.titleIds.includes(titleId)) notFound();
   const key = legalTitleContractsKey(titleId);
-  if (!layout.steps.some((s) => s.key === key)) {
-    const first = layout.steps.find(
-      (s) => s.groupKey === titleGroupKey(titleId),
-    );
+  const scope = layout.scopes.find((s) => s.titleId === titleId);
+  if (!scope?.steps.some((s) => s.key === key)) {
+    const first = scope && scopeEntry(scope);
     redirect(first?.href ?? routes.projectLegal(projectId));
   }
   const [needs, awaiting] = await Promise.all([
@@ -55,7 +54,7 @@ export async function TitleContractsStep({
   ]);
   const waiting = awaitingOnTitle(awaiting.guests, titleId);
   return (
-    <LegalStepFrame projectId={projectId} stepKey={key}>
+    <LegalStepFrame projectId={projectId} stepKey={key} titre={titleId}>
       {waiting.length > 0 && (
         <ToneCallout tone="info">
           {fr.legalContracts.agreements.awaitingOf(awaitingNames(waiting))}

@@ -1,21 +1,17 @@
-// A collective's Juridique, one group per title (retour d'Ibé du 18/11/2026,
-// § 3.1: « quand il y a plusieurs titres, c'est le bordel », « comment
-// savoir sur lequel on est ? »). The Dossier stays the project's; then
-// « Projet » holds the démarches of the whole project (the main artist, a
-// beatmaker of several titles, the intervenants, a borrowing of no title);
-// then one group per title, in the titles' order, the abandoned ones last:
-// a split, a SACEM declaration or a borrowing of its master, the fiche and
-// contract of the artist it invites when that artist is the guest of this
-// title only; then the Sortie. A title not in the Catalogue yet opens on
-// « Rattacher le titre au Catalogue » (§ 3.6). Only for a collective: a
+// A collective's Juridique, one journey per title (retour d'Ibé du
+// 18/11/2026, § 3.1: « quand il y a plusieurs titres, c'est le bordel »;
+// Maël 23/11/2026: « 1 par son », as the Master). The trail chooses the
+// scope: « Projet » holds the Dossier, the démarches of the whole project
+// (the main artist, a beatmaker or intervenant of no guest title, a
+// borrowing of no title) and the Sortie; each title, in the titles' order,
+// the abandoned ones last, holds what is its own: a split, a SACEM
+// declaration or a borrowing of its master, the fiche and contract of each
+// artist it invites (a guest of two titles in both: the same démarche, done
+// once). A title not in the Catalogue yet opens on « Rattacher le titre au
+// Catalogue » (§ 3.6), then « Contrats du titre » (§ 3.4, with « En attente
+// de l'accord » of its guests, § 3.5, `extra`). Only for a collective: a
 // project of its own keeps its journey as it is (legalJourney). Pure,
 // client-safe; read by lib/legal/title-layout.ts.
-//
-// A title's group is where what belongs to that title alone goes: its
-// démarches (`titleOfDemarche`), and the steps added to its group by
-// `layoutByTitle` (`extra`): « Contrats du titre » (§ 3.4, with « En
-// attente de l'accord » of its guests, § 3.5), after the attach step and
-// before the démarches.
 
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
@@ -37,7 +33,6 @@ import {
   legalAttachKey,
   legalTitleContractsHref,
   legalTitleContractsKey,
-  LEGAL_READY_KEY,
   type LegalDemarcheKind,
 } from "@/lib/ui/legal-steps";
 
@@ -111,46 +106,84 @@ export type DemarcheAnchor = {
   artistIds: string[];
 };
 
-/** The title a démarche belongs to; null: the whole project's. A person
- * goes to a title only as the guest of that title alone (of a live one
- * first: an abandoned title does not take a guest the project still has). */
-export function titleOfDemarche(
+/** The titles a démarche belongs to; none: the whole project's. A person
+ * goes to each title they are a guest of (the live ones: an abandoned
+ * title takes a guest only when the project has no other title for them). */
+export function titlesOfDemarche(
   anchor: DemarcheAnchor,
   titles: LegalTitle[],
-): LegalTitle | null {
+): LegalTitle[] {
   if (anchor.kind === "person") {
     const theirs = titles.filter((title) =>
       title.guestArtistIds.some((id) => anchor.artistIds.includes(id)),
     );
     const live = theirs.filter((title) => !title.abandoned);
-    if (live.length === 1) return live[0];
-    return live.length === 0 && theirs.length === 1 ? theirs[0] : null;
+    return live.length > 0 ? live : theirs;
   }
-  if (!anchor.masterId) return null;
-  return titles.find((title) => title.masterId === anchor.masterId) ?? null;
+  if (!anchor.masterId) return [];
+  return titles.filter((title) => title.masterId === anchor.masterId);
 }
 
-/** The title a step of a title's group is about, for the head of the step. */
-export type StepTitle = {
-  id: string;
+/** One journey of a collective's Juridique: « Projet » or a title. */
+export type LegalScope = {
+  // « project », or the title's (titleGroupKey).
+  key: string;
+  // null: « Projet ».
+  titleId: string | null;
+  // « Projet », or the title's name in the project.
   label: string;
+  // A title's tag before the step's h1 (« Néons · Jay »).
   heading: string;
   hue: Hue | null;
+  steps: JourneyStep[];
 };
 
 export type TitleLayout = {
   // Every title of the project (abandoned ones too), by project title id.
   titleIds: string[];
-  // The spine's steps: the Dossier, « Projet », each title, the Sortie.
-  steps: JourneyStep[];
-  // The titles' groups, folded but the one of the open step.
-  foldable: string[];
-  // Each step of a title's group → its title.
-  titleOf: Record<string, StepTitle>;
+  // « Projet » first, then each title that has steps.
+  scopes: LegalScope[];
 };
 
-/** The group key of a title (two titles may read alike). */
+export const PROJECT_SCOPE = "project";
+
+/** The scope key of a title (two titles may read alike). */
 export const titleGroupKey = (titleId: string) => `title:${titleId}`;
+
+/** A step's link inside a title's journey: `?titre=` keeps the title (a
+ * guest of two titles has one step in each), before any anchor. */
+export function withTitre(href: string, titleId: string): string {
+  const hash = href.indexOf("#");
+  const path = hash >= 0 ? href.slice(0, hash) : href;
+  const anchor = hash >= 0 ? href.slice(hash) : "";
+  return `${path}${path.includes("?") ? "&" : "?"}titre=${titleId}${anchor}`;
+}
+
+/** The journey a step is shown in: the URL's title when that title has the
+ * step, else the first scope that has it; null: not in the layout. */
+export function scopeOfStep(
+  layout: TitleLayout,
+  stepKey: string,
+  titre: string | null,
+): LegalScope | null {
+  const has = (scope: LegalScope) => scope.steps.some((s) => s.key === stepKey);
+  return (
+    layout.scopes.find((scope) => scope.titleId === titre && has(scope)) ??
+    layout.scopes.find(has) ??
+    null
+  );
+}
+
+/** Where a scope opens: the step that waits for the viewer, else the first
+ * not done, else its first. */
+export function scopeEntry(scope: LegalScope): JourneyStep | null {
+  return (
+    scope.steps.find((s) => s.actor?.viewer) ??
+    scope.steps.find((s) => s.status !== "done") ??
+    scope.steps[0] ??
+    null
+  );
+}
 
 /** A step inside its title's group: the title is not said again, neither
  * in its title (« Répartition de l'édition », not « … « Néons » ») nor in
@@ -224,12 +257,13 @@ export function titleContractsStep(
 }
 
 /**
- * The Juridique's journey of a collective, regrouped: `steps` as
- * legalJourney built them (Dossier, démarches, Sortie), each démarche put
- * in « Projet » or in its title's group (`anchors`, by step key). A title
- * without a master and not abandoned starts with its attach step; a title
- * with nothing in it has no group. `extra`: more steps of a title's group,
- * after its attach step and before its démarches (« Contrats du titre »).
+ * The Juridique's journeys of a collective: `steps` as legalJourney built
+ * them (Dossier, démarches, Sortie), each démarche put in « Projet » or in
+ * its titles' journeys (`anchors`, by step key). A title without a master
+ * and not abandoned starts with its attach step; a title with nothing in it
+ * has no journey. `extra`: more steps of a title's journey, after its
+ * attach step and before its démarches (« Contrats du titre »). A title's
+ * steps link with `?titre=`.
  */
 export function layoutByTitle(input: {
   projectId: string;
@@ -239,28 +273,21 @@ export function layoutByTitle(input: {
   extra?: Record<string, JourneyStep[]>;
 }): TitleLayout {
   const anchorOf = new Map(input.anchors.map((a) => [a.key, a]));
-  const dossier: JourneyStep[] = [];
   const project: JourneyStep[] = [];
-  const release: JourneyStep[] = [];
   const byTitle = new Map<string, JourneyStep[]>(
     input.titles.map((title) => [title.id, []]),
   );
   for (const step of input.steps) {
     const anchor = anchorOf.get(step.key);
-    if (!anchor) {
-      (step.key === LEGAL_READY_KEY ? release : dossier).push(step);
+    const titles = anchor ? titlesOfDemarche(anchor, input.titles) : [];
+    if (!anchor || titles.length === 0) {
+      project.push(step);
       continue;
     }
-    const title = titleOfDemarche(anchor, input.titles);
-    if (!title) {
-      project.push({ ...step, group: t.groups.project });
-      continue;
-    }
-    byTitle.get(title.id)?.push(inTitle(anchor.kind, step));
+    for (const title of titles)
+      byTitle.get(title.id)?.push(inTitle(anchor.kind, step));
   }
-  const titleOf: Record<string, StepTitle> = {};
-  const foldable: string[] = [];
-  const grouped = input.titles.flatMap((title) => {
+  const scopes = input.titles.flatMap((title): LegalScope[] => {
     const own = [
       ...(title.masterId || title.abandoned
         ? []
@@ -269,22 +296,35 @@ export function layoutByTitle(input: {
       ...(byTitle.get(title.id) ?? []),
     ];
     if (own.length === 0) return [];
-    const groupKey = titleGroupKey(title.id);
-    foldable.push(groupKey);
-    return own.map((step) => {
-      titleOf[step.key] = {
-        id: title.id,
+    return [
+      {
+        key: titleGroupKey(title.id),
+        titleId: title.id,
         label: title.label,
         heading: title.heading,
         hue: title.hue,
-      };
-      return { ...step, group: title.heading, groupKey };
-    });
+        steps: own.map((step) => ({
+          ...step,
+          href: withTitre(step.href, title.id),
+          actor: step.actor?.href
+            ? { ...step.actor, href: withTitre(step.actor.href, title.id) }
+            : step.actor,
+        })),
+      },
+    ];
   });
   return {
     titleIds: input.titles.map((title) => title.id),
-    steps: [...dossier, ...project, ...grouped, ...release],
-    foldable,
-    titleOf,
+    scopes: [
+      {
+        key: PROJECT_SCOPE,
+        titleId: null,
+        label: t.groups.project,
+        heading: t.groups.project,
+        hue: null,
+        steps: project,
+      },
+      ...scopes,
+    ],
   };
 }

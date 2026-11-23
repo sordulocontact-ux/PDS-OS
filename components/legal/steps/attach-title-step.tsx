@@ -5,7 +5,7 @@ import { AttachTitlePanel } from "@/components/legal/steps/attach-title-panel";
 import { routes } from "@/lib/auth/redirects";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
-import { titleGroupKey } from "@/lib/legal/title-groups";
+import { scopeEntry } from "@/lib/legal/title-groups";
 import { legalTitleLayout } from "@/lib/legal/title-layout";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { titleBoardChoices } from "@/lib/projects/title-board";
@@ -34,10 +34,9 @@ export async function AttachTitleStep({
   ]);
   if (!layout || !layout.titleIds.includes(titleId)) notFound();
   const key = legalAttachKey(titleId);
-  if (!layout.steps.some((s) => s.key === key)) {
-    const first = layout.steps.find(
-      (s) => s.groupKey === titleGroupKey(titleId),
-    );
+  const scope = layout.scopes.find((s) => s.titleId === titleId);
+  if (!scope?.steps.some((s) => s.key === key)) {
+    const first = scope && scopeEntry(scope);
     redirect(first?.href ?? routes.projectLegal(projectId));
   }
   const canManage = canEditProject(ctx.access, ctx.project);
@@ -47,7 +46,7 @@ export async function AttachTitleStep({
     canManage,
   );
   return (
-    <LegalStepFrame projectId={projectId} stepKey={key}>
+    <LegalStepFrame projectId={projectId} stepKey={key} titre={titleId}>
       {canManage ? (
         <AttachTitlePanel
           projectId={projectId}
