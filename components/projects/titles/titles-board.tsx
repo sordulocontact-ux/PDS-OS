@@ -175,7 +175,7 @@ const COLUMN = {
   artist:
     "scroll-start sticky left-0 z-20 w-44 min-w-44 bg-card not-last:border-r-0 before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-3 after:bg-[linear-gradient(to_right,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_right,rgb(0_0_0/0.4),transparent)] @min-[624px]:w-56 @min-[624px]:min-w-56",
   actions:
-    "scroll-end sticky right-0 z-20 bg-card align-top py-2 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:right-full after:w-3 after:bg-[linear-gradient(to_left,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_left,rgb(0_0_0/0.4),transparent)]",
+    "scroll-end sticky right-0 z-20 w-16 bg-card pl-4 align-top py-2 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--border-hairline)] in-[.section-card_.table-flat]:before:hidden after:pointer-events-none after:absolute after:inset-y-0 after:right-full after:w-3 after:bg-[linear-gradient(to_left,rgb(0_0_0/0.08),transparent)] after:opacity-0 after:transition-opacity dark:after:bg-[linear-gradient(to_left,rgb(0_0_0/0.4),transparent)]",
   status: "w-32 min-w-32",
   contact: "w-52 min-w-52",
   accord: "w-44 min-w-44",
