@@ -49,7 +49,7 @@ export async function contractProofOf(
     supabase
       .from("contract_files")
       .select(
-        "contract_id, category, via_contact_id, description, file_name, path, created_at",
+        "contract_id, category, via_contact_id, description, series_id, file_name, path, created_at",
       )
       .in("contract_id", contractIds)
       .in("category", ["signed", "evidence", "pds_signed"])
@@ -80,15 +80,29 @@ export async function contractProofOf(
       };
       pdsFiles.push({ id: row.contract_id, path: row.path });
     }
-    if (row.category === "signed" && row.via_contact_id && !known.deposit) {
-      known.deposit = {
-        fileName: row.file_name,
+  }
+  // What came back from the person (their link, or e-mail): the series
+  // their copy started, read at its latest version — the team may have
+  // replaced a wrong file since (Sacha 23/11/2026), the arrival kept.
+  const arrivals = new Map<string, { at: string; byEmail: boolean }>();
+  for (const row of files.data ?? [])
+    if (row.category === "signed" && row.via_contact_id)
+      arrivals.set(row.series_id, {
         at: row.created_at,
-        url: null,
         byEmail: row.description === "Reçu par e-mail",
-      };
-      deposits.push({ id: row.contract_id, path: row.path });
-    }
+      });
+  for (const row of files.data ?? []) {
+    const known = proof.get(row.contract_id);
+    const arrival = arrivals.get(row.series_id);
+    if (!known || row.category !== "signed" || !arrival || known.deposit)
+      continue;
+    known.deposit = {
+      fileName: row.file_name,
+      at: arrival.at,
+      url: null,
+      byEmail: arrival.byEmail,
+    };
+    deposits.push({ id: row.contract_id, path: row.path });
   }
   for (const c of contracts.data ?? []) {
     const known = proof.get(c.id);
