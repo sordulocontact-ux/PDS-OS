@@ -130,13 +130,14 @@ export default async function DealPage({
   const access = await requireApproved();
   const deal = await loadDeal(access, dealId);
   if (!deal) notFound();
-  const [events, terms, negotiators, calls, proposals, contacts] =
+  const [events, terms, negotiators, calls, proposals, sources, contacts] =
     await Promise.all([
       loadDealEvents(deal.id),
       loadDealTerms(deal.id, deal.kind),
       negotiatorsFor(deal.canAssign),
       loadDealCalls(deal.id),
       loadDealCallProposals(deal.id, deal.kind),
+      loadDealCallProposals(deal.id, deal.kind, "applied"),
       loadDealContacts(deal.id),
     ]);
   return (
@@ -166,6 +167,7 @@ export default async function DealPage({
         events={events}
         calls={calls}
         proposals={proposals}
+        sources={sources}
         contacts={contacts}
       />
     </SectionFrame>
@@ -182,6 +184,7 @@ async function DealTodo({
   events,
   calls,
   proposals,
+  sources,
   contacts,
 }: Omit<
   Parameters<typeof DealTodoView>[0],
@@ -307,6 +310,7 @@ async function DealTodo({
       callForm={callForm}
       negotiationCall={negotiationCall}
       proposals={proposals}
+      sources={sources}
       contacts={contacts}
       calls={calls}
       memoStep={memoStep}

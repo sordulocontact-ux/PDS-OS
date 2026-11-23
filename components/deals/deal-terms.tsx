@@ -81,6 +81,7 @@ export function DealTerms({
   terms,
   canWrite,
   proposals = [],
+  sources = [],
   writtenOnly = false,
 }: {
   dealId: string;
@@ -91,6 +92,9 @@ export function DealTerms({
   writtenOnly?: boolean;
   // PO's term proposals from the deal's calls, still to check, oldest first.
   proposals?: TermProposal[];
+  // The terms PO wrote from a call (Sacha 23/11/2026: « ce que PO lit est
+  // validé »), oldest first: the passage stays under the value it gave.
+  sources?: TermProposal[];
 }) {
   const t = fr.deals.terms;
   const [open, setOpen] = useState<{
@@ -161,10 +165,19 @@ export function DealTerms({
           const p = read.get(term.key);
           if (p) return proposedCard(term, p);
           const name = label(term);
+          // PO's passage, while the term still says what it read.
+          const said = sources.findLast(
+            (s) =>
+              s.termKey === term.key &&
+              s.state === term.state &&
+              JSON.stringify(s.value) === JSON.stringify(term.value),
+          );
           return (
             <FactCard
               key={term.key}
               label={name}
+              read={said !== undefined}
+              note={said && <ProposalSource proposal={said} />}
               value={
                 displayTermValue(term.format, term.value) ?? t.states.to_define
               }
@@ -178,8 +191,8 @@ export function DealTerms({
                   ? t.changed(term.changedBy, formatInstantDay(term.changedAt))
                   : null
               }
-              onClick={canWrite ? () => setOpen({ term }) : undefined}
-              actionLabel={canWrite ? t.editTitle(name) : undefined}
+              onEdit={canWrite ? () => setOpen({ term }) : undefined}
+              editLabel={t.editTitle(name)}
             />
           );
         })}

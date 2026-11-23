@@ -1,7 +1,10 @@
 import { DealContract } from "@/components/deals/deal-contract";
 import { DealMemoCompare } from "@/components/deals/deal-memo-compare";
-import { DealMemoLoop } from "@/components/deals/deal-memo-loop";
-import { DealMemos } from "@/components/deals/deal-memos";
+import {
+  DealMemoLoop,
+  DealMemoLoopAdd,
+} from "@/components/deals/deal-memo-loop";
+import { DealMemos, NewDealMemoButton } from "@/components/deals/deal-memos";
 import { PageSection } from "@/components/shell/page-section";
 import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
@@ -112,7 +115,14 @@ export async function DealMemoSections({
   return (
     <>
       {memoPart && (
-        <PageSection id="deal-memo" title={dealMemos.section}>
+        <PageSection
+          id="deal-memo"
+          title={dealMemos.section}
+          action={
+            canWrite &&
+            !isClosedStage(deal.stage) && <NewDealMemoButton dealId={deal.id} />
+          }
+        >
           <DealMemos
             dealId={deal.id}
             dealName={dealName(deal)}
@@ -134,15 +144,26 @@ export async function DealMemoSections({
         </PageSection>
       )}
       {loopPart && (canWrite || loop.length > 0) && (
-        <PageSection id="boucle" title={dealMemos.loop.section}>
+        <PageSection
+          id="boucle"
+          title={dealMemos.loop.section}
+          action={
+            canWrite &&
+            !isClosedStage(deal.stage) && (
+              <DealMemoLoopAdd
+                dealId={deal.id}
+                members={members}
+                linked={[
+                  ...contacts.map((c) => c.id),
+                  ...(deal.counterpartId ? [deal.counterpartId] : []),
+                ]}
+              />
+            )
+          }
+        >
           <DealMemoLoop
             dealId={deal.id}
             entries={loop}
-            members={members}
-            linked={[
-              ...contacts.map((c) => c.id),
-              ...(deal.counterpartId ? [deal.counterpartId] : []),
-            ]}
             canWrite={canWrite && !isClosedStage(deal.stage)}
           />
         </PageSection>

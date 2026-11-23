@@ -2,6 +2,17 @@
 export const dealMemos = {
   section: "Deal memo",
   none: "Aucun deal memo.",
+  // A memo found in the member's own Gmail (Sacha 23/11/2026).
+  gmail: {
+    found: (from: string, day: string) =>
+      `Reçu dans votre Gmail de ${from}, le ${day}`,
+    file: "Ranger dans le deal",
+    filing: "Rangement…",
+    filed: "Deal memo rangé dans le deal",
+    gone: "Ce mail n'a plus de PDF dans votre Gmail.",
+    tooLarge: "Ce PDF dépasse 20 Mo.",
+    failed: "Le PDF n'a pas pu être rangé. Réessayez.",
+  },
   // The label's PDF, received anywhere (Sacha 23/11/2026).
   deposit: {
     button: "Déposer le memo reçu",
@@ -254,6 +265,7 @@ export const dealMemos = {
     check_unchanged: "Rien n'a changé.",
     file_missing: "Le PDF n'a pas pu être déposé. Réessayez.",
     file_already_filed: "Ce PDF est déjà le deal memo.",
+    memo_already_filed: "Ce mail est déjà le deal memo du deal.",
     invalid_verdict: "Choisissez « Conforme » ou « Différent ».",
     invalid_term: "Ce terme n'est pas dans le deal memo.",
     memo_submitted: "Ce deal memo est déjà envoyé à valider.",

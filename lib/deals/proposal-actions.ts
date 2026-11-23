@@ -5,14 +5,11 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { settleProposal } from "@/lib/deals/call-settle";
-import { dealFailure } from "@/lib/deals/errors";
-import { TERM_STATES, TERM_VALUES, termOf } from "@/lib/deals/terms";
+import { applyTermProposals } from "@/lib/deals/call-apply";
 import { DEAL_KINDS } from "@/lib/deals/types";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { deals } from "@/lib/i18n/fr/deals";
 import { createClient } from "@/lib/supabase/server";
-import type { Json } from "@/lib/supabase/database.types";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 /**
@@ -30,50 +27,16 @@ export async function applyDealTermProposals(
   const id = z.uuid().safeParse(dealId);
   if (!id.success) return { ok: false, error: deals.errors.invalid };
   const supabase = await createClient();
-  const [{ data: deal }, { data: rows, error }] = await Promise.all([
-    supabase.from("deals").select("kind").eq("id", id.data).maybeSingle(),
-    supabase
-      .from("deal_call_proposals")
-      .select("id, term_key, value, term_state")
-      .eq("deal_id", id.data)
-      .eq("status", "proposed")
-      .eq("kind", "term")
-      .order("created_at"),
-  ]);
+  const { data: deal } = await supabase
+    .from("deals")
+    .select("kind")
+    .eq("id", id.data)
+    .maybeSingle();
   const kind = DEAL_KINDS.find((k) => k === deal?.kind);
-  if (error || !kind) return { ok: false, error: deals.errors.notFound };
-
-  const latest = new Map<string, NonNullable<typeof rows>[number]>();
-  const older: string[] = [];
-  for (const row of rows ?? []) {
-    if (!row.term_key) continue;
-    const before = latest.get(row.term_key);
-    if (before) older.push(before.id);
-    latest.set(row.term_key, row);
-  }
-
-  let applied = 0;
-  for (const row of latest.values()) {
-    const term = termOf(kind, row.term_key ?? "");
-    const state = z.enum(TERM_STATES).safeParse(row.term_state);
-    const value = term && TERM_VALUES[term.format].safeParse(row.value);
-    // A proposal the deal no longer knows how to read is left for a person.
-    if (!term || !state.success || !value?.success) continue;
-    const { error: failed } = await supabase.rpc("set_deal_term", {
-      p_deal_id: id.data,
-      p_term_key: term.key,
-      p_value: value.data as Json,
-      p_state: state.data,
-    });
-    if (failed)
-      return {
-        ok: false,
-        error: dealFailure("applyDealTermProposals", failed),
-      };
-    await settleProposal(supabase, row.id, "applied");
-    applied += 1;
-  }
-  for (const old of older) await settleProposal(supabase, old, "dismissed");
+  if (!kind) return { ok: false, error: deals.errors.notFound };
+  const result = await applyTermProposals(supabase, id.data, kind);
+  if (!result.ok) return result;
+  const applied = result.applied;
   revalidatePath(routes.deal(id.data));
   return { ok: true, done: dealCalls.proposals.allApplied(applied) };
 }

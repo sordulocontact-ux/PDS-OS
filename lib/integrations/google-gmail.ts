@@ -77,6 +77,25 @@ export async function listGmailIds(
   return (body.messages ?? []).map((m) => m.id);
 }
 
+/** The ids of the newest messages matching a Gmail search (`q`, built by
+ * the code from addresses it holds, never from a mail's content). */
+export async function searchGmailIds(
+  token: string,
+  q: string,
+  max: number,
+): Promise<string[]> {
+  const query = new URLSearchParams({
+    maxResults: String(max),
+    q,
+    fields: "messages/id",
+  });
+  const body = await get<{ messages?: { id: string }[] }>(
+    token,
+    `/messages?${query}`,
+  );
+  return (body.messages ?? []).map((m) => m.id);
+}
+
 /** A message's head, snippet and parts' tree, without content (`head`), or
  * whole with its texts (`full`). */
 export function getGmailMessage(

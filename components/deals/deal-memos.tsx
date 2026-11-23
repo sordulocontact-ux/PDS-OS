@@ -1,7 +1,5 @@
 "use client";
 
-import { IconPlus } from "nucleo-sharp-essential";
-
 import { DealMemoCard } from "@/components/deals/deal-memo-card";
 import { DealMemoDepositButton } from "@/components/deals/deal-memo-deposit-button";
 import {
@@ -10,7 +8,6 @@ import {
 } from "@/components/deals/deal-memo-gestures";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
-import { IconAction } from "@/components/ui/icon-action";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { routes } from "@/lib/auth/redirects";
@@ -41,6 +38,22 @@ function MemoPdf({
       size="sm"
       iconOnly
     />
+  );
+}
+
+/** « Nouveau deal memo » in the head of its section (Sacha 23/11/2026, as
+ * « Calls »): a draft photo of the terms now. */
+export function NewDealMemoButton({ dealId }: { dealId: string }) {
+  const create = useWriteSubmit(undefined, t.created);
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={create.pending}
+      onClick={() => create.run(() => createDealMemo(dealId))}
+    >
+      {t.create}
+    </Button>
   );
 }
 
@@ -76,31 +89,7 @@ export function DealMemos({
   send: MemoSendSetup;
   organizationId: string | null;
 }) {
-  const create = useWriteSubmit(undefined, t.created);
   const [latest, ...older] = memos;
-  // Beside the memo's main gesture, an icon (Sacha 22/11/2026); alone (no
-  // memo yet), its words.
-  const newButton = (iconOnly: boolean) =>
-    canWrite &&
-    (iconOnly ? (
-      <IconAction
-        label={t.create}
-        icon={IconPlus}
-        size="icon-sm"
-        disabled={create.pending}
-        busy={create.pending}
-        onClick={() => create.run(() => createDealMemo(dealId))}
-      />
-    ) : (
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={create.pending}
-        onClick={() => create.run(() => createDealMemo(dealId))}
-      >
-        {t.create}
-      </Button>
-    ));
   if (!latest)
     return (
       <EmptyNote
@@ -113,7 +102,6 @@ export function DealMemos({
                   dealId={dealId}
                 />
               )}
-              {newButton(false)}
             </div>
           )
         }
@@ -135,7 +123,6 @@ export function DealMemos({
         open={pdf(latest)}
         actions={
           <>
-            {newButton(true)}
             <DealMemoGestures
               dealId={dealId}
               dealName={dealName}
