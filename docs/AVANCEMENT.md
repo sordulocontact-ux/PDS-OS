@@ -2724,3 +2724,34 @@ de la feuille Excel » ; « Fiche de renseignement » à la place de « Juridiqu
   Juridique une fois l'artiste crédité sur le titre au Catalogue ».
 - « ⋯ » d'une ligne : gestes de l'artiste puis du titre (mots du titre : « Renommer le titre »…). Vérifié dans Chrome
   (Assurance 30, PDS MIC #5, cadre de 358 px).
+
+## « Titres et artistes » : finitions du tableau (23/11/2026, branche `pre-prod`)
+
+Toujours une ligne par artiste, mêmes colonnes. Vérifié dans Chrome sur « Assurance 30 » (vu comme Lina Haddad), à
+1280 px et dans un cadre de 390 px.
+
+- **Largeur** : sans la colonne Note, le tableau fait encore environ 1 830 px pour 920 visibles à 1280 px ; il défile
+  toujours dans son cadre. Artiste reste fixe à gauche et **« ⋯ » fixe à droite**, chacun avec son filet et une ombre
+  légère du côté où des colonnes passent dessous. Le filet de la colonne Artiste ne s'affichait pas avant : Chrome ne
+  dessine pas de `box-shadow` sur une cellule de tableau en `border-collapse` (pseudo-éléments maintenant). Sans
+  « ⋯ » (lecteur), fondu à droite comme avant.
+- **Note** sous le nom (deux lignes au plus, cliquée pour la modifier) ; « Ajouter une note » / « Modifier la note »
+  dans « ⋯ ». Plus de colonne Note. Aussi dans le récap compact de la Vue d'ensemble, en lecture.
+- **Statuts** (`participationStatusTone`) : À contacter gris, Contacté orange, D'accord vert, A refusé et Retiré gris.
+  Le même ton sert aussi dans « Participations et contrats ».
+- **Accord** en mots courts sur une ligne dans le tableau et le récap compact : « Accord validé », « Accord à
+  valider », « Négociation », « Call prévu »… (ton de `dealStageToneOf`).
+- **« Ajouter le contact »** : icône fantôme avec infobulle dans la cellule Contact (même fenêtre), à la place du
+  bouton contour.
+- **Titre partagé** : une ligne de tête sur la bande douce, le titre écrit une fois, ses artistes dessous. Mix,
+  Sortie, Distribution, Beatmaker se répètent sur chaque ligne ; Sortie changée sur une ligne change l'autre
+  (vérifié dans les deux sens, après rechargement).
+- **Titre sans artiste** : garde sa ligne (« Aucun artiste invité », « Nommer », « Ajouter un artiste »), vérifié.
+- **Données de test ajoutées depuis l'app** dans la base de dev : Lila Vega (Featuring, À contacter) sur « Cap sur
+  demain », et un titre vide « Titre 7 (à nommer) ». À retirer depuis l'app si besoin (« Retirer du titre »,
+  « Abandonner le titre »).
+- **Pour Sacha** : `DataTableActionsHead` et `DataTableActionsCell` (`components/ui/data-table.tsx`) prennent un
+  `className` facultatif (sans effet ailleurs). `participationStatusTone` a changé (`proposed` neutre, `declined`
+  neutre).
+- Pas encore fait : sur téléphone, le tableau défile au lieu de passer les colonnes sous le nom (règle mobile de
+  `CLAUDE.md`) ; la fenêtre visible entre les deux colonnes fixes est étroite (environ 120 px à 390 px).
