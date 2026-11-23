@@ -23228,6 +23228,10 @@ export type Database = {
         Args: { p_contact_id: string }
         Returns: string
       }
+      set_contact_managed_artists: {
+        Args: { p_artist_ids: string[]; p_contact_id: string }
+        Returns: undefined
+      }
       revoke_network_contact_fiche: {
         Args: { p_contact_id: string }
         Returns: undefined

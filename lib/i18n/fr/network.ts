@@ -144,6 +144,8 @@ export const network = {
     // « Garder seulement le nom » on the organization: a name is not a link.
     artist: "Artiste du catalogue",
     artistNone: "Aucun",
+    managedArtists: "Artistes managés",
+    managedArtistsPlaceholder: "Choisir les artistes",
     // A new contact named exactly as an artist of the catalog (UX test of
     // 09/10/2026, section 8): linked unless removed.
     artistLinked: (name: string) => `Relié à l'artiste du catalogue ${name}`,
@@ -240,6 +242,8 @@ export const network = {
     },
     forbidden: "Vous ne pouvez pas modifier le réseau.",
     parent: "L'organisation choisie n'existe plus dans le réseau.",
+    managedArtists:
+      "Le contact est enregistré, mais ses artistes n'ont pas pu être rattachés. Réessayez.",
     members:
       "Des personnes sont rattachées à cette organisation : détachez-les avant d'en faire une personne.",
     failed: "Le contact n'a pas pu être enregistré. Réessayez.",
@@ -247,6 +251,7 @@ export const network = {
       "L'image n'a pas pu être enregistrée. Réessayez avec un JPEG, un PNG ou un WebP.",
   },
   page: {
+    managedArtists: "Artistes managés",
     back: "Tout le réseau",
     facts: "Coordonnées",
     kind: "Type",

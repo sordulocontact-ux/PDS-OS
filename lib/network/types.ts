@@ -240,5 +240,8 @@ export type NetworkContactValues = {
 export type NetworkFormOptions = {
   organizations: { id: string; name: string }[];
   artists: { id: string; name: string }[];
+  // Whoever writes the artists' contacts links a manager to his artists
+  // (set_contact_managed_artists, Sacha 23/11/2026).
+  canLinkArtists?: boolean;
   contacts: { id: string; name: string; kind: NetworkKind }[];
 };

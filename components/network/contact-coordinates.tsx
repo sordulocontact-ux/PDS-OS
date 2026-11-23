@@ -132,6 +132,29 @@ export function ContactCoordinates({
                 },
               ]
             : []),
+          // The artists it manages (Sacha 23/11/2026), only when it does.
+          ...(contact.managedArtists.length > 0
+            ? [
+                {
+                  label: p.managedArtists,
+                  value: (
+                    <span className="flex flex-wrap gap-x-1">
+                      {contact.managedArtists.map((a, i) => (
+                        <span key={a.id}>
+                          <Link
+                            href={routes.artist(a.id)}
+                            className={linkClass}
+                          >
+                            {a.name}
+                          </Link>
+                          {i < contact.managedArtists.length - 1 && ","}
+                        </span>
+                      ))}
+                    </span>
+                  ),
+                },
+              ]
+            : []),
           ...privateFact({ label: p.notes, value: contact.notes }),
         ]}
       />

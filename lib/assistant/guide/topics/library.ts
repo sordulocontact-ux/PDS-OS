@@ -134,7 +134,7 @@ export const libraryTopics: GuideTopic[] = [
     ],
     nav: "/app/network",
     facts: [
-      "Le Réseau liste les personnes et organisations : artistes, techniciens, labels, studios, médias, prestataires.",
+      "Le Réseau liste les personnes et organisations : artistes, techniciens, labels, studios, médias, prestataires. Un contact au rôle Management se rattache à ses artistes depuis son formulaire (« Artistes managés », direction et chefs de projet) : il devient leur manager dans Catalogue › Contacts.",
       "Onglets : Tous, Personnes, Organisations, Artistes repérés. Filtres par métier, type de relation (client, prestataire, partenaire, fournisseur) et ville.",
       "Seuls le type et le nom sont obligatoires à la création. Un contact peut avoir plusieurs métiers et plusieurs types de relation.",
       "À la création, les contacts au nom proche sont signalés pour éviter les doublons, sans bloquer.",

@@ -66,6 +66,8 @@ export function ContactForm({
     memberCount?: number;
     // A private contact whose coordinates the reader may not read (BIZ 8).
     coordinatesHidden?: boolean;
+    // The artists it manages (set_contact_managed_artists).
+    managedArtistIds?: string[];
   };
   // A new contact already filled: a credit of a title (name and roles), a
   // draft of PO, or an artist spotted on TikTok in the Labo.
@@ -184,6 +186,26 @@ export function ContactForm({
         // The database accepts up to 8 roles (network_contacts_roles_check).
         max={8}
       />
+      {/* A manager's artists (Sacha 23/11/2026), for whoever writes the
+          artists' contacts; written on each artist's « Contacts ». Sent
+          empty once « Management » is taken off: the links go with it. */}
+      {options.canLinkArtists && options.artists.length > 0 && (
+        <>
+          <input type="hidden" name="managedArtistsShown" value="1" />
+          {roles.includes("manager") && (
+            <OptionSelect
+              multiple
+              name="managedArtists"
+              label={t.managedArtists}
+              placeholder={t.managedArtistsPlaceholder}
+              items={Object.fromEntries(
+                options.artists.map((a) => [a.id, a.name]),
+              )}
+              defaultValue={contact?.managedArtistIds ?? []}
+            />
+          )}
+        </>
+      )}
       <OptionSelect
         multiple
         name="relations"
