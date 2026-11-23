@@ -22,7 +22,6 @@ import { DealNextAction } from "@/components/deals/deal-next-action";
 import { DealNow } from "@/components/deals/deal-now";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
-import { EmptyNote } from "@/components/shell/empty-state";
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { PageSection } from "@/components/shell/page-section";
 import { StepFrieze } from "@/components/ui/step-frieze";
@@ -53,13 +52,18 @@ import { formatShortDay } from "@/lib/utils/day";
 // Where a deal memo is worked on: its loop beside the next action.
 const MEMO_STAGES: DealStage[] = ["negotiation", "agreement", "contracting"];
 
-type Work = "next" | "terms" | "contacts" | "calls" | "memo" | "contract";
+export type DealWork =
+  "next" | "terms" | "contacts" | "calls" | "memo" | "contract";
+type Work = DealWork;
 
 // What each stage works on under its « Maintenant », in order (Ibé
 // 18/11/2026: one view to act, the rest in « Dossier »): around the call,
 // the calls first; negotiating, the terms first (Sacha 21/11/2026). A deal
 // memo can arrive by e-mail while negotiating (20261120150101).
-const WORKS: Partial<Record<DealStage, Work[]>> = {
+// Signed or abandoned, nothing left to do: the page is the deal's file, to
+// read (Sacha 23/11/2026, no more « Dossier » tab).
+const CLOSED: Work[] = ["contract", "memo", "terms", "contacts", "calls"];
+export const WORKS: Record<DealStage, Work[]> = {
   to_contact: ["contacts", "next", "calls", "terms"],
   call_planned: ["calls", "next", "contacts", "terms"],
   // The deal memo is the accord de principe (réunion avec Ibé du 18/11/2026,
@@ -70,6 +74,8 @@ const WORKS: Partial<Record<DealStage, Work[]>> = {
   negotiation: ["terms", "memo", "next", "calls", "contract"],
   agreement: ["memo", "next", "terms", "contract"],
   contracting: ["memo", "contract", "next"],
+  signed: CLOSED,
+  abandoned: CLOSED,
 };
 
 /** The deal's stages as a frieze of points, each reached one with its day
@@ -112,7 +118,9 @@ function StageFrieze({ deal, events }: { deal: Deal; events: DealEvent[] }) {
  * only what its stage works on, its main work first (WORKS) — the calls
  * around the call, the terms (with PO's proposals in place of their terms)
  * while negotiating, the next action, the deal memo and the contract to
- * agree and sign. Everything else is in « Dossier » (DealFileView).
+ * agree and sign; signed or abandoned, the whole deal to read. Its facts,
+ * history and what the stage does not show are in « Informations »
+ * (DealInfoButton).
  */
 export function DealTodoView({
   access,
@@ -160,7 +168,7 @@ export function DealTodoView({
   );
   const nextProposals = proposals.filter((p) => p.kind === "next_action");
   // Calls right above: the next one is not repeated beside the action.
-  const callsFirst = WORKS[deal.stage]?.[0] === "calls";
+  const callsFirst = WORKS[deal.stage][0] === "calls";
   // Contracting, the next gesture is the contract's: an empty « Prochaine
   // action » says nothing (Sacha 23/11/2026).
   const nextShown =
@@ -279,8 +287,7 @@ export function DealTodoView({
           )
         }
       />
-      {deal.stage === "signed" && <EmptyNote>{t.page.signedNote}</EmptyNote>}
-      {(WORKS[deal.stage] ?? []).map((work) => (
+      {WORKS[deal.stage].map((work) => (
         <Fragment key={work}>{sections[work]}</Fragment>
       ))}
     </>

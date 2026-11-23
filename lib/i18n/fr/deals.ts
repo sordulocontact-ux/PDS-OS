@@ -271,11 +271,8 @@ export const deals = {
       "Le deal et son historique restent ; il ne change plus ensuite.",
     abandonReason: "Pourquoi ce deal s'arrête",
     abandonSubmit: "Abandonner le deal",
-    // The deal's two views (Ibé 18/11/2026: « on ne sait pas si on doit
-    // remplir ce qu'il y a en bas »): what to do now, and the file to read.
-    tabs: { label: "Vues du deal", todo: "À faire", file: "Dossier" },
-    // A signed deal: nothing left to do.
-    signedNote: "Deal signé : son dossier reste consultable dans « Dossier ».",
+    // « Informations » beside the title (DealInfoButton).
+    infoDescription: "Le deal, ses personnes et son historique.",
     sections: {
       next: "Prochaine action",
       info: "Informations",
