@@ -2,6 +2,7 @@
 // Gmail, read live, seen by them only.
 export const mailboxGmail = {
   view: "Mon Gmail",
+  loading: "Lecture de votre Gmail",
   // In the reading pane: the account a mail is read from.
   account: (email: string) => `Gmail · ${email}`,
   failed: (emails: string[]) =>

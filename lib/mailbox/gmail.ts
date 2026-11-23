@@ -126,7 +126,12 @@ export async function listGmail(accounts: GmailAccount[]): Promise<{
         );
         kept.set(cacheKey, { at: Date.now(), messages });
         return messages;
-      } catch {
+      } catch (error) {
+        // Why, never the mails: a token refused, Gmail slow or down.
+        console.error(
+          "listGmail:",
+          error instanceof Error ? error.message.slice(0, 200) : "unknown",
+        );
         failed.push(account.email);
         return [];
       }

@@ -2,44 +2,27 @@ import { IconEnvelopeOpen } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { MailComposeButton } from "@/components/mailbox/mail-compose-button";
-import { MailList } from "@/components/mailbox/mail-list";
+import { MailboxViews } from "@/components/mailbox/mailbox-views";
 import { EmptyState } from "@/components/shell/empty-state";
 import { SectionFrame } from "@/components/shell/section-frame";
-import { DataTableViews } from "@/components/ui/data-table";
-import { UrlFilters } from "@/components/ui/url-filters";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { inboxEnabled } from "@/lib/email/inbox";
 import { fr } from "@/lib/i18n/fr";
-import { mailboxGmail } from "@/lib/i18n/fr/mailbox-gmail";
-import { listGmail } from "@/lib/mailbox/gmail";
 import { gmailAccounts } from "@/lib/mailbox/gmail-accounts";
 import { MAILBOX_LIMIT, listMailbox } from "@/lib/mailbox/queries";
-import {
-  MAIL_KINDS,
-  type MailKind,
-  type MailboxMessage,
-} from "@/lib/mailbox/types";
+import { MAIL_KINDS } from "@/lib/mailbox/types";
 import { filterParam } from "@/lib/ui/filter-options";
-import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.mailbox.title} · ${fr.app.name}` };
 
-const VIEWS = [
-  { key: "received", param: "recus", folder: "inbox" },
-  { key: "sent", param: "envoyes", folder: "sent" },
-] as const;
-const GMAIL_VIEW = "gmail";
-
 /**
  * PO's mailbox (Sacha 23/11/2026): the mails PDS OS received and sent, as
- * the viewer may read them (their own; the direction's all). Views
- * Tous / Reçus / Envoyés, a filter by type, an instant search; a mail opens
- * in a side sheet. The member's own Gmail accounts (same day), read live
- * from Gmail and seen by them only, are in Tous, Reçus and Envoyés too
- * (Sacha: « dans Tous je dois avoir mon Gmail »); « Mon Gmail » shows them
- * alone.
+ * the viewer may read them (their own; the direction's all), with the
+ * member's own Gmail accounts (seen by them only) in Tous, Reçus and
+ * Envoyés, alone in « Mon Gmail ». The page reads the database only and
+ * shows at once; Gmail is asked once it shows (MailboxViews). A mail opens
+ * beside the list, as Outlook.
  */
 export default async function MailPage({
   searchParams,
@@ -51,12 +34,6 @@ export default async function MailPage({
   ]);
   const t = fr.mailbox;
   const hasGmail = google.accounts.length > 0;
-  const onGmail = hasGmail && params.vue === GMAIL_VIEW;
-  const view = onGmail
-    ? null
-    : (VIEWS.find((v) => v.param === params.vue) ?? null);
-  const kind = MAIL_KINDS.find((k) => k === filterParam(params.type)) ?? null;
-  const gmail = hasGmail ? await listGmail(google.accounts) : null;
 
   if (mails.error)
     return (
@@ -65,12 +42,8 @@ export default async function MailPage({
       </SectionFrame>
     );
 
-  // PDS OS's box and the member's Gmail, newest first.
-  const messages = [...mails.messages, ...(gmail?.messages ?? [])].sort(
-    (a, b) => b.sentAt.localeCompare(a.sentAt),
-  );
   // An empty box still lets one write (a member who has no mail yet).
-  if (messages.length === 0 && !hasGmail)
+  if (mails.messages.length === 0 && !hasGmail)
     return (
       <SectionFrame
         title={t.title}
@@ -86,106 +59,18 @@ export default async function MailPage({
       </SectionFrame>
     );
 
-  // The tabs count what the type filter keeps; the filter offers the types
-  // the tab holds.
-  const ofKind = (list: MailboxMessage[]) =>
-    kind ? list.filter((m) => m.kinds.includes(kind)) : list;
-  const inView: MailboxMessage[] = onGmail
-    ? (gmail?.messages ?? [])
-    : view
-      ? messages.filter((m) => m.folder === view.folder)
-      : messages;
-  const present = new Set<MailKind>(inView.flatMap((m) => m.kinds));
-  const vue = onGmail ? GMAIL_VIEW : (view?.param ?? null);
   const compose = <MailComposeButton />;
-
+  const vue = typeof params.vue === "string" ? params.vue : null;
   return (
     <SectionFrame title={t.title} action={compose} toolsAction>
-      <DataTableViews
-        label={t.viewsLabel}
-        pageAction={compose}
-        views={[
-          {
-            href: viewHref(routes.mailbox, { type: kind }),
-            label: t.views.all,
-            count: ofKind(messages).length,
-            current: !onGmail && view === null,
-          },
-          ...VIEWS.map((v) => ({
-            href: viewHref(routes.mailbox, { vue: v.param, type: kind }),
-            label: t.views[v.key],
-            count: ofKind(messages).filter((m) => m.folder === v.folder).length,
-            current: view?.key === v.key,
-          })),
-          ...(hasGmail
-            ? [
-                {
-                  href: viewHref(routes.mailbox, {
-                    vue: GMAIL_VIEW,
-                    type: kind,
-                  }),
-                  label: mailboxGmail.view,
-                  count: gmail ? ofKind(gmail.messages).length : undefined,
-                  current: onGmail,
-                },
-              ]
-            : []),
-        ]}
-      >
-        {gmail && gmail.failed.length > 0 && (
-          <FormMessage kind="error">
-            {mailboxGmail.failed(gmail.failed)}
-          </FormMessage>
-        )}
-        <MailList
-          messages={ofKind(inView)}
-          filters={
-            present.size > 0 || kind ? (
-              <UrlFilters
-                path={routes.mailbox}
-                params={{ vue }}
-                groups={[
-                  {
-                    key: "type",
-                    label: t.filters.kindLabel,
-                    allLabel: t.filters.kindAll,
-                    options: MAIL_KINDS.filter((k) => present.has(k)).map(
-                      (k) => ({ value: k, label: t.kinds[k] }),
-                    ),
-                    current: kind,
-                  },
-                ]}
-              />
-            ) : undefined
-          }
-          empty={
-            <EmptyState
-              icon={IconEnvelopeOpen}
-              title={
-                kind
-                  ? t.states.filtersEmpty
-                  : onGmail
-                    ? mailboxGmail.emptyTitle
-                    : t.states.viewEmptyTitle(
-                        view ? t.views[view.key] : t.views.all,
-                      )
-              }
-              body={
-                kind
-                  ? t.states.filtersEmptyBody
-                  : onGmail
-                    ? mailboxGmail.emptyBody
-                    : t.states.viewEmptyBody
-              }
-            />
-          }
-        />
-        {!onGmail && mails.truncated && (
-          <p className="text-sm text-muted-foreground">
-            {t.states.truncated(MAILBOX_LIMIT)}
-          </p>
-        )}
-      </DataTableViews>
+      <MailboxViews
+        box={mails.messages}
+        truncated={mails.truncated ? t.states.truncated(MAILBOX_LIMIT) : null}
+        hasGmail={hasGmail}
+        vue={vue}
+        kind={MAIL_KINDS.find((k) => k === filterParam(params.type)) ?? null}
+        compose={compose}
+      />
     </SectionFrame>
   );
 }

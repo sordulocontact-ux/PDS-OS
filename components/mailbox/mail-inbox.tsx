@@ -53,7 +53,7 @@ export function MailInbox({ messages }: { messages: MailboxMessage[] }) {
     <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(16rem,2fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
       <ul
         aria-label={t.reader.listLabel}
-        className="overflow-hidden rounded-lg border border-[color:var(--border-hairline)] bg-card"
+        className="-mx-3 flex flex-col gap-0.5"
       >
         {messages.map((message, i) => (
           <MailListItem

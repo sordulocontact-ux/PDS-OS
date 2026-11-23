@@ -10,14 +10,21 @@ import { cn } from "@/lib/utils";
 export function Avatar({
   name,
   pictureUrl,
+  contain = false,
   className,
 }: {
   name: string;
   pictureUrl: string | null;
+  // A logo, whole on a light disc (a sender's icon in « Mails »), rather
+  // than a photo filling the circle.
+  contain?: boolean;
   // Sets the size (e.g. `size-10`); defaults to 32 px.
   className?: string;
 }) {
   const [broken, setBroken] = useState(false);
+  // A logo shows once loaded: the initials stay until then (and for good
+  // when the brand has none).
+  const [loaded, setLoaded] = useState(false);
   const showPicture = Boolean(pictureUrl) && !broken;
 
   return (
@@ -40,7 +47,16 @@ export function Avatar({
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setBroken(true)}
-          className="absolute inset-0 size-full object-cover"
+          onLoad={() => setLoaded(true)}
+          className={cn(
+            "absolute inset-0 size-full",
+            // A logo on white, as mail apps show it: a black one stays
+            // visible in the dark theme.
+            contain
+              ? "bg-[var(--po-white)] object-contain p-1.5"
+              : "object-cover",
+            contain && !loaded && "invisible",
+          )}
         />
       )}
     </span>

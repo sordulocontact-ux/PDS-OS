@@ -1,10 +1,10 @@
 import { IconPaperclip } from "nucleo-sharp-essential";
 
+import { MailAvatar } from "@/components/mailbox/mail-avatar";
 import { MailBody } from "@/components/mailbox/mail-body";
 import { MailKindBadges } from "@/components/mailbox/mail-kind-badges";
 import { recipient, senderOf, whoLine } from "@/components/mailbox/mail-people";
 import { MailReplyButton } from "@/components/mailbox/mail-reply-button";
-import { Avatar } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { formatFileSize } from "@/lib/catalog/file-rules";
@@ -59,7 +59,7 @@ export function MailReader({
         </header>
       )}
       <div className="flex items-start gap-3">
-        <Avatar name={senderName} pictureUrl={null} className="size-10" />
+        <MailAvatar message={message} sender className="size-10" />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           {/* The day goes under the name when the pane is narrow. */}
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-3">

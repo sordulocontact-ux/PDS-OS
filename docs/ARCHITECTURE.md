@@ -8425,8 +8425,13 @@ Ticket : `.tickets/archive/2026-11-23-page-mails/TICKET.md`.
   500 mails les plus récents ; panneau `SideSheet` (texte brut chargé à l'ouverture par
   `readMailboxBody`, jamais le HTML : pas de XSS). PO : outil de lecture `mailbox`
   (`lib/assistant/read/mailbox.ts`, `docs/ASSISTANT.md`), le texte d'un mail encadré comme donnée.
+- **Icônes des expéditeurs** (Sacha, même jour) : `MailAvatar` demande `/api/mailbox/icon?domain=` (session
+  approuvée), qui lit l'icône chez DuckDuckGo (`lib/integrations/favicon.ts`, seul point d'entrée, hôte fixe : le
+  domaine lu dans un mail n'est qu'un nom dans le chemin, pas d'SSRF ; gardée une semaine) ; domaine de marque par
+  `lib/mailbox/sender-domain.ts`, jamais pour une boîte de particulier (gmail.com, outlook…) : les initiales.
 - **« Mon Gmail »** (Sacha, même jour : « ajoute aussi la lecture de mon Gmail », puis « dans Tous je dois avoir
-  mon Gmail ») : ses mails entrent dans Tous, Reçus et Envoyés avec la boîte de PDS OS, et la vue `?vue=gmail` les
+  mon Gmail ») : demandé **après l'affichage** de la page (`loadMyGmail`, `useMyGmail`) pour qu'elle ne l'attende
+  jamais ; ses mails entrent dans Tous, Reçus et Envoyés avec la boîte de PDS OS, et la vue `?vue=gmail` les
   montre seuls (liste de chaque compte gardée une minute par l'instance) ; tout cela seulement pour qui a un compte Google avec Gmail (§ 4 quater : compte pro par délégation, comptes connectés,
   sans ceux où Gmail est coupé ; `lib/mailbox/gmail-accounts.ts`). Les 50 mails les plus récents de chaque
   compte sont lus **en direct** à l'ouverture de la vue (`lib/mailbox/gmail.ts`, seul point d'entrée de l'API
