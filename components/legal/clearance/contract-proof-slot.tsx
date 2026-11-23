@@ -68,10 +68,10 @@ export function ContractProofSlot({
           aria-hidden
           className="size-4 text-[color:var(--tone-success-fg)]"
         />
-        <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">
-          · {busy ? t.uploading : t.deposited}
-        </span>
+        <span className="min-w-0 font-medium">{label}</span>
+        {/* The tick and the frame say it is there (Sacha 23/11/2026: « le
+            déposé ne sert à rien »); only the upload in progress is said. */}
+        {busy && <span className="text-muted-foreground">· {t.uploading}</span>}
         <input
           ref={picker}
           type="file"
