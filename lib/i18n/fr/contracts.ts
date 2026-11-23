@@ -379,6 +379,9 @@ export const contracts = {
     // Sent by e-mail: the signed copy comes back by e-mail, dropped here.
     depositSigned: "Déposer le contrat signé",
     sign: "Enregistrer la signature",
+    // The signed copy came back: its day (SignDateForm).
+    signOn: (day: string) => `Enregistrer la signature du ${day}`,
+    otherDay: "Autre date",
     signedOnLabel: "Date de signature",
     signedOnMissing:
       "Indiquez le jour de la signature, aujourd'hui au plus tard.",

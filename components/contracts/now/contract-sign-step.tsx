@@ -10,6 +10,7 @@ import { ContractSign } from "@/components/legal/tracking/contract-sign";
 import { SignatureGate } from "@/components/legal/signed-returns/signature-gate";
 import { advanceContract } from "@/lib/contracts/actions";
 import type { ContractProof } from "@/lib/contracts/proof";
+import { formatDate } from "@/lib/release/format";
 import { todayInParis } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
 
@@ -62,6 +63,7 @@ export function ContractSignStep({
     return (
       <SignDateForm
         pending={pending}
+        received={proof?.deposit ? signedOn : null}
         onSign={(day) => advance("sign", { signedOn: day })}
       />
     );
@@ -96,18 +98,35 @@ export function ContractSignStep({
 }
 
 /** « Date de signature » then « Enregistrer la signature »: today or
- * before, said in red at the first try. */
+ * before, said in red at the first try. The signed copy came back
+ * (`received`, its day): one click at that day, « Autre date » for the field
+ * (Sacha 23/11/2026: « pourquoi il n'est pas directement enregistré à la
+ * date ? »). */
 function SignDateForm({
   pending,
+  received,
   onSign,
 }: {
   pending: boolean;
+  received: string | null;
   onSign: (signedOn: string) => void;
 }) {
   const today = todayInParis(new Date());
-  const [day, setDay] = useState(today);
+  const [day, setDay] = useState(received ?? today);
+  const [other, setOther] = useState(false);
   const [tried, setTried] = useState(false);
   const invalid = !day || day > today;
+  if (received && !other && received <= today)
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <Button disabled={pending} onClick={() => onSign(received)}>
+          {t.signOn(formatDate(received))}
+        </Button>
+        <Button variant="outline" onClick={() => setOther(true)}>
+          {t.otherDay}
+        </Button>
+      </div>
+    );
   return (
     <div className="flex flex-wrap items-end gap-3">
       <Field
