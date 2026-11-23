@@ -1655,8 +1655,11 @@ Google (Gmail perso…) se connecte par un bouton. Tout est **en lecture seule**
   liens privés du Juridique) et l'enregistre avec la session (`google_accounts`, RLS : ses lignes seules).
   Son compte pro déjà branché n'est pas gardé deux fois (« already », jeton révoqué). « Déconnecter »
   (« ⋯ ») révoque l'accès chez Google puis oublie le compte et ses choix. Retour dans les Paramètres par
-  `?google=connected|already|cancelled|failed`. Écran de consentement « External » publié : tant que Google
-  n'a pas vérifié l'application, un Gmail perso passe une fois l'écran « non validée » (100 comptes au plus).
+  `?google=connected|already|cancelled|failed`. Écran de consentement « Externe » **en Test** depuis le 23/11/2026 (il était « Interne » : aucun
+  Gmail perso ne passait) : seuls les utilisateurs tests de Google Cloud (Audience) se connectent, 100 au plus, et
+  Google coupe l'accès tous les 7 jours (se reconnecter). Publier demande une page d'accueil, une page de
+  confidentialité et leurs domaines dans Branding. Variables `GOOGLE_CONNECT_*` et `GOOGLE_TOKEN_KEY` posées en
+  local et sur Vercel le 23/11 (nouveau secret client ; l'ancien, perdu, reste actif).
 - **Choix du membre** : `google_service_opt_outs` (compte, service) — branché par défaut, une ligne = un
   service coupé. Un service décoché sur l'écran de Google = « À autoriser ».
 - **Écran** (`GoogleConnectionsSection` sous `Suspense`, `GoogleAccountServices` par compte) : adresse et
@@ -8422,8 +8425,9 @@ Ticket : `.tickets/archive/2026-11-23-page-mails/TICKET.md`.
   500 mails les plus récents ; panneau `SideSheet` (texte brut chargé à l'ouverture par
   `readMailboxBody`, jamais le HTML : pas de XSS). PO : outil de lecture `mailbox`
   (`lib/assistant/read/mailbox.ts`, `docs/ASSISTANT.md`), le texte d'un mail encadré comme donnée.
-- **« Mon Gmail »** (Sacha, même jour : « ajoute aussi la lecture de mon Gmail ») : vue `?vue=gmail`, montrée
-  seulement à qui a un compte Google avec Gmail (§ 4 quater : compte pro par délégation, comptes connectés,
+- **« Mon Gmail »** (Sacha, même jour : « ajoute aussi la lecture de mon Gmail », puis « dans Tous je dois avoir
+  mon Gmail ») : ses mails entrent dans Tous, Reçus et Envoyés avec la boîte de PDS OS, et la vue `?vue=gmail` les
+  montre seuls (liste de chaque compte gardée une minute par l'instance) ; tout cela seulement pour qui a un compte Google avec Gmail (§ 4 quater : compte pro par délégation, comptes connectés,
   sans ceux où Gmail est coupé ; `lib/mailbox/gmail-accounts.ts`). Les 50 mails les plus récents de chaque
   compte sont lus **en direct** à l'ouverture de la vue (`lib/mailbox/gmail.ts`, seul point d'entrée de l'API
   Gmail : `lib/integrations/google-gmail.ts`, `gmail.readonly`), jamais copiés : privés à leur propriétaire,

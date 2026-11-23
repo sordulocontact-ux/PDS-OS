@@ -100,6 +100,11 @@ function messageOf(account: GmailAccount, m: GmailMessage): MailboxMessage {
  * live from Gmail and merged, newest first. An account that does not answer
  * is named in `failed`; the others are still shown.
  */
+// An account's list kept a minute by the server instance (« Tous » opens on
+// every visit of Mails), by account and address: never another member's.
+const KEPT_MS = 60_000;
+const kept = new Map<string, { at: number; messages: MailboxMessage[] }>();
+
 export async function listGmail(accounts: GmailAccount[]): Promise<{
   messages: MailboxMessage[];
   failed: string[];
@@ -107,15 +112,20 @@ export async function listGmail(accounts: GmailAccount[]): Promise<{
   const failed: string[] = [];
   const lists = await Promise.all(
     accounts.map(async (account) => {
+      const cacheKey = `${account.key}|${account.email}`;
+      const hit = kept.get(cacheKey);
+      if (hit && Date.now() - hit.at < KEPT_MS) return hit.messages;
       try {
         const token = await account.token();
         const ids = await listGmailIds(token, GMAIL_LIMIT);
         const heads = await settleWithLimit(ids, AT_ONCE, (id) =>
           getGmailMessage(token, id, "head"),
         );
-        return heads.flatMap((h) =>
+        const messages = heads.flatMap((h) =>
           h.status === "fulfilled" ? [messageOf(account, h.value)] : [],
         );
+        kept.set(cacheKey, { at: Date.now(), messages });
+        return messages;
       } catch {
         failed.push(account.email);
         return [];

@@ -36,8 +36,10 @@ const GMAIL_VIEW = "gmail";
  * PO's mailbox (Sacha 23/11/2026): the mails PDS OS received and sent, as
  * the viewer may read them (their own; the direction's all). Views
  * Tous / Reçus / Envoyés, a filter by type, an instant search; a mail opens
- * in a side sheet. « Mon Gmail » (same day): the member's own Gmail accounts,
- * read live from Gmail when the view is open, seen by them only.
+ * in a side sheet. The member's own Gmail accounts (same day), read live
+ * from Gmail and seen by them only, are in Tous, Reçus and Envoyés too
+ * (Sacha: « dans Tous je dois avoir mon Gmail »); « Mon Gmail » shows them
+ * alone.
  */
 export default async function MailPage({
   searchParams,
@@ -54,7 +56,7 @@ export default async function MailPage({
     ? null
     : (VIEWS.find((v) => v.param === params.vue) ?? null);
   const kind = MAIL_KINDS.find((k) => k === filterParam(params.type)) ?? null;
-  const gmail = onGmail ? await listGmail(google.accounts) : null;
+  const gmail = hasGmail ? await listGmail(google.accounts) : null;
 
   if (mails.error)
     return (
@@ -63,7 +65,10 @@ export default async function MailPage({
       </SectionFrame>
     );
 
-  const { messages } = mails;
+  // PDS OS's box and the member's Gmail, newest first.
+  const messages = [...mails.messages, ...(gmail?.messages ?? [])].sort(
+    (a, b) => b.sentAt.localeCompare(a.sentAt),
+  );
   // An empty box still lets one write (a member who has no mail yet).
   if (messages.length === 0 && !hasGmail)
     return (
@@ -85,8 +90,8 @@ export default async function MailPage({
   // the tab holds.
   const ofKind = (list: MailboxMessage[]) =>
     kind ? list.filter((m) => m.kinds.includes(kind)) : list;
-  const inView: MailboxMessage[] = gmail
-    ? gmail.messages
+  const inView: MailboxMessage[] = onGmail
+    ? (gmail?.messages ?? [])
     : view
       ? messages.filter((m) => m.folder === view.folder)
       : messages;
