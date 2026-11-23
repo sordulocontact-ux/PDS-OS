@@ -9942,6 +9942,69 @@ export type Database = {
           },
         ]
       }
+      mailbox_messages: {
+        Row: {
+          attachments: Json
+          body_text: string
+          cc_addresses: string[]
+          created_at: string
+          folder: string
+          from_address: string | null
+          from_name: string | null
+          id: string
+          imap_uid: number | null
+          message_id: string
+          names: Json
+          organization_id: string
+          person_ids: string[]
+          sent_at: string
+          snippet: string
+          subject: string
+          thread_ids: string[]
+          to_addresses: string[]
+        }
+        Insert: {
+          attachments?: Json
+          body_text?: string
+          cc_addresses?: string[]
+          created_at?: string
+          folder: string
+          from_address?: string | null
+          from_name?: string | null
+          id?: string
+          imap_uid?: number | null
+          message_id: string
+          names?: Json
+          organization_id: string
+          person_ids?: string[]
+          sent_at: string
+          snippet?: string
+          subject?: string
+          thread_ids?: string[]
+          to_addresses?: string[]
+        }
+        Update: {
+          attachments?: Json
+          body_text?: string
+          cc_addresses?: string[]
+          created_at?: string
+          folder?: string
+          from_address?: string | null
+          from_name?: string | null
+          id?: string
+          imap_uid?: number | null
+          message_id?: string
+          names?: Json
+          organization_id?: string
+          person_ids?: string[]
+          sent_at?: string
+          snippet?: string
+          subject?: string
+          thread_ids?: string[]
+          to_addresses?: string[]
+        }
+        Relationships: []
+      }
       marketing_activations: {
         Row: {
           closed_at: string | null

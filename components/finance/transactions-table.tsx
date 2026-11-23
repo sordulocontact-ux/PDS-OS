@@ -23,7 +23,7 @@ import {
   txSubtitle,
   txTitle,
 } from "@/components/finance/transaction-sheet";
-import { useSheetRow } from "@/components/finance/use-sheet-row";
+import { useSheetRow } from "@/components/ui/use-sheet-row";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {

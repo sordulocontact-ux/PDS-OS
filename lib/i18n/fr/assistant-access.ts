@@ -38,6 +38,8 @@ export const assistantAccess = {
       "mettre à jour le solde du compte et la réserve, saisir les entrées d'argent et leurs encaissements",
     validate_contracts:
       "valider ou refuser les modèles de contrat et les contrats soumis",
+    read_mailbox:
+      "lire tous les mails de la boîte de PDS OS, pas seulement les vôtres",
   } as Record<string, string>,
   // A permission the page needs: granted, or who holds it.
   youCan: (what: string) => `Votre poste vous permet de ${what}.`,

@@ -34,7 +34,7 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { SideSheet } from "@/components/ui/side-sheet";
 import { IncomeSheet } from "@/components/finance/income-sheet";
-import { useSheetRow } from "@/components/finance/use-sheet-row";
+import { useSheetRow } from "@/components/ui/use-sheet-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import {

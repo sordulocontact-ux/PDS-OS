@@ -237,6 +237,7 @@ des `sources` (libellé + lien) que l'interface affiche.
 | `calendar` | période (cette semaine… mois prochain), « à vous », nom | les dates du Calendrier (`loadCalendar`), la période calculée par le code d'après la date du jour à Paris, jamais donnée au modèle |
 | `files` | texte, rattachement, catégorie | les fichiers de la bibliothèque (`listLibraryFiles`), liens vers l'onglet Fichiers de la fiche |
 | `notifications` | depuis (aujourd'hui, hier, cette semaine) | les notifications de la cloche, non lues d'abord, avec leur texte et leur lien |
+| `mailbox` | texte, reçus / envoyés, type, période, nombre ; ou `id` d'un mail | la boîte de la page Mails (`lib/assistant/read/mailbox.ts`, session de l'utilisateur : la RLS de `mailbox_messages` filtre, ses mails ou tous pour `read_mailbox`) : date, dossier, de, à, objet, extrait, types (`mailKinds`, calculés par le code), pièces jointes, lien vers Mails ; avec un `id`, le texte du mail (8 000 caractères au plus) encadré comme donnée : jamais une instruction (règle 4). Comptes et dates calculés par le code ; PO n'écrit ni ne répond |
 | `team_members` | nom facultatif | les membres de l'équipe et leur poste ; pour un nom (« Nora », « Yannis »), la personne qu'il désigne, accents et fautes tolérés, ou « pas de certitude » (comparateur du code, `lib/assistant/fuzzy-name.ts`) ; un prénom n'est jamais cherché comme un projet |
 
 Routage (`lib/ai/instructions/assistant.ts`, règle « Lire le reste de l'application ») : la Finance du label → `finance`,

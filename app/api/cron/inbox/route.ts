@@ -3,6 +3,7 @@ import { fileEmailedDealMemos } from "@/lib/email/deal-memo-inbox";
 import { getServerEnv } from "@/lib/env";
 import { fileEmailedProofs } from "@/lib/finance/proof-email";
 import { fileClearanceReplies } from "@/lib/legal/clearance/inbox-replies";
+import { syncMailbox } from "@/lib/mailbox/sync";
 import { sendPendingPushes } from "@/lib/notifications/push";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -13,8 +14,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * told; then the tickets and invoices sent to po+justificatifs@, filed in
  * Finance › Justificatifs (lib/finance/proof-email.ts); then the deal memos
  * sent by a label or a brand, filed in their deal, the negotiator told
- * (lib/email/deal-memo-inbox.ts). Not triggered by a user: service role
- * (cron only).
+ * (lib/email/deal-memo-inbox.ts); then the Inbox and the Sent folder copied
+ * for the page « Mails », 30 new messages per folder at most
+ * (lib/mailbox/sync.ts). Not triggered by a user: service role (cron only).
  */
 
 export const maxDuration = 60;
@@ -52,6 +54,14 @@ export async function GET(request: Request) {
     );
     return null;
   });
+  // Nor does the copy of the mailbox: its failure is only logged.
+  const mailbox = await syncMailbox().catch((error: unknown) => {
+    console.error(
+      "cron inbox mailbox:",
+      error instanceof Error ? error.message.slice(0, 200) : "unknown",
+    );
+    return null;
+  });
   if (!result) return json({ error: "inbox_unavailable" }, 503);
   if (result.filed > 0 || (memos?.filed ?? 0) > 0) {
     const supabase = createAdminClient();
@@ -61,5 +71,6 @@ export async function GET(request: Request) {
     ...result,
     proofs: proofs?.filed ?? null,
     dealMemos: memos?.filed ?? null,
+    mailbox: mailbox?.copied ?? null,
   });
 }

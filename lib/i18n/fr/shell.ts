@@ -36,6 +36,7 @@ export const shell = {
     members: "Équipe",
     feedback: "Retours",
     labo: "Repérage",
+    mailbox: "Mails",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
     pendingMembers: (count: number) =>
       count === 1

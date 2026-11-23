@@ -33,6 +33,7 @@ export function MailCard({
   added,
   attachment,
   rows = 3,
+  maxLength = 2000,
   envelope,
 }: {
   // Default « L'e-mail que PDS OS enverra ».
@@ -52,6 +53,9 @@ export function MailCard({
   name: string;
   // Lines of the message field: more when the message is the whole e-mail.
   rows?: number;
+  // The message's longest length: a whole e-mail written in « Mails » is
+  // longer than a note added to a link.
+  maxLength?: number;
   // « Ajouté automatiquement à la fin de l'e-mail : », « Ouvrir votre
   // dossier : » + the link (or « lien privé créé à l'envoi »), its validity.
   // None: the message is the whole e-mail (an authorisation request).
@@ -104,7 +108,7 @@ export function MailCard({
           name={name}
           label={t.message}
           rows={rows}
-          maxLength={2000}
+          maxLength={maxLength}
           value={message}
           onChange={(event) => onMessage(event.target.value)}
         />

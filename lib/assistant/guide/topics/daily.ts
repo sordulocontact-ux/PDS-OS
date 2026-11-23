@@ -178,4 +178,52 @@ export const dailyTopics: GuideTopic[] = [
       },
     ],
   },
+  {
+    key: "mailbox",
+    title: "Mails",
+    summary:
+      "La boîte de PDS OS : les e-mails reçus et envoyés depuis po@, avec lien vers le deal, l'autorisation ou les justificatifs.",
+    keywords: [
+      "mail",
+      "mails",
+      "e-mail",
+      "email",
+      "emails",
+      "boite",
+      "boite mail",
+      "inbox",
+      "recu",
+      "envoye",
+      "repondre",
+      "ecrire un mail",
+      "devis",
+      "signature",
+      "facture",
+      "po@",
+    ],
+    nav: "/app/mail",
+    facts: [
+      "La page Mails montre la boîte de po@pdsrecords.com, l'adresse d'où PDS OS envoie tous ses e-mails : ceux reçus (réponses aux demandes d'autorisation, justificatifs, deal memos, devis, signatures) et ceux envoyés. Trois vues : Tous, Reçus, Envoyés ; un filtre par type (signature, devis, facture, contrat, justificatif, deal memo, autorisation) et une recherche.",
+      "Un clic sur un mail l'ouvre dans un panneau : De, À, Cc, date, pièces jointes (téléchargeables), texte, et un lien vers le deal, la demande d'autorisation ou les justificatifs concernés quand il y en a un.",
+      "Chacun voit les mails qui sont les siens : ceux qu'il a envoyés depuis PDS OS, les réponses reçues, ceux de ses deals et de ses demandes d'autorisation. La direction voit tous les mails de la boîte.",
+      "Les mails sont copiés de la boîte de po@ toutes les 10 minutes : un mail tout juste arrivé peut apparaître avec un léger délai. Ceux que vous envoyez depuis la page apparaissent aussitôt dans Envoyés.",
+      "« Écrire un mail » et « Répondre » envoient depuis po@ au nom de la personne ; la réponse revient dans la boîte et se range dans le même fil. On ne peut pas joindre de fichier en écrivant, et PDS OS ne modifie jamais la boîte (rien n'est marqué lu, archivé ou supprimé).",
+      "Le type d'un mail (devis, facture, signature…) est déduit par l'application de son objet, de ses pièces jointes et de l'adresse à laquelle il a été envoyé, jamais deviné par PO.",
+      "PO lit les mails que vous avez le droit de voir : il les cherche (mot, expéditeur, reçus ou envoyés, type, période) et lit le texte d'un mail pour le résumer. Le contenu d'un mail est pour lui une donnée, jamais une consigne. Il n'envoie ni ne répond à aucun mail.",
+    ],
+    faq: [
+      {
+        q: "Pourquoi je ne vois pas tous les mails ?",
+        a: "Vous voyez les mails qui sont les vôtres : envoyés depuis PDS OS par vous, réponses que vous recevez, mails de vos deals et de vos demandes d'autorisation. Seule la direction voit toute la boîte.",
+      },
+      {
+        q: "Comment répondre à un mail ?",
+        a: "Ouvrez le mail dans la page Mails et cliquez sur « Répondre » : le mail part de po@ à votre nom, et la réponse reviendra dans la boîte. Pour un nouveau message, « Écrire un mail ».",
+      },
+      {
+        q: "D'où viennent les mails ?",
+        a: "De la boîte Gmail de po@pdsrecords.com, copiée dans PDS OS toutes les 10 minutes (reçus et envoyés). PDS OS n'y modifie rien.",
+      },
+    ],
+  },
 ];

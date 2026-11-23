@@ -8369,6 +8369,50 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.
 
+## 8 quindecies. Mails : la boîte de PDS OS (`/app/mail`, `lib/mailbox/`, `components/mailbox/`)
+
+Sacha, 23/11/2026 : « une page qui me permet de récupérer tous les mails que PDS OS reçoit, les
+signatures, les devis, voir les mails envoyés », puis « tout le monde voit les mails qu'il a reçus,
+la direction voit tout », « écrire / répondre à un mail depuis l'app », « PO lit les mails ».
+Ticket : `.tickets/archive/2026-11-23-page-mails/TICKET.md`.
+
+- **Copie, pas de lecture IMAP à l'ouverture.** Le cron `/api/cron/inbox` (toutes les 10 min, service
+  role) appelle `syncMailbox()` (`lib/mailbox/sync.ts`) après les trois rangements existants : INBOX
+  et le dossier spécial `\Sent` de Gmail (Gmail y garde ce que son SMTP envoie : tout mail de PDS
+  OS, et ce qu'on écrit depuis po@ à la main), 365 jours, 30 nouveaux messages par dossier et par
+  passage (le retard se rattrape en quelques heures), source lue jusqu'à 1 Mo pour le texte. Un
+  message est connu par son Message-ID dans son dossier : copié une fois, jamais réécrit.
+  Organisation de la boîte = la plus ancienne (une seule en prod). `lib/email/inbox.ts` reste le
+  seul point d'entrée IMAP : `withInbox(work, { folder })`, `entries(uids)` (en-tête, fil, texte —
+  le HTML changé en texte s'il n'y a pas de partie texte —, pièces jointes nommées par la structure,
+  `lib/email/inbox-entries.ts`), `attachment({ uid, messageId }, part)`.
+- **Table `mailbox_messages`** (migration `20261123200101_mailbox.sql`) : texte entier (100 000
+  caractères), extrait, pièces jointes en `[{ part, name, type, size }]` (jamais copiées : lues dans
+  la boîte à la demande par `/api/mailbox/[id]/attachments/[part]`, sous la session, RLS), fil
+  (`thread_ids` = In-Reply-To puis References).
+- **Qui lit quoi** : `person_ids` décidés par le code à la copie (`lib/mailbox/owners.ts`, pur ;
+  contexte `owners-context.ts`) : envoyé → le membre du premier Reply-To (sendEmail met son adresse
+  en premier) et tout membre en De/À/Cc ; reçu → membre expéditeur, membre en À/Cc, personnes de
+  l'autorisation (po+aut-<id>@) ou du deal (po+deal-<id>@), propriétaires des messages du fil. RLS :
+  un membre lit les siens, la direction tout (permission `read_mailbox`, DG seul). Sans propriétaire,
+  seule la direction le voit. Personne ne modifie ni ne supprime un message ; la boîte Gmail n'est
+  jamais modifiée (lecture en `BODY.PEEK`).
+- **Type d'un mail** (`lib/mailbox/kinds.ts`, à chaque lecture, jamais stocké, jamais par l'IA) :
+  signature, devis, facture, contrat (mots de l'objet et des noms de fichiers), justificatif
+  (po+justificatifs@), deal memo (po+deal-), autorisation (po+aut-). Lien vers l'objet PDS OS
+  (`links.ts`) : le deal, la demande d'autorisation, Finance › Justificatifs (si la personne lit la
+  Finance).
+- **Écrire / répondre** (`lib/mailbox/compose-actions.ts`) : `sendEmail` (from po@ au nom du membre),
+  Reply-To = le membre **puis po@** pour que la réponse revienne aussi dans la boîte ; une réponse
+  porte In-Reply-To et References (`OutgoingEmail.inReplyTo` / `references`, `sendEmail` renvoie le
+  `messageId`). Le membre enregistre aussitôt son envoi (insert RLS : dossier `sent`, lui seul, dans
+  les 5 minutes, sans UID ni pièce jointe) ; le cron le reconnaît ensuite par son Message-ID. Pas de
+  pièce jointe à l'écriture.
+- **Page** : vues Tous / Reçus / Envoyés (`?vue=recus|envoyes`), filtre Type (`?type=`), recherche,
+  500 mails les plus récents ; panneau `SideSheet` (texte brut chargé à l'ouverture par
+  `readMailboxBody`, jamais le HTML : pas de XSS). PO : outil de lecture `mailbox`
+  (`lib/assistant/read/mailbox.ts`, `docs/ASSISTANT.md`), le texte d'un mail encadré comme donnée.
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices

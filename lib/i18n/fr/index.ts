@@ -74,6 +74,7 @@ import { designSteps } from "./design-steps";
 import { legalReadiness } from "./legal-readiness";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
+import { mailbox } from "./mailbox";
 import { masterBrief } from "./master-brief";
 import { masterFinal } from "./master-final";
 import { masterInvoice } from "./master-invoice";
@@ -283,6 +284,7 @@ export const fr = {
   budget,
   catalogFiles,
   library,
+  mailbox,
   network,
   contracts,
   facts,

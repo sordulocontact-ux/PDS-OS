@@ -2724,3 +2724,18 @@ de la feuille Excel » ; « Fiche de renseignement » à la place de « Juridiqu
   Juridique une fois l'artiste crédité sur le titre au Catalogue ».
 - « ⋯ » d'une ligne : gestes de l'artiste puis du titre (mots du titre : « Renommer le titre »…). Vérifié dans Chrome
   (Assurance 30, PDS MIC #5, cadre de 358 px).
+
+## Page « Mails » : la boîte de PDS OS (23/11/2026, branche `pre-prod`)
+
+Demande de Sacha : récupérer tous les mails que PDS OS reçoit (signatures, devis…) et voir les mails
+envoyés ; chacun voit les siens, la direction tout ; écrire et répondre depuis l'app ; PO lit les mails.
+
+- Migration `20261123200101_mailbox.sql` : table `mailbox_messages` (RLS : `person_ids` ou
+  `read_mailbox`, insert limité à son propre envoi), permission `read_mailbox` (DG).
+- Copie de INBOX et Envoyés par le cron `/api/cron/inbox` (`lib/mailbox/sync.ts`, `owners.ts`).
+- Page `/app/mail` (entrée « Mails » pour tous), panneau, pièces jointes à la demande, liens vers le
+  deal / l'autorisation / les justificatifs, « Écrire un mail », « Répondre ».
+- PO : outil de lecture `mailbox`, sujet « Mails » du guide.
+- Tests : `supabase/tests/mailbox.test.sql` (10), `team.test.sql` mis à jour.
+- Détail : `docs/ARCHITECTURE.md` § 8 quindecies.
+

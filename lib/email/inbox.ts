@@ -3,6 +3,7 @@ import "server-only";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
 
+import { entryOf, type InboxEntry } from "@/lib/email/inbox-entries";
 import { replyText } from "@/lib/email/reply-text";
 import { getServerEnv } from "@/lib/env";
 
@@ -52,14 +53,38 @@ export type Inbox = {
   recent: (days: number, max: number) => Promise<InboxEnvelope[]>;
   // One message's text, once it is known to be a reply to file.
   read: (uid: number) => Promise<InboxMessage | null>;
+  // Whole messages for the page « Mails » (lib/mailbox/sync.ts): their
+  // head, their text (the first MAX_SOURCE bytes read), the files joined
+  // named from the body structure, never downloaded.
+  entries: (uids: number[]) => Promise<InboxEntry[]>;
+  // One file joined, read when a reader asks for it: by its UID, else
+  // found by its Message-ID (an e-mail recorded from the app has no UID).
+  attachment: (
+    at: { uid: number | null; messageId: string },
+    part: string,
+  ) => Promise<InboxFile | null>;
 };
+
+export type InboxFile = { name: string; type: string; content: Uint8Array };
+
+// Gmail's folders: the Inbox, or the Sent folder (where Gmail keeps what its
+// SMTP sends, lib/email/send.ts), found by its special use, whatever the
+// account's language names it.
+export type InboxFolder = "inbox" | "sent";
+
+// How much of a message is read for its text (the text comes before the
+// files), and the largest file served.
+const MAX_SOURCE = 1024 * 1024;
+const MAX_ATTACHMENT = 25 * 1024 * 1024;
 
 const address = (a?: { address?: string }) =>
   a?.address?.trim().toLowerCase() || null;
 
-/** Opens PO's inbox for the time of `work`; null when it cannot. */
+/** Opens PO's inbox (or its Sent folder) for the time of `work`; null when
+ * it cannot. */
 export async function withInbox<T>(
   work: (inbox: Inbox) => Promise<T>,
+  { folder = "inbox" }: { folder?: InboxFolder } = {},
 ): Promise<T | null> {
   const env = getServerEnv();
   const pass = env.EMAIL_SMTP_PASSWORD;
@@ -80,7 +105,17 @@ export async function withInbox<T>(
     );
     return null;
   }
-  const lock = await client.getMailboxLock("INBOX");
+  const path =
+    folder === "inbox"
+      ? "INBOX"
+      : (await client.list().catch(() => [])).find(
+          (box) => box.specialUse === "\\Sent",
+        )?.path;
+  if (!path) {
+    await client.logout().catch(() => undefined);
+    return null;
+  }
+  const lock = await client.getMailboxLock(path);
   try {
     return await work({
       recent: async (days, max) => {
@@ -150,6 +185,45 @@ export async function withInbox<T>(
               content: new Uint8Array(a.content),
             })),
           source: new Uint8Array(m.source),
+        };
+      },
+      entries: async (uids) => {
+        if (uids.length === 0) return [];
+        const entries: InboxEntry[] = [];
+        for await (const m of client.fetch(
+          uids,
+          {
+            uid: true,
+            bodyStructure: true,
+            source: { maxLength: MAX_SOURCE },
+          },
+          { uid: true },
+        )) {
+          if (!m.source) continue;
+          const parsed = await simpleParser(m.source).catch(() => null);
+          const entry = parsed && entryOf(m.uid, parsed, m.bodyStructure);
+          if (entry) entries.push(entry);
+        }
+        return entries;
+      },
+      attachment: async ({ uid, messageId }, part) => {
+        const found =
+          uid ??
+          ((await client.search(
+            { header: { "message-id": messageId } },
+            { uid: true },
+          )) || [])[0];
+        if (!found) return null;
+        const file = await client.download(String(found), part, {
+          uid: true,
+          maxBytes: MAX_ATTACHMENT,
+        });
+        const chunks: Buffer[] = [];
+        for await (const chunk of file.content) chunks.push(chunk as Buffer);
+        return {
+          name: file.meta.filename ?? "Pièce jointe",
+          type: file.meta.contentType || "application/octet-stream",
+          content: new Uint8Array(Buffer.concat(chunks)),
         };
       },
     });

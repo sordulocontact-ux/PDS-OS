@@ -1,6 +1,7 @@
 import {
   IconCalendarDays,
   IconChartBarTrendUp,
+  IconEnvelopeOpen,
   IconFile,
   IconFolderOpen,
   IconHandshake,
@@ -64,6 +65,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconHandshake,
   },
   { href: routes.files, label: fr.shell.nav.files, icon: IconFile },
+  // PO's mailbox (Sacha 23/11/2026): everyone reads the e-mails that are
+  // theirs, the direction every one.
+  {
+    href: routes.mailbox,
+    label: fr.shell.nav.mailbox,
+    icon: IconEnvelopeOpen,
+  },
   // Every spend the reader may see, of the projects and the artists (BUD 3).
   {
     href: routes.expenses,

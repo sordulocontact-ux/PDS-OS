@@ -13,7 +13,7 @@ import { PostLabel } from "@/components/finance/post-label";
 import { IncomeForm } from "@/components/finance/income-form";
 import { SpendSheet } from "@/components/finance/spend-sheet";
 import type { SpendColumn } from "@/components/finance/spend-columns";
-import { useSheetRow } from "@/components/finance/use-sheet-row";
+import { useSheetRow } from "@/components/ui/use-sheet-row";
 import {
   DataTable,
   DataTableActionsCell,

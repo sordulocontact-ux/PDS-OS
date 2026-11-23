@@ -87,6 +87,9 @@ export const PERMISSIONS = [
   // Validates the contract templates and the contracts submitted (the
   // business manager, the direction supervising: Ibé, 18/11/2026).
   "validate_contracts",
+  // Reads every e-mail of PO's mailbox, not only one's own (the direction,
+  // Sacha 23/11/2026).
+  "read_mailbox",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -130,6 +133,9 @@ export const routes = {
     `/api/calls/${callId}/report?v=${version}&scope=${scope}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.
   files: "/app/files",
+  // PO's mailbox (Sacha 23/11/2026): the e-mails one received and sent
+  // through PDS OS, every one for the direction (?vue=recus|envoyes&type=…).
+  mailbox: "/app/mail",
   // Every spend the reader may see, projects and artists (BUD 3).
   expenses: "/app/expenses",
   // Finance (Ibé's ticket « Cockpit Finance », 13/11/2026): the overview,
