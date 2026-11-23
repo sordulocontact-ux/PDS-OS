@@ -19,8 +19,12 @@ const linkClass =
  * catalog artist (a person), its notes. */
 export function ContactCoordinates({
   contact,
+  fiche,
 }: {
   contact: NetworkContactDetail;
+  // Its own fiche de renseignements, first (Sacha 23/11/2026: « dans
+  // coordonnées ou plus haut »): what the contact fills in comes here.
+  fiche?: ReactNode;
 }) {
   const p = fr.network.page;
   const accounts = socialLinksOf(contact);
@@ -31,6 +35,7 @@ export function ContactCoordinates({
     hidden ? [] : [fact];
   return (
     <PageSection card id="coordinates" title={p.coordinates}>
+      {fiche && <div className="mb-4">{fiche}</div>}
       {/* A private contact (BIZ 8) whose coordinates the reader may not read. */}
       {hidden && (
         <ToneCallout className="mb-4">

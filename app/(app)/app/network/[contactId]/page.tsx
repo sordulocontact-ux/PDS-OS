@@ -160,20 +160,9 @@ export default async function NetworkContactPage({
           />
         </div>
         <div className="flex min-w-0 flex-col gap-6">
-          <ContactCoordinates contact={contact} />
-          {(isPrivate || canMakePrivate) && (
-            <ContactPrivacy
-              contactId={contact.id}
-              ownerName={privacy.ownerName}
-              isPrivate={isPrivate}
-              canMakePrivate={canMakePrivate}
-              canMakeShared={canMakeShared}
-              deals={sharing.deals}
-            />
-          )}
-          <ContactFiches
-            projects={projects}
-            lead={
+          <ContactCoordinates
+            contact={contact}
+            fiche={
               fiche &&
               !contact.archived && (
                 <ContactFiche
@@ -184,6 +173,17 @@ export default async function NetworkContactPage({
               )
             }
           />
+          {(isPrivate || canMakePrivate) && (
+            <ContactPrivacy
+              contactId={contact.id}
+              ownerName={privacy.ownerName}
+              isPrivate={isPrivate}
+              canMakePrivate={canMakePrivate}
+              canMakeShared={canMakeShared}
+              deals={sharing.deals}
+            />
+          )}
+          <ContactFiches projects={projects} />
         </div>
       </div>
     </SectionFrame>

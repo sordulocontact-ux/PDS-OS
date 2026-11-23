@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import { RemindContactButton } from "@/components/network/remind-contact-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -208,21 +206,16 @@ export function ContactInProjects({
 }
 
 /** The fiches de renseignements sent to the contact, one per project:
- * returned or not, after `lead` (its own Réseau fiche). None: no card. */
-export function ContactFiches({
-  projects,
-  lead,
-}: {
-  projects: ContactProject[];
-  lead?: ReactNode;
-}) {
+ * returned or not. None: no card. Its own Réseau fiche is in
+ * « Coordonnées » (ContactFiche). */
+export function ContactFiches({ projects }: { projects: ContactProject[] }) {
   const p = fr.network.page;
   const fiches = projects.flatMap((project) =>
     project.items
       .filter((i) => i.kind === "form")
       .map((item) => ({ project, item })),
   );
-  if (fiches.length === 0 && !lead) return null;
+  if (fiches.length === 0) return null;
   return (
     <PageSection
       card
@@ -230,9 +223,6 @@ export function ContactFiches({
       title={p.fiche}
       description={p.ficheDescription}
     >
-      {lead && (
-        <div className={fiches.length > 0 ? "mb-4" : undefined}>{lead}</div>
-      )}
       {fiches.length > 0 && (
         <DataTable framed>
           <DataTableHeader>
