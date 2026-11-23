@@ -125,31 +125,29 @@ const isReleaseValue = (value: unknown): value is ReleaseValue =>
 
 // -------------------------------------------------------------------- Note
 
-/** The artist's note under its name, two lines at most (the whole note on
- * hover); clicked, it opens to be changed. Empty: nothing shown, « Ajouter
- * une note » is in the row's « ⋯ », which opens the same modal (`open`,
- * `onOpenChange`). Read only: the note alone. */
+/** The artist's note in its « Note » column (Maël 23/11/2026), three lines
+ * at most (the whole on hover); clicked, it opens to be changed. Empty:
+ * « Ajouter une note » for whoever writes the title. Read only: the note
+ * alone, or nothing. */
 export function NoteLine({
   projectId,
   participationId,
   artist,
   note,
   canEdit,
-  open,
-  onOpenChange,
 }: {
   projectId: string;
   participationId: string;
   artist: string;
   note: string | null;
   canEdit: boolean;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 }) {
   const t = fr.projectTitles.recap.note;
+  const [open, setOpen] = useState(false);
   const lines = cn(
     caption,
-    "line-clamp-2 whitespace-normal break-words text-[color:var(--text-secondary)]",
+    "line-clamp-3 whitespace-normal break-words",
+    note && "text-[color:var(--text-secondary)]",
   );
   if (!canEdit)
     return note ? (
@@ -159,21 +157,20 @@ export function NoteLine({
     ) : null;
   return (
     <>
-      {note && (
-        <button
-          type="button"
-          className={cn(LINE_BUTTON, lines)}
-          title={note}
-          onClick={() => onOpenChange(true)}
-        >
-          {/* The note itself is read, after what the button does. */}
-          <span className="sr-only">{`${t.edit(artist)} : `}</span>
-          {note}
-        </button>
-      )}
+      <button
+        type="button"
+        className={cn(LINE_BUTTON, lines)}
+        title={note ?? undefined}
+        onClick={() => setOpen(true)}
+      >
+        {/* The note itself is read, after what the button does. */}
+        {note && <span className="sr-only">{`${t.edit(artist)} : `}</span>}
+        {note ?? t.add}
+        {!note && <span className="sr-only">{` · ${artist}`}</span>}
+      </button>
       <FormDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={setOpen}
         title={t.title(artist)}
         closeLabel={fr.dialogs.close}
       >
@@ -181,7 +178,7 @@ export function NoteLine({
           projectId={projectId}
           participationId={participationId}
           note={note}
-          onDone={() => onOpenChange(false)}
+          onDone={() => setOpen(false)}
         />
       </FormDialog>
     </>
