@@ -1,12 +1,10 @@
-import { IconCircleInfo } from "nucleo-sharp-essential";
-
 import { DealCalls } from "@/components/deals/deal-calls";
 import { DealContacts } from "@/components/deals/deal-contacts";
 import { DealHistory } from "@/components/deals/deal-history";
 import { DealInfo } from "@/components/deals/deal-info";
 import { WORKS } from "@/components/deals/deal-todo-view";
 import { PageSection } from "@/components/shell/page-section";
-import { DialogButton } from "@/components/ui/dialog-button";
+import { InfoButton } from "@/components/ui/info-button";
 import type { DealCall } from "@/lib/deals/call-queries";
 import type { DealContact } from "@/lib/deals/contact-queries";
 import type { Deal, DealEvent } from "@/lib/deals/types";
@@ -36,9 +34,8 @@ export function DealInfoButton({
   const s = t.page.sections;
   const shown = WORKS[deal.stage];
   return (
-    <DialogButton
+    <InfoButton
       label={s.info}
-      icon={IconCircleInfo}
       title={s.info}
       description={t.page.infoDescription}
     >
@@ -62,6 +59,6 @@ export function DealInfoButton({
           <DealHistory deal={deal} events={events} />
         </PageSection>
       </div>
-    </DialogButton>
+    </InfoButton>
   );
 }
