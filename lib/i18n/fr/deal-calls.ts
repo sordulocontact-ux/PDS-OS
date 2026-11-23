@@ -19,6 +19,8 @@ export const dealCalls = {
   negotiation: {
     button: "Caler le call",
     dialogTitle: "Caler le call",
+    // A call already to hold: the button plans one more (Sacha 23/11/2026).
+    another: "Caler un autre call",
     description: (who: string | null) =>
       `Avec ${who ?? "le business manager"} et le manager de l'artiste.`,
     who: "Business manager",
@@ -47,10 +49,10 @@ export const dealCalls = {
     said: (who: string) => `${who} :`,
     term: (label: string, value: string, state: string) =>
       `${label} : ${value} (${state})`,
+    // Under the section « Prochaine action »: not said again (Sacha
+    // 23/11/2026).
     next: (action: string, day: string | null) =>
-      day
-        ? `Prochaine action : ${action} · ${day}`
-        : `Prochaine action : ${action}`,
+      day ? `${action} · ${day}` : action,
     check: "Vérifier",
     // The terms PO read, already in their cards (DealTerms).
     toCheck: (n: number) =>

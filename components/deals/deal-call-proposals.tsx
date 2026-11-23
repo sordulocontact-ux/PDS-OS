@@ -12,7 +12,7 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { dismissDealProposal } from "@/lib/deals/call-actions";
 import type { DealCallProposal } from "@/lib/deals/call-queries";
-import { formatTermValue } from "@/lib/deals/term-format";
+import { displayTermValue } from "@/lib/deals/term-format";
 import { termOf, type DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
@@ -32,7 +32,7 @@ function textOf(deal: Deal, p: DealCallProposal): string {
   const term = termOf(deal.kind, p.termKey);
   return t.term(
     fr.deals.terms.labels[p.termKey] ?? p.termKey,
-    (term && formatTermValue(term.format, p.value)) ?? "",
+    (term && displayTermValue(term.format, p.value)) ?? "",
     fr.deals.terms.states[p.state],
   );
 }

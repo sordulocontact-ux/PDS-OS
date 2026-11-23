@@ -5,7 +5,7 @@ import { nowHeading, nowSecondary } from "@/components/deals/now-classes";
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { formatTermValue } from "@/lib/deals/term-format";
+import { displayTermValue } from "@/lib/deals/term-format";
 import type { DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -66,7 +66,7 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
           <FactCard
             key={term.key}
             label={fr.deals.terms.labels[term.key] ?? term.key}
-            value={formatTermValue(term.format, term.value) ?? ""}
+            value={displayTermValue(term.format, term.value) ?? ""}
             text={term.format === "text" || term.format === "split"}
           />
         ))}

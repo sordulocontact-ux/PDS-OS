@@ -3,7 +3,7 @@ import "server-only";
 import type { DealMemo } from "@/lib/deals/memos";
 import { dealName } from "@/lib/deals/names";
 import type { Deal } from "@/lib/deals/types";
-import { formatTermValue } from "@/lib/deals/term-format";
+import { displayTermValue } from "@/lib/deals/term-format";
 import { EMAIL_LOGO_URL, escapeHtml } from "@/lib/email/layout";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -72,7 +72,7 @@ export function memoHtml(memo: DealMemo, letter: MemoLetter): string {
   ].filter((row): row is [string, string] => Boolean(row[1]));
   const points = memo.terms
     .map((term) => {
-      const value = formatTermValue(term.format, term.value) ?? "";
+      const value = displayTermValue(term.format, term.value) ?? "";
       const lines = value
         .split(/\r?\n/)
         .map((line) => line.trim())

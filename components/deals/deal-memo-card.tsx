@@ -9,7 +9,7 @@ import {
   type DealMemo,
   type MemoFile,
 } from "@/lib/deals/memos";
-import { formatTermValue } from "@/lib/deals/term-format";
+import { displayTermValue } from "@/lib/deals/term-format";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dealMemoTone, dealTermTone } from "@/lib/ui/state-tones";
@@ -120,7 +120,7 @@ export function DealMemoCard({
         <FactRow
           key={term.key}
           label={fr.deals.terms.labels[term.key] ?? term.key}
-          value={formatTermValue(term.format, term.value)}
+          value={displayTermValue(term.format, term.value)}
           state={{
             tone: dealTermTone[term.state],
             label: fr.deals.terms.states[term.state],
