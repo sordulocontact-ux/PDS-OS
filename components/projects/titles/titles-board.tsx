@@ -6,6 +6,7 @@ import {
   IconLink,
   IconMicrophone,
   IconMinus,
+  IconMsgWriting,
   IconPenWriting2,
   IconTriangleWarning,
 } from "nucleo-sharp-essential";
@@ -109,7 +110,7 @@ export type BoardLinks = {
 };
 
 /** Which columns the table has besides those always there (Artiste,
- * Statut, Contact, Mix, Sortie, Beatmaker, Note): Accord and Taux when the
+ * Statut, Contact, Mix, Sortie, Beatmaker): Accord and Taux when the
  * reader sees deals (dealReach, lot 6); Fiche de renseignement and Contrat
  * with manage_legal; Distribution once the project has the workflow; « ⋯ »
  * for whoever writes the titles (none for a reader: no empty column on the
@@ -123,7 +124,7 @@ type Columns = {
 
 // Every column (a group row spans them).
 const columnCount = (columns: Columns) =>
-  7 +
+  6 +
   2 * Number(columns.accord) +
   2 * Number(columns.legal) +
   Number(columns.distribution) +
@@ -180,7 +181,6 @@ const COLUMN = {
   release: "w-32 min-w-32",
   distribution: "w-44 min-w-44",
   beatmaker: "w-48 min-w-48",
-  note: "w-56 min-w-56",
 } as const;
 
 // A row's cells read from the top: an artist's name may take several lines
@@ -223,12 +223,13 @@ const Empty = () => <span className={muted}>{EMPTY_CELL}</span>;
  * (retours d'Ibé du 18/11/2026; Maël 22/11/2026: « une ligne, ça soit un
  * artiste »): one row per artist on a title, as the overview's recap, with
  * the columns of the Excel — Artiste (its title under the name, « Nommer »
- * while it has none; its waivers), Statut (« À contacter », « Contacté »,
+ * while it has none; its note, edited here, Maël 23/11/2026; its waivers),
+ * Statut (« À contacter », « Contacté »,
  * « D'accord »), Contact (the Excel's TEL: « Appeler », « WhatsApp »),
  * Accord (deal, call; « Caler le call »), Taux, Fiche de renseignement
  * (« Pas envoyée », « Envoyée », « Renseignée », opening the fiche itself),
  * Contrat, Mix, Sortie (edited here), Distribution, Beatmaker (and their
- * fiche), Note (edited here). The fiche's personal data stay in the fiche.
+ * fiche). The fiche's personal data stay in the fiche.
  * A title's facts repeat on each of its artists' rows, as in the Excel; a
  * title without an artist has its own row. « Le tableau lit, les modules
  * font »: each name and pill leads to its module. Counters on top filter
@@ -422,9 +423,6 @@ export function TitlesBoard({
             )}
             <DataTableHead className={COLUMN.beatmaker}>
               {r.columns.beatmaker}
-            </DataTableHead>
-            <DataTableHead className={COLUMN.note}>
-              {r.columns.note}
             </DataTableHead>
             {columns.actions && (
               <DataTableActionsHead label={t.columns.actions} />
@@ -645,7 +643,6 @@ function TitleRows(props: TitleRowsProps) {
           {null}
         </DataTableCell>
         {titleCells}
-        <DataTableCell className={cn(COLUMN.note, CELL)}>{null}</DataTableCell>
         {columns.actions && (
           <DataTableActionsCell>
             <RowActions label={t.menu(label)} actions={titleActions} />
@@ -751,8 +748,8 @@ function TitleLine({
 }
 
 /** An artist on a title, one row: Artiste (name and role, its title, its
- * waivers), Statut, Contact, Accord, Taux, Fiche de renseignement, Contrat,
- * then its title's facts, Note, « ⋯ » (the artist's gestures, then the
+ * note, its waivers), Statut, Contact, Accord, Taux, Fiche de renseignement,
+ * Contrat, then its title's facts, « ⋯ » (the artist's gestures, then the
  * title's). The name opens the person's démarche in the Juridique, else the
  * deal. */
 function ArtistRow({
@@ -793,6 +790,7 @@ function ArtistRow({
   toCheck: boolean;
 }) {
   const t = fr.projectTitles;
+  const [noteOpen, setNoteOpen] = useState(false);
   const active = isActiveParticipation(participation.status) && !dimmed;
   const facts = participation.recap;
   const artist = participation.artist.name;
@@ -827,6 +825,15 @@ function ArtistRow({
             </span>
           </span>
           {titleLine}
+          <NoteLine
+            projectId={projectId}
+            participationId={participation.id}
+            artist={artist}
+            note={facts.note}
+            canEdit={canManage}
+            open={noteOpen}
+            onOpenChange={setNoteOpen}
+          />
           {toCheck && (
             <span className={cn(caption, "flex items-start gap-1.5")}>
               <IconTriangleWarning
@@ -918,22 +925,6 @@ function ArtistRow({
         </>
       )}
       {titleCells}
-      <DataTableCell className={cn(COLUMN.note, CELL)}>
-        {canManage || facts.note ? (
-          <span className="flex min-w-0 flex-col items-start">
-            <NoteLine
-              projectId={projectId}
-              participationId={participation.id}
-              artist={artist}
-              note={facts.note}
-              canEdit={canManage}
-              wrap
-            />
-          </span>
-        ) : (
-          <Empty />
-        )}
-      </DataTableCell>
       {columns.actions && (
         <DataTableActionsCell>
           <RowMenu
@@ -943,6 +934,7 @@ function ArtistRow({
             credit={credit}
             canManage={canManage}
             titleActions={titleActions}
+            onNote={() => setNoteOpen(true)}
           />
           {dialogs}
         </DataTableActionsCell>
@@ -1186,6 +1178,7 @@ function RowMenu({
   credit,
   canManage,
   titleActions,
+  onNote,
 }: {
   projectId: string;
   participation: RecapParticipation;
@@ -1194,6 +1187,8 @@ function RowMenu({
   // The artist's own gestures (not on a title abandoned).
   canManage: boolean;
   titleActions: RowAction[];
+  // The note's modal (NoteLine, under the name).
+  onNote: () => void;
 }) {
   const t = fr.projectTitles.participations;
   const [open, setOpen] = useState<"status" | "withdraw" | null>(null);
@@ -1227,6 +1222,14 @@ function RowMenu({
           label: t.status.action,
           icon: IconPenWriting2,
           onSelect: () => setOpen("status"),
+        },
+        {
+          key: "note",
+          label: participation.recap.note
+            ? fr.projectTitles.recap.note.change
+            : fr.projectTitles.recap.note.add,
+          icon: IconMsgWriting,
+          onSelect: onNote,
         },
         active
           ? {

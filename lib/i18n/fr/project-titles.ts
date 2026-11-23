@@ -395,7 +395,6 @@ export const projectTitles = {
       release: "Sortie",
       distribution: "Distribution",
       beatmaker: "Beatmaker",
-      note: "Note",
       // The overview's compact recap: the fiche and the contract together.
       legal: "Juridique",
     },
@@ -434,6 +433,8 @@ export const projectTitles = {
     },
     note: {
       add: "Ajouter une note",
+      // In a row's « ⋯ », once the artist has one (under its name).
+      change: "Modifier la note",
       edit: (artist: string) => `Modifier la note sur ${artist}`,
       title: (artist: string) => `Note sur ${artist}`,
       label: "Note",
