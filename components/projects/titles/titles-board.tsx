@@ -741,20 +741,9 @@ function TitleRows(props: TitleRowsProps) {
     );
   }
 
-  // Several artists on the title: their rows grouped under it, its name
-  // written once (Maël 23/11/2026), its facts still on each row. On a
-  // phone, the name above its cards.
-  const grouped = participations.length > 1;
-  const heading = grouped && (
-    <TitleLine
-      title={title}
-      label={label}
-      href={masterHref}
-      heading
-      artists={participations.length}
-      onName={onName}
-    />
-  );
+  // Each artist's row says its title under its name, a title shared by
+  // several artists too (Maël 23/11/2026: a group head made the rows of the
+  // next titles look like its own). Sortie stays one decision of the title.
   const artistRows = participations.map((participation, index) => (
     <ArtistRow
       key={participation.id}
@@ -769,7 +758,7 @@ function TitleRows(props: TitleRowsProps) {
       canReadLegal={props.canReadLegal}
       canEditNetwork={props.canEditNetwork && !abandoned}
       today={props.today}
-      titleLine={grouped ? null : titleLine}
+      titleLine={titleLine}
       titleFacts={titleFacts}
       titleActions={titleActions}
       dialogs={index === 0 ? dialogs : null}
@@ -785,26 +774,7 @@ function TitleRows(props: TitleRowsProps) {
       }
     />
   ));
-  if (cards)
-    return grouped ? (
-      <div className="flex flex-col gap-2">
-        <div className="px-1">{heading}</div>
-        {artistRows}
-      </div>
-    ) : (
-      <>{artistRows}</>
-    );
-  return (
-    <>
-      {grouped && (
-        <DataTableGroupRow columns={columnCount(columns)}>
-          {/* On one line, kept in sight while the table scrolls sideways. */}
-          <span className="sticky left-4 inline-flex">{heading}</span>
-        </DataTableGroupRow>
-      )}
-      {artistRows}
-    </>
-  );
+  return <>{artistRows}</>;
 }
 
 /** An artist's alerts (credits to check, contract not signed, waivers)
@@ -932,24 +902,17 @@ function FactCard({
 /** Under the artist's name, its title on one line: its label (to its
  * Master, cut short, the whole on hover) and « Nommer » while it has no name
  * (Ibé 18/11, 37:03: « il faut les mettre dans le catalogue d'abord ? »);
- * why it was abandoned on hover. `heading`: at the head of its artists'
- * group, « Titre Cap sur demain · 2 artistes » (Maël 23/11/2026: the name
- * alone did not say it is a title), why it was abandoned under it. */
+ * why it was abandoned on hover. */
 function TitleLine({
   title,
   label,
   href,
   onName,
-  heading = false,
-  artists = 0,
 }: {
   title: RecapTitle;
   label: string;
   href: string | null;
   onName?: () => void;
-  heading?: boolean;
-  // Its artists, said by the group's head.
-  artists?: number;
 }) {
   const t = fr.projectTitles;
   const reason =
@@ -961,73 +924,34 @@ function TitleLine({
       : null;
   const hover = reason ? `${label} · ${reason}` : label;
   return (
-    <span
-      className={cn(
-        heading ? "font-semibold" : caption,
-        "flex min-w-0 flex-col",
-      )}
-    >
-      <span
-        className={cn(
-          "flex min-w-0 items-baseline gap-x-1.5",
-          heading && "flex-wrap",
-        )}
-      >
-        {heading && (
-          <span className={cn(caption, "shrink-0 font-medium")}>
-            {t.board.group.title}
-          </span>
-        )}
-        {href ? (
-          <ViewLink
-            href={href}
-            title={hover}
-            // The links' own ink (globals) would outshine the artist's
-            // name: the caption's grey, a step darker.
-            className={cn(
-              NAME_LINK,
-              "min-w-0",
-              heading
-                ? "[overflow-wrap:anywhere]"
-                : "truncate text-[color:var(--text-secondary)]",
-            )}
-          >
-            {label}
-          </ViewLink>
-        ) : (
-          <span
-            title={hover}
-            className={cn(
-              "min-w-0",
-              heading ? "[overflow-wrap:anywhere]" : "truncate",
-            )}
-          >
-            {label}
-          </span>
-        )}
-        {onName && (
-          <button
-            type="button"
-            aria-label={t.recap.name.title(label)}
-            onClick={onName}
-            className={INLINE_ACTION}
-          >
-            {t.recap.name.action}
-          </button>
-        )}
-        {heading && artists > 1 && (
-          <span className={cn(caption, "shrink-0 font-medium")}>
-            {`· ${t.board.group.artists(artists)}`}
-          </span>
-        )}
-      </span>
-      {heading && reason && (
-        <span
-          className={cn(caption, "line-clamp-2 font-medium break-words")}
-          title={reason}
+    <span className={cn(caption, "flex min-w-0 items-baseline gap-x-1.5")}>
+      {href ? (
+        <ViewLink
+          href={href}
+          title={hover}
+          // The links' own ink (globals) would outshine the artist's name:
+          // the caption's grey, a step darker.
+          className={cn(
+            NAME_LINK,
+            "min-w-0 truncate text-[color:var(--text-secondary)]",
+          )}
         >
-          {reason}
+          {label}
+        </ViewLink>
+      ) : (
+        <span title={hover} className="min-w-0 truncate">
+          {label}
         </span>
+      )}
+      {onName && (
+        <button
+          type="button"
+          aria-label={t.recap.name.title(label)}
+          onClick={onName}
+          className={INLINE_ACTION}
+        >
+          {t.recap.name.action}
+        </button>
       )}
     </span>
   );

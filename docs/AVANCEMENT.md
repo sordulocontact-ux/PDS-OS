@@ -2834,8 +2834,9 @@ d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune 
   Beatmaker : nom, puis sa fiche. Note : deux lignes. Titre sans artiste : « Aucun artiste invité » puis le titre,
   « Ajouter un artiste » dans la cellule voisine. Colonne Contact élargie à 224 px pour que le numéro tienne. Les
   cartes du téléphone reprennent ces cases (leur tête garde les alertes en toutes lettres).
-- **Tête d'un titre partagé** : « Titre Cap sur demain · 2 artistes », sur une ligne (le nom seul ne disait pas que
-  c'était un titre).
+- **Titre partagé** : plus de tête de groupe. « Titre Cap sur demain · 2 artistes » faisait croire que les lignes des
+  titres suivants (Marée haute, Dernier métro, Titre 7) étaient à lui ; chaque artiste porte maintenant son titre sous
+  son nom, « Cap sur demain » écrit sous Elio et sous Lila (choix de Maël). Sortie reste commune aux deux lignes.
 - Vérifié dans Chrome (Assurance 30, Lina Haddad, 1280 px et cadre de 390 px) : aucune case ne dépasse deux lignes.
   L'icône d'alertes n'a pas pu être vue : aucun artiste d'Assurance 30 n'en a pour Lina (elle lit le Juridique).
 - `components/legal/waiver-lines.tsx` exporte aussi `waiverTexts` (les mêmes mots que `WaiverLines`).

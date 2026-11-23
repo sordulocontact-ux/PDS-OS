@@ -129,12 +129,6 @@ export const projectTitles = {
   // per participation; where each stands, computed (lib/projects/
   // title-board-rules.ts).
   board: {
-    // The head of a title shared by several artists (Maël 23/11/2026: « on
-    // comprend pas trop ce que c'est »): « Titre Cap sur demain · 2 artistes ».
-    group: {
-      title: "Titre",
-      artists: (count: number) => `${count} artistes`,
-    },
     // An artist's alerts, in a tooltip beside its name.
     alerts: "Alertes",
     facts: {
