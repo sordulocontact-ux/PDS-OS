@@ -19,6 +19,8 @@ export const dealCalls = {
   negotiation: {
     button: "Caler le call",
     dialogTitle: "Caler le call",
+    // A call already to hold: the button plans one more (Sacha 23/11/2026).
+    another: "Caler un autre call",
     description: (who: string | null) =>
       `Avec ${who ?? "le business manager"} et le manager de l'artiste.`,
     who: "Business manager",

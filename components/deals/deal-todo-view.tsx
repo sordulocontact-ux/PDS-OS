@@ -238,7 +238,9 @@ export function DealTodoView({
         // « À contacter »: « Caler le call » is already the main gesture.
         action={
           callForm &&
-          deal.stage !== "to_contact" && <DealCallButton data={callForm} />
+          deal.stage !== "to_contact" && (
+            <DealCallButton data={callForm} another={upcomingCall !== null} />
+          )
         }
       >
         <DealCalls calls={calls} movable={movable} />

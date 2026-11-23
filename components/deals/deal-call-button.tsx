@@ -46,10 +46,13 @@ export type DealCallFormData = {
 export function DealCallButton({
   data,
   variant = "outline",
+  another = false,
 }: {
   data: DealCallFormData;
   // "default": the main gesture of a deal to contact (its « Maintenant »).
   variant?: "default" | "outline";
+  // A call is already to hold: « Caler un autre call ».
+  another?: boolean;
 }) {
   const t = fr.dealCalls.negotiation;
   const [open, setOpen] = useState(false);
@@ -59,7 +62,7 @@ export function DealCallButton({
   return (
     <>
       <Button variant={variant} onClick={() => setOpen(true)}>
-        {t.button}
+        {another ? t.another : t.button}
       </Button>
       <FormDialog
         open={open}
