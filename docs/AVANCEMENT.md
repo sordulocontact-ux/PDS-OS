@@ -2821,5 +2821,6 @@ d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune 
 - **Pour Sacha** : `DistributionFrame` (fil de la sortie) et `/release/page.tsx` (entrée) touchés, collectif
   seulement ; `masterJourneyContext` découpé (`journeyOf`, `titleFacts`, `masterTitleJourney`), sans changement pour un
   projet simple.
-- Reste : **Marketing** (décision à prendre, voir ci-dessous) ; Travail et « Maintenant » ouvrent une démarche du
+- Reste : **Marketing**, déjà découpé par livrable et par activation (chacun dit les titres qu'il vise, les Activations
+  se filtrent par titre) : choix du titre en Conception et en Production à décider avec Maël ; Travail et « Maintenant » ouvrent une démarche du
   Juridique sans `?titre=` (la première portée qui l'a).
