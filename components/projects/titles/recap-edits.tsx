@@ -7,9 +7,10 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
+import { IconUserPlus } from "@/components/icons";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { caption, factsClass } from "@/components/projects/titles/recap-facts";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -313,7 +314,7 @@ function IconAction({
  * private contact's coordinates the reader may not read stay « Coordonnées
  * privées ». For whoever writes the title (another contact of the Réseau, a
  * new one) or the Réseau (the number): « Contact de l'artiste » in a modal;
- * none yet: « Ajouter le contact ». None and nothing to do: nothing.
+ * none yet: « Ajouter le contact », an icon. None and nothing to do: nothing.
  */
 export function ContactFacts({
   projectId,
@@ -350,21 +351,16 @@ export function ContactFacts({
     </FormDialog>
   );
 
+  // None yet: a quiet icon of the cell, as its other gestures (Maël
+  // 23/11/2026, in place of an outlined button on every such row).
   if (!contact)
     return modes.length > 0 ? (
-      <>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="relative z-10 self-start"
-          aria-label={`${t.add} · ${artist}`}
-          onClick={() => setOpen(true)}
-        >
-          {t.add}
-        </Button>
+      <span className="-my-1 flex items-center">
+        <IconAction label={t.addFor(artist)} onClick={() => setOpen(true)}>
+          <IconUserPlus aria-hidden className="size-4" />
+        </IconAction>
         {dialog}
-      </>
+      </span>
     ) : null;
 
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;

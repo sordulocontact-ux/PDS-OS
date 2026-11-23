@@ -472,7 +472,8 @@ export const projectTitles = {
       // `producer` role says « Réalisateur·rice ».
       kinds: { manager: "Manager", producer: "Producteur", other: "Autre" },
       title: "Contact de l'artiste",
-      add: "Ajouter le contact",
+      // The icon's tooltip and name, none yet.
+      addFor: (artist: string) => `Ajouter le contact ${de(artist)}`,
       edit: (artist: string) => `Modifier le contact ${de(artist)}`,
       call: (name: string) => `Appeler ${name}`,
       whatsapp: (name: string) => `Écrire à ${name} sur WhatsApp`,
