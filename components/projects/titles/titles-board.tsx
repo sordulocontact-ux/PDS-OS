@@ -218,6 +218,11 @@ const ROW = cn(
   ROW_INSET,
 );
 
+// The head of a title's group of artists: on the soft band, as a group
+// row of DataTable, never a rule between groups (no-dividers).
+const GROUP_ROW =
+  "bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] in-[.section-card_.table-flat]:bg-transparent";
+
 // A name that opens its page (the artist's démarche, the title's Master):
 // the link is the name itself.
 const NAME_LINK =
@@ -675,8 +680,38 @@ function TitleRows(props: TitleRowsProps) {
       </TableRow>
     );
 
+  // Several artists on the title: their rows grouped under it, its name
+  // written once (Maël 23/11/2026), its facts still on each row.
+  const grouped = participations.length > 1;
   return (
     <>
+      {grouped && (
+        <TableRow className={cn(ROW, GROUP_ROW)}>
+          <DataTableCell
+            className={cn(
+              COLUMN.artist,
+              CELL,
+              STICKY_HEAD,
+              "py-2 before:hidden",
+            )}
+          >
+            <TitleLine
+              title={title}
+              label={label}
+              href={masterHref}
+              heading
+              onName={
+                canManage && !abandoned && isUnnamed(title)
+                  ? () => setDialog("name")
+                  : undefined
+              }
+            />
+          </DataTableCell>
+          <DataTableCell colSpan={columnCount(columns) - 1} className="py-2">
+            {null}
+          </DataTableCell>
+        </TableRow>
+      )}
       {participations.map((participation, index) => (
         <ArtistRow
           key={participation.id}
@@ -690,7 +725,7 @@ function TitleRows(props: TitleRowsProps) {
           canReadLegal={props.canReadLegal}
           canEditNetwork={props.canEditNetwork && !abandoned}
           today={props.today}
-          titleLine={titleLine}
+          titleLine={grouped ? null : titleLine}
           titleCells={titleCells}
           titleActions={titleActions}
           dialogs={index === 0 ? dialogs : null}
@@ -718,11 +753,14 @@ function TitleLine({
   label,
   href,
   onName,
+  heading = false,
 }: {
   title: RecapTitle;
   label: string;
   href: string | null;
   onName?: () => void;
+  // At the head of its artists' group (TitleGroupRow): in the cell's ink.
+  heading?: boolean;
 }) {
   const t = fr.projectTitles;
   const reason =
@@ -733,7 +771,12 @@ function TitleLine({
         )
       : null;
   return (
-    <span className={cn(caption, "flex min-w-0 flex-col")}>
+    <span
+      className={cn(
+        heading ? "font-semibold" : caption,
+        "flex min-w-0 flex-col",
+      )}
+    >
       <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
         {href ? (
           <ViewLink
@@ -742,7 +785,8 @@ function TitleLine({
             // name: the caption's grey, a step darker.
             className={cn(
               NAME_LINK,
-              "min-w-0 [overflow-wrap:anywhere] text-[color:var(--text-secondary)]",
+              "min-w-0 [overflow-wrap:anywhere]",
+              !heading && "text-[color:var(--text-secondary)]",
             )}
           >
             {label}
@@ -755,14 +799,20 @@ function TitleLine({
             type="button"
             aria-label={t.recap.name.title(label)}
             onClick={onName}
-            className="relative z-10 shrink-0 rounded-sm font-medium text-[color:var(--text-secondary)] underline underline-offset-2 outline-none hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
+            className="relative z-10 shrink-0 rounded-sm text-[length:var(--type-caption)] font-medium text-[color:var(--text-secondary)] underline underline-offset-2 outline-none hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
           >
             {t.recap.name.action}
           </button>
         )}
       </span>
       {reason && (
-        <span className="line-clamp-2 break-words" title={reason}>
+        <span
+          className={cn(
+            "line-clamp-2 break-words",
+            heading && cn(caption, "font-medium"),
+          )}
+          title={reason}
+        >
           {reason}
         </span>
       )}
