@@ -293,6 +293,9 @@ Lu après le pull du 13/11/2026 ; ses tests : `deals-collective`, `deals-bm-open
   un titre sans nom et une participation proposée, par `add_project_title` /
   `add_title_participation` ; sélection et invités ensemble : chaque artiste une fois, jamais
   l'artiste principal.
+  Depuis le 23/11/2026, les artistes crédités des titres choisis sont préremplis dans
+  « Artistes invités » (`ProjectKindFields`) ; à la création, ils reçoivent toujours un titre sans
+  nom, pas le titre choisi.
 - **Le deal d'un collectif passe par une participation** : `create_deal` refuse « projet +
   artiste » ou un projet seul sur un collectif (`collective_needs_participation`, ou
   `use_participation` si l'artiste a une participation en jeu) ; une participation refusée ou

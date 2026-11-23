@@ -114,6 +114,12 @@ export function ProjectKindFields({
       artists.filter((a) => a.id === id),
     ),
   );
+  // The titles chosen, and the guests they brought (Maël 23/11/2026: the
+  // artists credited on a title chosen are invited with it).
+  const [chosenMasters, setChosenMasters] = useState<MasterOption[]>(() =>
+    defaults.masterIds.flatMap((id) => masters.filter((m) => m.id === id)),
+  );
+  const [brought, setBrought] = useState<string[]>([]);
   // A field corrected since the server's refusal is back to normal
   // (docs/DESIGN.md « Manques à la validation »): the errors it answered.
   const [corrected, setCorrected] = useState<{
@@ -125,11 +131,43 @@ export function ProjectKindFields({
   // An event created before V1 stays one when it is edited.
   const [eventOpen] = useState(type === "event");
   const single = musicFormat === "single";
+  const inviting = collectiveMode === "choose";
+
+  /** The artists credited on the titles chosen join the guests, the main
+   * artist apart; those a title brought leave with it. One removed by hand
+   * is not brought back while its title stays. */
+  function bringCredited(chosen: MasterOption[], main = mainArtistId) {
+    const credited = [
+      ...new Map(
+        chosen.flatMap((m) => m.credited).map((a) => [a.id, a]),
+      ).values(),
+    ].filter((a) => a.id !== main);
+    const creditedIds = new Set(credited.map((a) => a.id));
+    const gone = new Set(brought.filter((id) => !creditedIds.has(id)));
+    const kept = guests.filter((g) => !gone.has(g.id));
+    const keptIds = new Set(kept.map((g) => g.id));
+    const added = credited.filter(
+      (a) => !keptIds.has(a.id) && !brought.includes(a.id),
+    );
+    setGuests([...kept, ...added]);
+    setBrought([
+      ...brought.filter((id) => creditedIds.has(id)),
+      ...added.map((a) => a.id),
+    ]);
+  }
+
+  function changeMasters(chosen: MasterOption[]) {
+    setChosenMasters(chosen);
+    onMastersChange?.(chosen);
+    if (collective && inviting) bringCredited(chosen);
+  }
 
   // Ticked: the PDS Mic model, where nothing else was chosen yet (a music
   // collective keeps its type and its titles).
   function toggleCollective(next: boolean) {
     onCollectiveChange?.(next);
+    if (next && inviting && type === "music_release")
+      bringCredited(chosenMasters);
     if (!next || type === "music_release") return;
     if (type !== "content") onTypeChange("content");
     if (!contentMode) setContentMode("format");
@@ -203,7 +241,7 @@ export function ProjectKindFields({
           max={single ? 1 : undefined}
           hint={single ? t.singleHint : undefined}
           error={errors.masterIds}
-          onSelectionChange={onMastersChange}
+          onSelectionChange={changeMasters}
         />
       </div>
 

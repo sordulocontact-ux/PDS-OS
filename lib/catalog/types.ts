@@ -51,6 +51,9 @@ export type MasterOption = {
   variantLabel: string | null;
   // Credits in display order, already formatted ("Nova feat. Sable").
   artists: string;
+  // The artists credited, in that order (a collective's form invites them
+  // when the title is chosen).
+  credited: ArtistOption[];
 };
 
 export type MasterListItem = MasterOption & {
