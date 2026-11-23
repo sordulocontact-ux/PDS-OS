@@ -2772,3 +2772,18 @@ Retours de Maël. Vérifié dans Chrome sur « Assurance 30 » (lancé).
   sont supprimés ; la phrase correspondante de l'assistant PO (`lib/assistant/guide/topics/projects.ts`) aussi.
   `UnlaunchedOverview` : `titles` passe sous le bloc de transmission.
 - Pas vérifié dans Chrome : un collectif pas encore accepté (aucun sous la main dans la base de dev).
+
+## « Titres et artistes » : cartes sur téléphone, colonne Note (23/11/2026, branche `pre-prod`)
+
+- **Téléphone** : sous 640 px de large pour le tableau, une carte par artiste à la place du tableau (nom, titre et
+  « Nommer », statut, puis les autres infos en paires libellé / valeur, « ⋯ » en haut à droite). Mêmes gestes. La tête
+  d'un titre partagé reste au-dessus de ses cartes ; pas de trait, les cartes se séparent par l'espacement. Vérifié
+  dans un cadre de 390 px (Assurance 30, vu comme Lina Haddad) : cartes, groupe « Cap sur demain », titre vide,
+  « ⋯ » et « Nommer ». À 1280 px, le tableau est inchangé.
+- **Note** : de nouveau dans sa propre colonne, après Beatmaker (288 px, trois lignes au plus, en entier au survol),
+  « Ajouter une note » quand elle est vide ; plus dans « ⋯ ». Sur téléphone, paire « Note » en dernier.
+- **« ⋯ » centré** dans la dernière colonne (64 px, 16 px de chaque côté).
+- **Commit mélangé, laissé tel quel (accord de Maël)** : `f5d8a5c8` (« Titres et artistes » as cards on a phone)
+  contient aussi le travail d'une autre session lancée en parallèle : section dépendances retirée de la Vue d'ensemble
+  (`components/overview/dependency-rows.tsx`, `lib/overview/dependencies.ts`, `page.tsx`, `unlaunched-overview.tsx`,
+  guide, textes) et la note retirée du récap compact. Le contenu est juste, seul le message ne le dit pas.
