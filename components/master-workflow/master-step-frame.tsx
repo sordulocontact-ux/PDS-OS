@@ -11,7 +11,10 @@ import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { TitlesOverview } from "@/components/master-workflow/titles-overview";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
-import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import {
+  masterJourneyContext,
+  masterTitleJourney,
+} from "@/lib/master-workflow/journey-context";
 import { masterRoles } from "@/lib/master-workflow/roles";
 import {
   titleCrumb,
@@ -73,17 +76,25 @@ export async function MasterStepFrame({
   titleScope?: MasterTitleScope | null;
 }) {
   const {
-    steps,
+    steps: own,
     facts: rows,
     project,
     access,
   } = await masterJourneyContext(projectId);
+  // A collective: the journey of the title shown, its states its own
+  // (Maël 23/11/2026, « 1 par son »), each step keeping the title.
+  const steps = titleScope
+    ? await masterTitleJourney(projectId, titleScope.active.masterId)
+    : own;
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   const titled = titleScope
     ? steps.map((s) => ({
         ...s,
         href: `${s.href}?titre=${titleScope.active.masterId}`,
+        actor: s.actor?.href
+          ? { ...s.actor, href: keepTitre(s.actor.href, titleScope) }
+          : s.actor,
       }))
     : steps;
   // Blockers and noted information of the step (C6).
@@ -100,7 +111,7 @@ export async function MasterStepFrame({
         <>
           <ProjectHeader
             projectId={projectId}
-            steps={steps}
+            steps={titled}
             head={step}
             extraCrumbs={
               titleScope
@@ -150,4 +161,12 @@ export async function MasterStepFrame({
       </StepPanel>
     </JourneyLayout>
   );
+}
+
+/** An action's link keeping the title shown, before any anchor. */
+function keepTitre(href: string, scope: MasterTitleScope): string {
+  const hash = href.indexOf("#");
+  const path = hash >= 0 ? href.slice(0, hash) : href;
+  const anchor = hash >= 0 ? href.slice(hash) : "";
+  return `${path}${path.includes("?") ? "&" : "?"}titre=${scope.active.masterId}${anchor}`;
 }
