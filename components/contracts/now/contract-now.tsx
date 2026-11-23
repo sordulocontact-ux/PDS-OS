@@ -134,6 +134,13 @@ export function ContractNow({
         eyebrow={contract.title}
         title={title}
         line={line}
+        // The copy that came back, opened from where it is said (Sacha
+        // 23/11/2026: « le contrat dans la card alors »).
+        lineLink={
+          returnedLine && back?.url
+            ? { href: back.url, label: team.viewPdf }
+            : null
+        }
         facts={facts}
       >
         <ContractNowActions contract={contract} data={data} />
