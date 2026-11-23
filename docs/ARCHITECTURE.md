@@ -8356,6 +8356,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   (`DealsTable groups`), avec étape, prochaine action, **contrat** (`read_deal_contract`, `DealsTable
   contracts`), projet dans le nom du deal, négociateur ; jamais un contact. `routes.artistBudget` mène à
   `…/business#budget` (lien « Budget de l'artiste » d'un projet).
+- **Invités d'un call de deal** (Sacha 23/11/2026 : « s'il n'y a que l'artiste dans les contacts ok, mais s'il y a un manager ou un label on ne met pas l'artiste ») : « Caler le call » (direction, business manager, chef de projet, récap des titres) coche d'office les contacts du Réseau choisis par `pickCallGuests` (`lib/deals/call-guests-rules.ts`, lus par `loadCallGuests`) : les contacts du deal, le contact de la participation et le manager principal de l'artiste (Catalogue › Contacts, lié au Réseau) ; personne : le label ou la marque du deal ; sinon l'artiste (son contact du Réseau, `network_contacts.artist_id`), jamais à côté des autres. Chacun se retire d'un clic. Dans le récap des titres, le manager sinon l'artiste (les contacts du deal se lisent sur sa page).
 - **Call de négociation avant tout contrat** (réunion avec Ibé du 18/11/2026, 52:10, 1:00:07 à 1:04:28, 1:17:44 à
   1:19:23 ; `20261120140101_deal_negotiation_call.sql`) : dès que l'artiste est d'accord, la cheffe de projet cale un call
   entre le business manager et le manager (ou producteur) de l'artiste ; elle n'est pas dedans. **Décision (droits)** :

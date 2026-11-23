@@ -2,6 +2,7 @@ import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
+import { pickCallGuests } from "@/lib/deals/call-guests-rules";
 import { dealName } from "@/lib/deals/names";
 import { loadSharedNegotiationCall } from "@/lib/deals/negotiation-call";
 import {
@@ -465,7 +466,14 @@ export async function loadTitleRecap(
                     projectTitle: null,
                   }),
                   assigneeId: onDeal ? (deal?.assigneeId ?? null) : null,
-                  contactId: null,
+                  contactId: managerOf.get(p.artist.id)?.contactId ?? null,
+                  // The deal's own contacts are read on its page; here the
+                  // artist's manager, else the artist (Sacha 23/11/2026).
+                  guestIds: pickCallGuests({
+                    people: [managerOf.get(p.artist.id)?.contactId ?? null],
+                    counterpartId: null,
+                    artistContactId: personOf.get(p.artist.id) ?? null,
+                  }),
                   topics: negotiationTopics(
                     onDeal ? { stage: onDeal.stage } : null,
                     onDeal ? (termsOf.get(onDeal.dealId) ?? []) : [],

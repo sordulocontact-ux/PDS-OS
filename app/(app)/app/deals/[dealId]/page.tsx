@@ -26,6 +26,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts } from "@/lib/calls/invite";
+import { loadCallGuests } from "@/lib/deals/call-guests";
 import { dealCallTitle, dealCallTopics } from "@/lib/deals/call-prep";
 import {
   loadDealCallProposals,
@@ -72,6 +73,12 @@ async function callFormFor(
     dealId: deal.id,
     title: dealCallTitle(dealName(deal)),
     contacts: await loadCallContacts(),
+    guests: await loadCallGuests({
+      dealId: deal.id,
+      participationId: deal.participationId,
+      artistId: deal.artistId,
+      counterpartId: deal.counterpartId,
+    }),
     googleMeet: googleMeetConfigured(),
     defaultOccurredAt: nextRoundHourInput(new Date()),
     topics: dealCallTopics(deal, terms),

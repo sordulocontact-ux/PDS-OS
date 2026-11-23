@@ -11,6 +11,7 @@ import {
   dealCallTitle,
   dealCallTopics,
 } from "@/lib/deals/call-prep";
+import { loadCallGuests } from "@/lib/deals/call-guests";
 import { dealName } from "@/lib/deals/names";
 import {
   contactsFirst as orderContacts,
@@ -43,6 +44,8 @@ export type NegotiationCallData = {
   fixed: boolean;
   negotiators: CallNegotiator[];
   contacts: CallContact[];
+  // The Réseau contacts invited by default (pickCallGuests).
+  guests: string[];
   googleMeet: boolean;
   // The agenda the call will have, one line a point (dealCallTopics).
   topics: string[];
@@ -106,13 +109,19 @@ export async function loadDealNegotiationCall(
 ): Promise<NegotiationCallData | null> {
   if (!deal.canPlanCall) return null;
   const people = deal.assignee ? [deal.assignee] : await negotiatorsOf();
-  const [negotiators, contacts] = await Promise.all([
+  const [negotiators, contacts, guests] = await Promise.all([
     withSlots(people),
     contactsFirst(
       deal.participationId
         ? await participationContact(deal.participationId)
         : null,
     ),
+    loadCallGuests({
+      dealId: deal.id,
+      participationId: deal.participationId,
+      artistId: deal.artistId,
+      counterpartId: deal.counterpartId,
+    }),
   ]);
   return {
     target: { dealId: deal.id },
@@ -120,6 +129,7 @@ export async function loadDealNegotiationCall(
     fixed: deal.assignee !== null,
     negotiators,
     contacts,
+    guests,
     googleMeet: googleMeetConfigured(),
     topics: dealCallTopics(deal, terms),
   };
@@ -134,10 +144,17 @@ export async function loadDealNegotiationCall(
 export async function loadParticipationNegotiationCall(
   participationId: string,
   name: string,
+  artistId: string | null = null,
 ): Promise<NegotiationCallData> {
-  const [negotiators, contacts] = await Promise.all([
+  const [negotiators, contacts, guests] = await Promise.all([
     negotiatorsOf().then(withSlots),
     participationContact(participationId).then(contactsFirst),
+    loadCallGuests({
+      dealId: null,
+      participationId,
+      artistId,
+      counterpartId: null,
+    }),
   ]);
   return {
     target: { participationId },
@@ -145,6 +162,7 @@ export async function loadParticipationNegotiationCall(
     fixed: false,
     negotiators,
     contacts,
+    guests,
     googleMeet: googleMeetConfigured(),
     topics: dealCallTopics({ stage: "to_contact" }, blankDealTerms()),
   };

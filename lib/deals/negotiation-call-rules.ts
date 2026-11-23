@@ -46,6 +46,8 @@ export type NegotiationCallTarget = {
   assigneeId: string | null;
   // The artist's manager, first among the guests to pick (null: none).
   contactId: string | null;
+  // The Réseau contacts invited by default (pickCallGuests).
+  guestIds: string[];
   // The call's agenda, one line a point (negotiationTopics).
   topics: string[];
 };
@@ -122,6 +124,7 @@ export function negotiationCallData(
     fixed: assignee !== null,
     negotiators: assignee ? [assignee] : shared.negotiators,
     contacts: contactsFirst(shared.contacts, row.contactId),
+    guests: row.guestIds,
     googleMeet: shared.googleMeet,
     topics: row.topics,
   };
