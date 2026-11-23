@@ -5,12 +5,14 @@ import { isMine, type ContractNowKind } from "@/lib/contracts/now";
 import type { ContractDetail } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { formatDate } from "@/lib/release/format";
 import { contractStateTone } from "@/lib/ui/state-tones";
 
 import { ContractNowActions } from "./contract-now-actions";
 
 const fr = { contracts, legalDocuments };
+const team = signedReturns.team;
 
 /**
  * « Maintenant » of a contract (proto « Contrats », 29/10/2026), by role
@@ -76,9 +78,24 @@ export function ContractNow({
             ]
           : [];
 
+  // The signed copy came back: from whom, how and when, in one line (Sacha
+  // 23/11/2026: « on ne sait pas qu'on vient de recevoir le mail »).
+  const back = proof?.deposit;
+  const returnedLine =
+    back &&
+    (kind === "mark_signed" ||
+      kind === "await_mark_signed" ||
+      kind === "countersign" ||
+      kind === "await_countersign")
+      ? (back.byEmail ? team.emailedBy : team.depositedBy)(
+          signerName,
+          formatDate(back.at),
+        )
+      : null;
   // Sent: when, by whom and how, in one line (Sacha 22/11/2026).
   const line =
-    kind === "await_signer" && sent
+    returnedLine ??
+    (kind === "await_signer" && sent
       ? sent.via === "link"
         ? f.linkLine(
             formatDate(sent.on),
@@ -89,7 +106,7 @@ export function ContractNow({
             data.sentBy ?? "",
             sent.how ? (f.hows[sent.how] ?? sent.how.toLowerCase()) : "",
           )
-      : null;
+      : null);
 
   return (
     <>
