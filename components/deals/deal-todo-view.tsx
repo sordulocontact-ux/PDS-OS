@@ -260,7 +260,11 @@ export function DealTodoView({
         action={
           callForm &&
           deal.stage !== "to_contact" && (
-            <DealCallButton data={callForm} another={upcomingCall !== null} />
+            <DealCallButton
+              data={callForm}
+              another={upcomingCall !== null}
+              inSection
+            />
           )
         }
       >

@@ -21,6 +21,8 @@ export const dealCalls = {
     dialogTitle: "Caler le call",
     // A call already to hold: the button plans one more (Sacha 23/11/2026).
     another: "Caler un autre call",
+    // In the head of « Calls » (Sacha 23/11/2026): one call among others.
+    one: "Caler un call",
     description: (who: string | null) =>
       `Avec ${who ?? "le business manager"} et le manager de l'artiste.`,
     who: "Business manager",

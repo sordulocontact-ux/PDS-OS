@@ -130,21 +130,19 @@ function RemoveButton({ dealId, id }: { dealId: string; id: string }) {
  * step. Whoever writes the deal adds one (`PersonPickerField`, the deal's
  * people first; a member among those who read the deal) or takes one off.
  */
-export function DealMemoLoop({
+/** « Mettre dans la boucle », in the head of its section (Sacha
+ * 23/11/2026, as « Calls »). */
+export function DealMemoLoopAdd({
   dealId,
-  entries,
   members,
   linked,
-  canWrite,
 }: {
   dealId: string;
-  entries: LoopEntry[];
-  // For whoever writes the deal: the members who may be put in it.
+  // The members who may be put in it.
   members: Record<string, string>;
   linked: string[];
-  canWrite: boolean;
 }) {
-  const addButton = canWrite && (
+  return (
     <DialogButton label={t.add} title={t.title} description={t.description}>
       {(close) => (
         <AddForm
@@ -156,16 +154,25 @@ export function DealMemoLoop({
       )}
     </DialogButton>
   );
+}
+
+export function DealMemoLoop({
+  dealId,
+  entries,
+  canWrite,
+}: {
+  dealId: string;
+  entries: LoopEntry[];
+  canWrite: boolean;
+}) {
   // No one else is the usual case, not a gap to fill: one quiet line, not an
-  // empty state (Sacha 22/11/2026).
+  // empty state (Sacha 22/11/2026). « Mettre dans la boucle » is in the
+  // section's head (DealMemoLoopAdd).
   if (entries.length === 0)
     return (
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-body-md text-[color:var(--text-secondary)]">
-          {t.empty}
-        </p>
-        {addButton}
-      </div>
+      <p className="text-body-md text-[color:var(--text-secondary)]">
+        {t.empty}
+      </p>
     );
   return (
     <div className="flex flex-col gap-3">
@@ -186,7 +193,6 @@ export function DealMemoLoop({
           />
         ))}
       </FactRows>
-      {addButton && <div>{addButton}</div>}
     </div>
   );
 }

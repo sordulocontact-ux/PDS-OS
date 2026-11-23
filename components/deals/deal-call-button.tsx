@@ -47,12 +47,15 @@ export function DealCallButton({
   data,
   variant = "outline",
   another = false,
+  inSection = false,
 }: {
   data: DealCallFormData;
   // "default": the main gesture of a deal to contact (its « Maintenant »).
   variant?: "default" | "outline";
   // A call is already to hold: « Caler un autre call ».
   another?: boolean;
+  // In the head of « Calls »: small, « Caler un call » (Sacha 23/11/2026).
+  inSection?: boolean;
 }) {
   const t = fr.dealCalls.negotiation;
   const [open, setOpen] = useState(false);
@@ -61,8 +64,12 @@ export function DealCallButton({
   const slots = data.slots[0] ?? null;
   return (
     <>
-      <Button variant={variant} onClick={() => setOpen(true)}>
-        {another ? t.another : t.button}
+      <Button
+        variant={variant}
+        size={inSection ? "sm" : "default"}
+        onClick={() => setOpen(true)}
+      >
+        {another ? t.another : inSection ? t.one : t.button}
       </Button>
       <FormDialog
         open={open}
