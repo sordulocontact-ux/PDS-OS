@@ -93,7 +93,9 @@ export const deals = {
   },
   // The terms of lib/deals/terms.ts (BIZ 3): one label per key.
   terms: {
-    title: "Termes négociés",
+    // What is discussed, not yet agreed: the memo says what is (Sacha
+    // 23/11/2026, « à quoi servent les termes s'ils sont déjà négociés »).
+    title: "Négociation",
     // A term still to define, its empty slot (FactSlot).
     define: "Définir",
     labels: {

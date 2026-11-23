@@ -91,6 +91,16 @@ async function callFormFor(
   };
 }
 
+/** How many memos a deal has (RLS: whoever reads the deal). */
+async function countDealMemos(dealId: string): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("deal_memos")
+    .select("id", { count: "exact", head: true })
+    .eq("deal_id", dealId);
+  return count ?? 0;
+}
+
 /** The tab's title: the deal's name (UX test of 12/11/2026: « PDS OS »
  * alone, the tab said nothing). */
 export async function generateMetadata({
@@ -196,13 +206,17 @@ async function DealTodo({
   // Contracting, whoever reads the deal and its contract sees the contract's
   // step: who it waits for, when not their own (Sacha 23/11/2026).
   const contractTime = deal.stage === "contracting";
-  const [callForm, negotiationCall, memos, loop, contract] = await Promise.all([
-    callFormFor(deal, terms, access.personId),
-    loadDealNegotiationCall(deal, terms),
-    memoTime ? loadDealMemos(deal.id, deal.kind, true) : Promise.resolve([]),
-    memoTime ? loadDealLoop(deal.id) : Promise.resolve([]),
-    contractTime ? loadDealContract(deal.id) : Promise.resolve(null),
-  ]);
+  const [callForm, negotiationCall, memos, loop, contract, memoCount] =
+    await Promise.all([
+      callFormFor(deal, terms, access.personId),
+      loadDealNegotiationCall(deal, terms),
+      memoTime ? loadDealMemos(deal.id, deal.kind, true) : Promise.resolve([]),
+      memoTime ? loadDealLoop(deal.id) : Promise.resolve([]),
+      contractTime ? loadDealContract(deal.id) : Promise.resolve(null),
+      // Whether a memo came (it comes before the terms), when not read above.
+      memoTime ? Promise.resolve(null) : countDealMemos(deal.id),
+    ]);
+  const hasMemo = memoTime ? memos.length > 0 : (memoCount ?? 0) > 0;
   // Its circuit, the same as on its page in Contrats, once its document is
   // there (generated, or a PDF deposited).
   const detail =
@@ -298,6 +312,7 @@ async function DealTodo({
       memoStep={memoStep}
       contractStep={contractStep}
       contractCircuit={circuit}
+      hasMemo={hasMemo}
       nextCall={
         nextCall
           ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }

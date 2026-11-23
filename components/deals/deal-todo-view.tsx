@@ -78,6 +78,16 @@ export const WORKS: Record<DealStage, Work[]> = {
   abandoned: CLOSED,
 };
 
+/** What the stage works on; once a memo came, the memo before the terms. */
+function worksOf(stage: DealStage, hasMemo: boolean): Work[] {
+  const works = WORKS[stage];
+  if (!hasMemo || !works.includes("memo") || !works.includes("terms"))
+    return works;
+  const rest = works.filter((w) => w !== "terms");
+  const at = rest.indexOf("memo") + 1;
+  return [...rest.slice(0, at), "terms", ...rest.slice(at)];
+}
+
 /** The deal's stages as a frieze of points, each reached one with its day
  * (its journal, the latest first); signed, all done. Abandoned: none (the
  * word is beside the title, the way there in « Dossier »). */
@@ -137,6 +147,7 @@ export function DealTodoView({
   memoStep = null,
   contractStep = null,
   contractCircuit = null,
+  hasMemo = false,
 }: {
   access: Access;
   deal: Deal;
@@ -158,6 +169,8 @@ export function DealTodoView({
   // Its document there: the contract's own « Maintenant » (ContractNow), the
   // same as on its page in Contrats.
   contractCircuit?: { contract: ContractDetail; data: ContractPageData } | null;
+  // The deal has a memo: it comes first, the terms fold under it.
+  hasMemo?: boolean;
 }) {
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
@@ -212,8 +225,15 @@ export function DealTodoView({
         )}
       </div>
     ),
+    // Once a memo came, it says what was agreed: the terms fold under it,
+    // kept to check it and to fill the contract (Sacha 23/11/2026).
     terms: (
-      <PageSection id="termes" title={t.terms.title}>
+      <PageSection
+        id="termes"
+        title={t.terms.title}
+        collapsible={hasMemo}
+        defaultOpen={!hasMemo}
+      >
         <DealTerms
           dealId={deal.id}
           terms={terms}
@@ -289,7 +309,7 @@ export function DealTodoView({
           )
         }
       />
-      {WORKS[deal.stage].map((work) => (
+      {worksOf(deal.stage, hasMemo).map((work) => (
         <Fragment key={work}>{sections[work]}</Fragment>
       ))}
     </>
