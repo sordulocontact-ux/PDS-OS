@@ -245,6 +245,11 @@ avant `budget` quand la question vient de la Finance (lot 7 du nouveau style Fin
 
 ## 3 bis. Les propositions (écriture avec validation humaine)
 
+Exception (Sacha, 23/11/2026) : les **termes d'un deal** lus par PO dans la transcription d'un call sont écrits tout
+de suite (valeur et état), chacun avec son passage vérifié par le code (citation retrouvée mot pour mot, chiffres
+repris d'elle) ; la personne les corrige au crayon de la carte. La vérification humaine passe par le deal memo, que la
+direction valide avant le contrat (`docs/ARCHITECTURE.md` § 8 quaterdecies). La prochaine action reste proposée.
+
 | Fonction | Crée ou modifie | Droit requis |
 | --- | --- | --- |
 | `propose_artist` | artiste : nom, relation avec PDS (seulement si dite), nom civil, pays, biographie, notes, contacts à ajouter | `manage_catalog` |

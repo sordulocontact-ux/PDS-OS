@@ -1,6 +1,11 @@
-import { IconPlus, IconSparkle3 } from "nucleo-sharp-essential";
+import {
+  IconPenWriting2,
+  IconPlus,
+  IconSparkle3,
+} from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
+import { IconAction } from "@/components/ui/icon-action";
 import { StatusDot } from "@/components/ui/status-dot";
 import { cn } from "@/lib/utils";
 import type { Tone } from "@/lib/ui/state-tones";
@@ -14,7 +19,11 @@ import type { Tone } from "@/lib/ui/state-tones";
  * reader). `action`: a button of its own at the bottom right (« Changer »),
  * never with `onClick`. `proposed`: a value PO read and a person checks (a
  * deal's term from its call, Sacha 21/11/2026) — dashed frame, sparkle
- * before the label, where it comes from in `note`. Laid out by `FactCards`.
+ * before the label, where it comes from in `note`. `read`: a value PO wrote
+ * from a call (sparkle, plain frame, its passage in `note`). `onEdit`: a
+ * pencil at the top right, shown on hover or focus (always on a touch
+ * screen), when the card holds links of its own (Sacha 23/11/2026). Laid
+ * out by `FactCards`.
  */
 export function FactCard({
   label,
@@ -26,7 +35,10 @@ export function FactCard({
   actionLabel,
   action,
   proposed = false,
+  read = false,
   note,
+  onEdit,
+  editLabel,
 }: {
   label: string;
   value: ReactNode;
@@ -38,13 +50,18 @@ export function FactCard({
   actionLabel?: string;
   action?: ReactNode;
   proposed?: boolean;
+  read?: boolean;
   // Under the value: where a proposed value comes from (ProposalSource).
   note?: ReactNode;
+  onEdit?: () => void;
+  editLabel?: string;
 }) {
   const body = (
     <>
       <span className="flex items-center gap-1.5 text-caption text-[color:var(--text-secondary)]">
-        {proposed && <IconSparkle3 aria-hidden className="size-3.5 shrink-0" />}
+        {(proposed || read) && (
+          <IconSparkle3 aria-hidden className="size-3.5 shrink-0" />
+        )}
         {label}
       </span>
       <span
@@ -75,6 +92,21 @@ export function FactCard({
       ? "border-dashed border-[color:var(--border-default)]"
       : "border-[color:var(--border-hairline)]",
   );
+  if (onEdit)
+    return (
+      <div className={cn(frame, "group/card relative pr-12")}>
+        {body}
+        <span className="absolute top-2.5 right-2.5 transition-opacity duration-[var(--duration-fast)] [@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-focus-within/card:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-hover/card:opacity-100">
+          <IconAction
+            label={editLabel ?? ""}
+            icon={IconPenWriting2}
+            variant="ghost"
+            size="icon-sm"
+            onClick={onEdit}
+          />
+        </span>
+      </div>
+    );
   if (!onClick) return <div className={frame}>{body}</div>;
   return (
     <button

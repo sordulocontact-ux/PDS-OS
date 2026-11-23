@@ -13,6 +13,7 @@ import type { Transcript } from "@/lib/ai/schemas/transcript";
 import { resolveSaidDate } from "@/lib/assistant/said-date";
 import { parseSaidEuros } from "@/lib/assistant/verbatim";
 import { loadLatestTranscript } from "@/lib/calls/queries";
+import { applyTermProposals } from "@/lib/deals/call-apply";
 import {
   DEAL_TERMS,
   TERM_VALUES,
@@ -129,9 +130,9 @@ function inputOf(kind: DealKind, transcript: Transcript) {
  * transcript and proposes what changed in the negotiation: a term's value,
  * the next action (no stage: the deal moves by itself, 21/11/2026). The code keeps only what it can verify — a known
  * term, a quote found verbatim, every figure taken from it, a date said and
- * resolved by code — and writes them « proposé » under the user's session
- * (RLS: whoever works on the call). A person confirms each in the deal's
- * real form. A call already read is not read twice. Returns how many were
+ * resolved by code — and writes them under the user's session (RLS:
+ * whoever works on the call): the terms are written at once (applyTermProposals,
+ * Sacha 23/11/2026), each with its passage, the next action stays proposed. A call already read is not read twice. Returns how many were
  * proposed.
  */
 export async function proposeFromDealCall(
@@ -232,6 +233,13 @@ export async function proposeFromDealCall(
   if (error) {
     console.error("proposeFromDealCall insert:", error.message);
     return 0;
+  }
+  // What PO read is the term now (Sacha 23/11/2026: « ce que PO lit est
+  // validé »), its passage kept beside it; a person changes it with the
+  // card's pencil. Who may not write the deal leaves them proposed.
+  if (rows.some((r) => r.kind === "term")) {
+    const applied = await applyTermProposals(supabase, deal.id, kind);
+    if (!applied.ok) console.error("proposeFromDealCall apply:", applied.error);
   }
   return kept.length;
 }

@@ -79,11 +79,13 @@ const isState = (v: string | null): v is Exclude<TermState, "to_define"> =>
   v !== "to_define" &&
   (TERM_STATES as readonly string[]).includes(v);
 
-/** The deal's proposals still « proposé », oldest call first; one whose term
- * left the configuration is not shown. */
+/** The deal's proposals still « proposé » (or, `applied`, the terms PO
+ * wrote, their passage shown under the term), oldest call first; one whose
+ * term left the configuration is not shown. */
 export async function loadDealCallProposals(
   dealId: string,
   kind: DealKind,
+  status: "proposed" | "applied" = "proposed",
 ): Promise<DealCallProposal[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -92,7 +94,7 @@ export async function loadDealCallProposals(
       "id, call_id, kind, term_key, value, term_state, stage, next_action, next_action_on, quote, call:calls!deal_call_proposals_call_same_org(title, occurred_at)",
     )
     .eq("deal_id", dealId)
-    .eq("status", "proposed")
+    .eq("status", status)
     // No stage proposals since 21/11/2026 (the deal moves by itself): the
     // older ones are not shown.
     .neq("kind", "stage")

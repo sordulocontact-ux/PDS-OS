@@ -141,6 +141,7 @@ export function DealTodoView({
   callForm,
   negotiationCall,
   proposals,
+  sources = [],
   contacts,
   calls,
   nextCall,
@@ -159,6 +160,8 @@ export function DealTodoView({
   // « Caler le call » of the project's owner (loadDealNegotiationCall).
   negotiationCall: NegotiationCallData | null;
   proposals: DealCallProposal[];
+  // The terms PO wrote from the calls (their passages).
+  sources?: DealCallProposal[];
   contacts: DealContact[];
   calls: DealCall[];
   nextCall: { label: string; href: string } | null;
@@ -240,6 +243,7 @@ export function DealTodoView({
           canWrite={deal.canWrite}
           writtenOnly={deal.agreementStatus === "validated"}
           proposals={termProposals}
+          sources={sources.flatMap((p) => (p.kind === "term" ? [p] : []))}
         />
       </PageSection>
     ),

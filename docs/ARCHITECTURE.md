@@ -8155,7 +8155,13 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   « Notre proposition », « Leur proposition », « Confirmé » ; **pré-remplies dans la carte de leur terme**
   (`DealTerms`, `FactCard proposed` : valeur lue, l'ancienne barrée, source en `note`, « Modifier » = `TermForm
   proposalId`, « Écarter »), « Tout valider » au-dessus (`applyDealTermProposals`, `lib/deals/proposal-actions.ts` :
-  `set_deal_term` avec valeur et état lus, un terme lu deux fois = le plus récent, l'autre écarté ; 22/11/2026), celle de la
+  `set_deal_term` avec valeur et état lus, un terme lu deux fois = le plus récent, l'autre écarté ; 22/11/2026). **Depuis le
+  23/11/2026 (Sacha : « ce que PO lit est validé »), les termes lus sont écrits tout de suite** : `proposeFromDealCall`
+  appelle `applyTermProposals` (`lib/deals/call-apply.ts`, le même que « Tout valider ») sous la session de qui enregistre
+  le compte rendu ; s'il n'écrit pas le deal, ils restent proposés comme avant. La carte du terme garde le passage
+  (`FactCard read` + `note` = `ProposalSource` de la dernière proposition `applied` dont la valeur est encore celle du
+  terme, `loadDealCallProposals(…, "applied")`) et se corrige au crayon, au survol (`FactCard onEdit`). Seule
+  vérification humaine restante : le deal memo, validé par la direction avant le contrat. Celle de la
   prochaine action dans « Prochaine action » ; ordre des sections de « À faire » selon l'étape (`WORKS` de
   `deal-todo-view.tsx` : calls en tête à « Call prévu », termes en tête en négociation). « Vérifier » ouvre le **vrai formulaire** pré-rempli
   (`TermForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
