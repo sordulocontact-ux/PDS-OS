@@ -2,13 +2,13 @@
 
 import { IconCheck, IconFile } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { latestContractFileId } from "@/lib/contracts/proof-file-actions";
+import { latestContractFile } from "@/lib/contracts/proof-file-actions";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 
 const fr = { legalClearance };
@@ -43,21 +43,34 @@ export function ContractProofSlot({
   const [busy, setBusy] = useState(false);
   const router = useRouter();
   const picker = useRef<HTMLInputElement>(null);
+  // Dropped: the file's own name (Sacha 23/11/2026), read once there.
+  const [fileName, setFileName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!present) return;
+    let alive = true;
+    void latestContractFile({ contractId, category }).then(
+      (file) => alive && setFileName(file?.name ?? null),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [present, contractId, category]);
 
   // A new version of the file already there (the wrong one was dropped).
   const replace = async (file: File) => {
     setBusy(true);
-    const replacesId = await latestContractFileId({ contractId, category });
+    const replacesId = (await latestContractFile({ contractId, category }))?.id;
     const result = await uploadCatalogFile({
       organizationId,
       owner: { kind: "contract", id: contractId },
       category,
       file,
-      replacesId: replacesId ?? undefined,
+      replacesId,
     });
     setBusy(false);
     if (!result.ok) return void toast.error(result.error);
     toast.success(t.replaced);
+    setFileName(file.name);
     router.refresh();
   };
 
@@ -68,7 +81,9 @@ export function ContractProofSlot({
           aria-hidden
           className="size-4 text-[color:var(--tone-success-fg)]"
         />
-        <span className="min-w-0 font-medium">{label}</span>
+        <span className="min-w-0 truncate font-medium" title={label}>
+          {fileName ?? label}
+        </span>
         {/* The tick and the frame say it is there (Sacha 23/11/2026: « le
             déposé ne sert à rien »); only the upload in progress is said. */}
         {busy && <span className="text-muted-foreground">· {t.uploading}</span>}
