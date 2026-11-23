@@ -935,6 +935,10 @@ composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 > **Nouveau style (16/11/2026, `docs/STYLE-FINANCE-PARTOUT.md` § 6.7, 6.8 et 13)** : formulaires et gestes
 > s'ouvrent en **panneau à droite** (520 px, à 12 px des bords, arrondi 8, filet, sans ombre, voile sombre ;
 > `size` `medium`/`wide` pour un formulaire long), le détail d'une ligne en **fiche latérale** (`SideSheet`).
+> **Écart voulu : Mails** (Sacha, 23/11/2026, « inspire-toi de Gmail / Outlook, j'aime bien Outlook où on voit le mail
+> à droite de la liste ») : dès `lg`, un mail s'ouvre dans un **volet de lecture** à droite de la liste, pas dans la fiche
+> latérale : on enchaîne les mails sans ouvrir ni fermer, comme dans toute messagerie. Sous `lg`, la fiche latérale
+> reprend (`MailInbox`, `docs/COMPOSANTS.md`).
 > Le verre centré ne reste que pour ⌘K, la visionneuse, la présentation, PO et le menu du téléphone
 > (`side="center"`). Ce qui suit décrit le **style classique**, gardé derrière l'interrupteur de Réglages.
 

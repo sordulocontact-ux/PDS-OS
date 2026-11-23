@@ -12,12 +12,6 @@ export const mailbox = {
     deal_memo: "Deal memo",
     clearance: "Autorisation",
   },
-  columns: {
-    correspondent: "Correspondant",
-    subject: "Objet",
-    kinds: "Type",
-    date: "Date",
-  },
   // « À » before the recipients of a sent mail.
   to: "À",
   noSubject: "(sans objet)",
@@ -45,14 +39,15 @@ export const mailbox = {
       `Les ${limit} mails les plus récents sont affichés.`,
     loadError: "Les mails n'ont pas pu être chargés. Rechargez la page.",
   },
+  // The reading pane beside the list (Outlook, Sacha 23/11/2026).
+  reader: {
+    listLabel: "Liste des mails",
+    pickTitle: "Aucun mail ouvert",
+    pickBody: "Choisissez un mail dans la liste pour le lire ici.",
+  },
   sheet: {
-    received: "Reçu",
-    sent: "Envoyé",
-    eyebrow: (direction: string, date: string) => `${direction} · ${date}`,
-    from: "De",
     to: "À",
     cc: "Cc",
-    date: "Date",
     attachments: "Pièces jointes",
     download: (name: string) => `Télécharger ${name}`,
     bodyLoading: "Chargement du texte du mail",

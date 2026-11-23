@@ -1,6 +1,6 @@
 "use client";
 
-import { MailTable } from "@/components/mailbox/mail-table";
+import { MailInbox } from "@/components/mailbox/mail-inbox";
 import { searchTextOf } from "@/components/mailbox/mail-people";
 import { SearchableList } from "@/components/ui/searchable-list";
 import { mailbox } from "@/lib/i18n/fr/mailbox";
@@ -29,7 +29,7 @@ export function MailList({
       filters={filters}
       empty={empty}
     >
-      {(visible) => <MailTable messages={visible} />}
+      {(visible) => <MailInbox messages={visible} />}
     </SearchableList>
   );
 }
