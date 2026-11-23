@@ -2755,3 +2755,18 @@ Toujours une ligne par artiste, mêmes colonnes. Vérifié dans Chrome sur « As
   neutre).
 - Pas encore fait : sur téléphone, le tableau défile au lieu de passer les colonnes sous le nom (règle mobile de
   `CLAUDE.md`) ; la fenêtre visible entre les deux colonnes fixes est étroite (environ 120 px à 390 px).
+
+## Vue d'ensemble : « Titres et artistes » en bas, sans notes ; « Ce qui dépend d'un autre workflow » retiré (23/11/2026, branche `pre-prod`)
+
+Retours de Maël. Vérifié dans Chrome sur « Assurance 30 » (lancé).
+
+- **Collectif** : la section « Titres et artistes » passe en bas de la Vue d'ensemble (après « Maintenant » et
+  « Progression ») : longue, elle cachait le reste. Même chose avant l'acceptation : le tableau vient après le bloc de
+  transmission. L'encart des contrats manquants reste en haut.
+- **Sans les notes** dans ces deux tableaux (récap compact et `TitlesBoard notes={false}`) : trop d'infos. Les notes
+  restent lues et écrites dans l'onglet « Titres et artistes ».
+- **Pour Sacha** : « Ce qui dépend d'un autre workflow » est retiré de la Vue d'ensemble de **tous** les projets (à la
+  demande de Maël). `DependencyRows`, `lib/overview/dependencies.ts` et les textes `projectShell.overview.dependencies`
+  sont supprimés ; la phrase correspondante de l'assistant PO (`lib/assistant/guide/topics/projects.ts`) aussi.
+  `UnlaunchedOverview` : `titles` passe sous le bloc de transmission.
+- Pas vérifié dans Chrome : un collectif pas encore accepté (aucun sous la main dans la base de dev).
