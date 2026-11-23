@@ -441,6 +441,21 @@ export const projectTitles = {
       done: "Note enregistrée.",
     },
     accord: {
+      // A deal's stage in the recap, short enough for one line (Maël
+      // 23/11/2026); the deal's own badge keeps its words elsewhere.
+      stages: {
+        to_contact: "À contacter",
+        call_planned: "Call prévu",
+        negotiation: "Négociation",
+        agreement: "Accord de principe",
+        contracting: "Contractualisation",
+        signed: "Signé",
+        abandoned: "Abandonné",
+      },
+      agreement: {
+        pending: "Accord à valider",
+        validated: "Accord validé",
+      },
       // « Call le Sam. 05/12/2026 » (formatDay).
       callOn: (day: string) => `Call le ${day}`,
       // The overview's recap (read only) says it, the board has the button.
