@@ -380,7 +380,6 @@ export const contracts = {
     depositSigned: "Déposer le contrat signé",
     sign: "Enregistrer la signature",
     signedOnLabel: "Date de signature",
-    signedOnHint: "Aujourd'hui ou avant.",
     signedOnMissing:
       "Indiquez le jour de la signature, aujourd'hui au plus tard.",
     terminate: "Résilier",

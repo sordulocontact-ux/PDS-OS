@@ -115,7 +115,8 @@ function SignDateForm({
         type="date"
         label={t.signedOnLabel}
         required
-        hint={t.signedOnHint}
+        // No hint under it: the button stays level with the date (Sacha
+        // 23/11/2026); a day to come is refused with its reason.
         max={today}
         value={day}
         error={tried && invalid ? t.signedOnMissing : undefined}
