@@ -2523,6 +2523,10 @@ cliquer et tout s'enchaîner »).
   ligne cliquable et bouton « Ranger des dépenses » (ex-« Rattacher des dépenses ») ; « Hors sous-budget » remplace « Non réparti »,
   sans rouge pour des dépenses à ranger ; « Sous-budget « … » » sur chaque dépense (page du budget, Finance › Dépenses, fiche) ;
   champ « Sous-budget » juste sous le montant quand le budget est connu ; montants des sous-budgets dits HT. Sans migration.
+- Fait le 24/11 (Sacha : « quand on crée une dépense, la mettre direct dans un sous-budget depuis la page Dépenses ») : dans
+  la liste « Pour » du formulaire de dépense (Dépenses, Finance › Dépenses), chaque budget découpé est suivi de ses
+  sous-budgets (« Frais de structure › Loyer ») ; les choisir remplit le budget et le champ « Sous-budget ». Vérifié dans
+  Chrome (dépense enregistrée dans le sous-budget, puis données de test supprimées). Sans migration.
 
 ## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
 

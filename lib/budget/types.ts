@@ -59,7 +59,13 @@ export const isFinanceTarget = (target: Pick<BudgetTarget, "kind">) =>
 
 /** A target offered to a quick spend (BUD 4): its name, and whether the
  * reader spent on it lately (those lead the list). */
-export type ExpenseTarget = BudgetTarget & { label: string; recent?: boolean };
+export type ExpenseTarget = BudgetTarget & {
+  label: string;
+  recent?: boolean;
+  // Its sub-budgets, for the Finance: a spend goes straight into one
+  // (Sacha 24/11/2026).
+  parts?: { id: string; name: string }[];
+};
 
 export type BudgetLine = {
   id: string;

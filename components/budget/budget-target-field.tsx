@@ -12,26 +12,54 @@ const fr = { budget };
 
 export const targetKey = (t: BudgetTarget) => `${t.kind}:${t.id}`;
 
+// A sub-budget of a target in the same list: « Frais de structure › Loyer ».
+const PART = "|part:";
+const partKey = (target: BudgetTarget, partId: string) =>
+  `${targetKey(target)}${PART}${partId}`;
+
 /**
  * « Pour » of a quick spend (BUD 4): a project the reader runs or an
  * artist (for the Finance, a cost center or « Hors budget » too), searched as one types, the last ones spent on first. The name is
  * the choice; its kind is a badge in its hue (Projet, Artiste), so the two
- * read apart at a glance (Sacha 11/11/2026).
+ * read apart at a glance (Sacha 11/11/2026). For the Finance, each budget
+ * cut into sub-budgets is followed by them (« Frais de structure › Loyer »):
+ * one choice puts the spend in its budget and its sub-budget (Sacha
+ * 24/11/2026). `partId`: the sub-budget chosen, given back with the target.
  */
 export function BudgetTargetField({
   targets,
   value,
+  partId,
   error,
   onChange,
 }: {
   targets: ExpenseTarget[];
   // targetKey of the one chosen, "" for none.
   value: string;
+  partId?: string;
   error?: string;
-  onChange: (key: string) => void;
+  onChange: (key: string, partId?: string) => void;
 }) {
   const t = fr.budget.form;
-  const byKey = new Map(targets.map((target) => [targetKey(target), target]));
+  const byKey = new Map(
+    targets.flatMap((target) => [
+      [targetKey(target), target] as const,
+      ...(target.parts ?? []).map(
+        (part) => [partKey(target, part.id), target] as const,
+      ),
+    ]),
+  );
+  const partName = new Map(
+    targets.flatMap((target) =>
+      (target.parts ?? []).map(
+        (part) => [partKey(target, part.id), part.name] as const,
+      ),
+    ),
+  );
+  const shown =
+    value && partId && partName.has(`${value}${PART}${partId}`)
+      ? `${value}${PART}${partId}`
+      : value;
   // The Finance also chooses a cost center or « Hors budget ».
   const words = targets.some((target) => target.kind === "off_budget")
     ? t.finance
@@ -48,24 +76,37 @@ export function BudgetTargetField({
         options={{
           "": words.targetPlaceholder,
           ...Object.fromEntries(
-            targets.map((target) => [targetKey(target), target.label]),
+            targets.flatMap((target) => [
+              [targetKey(target), target.label],
+              ...(target.parts ?? []).map((part) => [
+                partKey(target, part.id),
+                t.targetPart(target.label, part.name),
+              ]),
+            ]),
           ),
         }}
-        value={value}
-        onChange={onChange}
+        value={shown}
+        onChange={(key) => {
+          const [target, part] = key.split(PART);
+          onChange(target, part);
+        }}
         searchPlaceholder={words.targetSearch}
         emptyLabel={words.targetNone}
         fill
         keywords={(key) => {
           const target = byKey.get(key);
-          return target ? t.targetKinds[target.kind] : "";
+          return target
+            ? [t.targetKinds[target.kind], partName.get(key) && t.partWord]
+                .filter(Boolean)
+                .join(" ")
+            : "";
         }}
         badge={(key) => {
           const target = byKey.get(key);
           if (!target) return null;
           return (
             <span className="flex shrink-0 items-center gap-2">
-              {target.recent && (
+              {target.recent && !partName.has(key) && (
                 <span className="text-[length:var(--type-caption)] text-[color:var(--text-tertiary)]">
                   {t.targetRecent}
                 </span>

@@ -46,12 +46,15 @@ export function BudgetPartField({
     void loadSpendParts({ kind, targetId, lineId }).then((found) => {
       if (!live) return;
       setLoaded({ key, parts: found.parts });
-      onChange(found.parts.length ? (found.current ?? "") : undefined);
+      // A sub-budget already chosen with the budget (its list) stays.
+      const kept = found.parts.some((p) => p.id === value) ? value : undefined;
+      onChange(found.parts.length ? (kept ?? found.current ?? "") : undefined);
     });
     return () => {
       live = false;
     };
-    // onChange is a state setter of the form.
+    // onChange is a state setter of the form; `value` is read as the
+    // budget changes, with it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 

@@ -142,6 +142,9 @@ export const budget = {
     spentOn: "Date",
     // A quick spend (BUD 4): what it goes to.
     target: "Pour",
+    // A sub-budget among the budgets (Finance, 24/11/2026).
+    targetPart: (budgetName: string, part: string) => `${budgetName} › ${part}`,
+    partWord: "sous-budget",
     targetPlaceholder: "Choisir un projet ou un artiste",
     targetSearch: "Rechercher un projet ou un artiste",
     targetNone: "Aucun projet ni artiste ne correspond.",

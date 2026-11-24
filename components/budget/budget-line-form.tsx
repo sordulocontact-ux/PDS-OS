@@ -245,8 +245,18 @@ export function BudgetLineForm({
               <BudgetTargetField
                 targets={targets}
                 value={chosen}
+                partId={partId}
                 error={shown.target}
-                onChange={setChosen}
+                onChange={(key, part) => {
+                  // A sub-budget chosen in the list (Finance, 24/11/2026);
+                  // the same budget alone again: no sub-budget (« Aucun »).
+                  // Another budget: its field reads its sub-budgets anew.
+                  setPartId(
+                    part ??
+                      (key === chosen && partId !== undefined ? "" : undefined),
+                  );
+                  setChosen(key);
+                }}
               />
             )}
             {!fixedTarget && partField}
