@@ -1,5 +1,3 @@
-import { IconScale } from "nucleo-sharp-essential";
-
 import {
   DataTable,
   DataTableBody,
@@ -7,10 +5,10 @@ import {
   DataTableGroupRow,
   DataTableHead,
   DataTableHeader,
-  DataTableIcon,
   DataTableLink,
   DataTableMedia,
   DataTableRow,
+  DataTableText,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -35,7 +33,9 @@ function NextCell({ deal, today }: { deal: Deal; today: string }) {
   if (deal.followUpOn && followUpDue(deal, today))
     return (
       <StatusBadge tone={overdueTone} size="sm">
-        {t.followUpDue(formatShortDate(deal.followUpOn))}
+        {deal.nextAction
+          ? t.on(deal.nextAction, formatShortDate(deal.followUpOn))
+          : t.followUpDue(formatShortDate(deal.followUpOn))}
       </StatusBadge>
     );
   if (deal.nextAction)
@@ -53,7 +53,8 @@ function NextCell({ deal, today }: { deal: Deal; today: string }) {
 
 /**
  * The deals (BIZ 4), the latest moved first: the row opens the deal; its
- * project or kind under the name; its stage, what comes next (a follow-up
+ * project of a title's deal under the name; its type (its own column,
+ * Sacha 24/11/2026), its stage, what comes next (a follow-up
  * due flagged) and who negotiates it. On an artist's page (BIZ 10):
  * `groups` titles them (to follow up, open, signed…) and `contracts` adds
  * each deal's contract and its state.
@@ -70,7 +71,7 @@ export function DealsTable({
   today: string;
 }) {
   const t = fr.deals.table;
-  const columns = contracts ? 5 : 4;
+  const columns = contracts ? 6 : 5;
   // The text columns share the width (Sacha, 12/11/2026: everything sat on
   // the left, the space left unused after « Négocié par »); the stage keeps
   // its 192 px.
@@ -78,7 +79,6 @@ export function DealsTable({
     <DataTableRow key={deal.id}>
       <DataTableCell fill>
         <DataTableMedia
-          visual={<DataTableIcon icon={IconScale} />}
           title={
             <DataTableLink href={routes.deal(deal.id)}>
               {dealName(deal)}
@@ -86,16 +86,24 @@ export function DealsTable({
           }
           subtitle={
             <>
-              {/* The stage column is hidden on phones. */}
+              {/* On a phone, the hidden stage and type. */}
               <span className="sm:hidden">
-                {fr.deals.stages[deal.stage]} ·{" "}
+                {[fr.deals.stages[deal.stage], fr.deals.kinds[deal.kind]].join(
+                  " · ",
+                )}
               </span>
-              {deal.titleLabel || deal.titlePosition !== null
-                ? deal.projectTitle
-                : fr.deals.kinds[deal.kind]}
+              {/* What it is about when its name does not say it: the
+                  project of a title's deal. Its type has its column. */}
+              <span className="hidden sm:inline">
+                {(deal.titleLabel || deal.titlePosition !== null) &&
+                  deal.projectTitle}
+              </span>
             </>
           }
         />
+      </DataTableCell>
+      <DataTableCell hideBelow="xl" className="w-40">
+        <DataTableText>{fr.deals.kinds[deal.kind]}</DataTableText>
       </DataTableCell>
       <DataTableCell hideBelow="sm">
         <DealStageBadge deal={deal} />
@@ -117,6 +125,9 @@ export function DealsTable({
     <DataTable>
       <DataTableHeader>
         <DataTableHead fill>{t.deal}</DataTableHead>
+        <DataTableHead hideBelow="xl" className="w-40">
+          {t.kind}
+        </DataTableHead>
         <DataTableHead hideBelow="sm">{t.stage}</DataTableHead>
         <DataTableHead hideBelow="md" fill>
           {t.next}

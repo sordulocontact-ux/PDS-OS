@@ -14,121 +14,70 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  optionsWithValues,
+  type FilterControl,
+} from "@/components/ui/filter-control";
+import { FilterPanel } from "@/components/ui/filter-panel";
+import { FIELD_CONTROL } from "@/components/ui/search-field";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FIELD_CONTROL } from "@/components/ui/search-field";
 import { core } from "@/lib/i18n/fr/core";
 import { cn } from "@/lib/utils";
 
-const fr = { urlFilters: core.urlFilters };
+export type { FilterControl } from "@/components/ui/filter-control";
 
-export type FilterControl = {
-  key: string;
-  label: string;
-  // The "no filter" choice ("Tous les types").
-  allLabel: string;
-  options: { value: string; label: string }[];
-  value: string | null;
-  onChange: (value: string | null) => void;
-  // Always behind the filter button, never a select (Actifs / Archivés).
-  menuOnly?: boolean;
-};
+const fr = { urlFilters: core.urlFilters };
 
 // "all" in a select: no filter on that axis.
 const ALL = "all";
+
+// Up to this many axes, one select each (one choice); beyond, every axis in
+// the « Filtres » panel, several choices each (Sacha 24/11/2026).
+const MAX_SELECTS = 3;
 
 // Each control of the bar: as wide as its neighbours, on one line when
 // there is room (Figma, page Projets 90:4972), stacked on a phone.
 const CELL = "min-w-0 flex-[1_1_12rem]";
 
 /**
- * The filters of a list page, beside its search (`ListToolbar`): the first
- * `inline` ones as selects, the others behind the filter button ("filtres
- * avancés", with the number of active ones), then « Effacer les filtres »
- * once one is set. Only the axes the list holds are offered.
+ * The filters of a list page, beside its search (`ListToolbar`). Up to 3
+ * axes: one select each (one choice), the one-choice axes (Actifs /
+ * Archivés) behind the filter button. More than 3: one « Filtres » button
+ * and its panel of boxes to tick (`FilterPanel`, several choices per axis).
+ * Then « Effacer les filtres » once one is set. Only the axes the list holds
+ * are offered.
  */
 export function FilterBar({
   filters,
-  inline = 3,
   onClear,
 }: {
   filters: FilterControl[];
-  inline?: number;
   onClear: () => void;
 }) {
   const t = fr.urlFilters;
   const offered = filters.filter(
-    (filter) => filter.options.length > 0 || filter.value !== null,
+    (filter) => filter.options.length > 0 || filter.values.length > 0,
   );
   const selects = offered.filter((filter) => !filter.menuOnly);
-  const shown = selects.slice(0, inline);
-  const more = [
-    ...selects.slice(inline),
-    ...offered.filter((filter) => filter.menuOnly),
-  ];
-  const activeMore = more.filter((filter) => filter.value !== null).length;
-  const active = offered.some((filter) => filter.value !== null);
+  const more = offered.filter((filter) => filter.menuOnly);
+  const active = offered.some((filter) => filter.values.length > 0);
 
   return (
     <>
-      {shown.map((filter) => (
-        <FilterSelect key={filter.key} filter={filter} />
-      ))}
-      {more.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={activeMore > 0 ? t.moreCount(activeMore) : t.more}
-                className="relative shrink-0 border-input bg-[var(--control-bg)]"
-              >
-                <IconFilter aria-hidden />
-                {activeMore > 0 && (
-                  <CountBadge
-                    count={activeMore}
-                    size="sm"
-                    className="absolute -top-1 -right-1"
-                  />
-                )}
-              </Button>
-            }
-          />
-          <DropdownMenuContent
-            align="end"
-            className="max-h-[min(70vh,32rem)] overflow-y-auto"
-          >
-            {more.map((filter, index) => (
-              <div key={filter.key} className="flex flex-col">
-                {index > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuRadioGroup
-                  value={filter.value ?? ALL}
-                  onValueChange={(value: string) =>
-                    filter.onChange(value === ALL ? null : value)
-                  }
-                >
-                  <DropdownMenuGroupLabel>{filter.label}</DropdownMenuGroupLabel>
-                  <DropdownMenuRadioItem value={ALL}>
-                    {filter.allLabel}
-                  </DropdownMenuRadioItem>
-                  {filter.options.map((option) => (
-                    <DropdownMenuRadioItem
-                      key={option.value}
-                      value={option.value}
-                    >
-                      {option.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </div>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {selects.length > MAX_SELECTS ? (
+        <FilterPanel filters={offered} />
+      ) : (
+        <>
+          {selects.map((filter) => (
+            <FilterSelect key={filter.key} filter={filter} />
+          ))}
+          {more.length > 0 && <FilterMenu filters={more} />}
+        </>
       )}
       {active && (
         <Button variant="ghost" size="sm" onClick={onClear}>
@@ -139,22 +88,77 @@ export function FilterBar({
   );
 }
 
+// The one-choice axes beside the selects, behind the square filter button
+// (the number of active ones on it).
+function FilterMenu({ filters }: { filters: FilterControl[] }) {
+  const t = fr.urlFilters;
+  const active = filters.filter((filter) => filter.values.length > 0).length;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={active > 0 ? t.moreCount(active) : t.more}
+            className="relative shrink-0 border-input bg-[var(--control-bg)]"
+          >
+            <IconFilter aria-hidden />
+            {active > 0 && (
+              <CountBadge
+                count={active}
+                size="sm"
+                className="absolute -top-1 -right-1"
+              />
+            )}
+          </Button>
+        }
+      />
+      <DropdownMenuContent
+        align="end"
+        className="max-h-[min(70vh,32rem)] overflow-y-auto"
+      >
+        {filters.map((filter, index) => (
+          <div key={filter.key} className="flex flex-col">
+            {index > 0 && <DropdownMenuSeparator />}
+            <DropdownMenuRadioGroup
+              value={filter.values[0] ?? ALL}
+              onValueChange={(value: string) =>
+                filter.onChange(value === ALL ? [] : [value])
+              }
+            >
+              <DropdownMenuGroupLabel>{filter.label}</DropdownMenuGroupLabel>
+              <DropdownMenuRadioItem value={ALL}>
+                {filter.allLabel}
+              </DropdownMenuRadioItem>
+              {filter.options.map((option) => (
+                <DropdownMenuRadioItem key={option.value} value={option.value}>
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </div>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// One axis, one choice: a choice replaces the other ones.
 function FilterSelect({ filter }: { filter: FilterControl }) {
-  // A value the list no longer holds keeps its raw text, so it can be seen
-  // and removed.
   const items: Record<string, string> = {
     [ALL]: filter.allLabel,
-    ...Object.fromEntries(filter.options.map((o) => [o.value, o.label])),
+    ...Object.fromEntries(
+      optionsWithValues(filter).map((o) => [o.value, o.label]),
+    ),
   };
-  if (filter.value && !(filter.value in items))
-    items[filter.value] = filter.value;
   return (
     <div className={CELL}>
       <Select
         items={items}
-        value={filter.value ?? ALL}
+        value={filter.values[0] ?? ALL}
         onValueChange={(next) =>
-          typeof next === "string" && filter.onChange(next === ALL ? null : next)
+          typeof next === "string" && filter.onChange(next === ALL ? [] : [next])
         }
       >
         <SelectTrigger

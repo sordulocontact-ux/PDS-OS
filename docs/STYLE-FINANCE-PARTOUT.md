@@ -287,7 +287,11 @@ de la page ; `EmptyNote` quand un filtre ne garde rien. Formulation positive qua
 
 - Un filtre se place **juste au-dessus de ce qu'il filtre** (le budget d'un camembert dans sa carte, le statut
   au-dessus des postes), jamais en tête de page s'il ne filtre qu'un bloc.
-- 2 filtres au plus en ligne (`inline={2}`), les autres dans le bouton « Filtres » (`FilterBar`).
+- **3 axes de filtre ou moins** : une liste déroulante à choix unique par axe, en ligne (`FilterBar`).
+  **Plus de 3 axes** : plus aucune liste déroulante, un seul bouton « Filtres » en contour (icône, nombre de
+  cases cochées) qui ouvre un panneau listant tous les axes en groupes de cases à cocher (`FilterPanel`),
+  plusieurs choix possibles : dans un axe = OU, entre axes = ET (Sacha 24/11/2026, d'après Accordee).
+  Actifs / Archivés reste un choix unique. « Effacer les filtres » à côté dès qu'un filtre est posé.
 - Un choix de 2 à 4 vues = **segmenté** avec comptes (« À rattacher 12 »), jamais des onglets.
 - Horizon d'une page de synthèse (30/60/90 j) : à **gauche** ; les actions : à **droite**.
 
@@ -300,13 +304,34 @@ Déjà global (`components/ui/data-table.tsx`, `table.tsx`), il prend les tokens
 - En-tête : 44 px, bandeau `--surface-soft`, libellés 15 px `font-medium` (450) **gris secondaire**.
 - Lignes : 48 px min (§ 4.2), 15 px, filet `--border-hairline` entre les lignes, **filet vertical** entre les
   colonnes (déjà dans `TableHead`/`TableCell`), 16 px aux deux bouts.
+- **Nom et sous-ligne sur deux lignes** (`DataTableMedia`) : essayé sur une seule ligne d'après Accordee, retiré le
+  24/11/2026 (Sacha) parce que la colonne du nom prenait la largeur des autres (Réseau, Contrats). Les autres cellules
+  restent sur une ligne, coupées par « … ».
+- **Tri** (d'après Accordee, Sacha 24/11/2026) : un clic sur un en-tête trie la colonne, croissant puis décroissant
+  puis l'ordre de départ ; flèche 14 px sur la seule colonne triée, libellé à l'encre. Partout, sans code par
+  tableau (`ui/table-sort.tsx`), à partir de 3 lignes, pour une colonne d'au moins deux valeurs ; vides en bas ;
+  un total reste en place (`DataTableRow pinned`). Pas de menu de colonne (déplacer, masquer) : le tri est le seul
+  geste d'un en-tête, un clic vaut mieux qu'un menu à trois choix. Une valeur qui se lit mal (« Hier ») se donne
+  par `DataTableCell sort`.
 - Colonnes : 192 px fixes, une ou plusieurs `fill` qui prennent le reste ; colonnes secondaires cachées sous un
   point de rupture (`hideBelow`) ; **5 à 6 colonnes visibles** au plus, le reste dans « Colonnes ».
-- Montants **à droite** (`align="end"`), en `tabular-nums` ; dates en `tabular-nums`.
+- **Visuel d'une ligne seulement s'il dit quelque chose** : une photo, le type (personne / organisation, type de
+  fichier). La même icône sur chaque ligne (poignée de main des Contrats, balance des Deals) est retirée (Sacha,
+  24/11/2026).
+- Texte d'une cellule : `DataTableText` (une ligne, « … », **192 px au plus**) ; sans plafond, un tableau élargit la
+  colonne à son texte le plus long même coupé (« Métier ou activité » du Réseau, Sacha 24/11/2026).
+- Montants **à droite** (`align="end"`), en `tabular-nums` ; dates en `tabular-nums`. `tabular-nums` met en Geist Mono :
+  jamais sur des mots (« 13 jours de retard », « 2 à payer · 840 € »), seulement sur le chiffre ou la date seuls.
+- **Échéance encore attendue = en mots et en couleur** (`DueDate`, `components/ui/due-date.tsx`) : en retard,
+  **rouge** « 26 jours de retard » ; à **7 jours ou moins** (`DUE_SOON_DAYS`), **orange** « Dans 4 jours »,
+  « Demain », « Aujourd'hui » ; au-delà, la date courte à l'encre. Le mot porte le sens, la couleur le renforce.
+  **Seulement si quelque chose est encore attendu** (facture non soldée, dépense engagée ou facturée non payée,
+  contrat ni signé ni terminé) : sinon la date courte, sans couleur. Le calcul est du code (`dueGap`, jour de Paris).
 - Cellule vide : `—` (`EMPTY_CELL`) quand rien n'est attendu ; le **mot du travail à faire** quand quelque chose
   manque (« Manquant », « Pas encore »).
 - Une ligne qui s'ouvre : `DataTableLink` (lien étiré, survol `--control-bg-hover`) ; vers une fiche latérale :
-  `onOpen`. Les gestes de la ligne : « ⋯ » à droite (`RowActions`), visibles au survol (`reveal`) ; un bouton de
+  `onOpen`, avec un `TableSortProvider` autour du tableau et de la fiche pour que ↑ ↓ suivent l'ordre trié. Une
+  personne du Réseau s'ouvre en fiche latérale (`ContactSheet`), sa page complète à un clic. Les gestes de la ligne : « ⋯ » à droite (`RowActions`), visibles au survol (`reveal`) ; un bouton de
   ligne est en **contour**.
 - Téléphone : la colonne `fill` se tronque (`max-sm:max-w-0`), le montant reste dans le cadre.
 
@@ -318,6 +343,8 @@ avertissement, **rouge** pour danger. Couleur du point : tertiaire (neutre), inf
 avertissement, danger. Les **teintes de catégorie** (`hue`) gardent leur pastille pleine : ce ne sont pas des
 états. L'état dit la **prochaine action** quand il y en a une (« À rattacher », « Sans justificatif »), pas un
 état technique.
+Le point d'un état réussi (« Signé », « Payée ») a son token vif, `--tone-success-dot` (#16a34a, #22c55e en sombre) :
+`--tone-success-fg` était trop pâle en sombre pour un point de 6 px (Sacha, 24/11/2026).
 
 ### 6.5 Carte chiffre (`MetricCard`)
 
@@ -360,13 +387,69 @@ facture, contact, fichier, version audio, tâche…).
   (une action principale noire au plus, le reste dans « ⋯ »), puis l'historique de l'enregistrement.
 - Une source commune (« Lu dans le PDF ») se dit **une fois** dans le titre de la section, pas sur chaque valeur.
 
+### 6.7 bis Fiche d'un enregistrement : le modèle du Réseau (Sacha, 24/11/2026)
+
+Validé par Sacha (« vraiment bien designé »), d'après le panneau personne d'Accordee : **modèle de toute fiche
+latérale d'un enregistrement qu'on lit plus qu'un montant** (contact, artiste, titre, deal, projet…). Une ligne
+d'argent garde le § 6.7. Code : `components/network/contact-sheet.tsx`, `components/network/sheet/`.
+
+Anatomie, de haut en bas :
+
+1. **En-tête en barre** (`SideSheet bar`) : 56 px, filet `--border-hairline` dessous, icône du type 16 px
+   secondaire, nom 15 px `font-medium` tronqué ; à droite en `ghost icon-sm` : « Ouvrir la fiche complète »
+   (`IconExpand`, lien vers la page), « ⋯ » (les gestes d'écriture de la ligne), la croix.
+2. **Identité**, tirée de la ligne, affichée sans attendre : photo 64 px (un enregistrement sans photo, un contrat,
+   commence par son nom : pas de disque d'icône), nom en grand (`text-display-sm`), une
+   ligne secondaire « ce qu'il fait · icône + à quoi il appartient », ses catégories en `NameChip` (sans lien),
+   puis les **gestes de communication** en boutons contour `sm` avec icône (« E-mail » = fenêtre de la page
+   Mails pré-remplie, « Réunion » = formulaire avec la personne déjà invitée). Modifier, archiver, supprimer
+   restent dans « ⋯ ».
+3. **Une carte de synthèse**, la seule encadrée en tête (`rounded-xl`, filet `--border-default`, fond
+   `--surface-soft`, `p-4`) : ce qui est attendu (en `--tone-danger-fg` s'il y a du retard) ou la formule
+   positive (« Rien d'attendu en ce moment »), une ligne 13 px secondaire (le dernier échange), un filet, puis des
+   lignes « icône 16 · libellé · nombre à droite en `tabular-nums` », seulement les nombres non nuls. **Une ligne
+   dont la liste n'est nulle part ailleurs dans la fiche se replie** (`Fold variant="row"`, fermée au départ,
+   chevron au bout : parties et fichiers d'un contrat, calls passés et titres crédités d'un contact ; Sacha,
+   24/11/2026) ; une liste déjà montrée plus bas reste un nombre. Pas de score, pas de phrase qui explique un
+   calcul.
+4. **Blocs titrés sans carte** (`SheetBlock` : titre 15 px `font-medium`, à droite un résumé 13 px secondaire),
+   `gap-6` entre eux, chacun **absent s'il est vide** :
+   - **personnes** : avatar 32, nom, à droite le lien en 13 px secondaire (« 3 calls ensemble »), badge
+     `neutral sm` sur la première s'il y en a plusieurs (« Le plus proche ») ;
+   - **fiches liées** : lignes `SheetLine` (icône 16 + libellé secondaire sur 10rem | valeur), chaque fiche en
+     `NameChip href` (pastille qui ouvre sa page), un rôle en `StatusBadge neutral sm` à côté ;
+   - **éléments chiffrés** (factures) : liste encadrée (`rounded-xl`, filet, lignes séparées par
+     `--border-hairline`), ligne entière cliquable (lien étiré, survol `--control-bg-hover`) : icône, titre et
+     échéance 13 px dessous, montant `tabular-nums`, badge d'état (ton de `state-tones.ts`) ; le reste à payer en
+     résumé du titre du bloc ;
+   - **coordonnées** : `SheetLine`, liens en `--text-link` (mail, téléphone, site, comptes), une absence en
+     tertiaire (« Aucun de prévu »), la fiche de renseignements et son lien en premier.
+5. **Pas d'historique ni de timeline** (Ibé, 23/11/2026).
+
+Comportements :
+
+- Ouverte par le nom de la ligne (`DataTableLink onOpen`) ; `?ouvrir=<id>` l'ouvre (`useSheetRow`).
+- **Chargement en deux temps** : identité et coordonnées connues de la ligne tout de suite ; le reste lu à
+  l'ouverture par une action serveur (session de l'utilisateur, RLS), un squelette en attendant ; **gardé par
+  enregistrement** : revenir sur une fiche déjà vue est instantané.
+- ↑ ↓ passent à la ligne voisine **dans l'ordre affiché**, tri compris (`TableSortProvider` autour du tableau et
+  de la fiche) ; Échap ferme.
+- Chaque nombre, date et retard est calculé par le code.
+- Fiches sur ce modèle (24/11/2026) : `ContactSheet` (Réseau), `ContractSheet`, `CallSheet`. **Seulement pour un
+  enregistrement simple** : un artiste, un titre, une maquette, une session studio et un projet gardent leur page,
+  « trop complexes pour une seule modale » (Sacha, 24/11/2026 ; essayé puis retiré le même jour).
+- Briques communes (deuxième fiche : `ContractSheet`, 24/11/2026) : `components/ui/record-sheet.tsx` (`SheetBlock`,
+  `SheetLine`, `SheetLines`, `SheetSummaryCard`), `record-sheet-blocks.tsx` (`SheetPeopleBlock`, `SheetLinkedBlock`),
+  `use-record-sheet-data.ts` (lecture à l'ouverture, gardée par enregistrement), `components/invoices/
+  invoices-sheet-block.tsx` (`InvoicesSheetBlock`, `loadSheetInvoices`). Une nouvelle fiche ne recopie aucun bloc.
+
 ### 6.8 Formulaires et gestes : le panneau de droite
 
 Dans Finance, **toute** modale s'ouvre en panneau à droite (`DialogSideProvider side="right"`), par-dessus la
 fiche d'où elle part : on reste où l'on est. Cible : `DialogSideProvider side="right"` posé **au niveau de la
 coquille de l'app**, donc `FormDialog`, `ConfirmDialog`, `DialogButton`, `LoadedFormButton` s'ouvrent à droite
-partout. Exceptions qui restent centrées (`side="center"`) : la recherche ⌘K, la visionneuse d'images, la
-présentation de première connexion, PO ouvert par Espace Espace.
+partout. Exceptions qui restent centrées (`side="center"`) : la recherche ⌘K, la visionneuse d'images, l'aperçu d'un
+fichier (`FilePreview`, en grand : `DESIGN.md` § 4), la présentation de première connexion, PO ouvert par Espace Espace.
 
 - Même dessin que la fiche (520 px, 12 px des bords, arrondi 8, sans ombre, voile sombre), contenu `p-6 gap-5`,
   croix en haut à droite.

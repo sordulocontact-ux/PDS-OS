@@ -15,7 +15,11 @@ import type { RecordRights } from "@/lib/archive/types";
 import { records } from "@/lib/i18n/fr/records";
 import { shell } from "@/lib/i18n/fr/shell";
 import { todayInParis } from "@/lib/insights/dates";
-import { optionsOfNames } from "@/lib/ui/filter-options";
+import {
+  filterParamOf,
+  filterValues,
+  optionsOfNames,
+} from "@/lib/ui/filter-options";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import {
   ADMIN_STATUSES,
@@ -24,23 +28,43 @@ import {
   PROJECT_VIEWS,
   draftMatches,
   isDraftProject,
+  type DueChoice,
   matchesFilters,
   type ProjectFilters,
   type ProjectView,
 } from "@/lib/projects/list-view";
-import { PROJECT_TYPES, type ProjectListItem } from "@/lib/projects/types";
+import {
+  PROJECT_TYPES,
+  type ProjectListItem,
+  type ProjectType,
+} from "@/lib/projects/types";
 
 const fr = { shell, records };
 
 const ANY = "any";
 const VIEW_PARAM = "vue";
 
+// The filters and their URL params; the search is `q`.
+const FILTER_PARAMS = {
+  type: "type",
+  artist: "artiste",
+  responsible: "responsable",
+  status: "statut",
+  due: "echeance",
+} as const;
+type FilterKey = keyof typeof FILTER_PARAMS;
+
+// The values of a param the list knows (a type, a status), the others left
+// out.
+const known = <V extends string>(values: string[], allowed: readonly V[]) =>
+  values.filter((v): v is V => (allowed as readonly string[]).includes(v));
+
 /**
  * The Projects page's list (PROJ-UX-01): Tous | Brouillons | Actifs |
  * Archivés with counts that are exactly the rows shown, then one line
- * (Figma 90:4972): a search over project, artist and responsible, Artiste,
- * Type and Responsable as selects, Statut and Échéance behind the filter
- * button; all combine. The tab and the filters stay in the URL; the archive stays the
+ * (Figma 90:4972): a search over project, artist and responsible, then
+ * the « Filtres » panel (Artiste, Type, Responsable, Statut, Échéance,
+ * several choices each); all combine. The tab and the filters stay in the URL; the archive stays the
  * server's (`?view=archived`).
  */
 export function ProjectsBrowser({
@@ -74,41 +98,32 @@ export function ProjectsBrowser({
       ? (initialView as ProjectView)
       : "all",
   );
-  const [filters, setFilters] = useState<ProjectFilters>(() => ({
-    ...NO_FILTERS,
-    query: params.get("q") ?? "",
-    type: (PROJECT_TYPES as readonly string[]).includes(
-      params.get("type") ?? "",
-    )
-      ? (params.get("type") as ProjectFilters["type"])
-      : ANY,
-    artist: params.get("artiste") ?? ANY,
-    responsible: params.get("responsable") ?? ANY,
-    status: (ADMIN_STATUSES as readonly string[]).includes(
-      params.get("statut") ?? "",
-    )
-      ? (params.get("statut") as ProjectFilters["status"])
-      : ANY,
-    due: (DUE_FILTERS as readonly string[]).includes(
-      params.get("echeance") ?? "",
-    )
-      ? (params.get("echeance") as ProjectFilters["due"])
-      : ANY,
-  }));
+  const [filters, setFilters] = useState<ProjectFilters>(() => {
+    const read = (key: FilterKey) =>
+      filterValues(params.get(FILTER_PARAMS[key]));
+    return {
+      query: params.get("q") ?? "",
+      type: known<ProjectType>(read("type"), PROJECT_TYPES),
+      artist: read("artist"),
+      responsible: read("responsible"),
+      status: known(read("status"), ADMIN_STATUSES),
+      due: known<DueChoice>(
+        read("due"),
+        DUE_FILTERS.filter((d): d is DueChoice => d !== ANY),
+      ),
+    };
+  });
 
   // The URL says the tab and the filters (shared, back button), without a
   // new request: the list is already here.
   const sync = (nextView: ProjectView, next: ProjectFilters) => {
     const query = new URLSearchParams(params.toString());
-    const set = (key: string, value: string, empty: string) =>
-      value && value !== empty ? query.set(key, value) : query.delete(key);
-    set(VIEW_PARAM, nextView, "all");
-    set("q", next.query.trim(), "");
-    set("type", next.type, ANY);
-    set("artiste", next.artist, ANY);
-    set("responsable", next.responsible, ANY);
-    set("statut", next.status, ANY);
-    set("echeance", next.due, ANY);
+    const set = (key: string, value: string | null) =>
+      value ? query.set(key, value) : query.delete(key);
+    set(VIEW_PARAM, nextView === "all" ? null : nextView);
+    set("q", next.query.trim() || null);
+    for (const key of Object.keys(FILTER_PARAMS) as FilterKey[])
+      set(FILTER_PARAMS[key], filterParamOf(next[key]));
     const text = query.toString();
     window.history.replaceState(
       null,
@@ -187,9 +202,8 @@ export function ProjectsBrowser({
         ]),
   ];
 
-  // ANY in the state is "no filter" in the bar.
   const control = (
-    key: keyof Omit<ProjectFilters, "query">,
+    key: FilterKey,
     label: string,
     allLabel: string,
     options: [string, string][],
@@ -198,12 +212,10 @@ export function ProjectsBrowser({
     label,
     allLabel,
     options: options.map(([value, text]) => ({ value, label: text })),
-    value: filters[key] === ANY ? null : filters[key],
-    onChange: (value) =>
-      change({ [key]: value ?? ANY } as Partial<ProjectFilters>),
+    values: filters[key],
+    onChange: (values) => change({ [key]: values } as Partial<ProjectFilters>),
   });
-  // Artiste, Type, Responsable on the line; Statut and Échéance behind the
-  // filter button (Sacha 29/10).
+  // Five axes: all of them in the « Filtres » panel (Sacha 24/11/2026).
   const artists = optionsOfNames(projects.map((p) => p.artistName));
   const controls = [
     control(

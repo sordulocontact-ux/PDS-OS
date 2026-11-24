@@ -16,7 +16,7 @@ import { DEMO_STATUSES, demoStatusOf } from "@/lib/catalog/demo-rules";
 import { listMasters } from "@/lib/catalog/queries";
 import { countTitleViews } from "@/lib/catalog/title-views";
 import { fr } from "@/lib/i18n/fr";
-import { filterParam } from "@/lib/ui/filter-options";
+import { filterValues } from "@/lib/ui/filter-options";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
@@ -38,9 +38,15 @@ export default async function DemosPage({
       searchParams,
     ]);
   const t = fr.demos;
-  const status = demoStatusOf(filterParam(params.statut));
+  // Several statuses: any of them.
+  const statuses = filterValues(params.statut).flatMap(
+    (value) => demoStatusOf(value) ?? [],
+  );
   const active = demos.filter((d) => d.demoStatus !== "abandoned");
-  const rows = status ? demos.filter((d) => d.demoStatus === status) : active;
+  const rows =
+    statuses.length > 0
+      ? demos.filter((d) => d.demoStatus && statuses.includes(d.demoStatus))
+      : active;
   const newDemo = can(access, "manage_catalog") ? (
     <Link href={routes.demosNew} className={buttonVariants({ size: "lg" })}>
       <ButtonRoll>
@@ -93,7 +99,7 @@ export default async function DemosPage({
                         value,
                         label: t.statuses[value],
                       })),
-                      current: status,
+                      current: statuses,
                     },
                   ]}
                 />

@@ -101,11 +101,14 @@ export function dealMailSetup(dealId: string): {
 }
 
 /** To whom the validated memo goes back by default: the address that sent
- * the latest memo received, else the counterpart's address in the Réseau
- * (read only by whoever may), else nobody known. */
+ * the latest memo received, else the counterpart's address in the Réseau;
+ * a music deal has none (Sacha 24/11/2026: « ça doit être pré-rempli »),
+ * then the deal's contacts, the artist's manager, the artist's own Réseau
+ * contact, the first with an address. Each read only by whoever may (a
+ * private contact's address stays hidden); else nobody known. */
 export async function memoReplyTo(
   latestFrom: string | null,
-  counterpartId: string | null,
+  deal: { id: string; counterpartId: string | null; artistId: string | null },
 ): Promise<{
   name: string;
   email: string;
@@ -113,9 +116,38 @@ export async function memoReplyTo(
 } | null> {
   if (latestFrom)
     return { name: latestFrom, email: latestFrom, source: "email" };
-  if (!counterpartId) return null;
-  const contact = await contactAddressOf(await createClient(), counterpartId);
-  return contact?.email
-    ? { name: contact.name, email: contact.email, source: "network" }
-    : null;
+  const supabase = await createClient();
+  const [contacts, managers, artist] = await Promise.all([
+    supabase
+      .from("deal_contacts")
+      .select("contact_id")
+      .eq("deal_id", deal.id)
+      .order("created_at"),
+    deal.artistId
+      ? supabase
+          .from("artist_contacts")
+          .select("contact_id")
+          .eq("artist_id", deal.artistId)
+          .eq("role", "manager")
+      : null,
+    deal.artistId
+      ? supabase
+          .from("network_contacts")
+          .select("id")
+          .eq("artist_id", deal.artistId)
+          .is("archived_at", null)
+      : null,
+  ]);
+  const candidates = [
+    deal.counterpartId,
+    ...(contacts.data ?? []).map((row) => row.contact_id),
+    ...(managers?.data ?? []).map((row) => row.contact_id),
+    ...(artist?.data ?? []).map((row) => row.id),
+  ].filter((id): id is string => Boolean(id));
+  for (const id of new Set(candidates)) {
+    const contact = await contactAddressOf(supabase, id);
+    if (contact?.email)
+      return { name: contact.name, email: contact.email, source: "network" };
+  }
+  return null;
 }

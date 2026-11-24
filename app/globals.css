@@ -114,6 +114,9 @@
   --tone-warning-fg: #6e4300;
   --tone-success-bg: #daf3e2;
   --tone-success-fg: #0d5226;
+  /* The dot of a success state (« Signé », « Payée »): vivid, the text
+     keeps --tone-success-fg (Sacha 24/11/2026, « pas assez puissant »). */
+  --tone-success-dot: #16a34a;
   --tone-danger-bg: #fce1df;
   --tone-danger-fg: #9a1b1b;
   /* Réservé à l'action qui attend précisément la personne connectée (valider
@@ -147,6 +150,12 @@
   --hue-sand-fg: #5c4630;
   --hue-slate-bg: #e4e8ee;
   --hue-slate-fg: #334155;
+  /* Rouge et vert : types de fichier seulement (PDF, tableur, comme dans tout
+     gestionnaire de fichiers), jamais une catégorie qu'on lirait comme un état. */
+  --hue-red-bg: #fbe3e0;
+  --hue-red-fg: #a3241c;
+  --hue-green-bg: #dcf1e2;
+  --hue-green-fg: #17603a;
 
   /* --- Sélection (DESIGN.md § 3 bis) : l'accent unique de ce qui est choisi
      ou actif (focus, champ en saisie, radio, case cochée, carte de choix).
@@ -479,6 +488,7 @@
   --tone-warning-fg: #f5c869;
   --tone-success-bg: #0f2e1c;
   --tone-success-fg: #7fdca0;
+  --tone-success-dot: #22c55e;
   --tone-danger-bg: #3a1616;
   --tone-danger-fg: #ff9b94;
   --tone-action-bg: #262626;
@@ -505,6 +515,10 @@
   --hue-sand-fg: #d8c3a5;
   --hue-slate-bg: #222831;
   --hue-slate-fg: #b6c2d2;
+  --hue-red-bg: #3b1814;
+  --hue-red-fg: #f7a399;
+  --hue-green-bg: #102f1e;
+  --hue-green-fg: #88d8a8;
 
   /* --- Sélection : le bleu de Sacha éclairci pour garder 3:1 sur le noir -- */
   --selection: #3b7bff;
@@ -1490,7 +1504,7 @@ button[data-busy]::before {
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
   [data-slot="status-badge"][data-tone="success"] {
-  --state-dot: var(--tone-success-fg);
+  --state-dot: var(--tone-success-dot);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
   [data-slot="status-badge"][data-tone="action"] {

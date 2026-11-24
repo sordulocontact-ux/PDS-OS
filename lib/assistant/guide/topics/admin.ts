@@ -144,6 +144,11 @@ export const adminTopics: GuideTopic[] = [
       "sombre",
       "lecture seule",
       "interdit",
+      "trier",
+      "tri",
+      "colonne",
+      "filtre",
+      "filtrer",
     ],
     where: "Valable dans toute l'application.",
     facts: [
@@ -155,6 +160,9 @@ export const adminTopics: GuideTopic[] = [
       "Les états (en cours, en retard, terminé), compteurs, dates et calculs sont toujours faits par le code, jamais par PO.",
       "PO peut préparer un brouillon qui ouvre le vrai formulaire pré-rempli : c'est toujours une personne qui enregistre. PO ne valide, ne signe et ne transmet jamais à la place de quelqu'un.",
       "Le thème de l'interface peut être Clair, Sombre ou suivre l'ordinateur.",
+      "Dans les listes du Réseau, des Contrats et des Calls, cliquer sur un nom ouvre sa fiche à droite sans quitter la liste : l'essentiel en tête, ce qui s'y rattache replié sous des nombres (parties, fichiers, participants…), et l'icône « Ouvrir » vers sa page complète. Un artiste, un titre, une maquette ou une session studio s'ouvre sur sa page. Les flèches ↑ ↓ du clavier passent à la ligne voisine dans l'ordre du tableau.",
+      "Dans un tableau d'au moins 3 lignes, un clic sur le titre d'une colonne trie les lignes dans l'ordre croissant, un deuxième dans l'ordre décroissant, un troisième remet l'ordre de départ. Les cases vides restent en bas. Le tri tient pendant la recherche et les filtres, et s'efface en quittant la page.",
+      "Les filtres d'une liste sont à côté de sa recherche. Jusqu'à 3 filtres, chacun est une liste déroulante où l'on choisit une valeur. Au-delà, un seul bouton « Filtres » ouvre un panneau de cases à cocher : on peut cocher plusieurs valeurs d'un même filtre (une ligne en garde une au moins) et combiner les filtres (une ligne doit les satisfaire tous). « Effacer les filtres » remet la liste entière. Les filtres restent dans l'adresse de la page.",
     ],
     faq: [
       {

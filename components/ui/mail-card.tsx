@@ -71,6 +71,8 @@ export function MailCard({
     value: MailEnvelope;
     onChange: (next: MailEnvelope) => void;
     tried: boolean;
+    // Who an address stands for, when the caller knows (MailEnvelopeRows).
+    known?: Record<string, string>;
   };
 }) {
   const t = fr.mail;

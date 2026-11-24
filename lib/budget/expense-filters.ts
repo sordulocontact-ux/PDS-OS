@@ -6,26 +6,31 @@ import type { Expense } from "@/lib/budget/expenses-queries";
 import { BUDGET_FAMILIES } from "@/lib/budget/types";
 import { budget } from "@/lib/i18n/fr/budget";
 import { expenses } from "@/lib/i18n/fr/expenses";
-import { filterParam, optionsOfNames } from "@/lib/ui/filter-options";
+import {
+  filterValues,
+  matchesAny,
+  optionsOfNames,
+} from "@/lib/ui/filter-options";
 
+// Several values per axis (the « Filtres » panel): any of them.
 export type ExpenseFilters = {
-  artist: string | null;
-  project: string | null;
-  poste: string | null;
-  person: string | null;
+  artist: string[];
+  project: string[];
+  poste: string[];
+  person: string[];
   // « AAAA-MM »
-  mois: string | null;
+  mois: string[];
 };
 
 export function expenseFiltersOf(
   params: Record<string, string | string[] | undefined>,
 ): ExpenseFilters {
   return {
-    artist: filterParam(params.artist),
-    project: filterParam(params.project),
-    poste: filterParam(params.poste),
-    person: filterParam(params.person),
-    mois: filterParam(params.mois),
+    artist: filterValues(params.artist),
+    project: filterValues(params.project),
+    poste: filterValues(params.poste),
+    person: filterValues(params.person),
+    mois: filterValues(params.mois),
   };
 }
 
@@ -35,11 +40,11 @@ const monthOf = (e: Expense) => e.spentOn.slice(0, 7);
 
 export function matchesExpense(e: Expense, f: ExpenseFilters): boolean {
   return (
-    (!f.artist || e.artistName === f.artist) &&
-    (!f.project || projectOf(e) === f.project) &&
-    (!f.poste || e.family === f.poste) &&
-    (!f.person || e.authorName === f.person) &&
-    (!f.mois || monthOf(e) === f.mois)
+    matchesAny(f.artist, e.artistName) &&
+    matchesAny(f.project, projectOf(e)) &&
+    matchesAny(f.poste, e.family) &&
+    matchesAny(f.person, e.authorName) &&
+    matchesAny(f.mois, monthOf(e))
   );
 }
 

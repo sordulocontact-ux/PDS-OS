@@ -4,6 +4,19 @@ import { callPage } from "./calls-page";
 import { microphoneErrors } from "./microphone";
 
 export const calls = {
+  // The side sheet of a call, from the list (the Réseau's model,
+  // docs/STYLE-FINANCE-PARTOUT.md § 6.7 bis, Sacha 24/11/2026).
+  sheet: {
+    expand: "Ouvrir le call",
+    loadFailed: "Le détail de ce call n'a pas pu être chargé.",
+    lines: {
+      agenda: "Ordre du jour",
+      team: "Équipe",
+      guests: "Invités",
+    },
+    minutes: (n: number) => `${n} min`,
+    report: "Compte rendu",
+  },
   schedule,
   calendar,
   // « Modifier le call » (Sacha 21/11/2026): the call form, filled.

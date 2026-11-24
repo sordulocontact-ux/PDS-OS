@@ -98,7 +98,7 @@ export async function DealMemoSections({
   const latestFrom = memos.find((m) => m.email)?.email?.from ?? null;
   const replyTo =
     canWrite && memos[0]?.status === "validated" && !memos[0].sent
-      ? await memoReplyTo(latestFrom, deal.counterpartId)
+      ? await memoReplyTo(latestFrom, deal)
       : null;
   const validated = memos.find((m) => m.status === "validated") ?? null;
   const checks =

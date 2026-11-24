@@ -234,11 +234,6 @@ export const treasury = {
       total: "Montant TTC",
     },
     // The days under a due day, computed by the code from today.
-    dueIn: {
-      ago: (days: number) => `il y a ${days} j`,
-      ahead: (days: number) => `dans ${days} j`,
-      today: "aujourd'hui",
-    },
     chase: {
       last: (day: string) => `Dernière le ${day}`,
       never: "Jamais",

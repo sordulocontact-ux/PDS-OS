@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { SessionPageView } from "@/components/sessions/session-page/session-page";
-import { sessionName } from "@/components/sessions/sessions-table";
+import { sessionName } from "@/components/sessions/session-format";
 import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { getMaster } from "@/lib/catalog/queries";

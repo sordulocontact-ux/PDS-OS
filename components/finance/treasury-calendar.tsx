@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { SideSheet } from "@/components/ui/side-sheet";
+import { TableSortProvider } from "@/components/ui/table-sort";
 import {
   MoveRecord,
   type MoveRecordData,
@@ -76,125 +77,130 @@ export function TreasuryCalendar({
 
   return (
     <PageSection id="finance-calendar" title={t.title}>
-      {events.length === 0 ? (
-        <EmptyNote>{t.empty}</EmptyNote>
-      ) : (
-        <DataTable framed>
-          <DataTableHeader>
-            <DataTableHead className="w-24">{t.date}</DataTableHead>
-            <DataTableHead fill>{t.operation}</DataTableHead>
-            <DataTableHead hideBelow="lg">{t.source}</DataTableHead>
-            <DataTableHead hideBelow="md">{t.nature}</DataTableHead>
-            <DataTableHead align="end" className="w-auto sm:w-48">
-              {t.amount}
-            </DataTableHead>
-            <DataTableHead hideBelow="sm" align="end">
-              {t.balance}
-            </DataTableHead>
-          </DataTableHeader>
-          <DataTableBody>
-            {events.map((e, index) => {
-              const source =
-                (e.projectId && names.get(e.projectId)) ||
-                (e.artistId && names.get(e.artistId)) ||
-                EMPTY_CELL;
-              const badge =
-                e.source.kind === "income"
-                  ? {
-                      tone: incomeStateTone[e.dueOn ? "late" : e.source.state],
-                      label: states.states[e.dueOn ? "late" : e.source.state],
-                    }
-                  : e.source.kind === "engine"
+      {/* One sort for the table and its sheet: ↑ ↓ follow the rows. */}
+      <TableSortProvider>
+        {events.length === 0 ? (
+          <EmptyNote>{t.empty}</EmptyNote>
+        ) : (
+          <DataTable framed>
+            <DataTableHeader>
+              <DataTableHead className="w-24">{t.date}</DataTableHead>
+              <DataTableHead fill>{t.operation}</DataTableHead>
+              <DataTableHead hideBelow="lg">{t.source}</DataTableHead>
+              <DataTableHead hideBelow="md">{t.nature}</DataTableHead>
+              <DataTableHead align="end" className="w-auto sm:w-48">
+                {t.amount}
+              </DataTableHead>
+              <DataTableHead hideBelow="sm" align="end">
+                {t.balance}
+              </DataTableHead>
+            </DataTableHeader>
+            <DataTableBody>
+              {events.map((e, index) => {
+                const source =
+                  (e.projectId && names.get(e.projectId)) ||
+                  (e.artistId && names.get(e.artistId)) ||
+                  EMPTY_CELL;
+                const badge =
+                  e.source.kind === "income"
                     ? {
-                        tone: "neutral" as const,
-                        label: states.states.expected,
+                        tone: incomeStateTone[
+                          e.dueOn ? "late" : e.source.state
+                        ],
+                        label: states.states[e.dueOn ? "late" : e.source.state],
                       }
-                    : {
-                        tone: spendCashTone[e.source.status],
-                        label: states.spendStates[e.source.status],
-                      };
-              return (
-                <DataTableRow key={e.key}>
-                  <DataTableCell className="w-24 tabular-nums">
-                    {short(e.day)}
-                  </DataTableCell>
-                  <DataTableCell fill>
-                    <DataTableMedia
-                      title={
-                        <DataTableLink
-                          href={null}
-                          onOpen={() => setSheet(index)}
-                        >
-                          {e.label}
-                        </DataTableLink>
-                      }
-                      subtitle={
-                        <>
-                          {[e.direction === "in" ? t.in : t.out, typeOf(e)]
-                            .filter(Boolean)
-                            .join(" · ")}
-                          {e.dueOn && (
-                            <span className="text-[color:var(--error)]">
-                              {" · "}
-                              {t.late(short(e.dueOn))}
-                            </span>
-                          )}
-                        </>
-                      }
-                    />
-                  </DataTableCell>
-                  <DataTableCell
-                    hideBelow="lg"
-                    className="text-[color:var(--text-secondary)]"
-                  >
-                    <span className="truncate">{source}</span>
-                  </DataTableCell>
-                  <DataTableCell hideBelow="md">
-                    <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
-                  </DataTableCell>
-                  <DataTableCell align="end" className="w-auto sm:w-48">
-                    <SignedAmount event={e} />
-                  </DataTableCell>
-                  <DataTableCell
-                    hideBelow="sm"
-                    align="end"
-                    className={cn(
-                      "tabular-nums",
-                      e.balanceCents < reserveCents &&
-                        "text-[color:var(--tone-warning-fg)]",
-                    )}
-                  >
-                    {formatAmount(e.balanceCents, { ht: false })}
-                  </DataTableCell>
-                </DataTableRow>
-              );
-            })}
-          </DataTableBody>
-        </DataTable>
-      )}
-      {open && sheet !== null && (
-        <SideSheet
-          open
-          onClose={() => setSheet(null)}
-          title={open.label}
-          index={sheet}
-          total={events.length}
-          onMove={setSheet}
-        >
-          <MoveRecord
-            move={{
-              target: targetOfEvent(open.source),
-              label: open.label,
-              direction: open.direction,
-              cents: open.cents,
-              eyebrow: [open.direction === "in" ? t.in : t.out, typeOf(open)]
-                .filter(Boolean)
-                .join(" · "),
-            }}
-            data={data}
-          />
-        </SideSheet>
-      )}
+                    : e.source.kind === "engine"
+                      ? {
+                          tone: "neutral" as const,
+                          label: states.states.expected,
+                        }
+                      : {
+                          tone: spendCashTone[e.source.status],
+                          label: states.spendStates[e.source.status],
+                        };
+                return (
+                  <DataTableRow key={e.key}>
+                    <DataTableCell className="w-24 tabular-nums">
+                      {short(e.day)}
+                    </DataTableCell>
+                    <DataTableCell fill>
+                      <DataTableMedia
+                        title={
+                          <DataTableLink
+                            href={null}
+                            onOpen={() => setSheet(index)}
+                          >
+                            {e.label}
+                          </DataTableLink>
+                        }
+                        subtitle={
+                          <>
+                            {[e.direction === "in" ? t.in : t.out, typeOf(e)]
+                              .filter(Boolean)
+                              .join(" · ")}
+                            {e.dueOn && (
+                              <span className="text-[color:var(--error)]">
+                                {" · "}
+                                {t.late(short(e.dueOn))}
+                              </span>
+                            )}
+                          </>
+                        }
+                      />
+                    </DataTableCell>
+                    <DataTableCell
+                      hideBelow="lg"
+                      className="text-[color:var(--text-secondary)]"
+                    >
+                      <span className="truncate">{source}</span>
+                    </DataTableCell>
+                    <DataTableCell hideBelow="md">
+                      <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+                    </DataTableCell>
+                    <DataTableCell align="end" className="w-auto sm:w-48">
+                      <SignedAmount event={e} />
+                    </DataTableCell>
+                    <DataTableCell
+                      hideBelow="sm"
+                      align="end"
+                      className={cn(
+                        "tabular-nums",
+                        e.balanceCents < reserveCents &&
+                          "text-[color:var(--tone-warning-fg)]",
+                      )}
+                    >
+                      {formatAmount(e.balanceCents, { ht: false })}
+                    </DataTableCell>
+                  </DataTableRow>
+                );
+              })}
+            </DataTableBody>
+          </DataTable>
+        )}
+        {open && sheet !== null && (
+          <SideSheet
+            open
+            onClose={() => setSheet(null)}
+            title={open.label}
+            index={sheet}
+            total={events.length}
+            onMove={setSheet}
+          >
+            <MoveRecord
+              move={{
+                target: targetOfEvent(open.source),
+                label: open.label,
+                direction: open.direction,
+                cents: open.cents,
+                eyebrow: [open.direction === "in" ? t.in : t.out, typeOf(open)]
+                  .filter(Boolean)
+                  .join(" · "),
+              }}
+              data={data}
+            />
+          </SideSheet>
+        )}
+      </TableSortProvider>
     </PageSection>
   );
 }

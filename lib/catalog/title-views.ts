@@ -7,6 +7,7 @@
 
 import { AUDIO_STATES, isAudioState } from "@/lib/catalog/title-rules";
 import type { AudioState } from "@/lib/catalog/title-rules";
+import { filterValues, matchesAny, matchesSome } from "@/lib/ui/filter-options";
 
 export const TITLE_VIEWS = [
   "all",
@@ -69,14 +70,19 @@ export function countTitleViews(
 export const AUDIO_FILTERS = ["none", ...AUDIO_STATES] as const;
 export type AudioFilter = (typeof AUDIO_FILTERS)[number];
 
-export function audioFilterOf(param: unknown): AudioFilter | null {
-  return param === "none" || isAudioState(param) ? param : null;
+/** The audio steps of `?audio=` (several: any of them), unknown ones left
+ * out. */
+export function audioFiltersOf(param: unknown): AudioFilter[] {
+  return filterValues(param).filter(
+    (value): value is AudioFilter => value === "none" || isAudioState(value),
+  );
 }
 
+// Several values per axis (the « Filtres » panel): any of them.
 export type TitleFilters = {
-  audio: AudioFilter | null;
-  artist: string | null;
-  project: string | null;
+  audio: AudioFilter[];
+  artist: string[];
+  project: string[];
 };
 
 type Filtered = {
@@ -89,19 +95,15 @@ export function matchesTitleFilters(
   title: Filtered,
   filters: TitleFilters,
 ): boolean {
-  if (filters.audio !== null) {
-    const state = title.audioState ?? "none";
-    if (state !== filters.audio) return false;
-  }
-  if (
-    filters.artist !== null &&
-    !title.credited.some((a) => a.id === filters.artist)
-  )
-    return false;
-  if (
-    filters.project !== null &&
-    !title.projects.some((p) => p.id === filters.project)
-  )
-    return false;
-  return true;
+  return (
+    matchesAny(filters.audio, title.audioState ?? "none") &&
+    matchesSome(
+      filters.artist,
+      title.credited.map((a) => a.id),
+    ) &&
+    matchesSome(
+      filters.project,
+      title.projects.map((p) => p.id),
+    )
+  );
 }

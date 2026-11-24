@@ -136,6 +136,7 @@ export function StandingGoals({
                 {[...budget.rows, budget.total].map((r, i) => (
                   <DataTableRow
                     key={r.activationId ?? `${r.title}-${i}`}
+                    pinned={i === budget.rows.length}
                     className={
                       i === budget.rows.length ? "font-semibold" : undefined
                     }

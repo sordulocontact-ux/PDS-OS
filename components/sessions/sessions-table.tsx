@@ -1,3 +1,8 @@
+import {
+  sessionDuration,
+  sessionHours,
+  sessionName,
+} from "@/components/sessions/session-format";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   DataTable,
@@ -7,6 +12,7 @@ import {
   DataTableHeader,
   DataTableLink,
   DataTableRow,
+  DataTableText,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { masterPage } from "@/lib/i18n/fr/master-page";
@@ -22,36 +28,6 @@ const fr = { masterPage, sessions };
 const secondary = "text-[color:var(--text-secondary)]";
 const sub =
   "block text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]";
-
-/** « Enregistrement · Studio Ferber », the name of a session in a list. */
-export function sessionName(
-  session: Pick<StudioSessionRow, "kind" | "studio">,
-): string {
-  return [fr.masterPage.sessions.kinds[session.kind], session.studio]
-    .filter(Boolean)
-    .join(" · ");
-}
-
-const minutesOf = (hm: string) =>
-  Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
-
-/** « 4 h 18 » when both hours are known, else nothing. */
-export function sessionDuration(
-  session: Pick<StudioSessionRow, "startsAt" | "endsAt">,
-): string | null {
-  if (!session.startsAt || !session.endsAt) return null;
-  const minutes = minutesOf(session.endsAt) - minutesOf(session.startsAt);
-  return minutes > 0 ? fr.sessions.duration(minutes) : null;
-}
-
-/** « 14:00 – 18:00 », or nothing. */
-export function sessionHours(
-  session: Pick<StudioSessionRow, "startsAt" | "endsAt">,
-): string | null {
-  return session.startsAt || session.endsAt
-    ? fr.sessions.page.hours(session.startsAt, session.endsAt)
-    : null;
-}
 
 /**
  * The sessions list (the menu's page, an artist's tab, a project's section):
@@ -92,14 +68,23 @@ export function SessionsTable({
             .join(" · ");
           return (
             <DataTableRow key={session.id}>
-              <DataTableCell className="tabular-nums">
+              <DataTableCell sort={session.date ?? ""}>
                 <span className="block">
-                  <span className="block whitespace-nowrap">
+                  {/* The figures' typeface on figures only, never on
+                      « Sans date ». */}
+                  <span
+                    className={cn(
+                      "block whitespace-nowrap",
+                      session.date && "tabular-nums",
+                    )}
+                  >
                     {session.date
                       ? formatShortDate(session.date)
                       : fr.sessions.noDate}
                   </span>
-                  {hours && <span className={sub}>{hours}</span>}
+                  {hours && (
+                    <span className={cn(sub, "tabular-nums")}>{hours}</span>
+                  )}
                 </span>
               </DataTableCell>
               <DataTableCell>
@@ -111,19 +96,24 @@ export function SessionsTable({
                 </span>
               </DataTableCell>
               {hide !== "artists" && (
-                <DataTableCell hideBelow="sm" className="break-words">
-                  {session.artists.map((a) => a.name).join(", ") || (
+                <DataTableCell hideBelow="sm">
+                  {session.artists.length > 0 ? (
+                    <DataTableText>
+                      {session.artists.map((a) => a.name).join(", ")}
+                    </DataTableText>
+                  ) : (
                     <span className={secondary}>{EMPTY_CELL}</span>
                   )}
                 </DataTableCell>
               )}
               {hide !== "projects" && (
-                <DataTableCell
-                  hideBelow="lg"
-                  className={cn("break-words", secondary)}
-                >
-                  {session.projects.map((p) => p.name).join(", ") || (
-                    <span className={secondary}>{EMPTY_CELL}</span>
+                <DataTableCell hideBelow="lg" className={secondary}>
+                  {session.projects.length > 0 ? (
+                    <DataTableText>
+                      {session.projects.map((p) => p.name).join(", ")}
+                    </DataTableText>
+                  ) : (
+                    EMPTY_CELL
                   )}
                 </DataTableCell>
               )}

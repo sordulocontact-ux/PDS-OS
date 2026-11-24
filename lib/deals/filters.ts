@@ -4,7 +4,11 @@
 import type { UrlFilterGroup } from "@/components/ui/url-filters";
 import { isClosedStage, type Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
-import { filterParam, optionsOfNames } from "@/lib/ui/filter-options";
+import {
+  filterValues,
+  matchesAny,
+  optionsOfNames,
+} from "@/lib/ui/filter-options";
 
 /** One list, four views (never three lists Opportunités / Négociations /
  * Accords): the open deals, the ones to follow up, signed, abandoned. */
@@ -29,26 +33,27 @@ export function inDealView(deal: Deal, view: DealView, today: string) {
   return !isClosedStage(deal.stage);
 }
 
+// Several values per axis (the « Filtres » panel): any of them.
 export type DealFilters = {
-  etape: string | null;
-  negociateur: string | null;
-  projet: string | null;
+  etape: string[];
+  negociateur: string[];
+  projet: string[];
 };
 
 export function dealFiltersOf(
   params: Record<string, string | string[] | undefined>,
 ): DealFilters {
   return {
-    etape: filterParam(params.etape),
-    negociateur: filterParam(params.negociateur),
-    projet: filterParam(params.projet),
+    etape: filterValues(params.etape),
+    negociateur: filterValues(params.negociateur),
+    projet: filterValues(params.projet),
   };
 }
 
 export const matchesDeal = (d: Deal, f: DealFilters) =>
-  (!f.etape || d.stage === f.etape) &&
-  (!f.negociateur || d.assignee?.name === f.negociateur) &&
-  (!f.projet || d.projectTitle === f.projet);
+  matchesAny(f.etape, d.stage) &&
+  matchesAny(f.negociateur, d.assignee?.name) &&
+  matchesAny(f.projet, d.projectTitle);
 
 /** Only what some deal of the tab holds. */
 export function dealFilterGroups(

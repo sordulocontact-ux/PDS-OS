@@ -14,6 +14,7 @@ import {
   DataTableHeader,
   DataTableLink,
   DataTableRow,
+  DataTableText,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import {
@@ -28,7 +29,6 @@ import { records } from "@/lib/i18n/fr/records";
 import { shell } from "@/lib/i18n/fr/shell";
 import { adminStatus } from "@/lib/projects/list-view";
 import { formatShortDate } from "@/lib/release/format";
-import { cn } from "@/lib/utils";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
 import {
@@ -68,6 +68,9 @@ export function ProjectsTable({
   const canSelectProjects = selectable && Boolean(rights?.canArchive);
   const withSelection = canSelectProjects || (selectable && drafts.length > 0);
   const selection = fr.records.selection;
+  // Covers only when one at least has one: the same grey disc on every row
+  // says nothing (Sacha 24/11/2026), and the names stay aligned otherwise.
+  const withCovers = projects.some((project) => project.coverUrl);
 
   const table = (
     <DataTable>
@@ -100,7 +103,12 @@ export function ProjectsTable({
               )}
               <DataTableCell>
                 <span className="flex min-w-0 items-center gap-3">
-                  <ReleaseCover coverUrl={null} className="size-9 rounded-md" />
+                  {withCovers && (
+                    <ReleaseCover
+                      coverUrl={null}
+                      className="size-9 rounded-md"
+                    />
+                  )}
                   <DataTableLink
                     href={`${routes.projectsNew}?draft=${draft.id}`}
                   >
@@ -158,10 +166,12 @@ export function ProjectsTable({
                 {/* Its cover next to its name (Sacha, 10/11/2026); none = the
                     Catalogue's disc on grey, not the overview's coloured visual. */}
                 <span className="flex min-w-0 items-center gap-3">
-                  <ReleaseCover
-                    coverUrl={project.coverUrl ?? null}
-                    className="size-9 rounded-md"
-                  />
+                  {withCovers && (
+                    <ReleaseCover
+                      coverUrl={project.coverUrl ?? null}
+                      className="size-9 rounded-md"
+                    />
+                  )}
                   <DataTableLink
                     href={rights?.archived ? null : routes.project(project.id)}
                   >
@@ -172,12 +182,18 @@ export function ProjectsTable({
               {/* Its own column (Sacha 29/10), no longer under the name. */}
               <DataTableCell hideBelow="md">
                 {(project.type === "music_release" || project.collective) &&
-                project.artistName
-                  ? project.artistName
-                  : EMPTY_CELL}
+                project.artistName ? (
+                  <DataTableText>{project.artistName}</DataTableText>
+                ) : (
+                  EMPTY_CELL
+                )}
               </DataTableCell>
               <DataTableCell hideBelow="xl">
-                {project.responsibleName ?? EMPTY_CELL}
+                {project.responsibleName ? (
+                  <DataTableText>{project.responsibleName}</DataTableText>
+                ) : (
+                  EMPTY_CELL
+                )}
               </DataTableCell>
               <DataTableCell hideBelow="2xl">
                 <ProjectKindBadge
@@ -187,10 +203,13 @@ export function ProjectsTable({
               </DataTableCell>
               <DataTableCell
                 hideBelow="sm"
-                className={cn(
-                  "tabular-nums",
-                  !project.dueDate && "text-[color:var(--text-secondary)]",
-                )}
+                // The figures' typeface on a date only, never on « Sans
+                // échéance ».
+                className={
+                  project.dueDate
+                    ? "tabular-nums"
+                    : "text-[color:var(--text-secondary)]"
+                }
               >
                 {project.dueDate ? formatShortDate(project.dueDate) : t.noDue}
               </DataTableCell>

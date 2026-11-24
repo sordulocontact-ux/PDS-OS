@@ -11,7 +11,6 @@ import {
 import { nowHeading } from "@/components/deals/now-classes";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { createDealMemo, validateDealMemo } from "@/lib/deals/memo-actions";
@@ -54,6 +53,10 @@ export type MemoStep = {
   // writes it.
   counterpart: string | null;
   director: boolean;
+  // Who negotiates the deal, when it is not the reader (the direction
+  // reads it): the memo to write is theirs, the direction may still write
+  // it (Sacha 24/11/2026).
+  negotiator: string | null;
   dealName: string;
   replyTo: MemoReplyTo | null;
   copies: string[];
@@ -104,14 +107,15 @@ export function DealMemoNow({
     (memo.file ? (
       <MemoFileButton file={memo.file} size="default" />
     ) : memo.pdf ? (
-      <PdfExportButton
-        href={memo.pdf.href}
-        fileName={memo.pdf.fileName}
-        label={t.openFile}
-        pendingLabel={t.pdf.pending}
-        failedLabel={t.pdf.failed}
-        variant="outline"
-        size="sm"
+      // Opened in the browser, beside its gesture and as tall (Sacha
+      // 24/11/2026: it downloaded, and was smaller).
+      <MemoFileButton
+        file={{
+          id: memo.id,
+          name: memo.pdf.fileName,
+          url: `${memo.pdf.href}?view=1`,
+        }}
+        size="default"
       />
     ) : null);
 
@@ -212,8 +216,10 @@ export function DealMemoNow({
       memo.changes,
     );
   } else if (memo?.changes && !memo.received) {
-    heading = t.now.rewrite;
-    gesture = writeButton("default");
+    heading = step.negotiator
+      ? t.now.waitingRewrite(step.negotiator)
+      : t.now.rewrite;
+    gesture = writeButton(step.negotiator ? "outline" : "default");
   } else if (who) {
     // Awaiting the label's memo, nothing to write here (Sacha 22/11/2026):
     // the PDF they sent, wherever it arrived (Sacha 23/11/2026); one sent
@@ -234,8 +240,10 @@ export function DealMemoNow({
       </>
     );
   } else {
-    heading = t.now.write;
-    gesture = writeButton("default");
+    heading = step.negotiator
+      ? t.now.waitingWrite(step.negotiator)
+      : t.now.write;
+    gesture = writeButton(step.negotiator ? "outline" : "default");
   }
 
   return (

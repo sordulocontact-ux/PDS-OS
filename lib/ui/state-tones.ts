@@ -1295,6 +1295,18 @@ export const dealTermTone = {
 
 /** A deal's stage (BIZ 4): running stages are info, the accord de principe
  * waits for the direction, signed is done, abandoned is set aside. */
+/** An invoice a Réseau contact sent PDS, in its side sheet (ContactSheet):
+ * awaited, to pay, late, paid. */
+export const contactInvoiceTone: Record<
+  "requested" | "to_pay" | "late" | "paid",
+  Tone
+> = {
+  requested: "neutral",
+  to_pay: "action",
+  late: overdueTone,
+  paid: "success",
+};
+
 export const dealStageTone = {
   to_contact: "neutral",
   call_planned: "info",

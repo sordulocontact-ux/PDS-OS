@@ -8105,7 +8105,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   pas (`deal_not_found`). On n'affecte qu'à un membre qui négocie (`assignee_cannot_negotiate`,
   `list_deal_negotiators`).
 - **Prochaine action** (texte, date) et **date de relance** par deal (`set_deal_next_action`) ; journal
-  `deal_events` (auteur, date, transition, motif, détail).
+  `deal_events` (auteur, date, transition, motif, détail). **Une seule date à l'écran** depuis le test UX du 24/11/2026
+  (`ux-tests/2026-11-24-deals-profils`) : « Me le rappeler le », écrite dans les deux colonnes ; le rappel part au plus
+  tôt des deux (`20261124170101_deal_reminder_on_next_action.sql`), donc aussi pour un deal qui n'a qu'un jour d'action
+  (créé avec une date, ou écrit avant).
 - **Contexte** : `read_deal_context(ids)` (SECURITY DEFINER, pour qui lit le deal) donne le nom du projet
   même à qui ne le voit pas (Glen ne voit aucun projet : nom sans lien), le titre et le statut de la
   participation et l'état de son contrat. **Aucun contact** (décision 5 du plan).
@@ -8146,7 +8149,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   l'existant, négociateur parmi les membres qui négocient (`loadNewDealOptions`).
 - **Notifications** (`20261111232101_deal_notifications.sql`, trigger sur `deal_events`) : `deal_assigned`
   (à l'affecté), `deal_agreement_proposed` (à la direction), `deal_agreement_validated` /
-  `deal_agreement_refused` (à l'affecté), `deal_follow_up_due` (à l'affecté, une fois par date, posée par
+  `deal_agreement_refused` (à l'affecté), `deal_follow_up_due` (« Rappel du jour », à l'affecté, une fois par date, posée par
   `flag_due_deal_follow_ups` dans le cron quotidien `/api/cron/detect-releases`, le même que les réserves
   de la Distribution). Ouvrent la page du deal ; push par `schedulePendingPushes()` après les gestes.
 - **PO** : sujet `deals` du guide (`topics/business.ts`), lecteur `deals` (`lib/assistant/read/deals.ts` :
@@ -8321,7 +8324,13 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     marquer signé ; un contrat en brouillon sans document, ni généré ni PDF déposé, demande d'abord « Déposer le
     contrat » : type `deposit` de `contractNowOf`, `ContractDepositButton`, le même dans Contrats) ; la section « Contrat » ouvre son PDF (dernier signé, sinon dernier projet) et garde ses gestes
     secondaires en icônes (ouvrir dans Contrats, changer, retirer le lien) ;
-    un contrat de participation est lancé par le chef de projet. « Prochaine action » et « Dans la boucle » côte à
+    un contrat de participation se prépare **depuis le deal** (Sacha, 24/11/2026 ; la règle « lancé par le chef de projet dans
+    le Juridique » n'avait aucune source) : `DealParticipationNow` montre l'état de sa ligne dans le Juridique du projet
+    (`loadParticipationStep` → `loadAgreements`, la personne = contact de la participation, sinon la fiche Réseau de
+    l'artiste) et ses gestes à elle, pour le responsable du projet qui a `manage_legal` (`canEditProject`) : « Prévoir le
+    contrat » (modèle proposé + rémunération, `saveAgreementFee`), « Ouvrir sa fiche », « Générer le contrat »
+    (`generateLegalContract`) ; un seul contrat, celui du Juridique. Les autres lecteurs voient qui doit agir, et tout
+    lecteur qui n'écrit pas le deal voit « En attente de … : … » à chaque étape (`waitLineOf`). « Prochaine action » et « Dans la boucle » côte à
     côte ; la boucle vide = une ligne discrète, pas un `EmptyNote`.
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Envoyer à valider », ex-« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,

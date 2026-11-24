@@ -122,7 +122,7 @@ export function BudgetParts({
             />
           ))}
           {((loose !== null && loose !== 0) || summary.looseLines > 0) && (
-            <DataTableRow>
+            <DataTableRow pinned>
               <DataTableCell fill>
                 <span className="truncate text-[color:var(--text-secondary)]">
                   {t.parts.outside}

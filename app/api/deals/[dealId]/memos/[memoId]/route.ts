@@ -9,9 +9,11 @@ import { htmlToPdf } from "@/lib/pdf/render";
 // Starting a browser and printing takes a few seconds, more on a cold start.
 export const maxDuration = 60;
 
-/** A deal memo as a PDF (BIZ 7), for whoever reads the deal (RLS). */
+/** A deal memo as a PDF (BIZ 7), for whoever reads the deal (RLS).
+ * `?view=1`: shown in the browser (« Ouvrir le PDF »), as a contract's;
+ * downloaded otherwise. */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: RouteContext<"/api/deals/[dealId]/memos/[memoId]">,
 ) {
   const access = await getAccess();
@@ -38,7 +40,7 @@ export async function GET(
     {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="deal-memo.pdf"; filename*=UTF-8''${encodeURIComponent(file)}`,
+        "Content-Disposition": `${new URL(request.url).searchParams.get("view") === "1" ? "inline" : "attachment"}; filename="deal-memo.pdf"; filename*=UTF-8''${encodeURIComponent(file)}`,
         "Cache-Control": "private, no-store",
       },
     },

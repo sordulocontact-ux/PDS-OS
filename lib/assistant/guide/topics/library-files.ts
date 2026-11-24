@@ -30,6 +30,7 @@ export const libraryFilesTopics: GuideTopic[] = [
       "Un modèle ne se modifie pas dans PDS OS : « Modifier » ouvre son document source ; une fois corrigé, il s'importe en nouvelle version (« ⋯ › Nouvelle version »), à valider à son tour. Un modèle validé ne change jamais. Les contrats d'un projet se génèrent depuis les modèles dans son Juridique.",
       "Un modèle est en français ou en anglais, dit à son import. Un contrat est dans la langue de son modèle : pour un artiste anglais, on choisit le modèle en anglais dans les contrats à prévoir du Juridique.",
       "PO n'écrit ni modèle ni clause, et ne traduit jamais un contrat.",
+      "Cliquer sur le titre d'un contrat ouvre son panneau à droite, sans quitter la liste : son type et ses parties, son état, « Voir le contrat » et « E-mail » à la personne qui signe, puis « Maintenant » (ce qu'il attend de vous ou de qui, en rouge si son échéance est passée), ses parties (celle qui signe marquée « Signe »), ses fiches liées (projet, artiste, deals, Juridique), ses factures et ses informations (responsable, échéance, début, fin, signature, notes). ↑ ↓ passent au contrat voisin dans l'ordre du tableau ; l'icône « Ouvrir le contrat » mène à sa page, où se font l'envoi, la validation et la signature.",
     ],
     faq: [
       {
@@ -63,11 +64,15 @@ export const libraryFilesTopics: GuideTopic[] = [
       "pochette",
       "audio",
       "bibliotheque",
+      "apercu",
+      "voir un fichier",
     ],
     nav: "/app/files",
     facts: [
       "La page rassemble les fichiers des artistes, des titres, des projets et des contrats, dans leur dernière version, avec ce à quoi chacun est rattaché.",
       "Onglets par rattachement : Tous, Artistes, Titres, Projets, Contrats. Recherche et filtres par catégorie, type de fichier et auteur.",
+      "Cliquer sur le nom d'un fichier l'ouvre en grand par-dessus la liste, ici comme dans l'onglet Fichiers d'une fiche : un PDF se lit page par page, une image s'affiche, un son s'écoute, une vidéo se lit, un texte ou un CSV s'affiche (le CSV en tableur). Word, Excel, PowerPoint et les autres types montrent seulement leur icône avec « Télécharger ». En haut à droite : ouvrir dans un nouvel onglet, télécharger, fermer ; les flèches ← → du clavier passent au fichier d'avant ou d'après, Échap ferme. Modifier, supprimer ou ajouter une version reste dans le menu « ⋯ » de la ligne.",
+      "Chaque fichier a une icône de la couleur de son type : PDF rouge, tableur vert, texte bleu, présentation orange.",
       "On ne dépose pas de fichier ici : on le dépose dans la fiche de l'artiste, du titre, du projet ou du contrat, qui le classe par catégorie.",
       "Chaque fichier peut avoir de nouvelles versions : l'ancienne reste consultable.",
       "Vous ne voyez que les fichiers que vous avez le droit de lire.",
@@ -76,6 +81,10 @@ export const libraryFilesTopics: GuideTopic[] = [
       {
         q: "Où déposer un fichier ?",
         a: "Dans l'onglet Fichiers de la fiche concernée (artiste, titre, projet ou contrat).",
+      },
+      {
+        q: "Comment voir un fichier sans le télécharger ?",
+        a: "Cliquez sur son nom : il s'ouvre en grand par-dessus la liste (PDF, image, son, vidéo, texte, CSV). Les flèches ← → passent au suivant. Un fichier Word, Excel ou PowerPoint se télécharge.",
       },
     ],
   },

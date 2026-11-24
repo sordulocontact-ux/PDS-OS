@@ -101,7 +101,7 @@ function pathOf(name) {
   if (n === "nav-shadow") return ["elevation", "nav"];
   if (n === "nav-width" || n === "nav-width-collapsed") return ["layout", n];
   if (n.startsWith("nav-")) return ["color", "nav", strip(n, "nav-")];
-  if ((m = n.match(/^(tone|hue)-([a-z]+)-(bg|fg)$/)))
+  if ((m = n.match(/^(tone|hue)-([a-z]+)-(bg|fg|dot)$/)))
     return ["color", m[1], m[2], m[3]];
   if (n === "selection") return ["color", "selection", "default"];
   if (n.startsWith("selection-"))

@@ -16,17 +16,16 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
   contractFilterGroups,
+  contractFiltersOf,
   matchesContract,
   matchesTemplate,
   templateFilterGroups,
-  type ContractFilters,
-  type TemplateFilters,
+  templateFiltersOf,
 } from "@/lib/contracts/list-filters";
 import { listContracts } from "@/lib/contracts/queries";
-import { asContractView } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { listTemplateSeries } from "@/lib/legal/contracts/templates";
-import { filterParam } from "@/lib/ui/filter-options";
+import { isFiltering } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -68,20 +67,11 @@ export default async function ContractsPage({
       </PageContainer>
     );
 
-  const filters: ContractFilters = {
-    view: asContractView(params.view),
-    type: filterParam(params.type),
-    project: filterParam(params.project),
-    artist: filterParam(params.artist),
-    owner: filterParam(params.owner),
-  };
-  const tFilters: TemplateFilters = {
-    state: filterParam(params.tstate),
-    type: filterParam(params.ttype),
-  };
+  const filters = contractFiltersOf(params);
+  const tFilters = templateFiltersOf(params);
   const shown = all.filter((c) => matchesContract(c, filters));
   const shownTemplates = templates.filter((x) => matchesTemplate(x, tFilters));
-  const filtering = Object.values(filters).some((v) => v !== null);
+  const filtering = isFiltering(filters);
   const action = onTemplates ? (
     canWriteTemplates ? (
       <TemplateFormButton organizationId={organizationId} />

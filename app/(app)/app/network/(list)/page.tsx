@@ -33,6 +33,11 @@ import {
   NETWORK_VIEWS,
   type NetworkContactRow,
 } from "@/lib/network/types";
+import {
+  filterParamsOf,
+  filterValues,
+  isFiltering,
+} from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { normalizeSearch } from "@/lib/utils/search";
 
@@ -53,9 +58,14 @@ export default async function NetworkPage({
   const canArchive = can(access, "archive_records");
   const archived = canArchive && isArchivedView(params.view);
   const tab = asNetworkView(params.tab);
-  const domain = asNetworkDomain(params.domain);
-  const relation = asNetworkRelation(params.relation);
-  const city = typeof params.city === "string" ? params.city : null;
+  // Several values per filter: any of them.
+  const domain = filterValues(params.domain).flatMap(
+    (value) => asNetworkDomain(value) ?? [],
+  );
+  const relation = filterValues(params.relation).flatMap(
+    (value) => asNetworkRelation(value) ?? [],
+  );
+  const city = filterValues(params.city).map(normalizeSearch);
   const canWrite = can(access, "manage_network") && !archived;
   const [all, projectsOf, lists] = await Promise.all([
     listNetworkContacts(archived),
@@ -93,14 +103,21 @@ export default async function NetworkPage({
 
   const filtered = all.filter(
     (c) =>
-      (!domain || inDomain(c.roles, domain)) &&
-      (!relation || c.relations.includes(relation)) &&
-      (!city || (c.city && normalizeSearch(c.city) === normalizeSearch(city))),
+      (domain.length === 0 || domain.some((d) => inDomain(c.roles, d))) &&
+      (relation.length === 0 ||
+        relation.some((r) => c.relations.includes(r))) &&
+      (city.length === 0 ||
+        (!!c.city && city.includes(normalizeSearch(c.city)))),
   );
   const contacts = tab ? filtered.filter((c) => inView(c, tab)) : filtered;
   const view = archived ? "archived" : null;
-  const filters = { domain, relation, city };
-  const filtering = domain !== null || relation !== null || city !== null;
+  const chosen = {
+    domain,
+    relation,
+    city: filterValues(params.city),
+  };
+  const filters = filterParamsOf(chosen);
+  const filtering = isFiltering(chosen);
   const ofTab = tab ? all.filter((c) => inView(c, tab)) : all;
   // No row: the archive, the filters, the tab or the network is empty.
   const empty = archived ? (
@@ -183,7 +200,7 @@ export default async function NetworkPage({
                   path={routes.network}
                   params={{ tab }}
                   groups={[
-                    ...filterGroups(ofTab, filters),
+                    ...filterGroups(ofTab, chosen),
                     ...(canArchive ? [archiveFilterGroup(archived)] : []),
                   ]}
                 />
@@ -201,11 +218,7 @@ export default async function NetworkPage({
 // lists' order; cities by their first spelling, case and accents aside.
 function filterGroups(
   contacts: NetworkContactRow[],
-  current: {
-    domain: string | null;
-    relation: string | null;
-    city: string | null;
-  },
+  current: { domain: string[]; relation: string[]; city: string[] },
 ): UrlFilterGroup[] {
   const t = fr.network;
   const cities = new Map<string, string>();

@@ -28,6 +28,9 @@ export type DealCall = {
   closed: boolean;
   // Who planned it: the project's owner may move a call she planned.
   createdBy: string | null;
+  // Its latest report's summary, folded in its card on the deal (Sacha
+  // 24/11/2026: « je n'ai pas de résumé de la réunion »); RLS decides.
+  summary: string | null;
 };
 
 export async function loadDealCalls(dealId: string): Promise<DealCall[]> {
@@ -35,7 +38,7 @@ export async function loadDealCalls(dealId: string): Promise<DealCall[]> {
   const { data, error } = await supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, ends_at, duration_minutes, status, audio_path, created_by, closures:call_closures!call_closures_call_same_org(id)",
+      "id, title, occurred_at, ends_at, duration_minutes, status, audio_path, created_by, closures:call_closures!call_closures_call_same_org(id), reports:call_reports!call_reports_call_same_org(summary, created_at)",
     )
     .eq("deal_id", dealId)
     .order("occurred_at", { ascending: false })
@@ -51,6 +54,9 @@ export async function loadDealCalls(dealId: string): Promise<DealCall[]> {
     audioPath: c.audio_path,
     closed: c.closures.length > 0,
     createdBy: c.created_by,
+    summary:
+      [...c.reports].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
+        ?.summary ?? null,
   }));
 }
 

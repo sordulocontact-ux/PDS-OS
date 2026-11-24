@@ -2,7 +2,6 @@ import { RecordSelection } from "@/components/archive/record-selection";
 import { ReleaseCover } from "@/components/catalog/artist-profile/release-cover";
 import { MasterActions } from "@/components/catalog/master-actions";
 import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
-import { IconDisc } from "@/components/icons";
 import {
   DataTable,
   DataTableActionsCell,
@@ -11,10 +10,10 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
-  DataTableIcon,
   DataTableLink,
   DataTableMedia,
   DataTableRow,
+  DataTableText,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
@@ -79,14 +78,14 @@ export function MastersTable({
             )}
             <DataTableCell>
               <DataTableMedia
+                // Its cover; no disc repeated on every row without one
+                // (Sacha 24/11/2026).
                 visual={
-                  covers ? (
+                  covers && (
                     <ReleaseCover
                       coverUrl={covers[master.id] ?? null}
                       className="size-9 rounded-md"
                     />
-                  ) : (
-                    <DataTableIcon icon={IconDisc} />
                   )
                 }
                 title={
@@ -102,7 +101,9 @@ export function MastersTable({
                 }
               />
             </DataTableCell>
-            <DataTableCell>{master.artists}</DataTableCell>
+            <DataTableCell>
+              <DataTableText>{master.artists}</DataTableText>
+            </DataTableCell>
             <DataTableCell hideBelow="sm">
               <TitleAudioState
                 state={master.audioState}
@@ -111,8 +112,8 @@ export function MastersTable({
             </DataTableCell>
             <DataTableCell hideBelow="md">
               {master.projects[0] ? (
-                <span className="flex items-baseline gap-1.5">
-                  {master.projects[0].title}
+                <span className="flex max-w-48 items-baseline gap-1.5">
+                  <span className="truncate">{master.projects[0].title}</span>
                   {master.projects.length > 1 && (
                     <span className="text-[color:var(--text-tertiary)]">
                       <span aria-hidden>

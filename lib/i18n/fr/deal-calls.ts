@@ -3,6 +3,8 @@
 export const dealCalls = {
   section: "Calls",
   empty: "Aucun call pour ce deal.",
+  // Its report's summary, folded in the call's card.
+  summary: "Compte rendu",
   actions: (title: string) => `Actions pour « ${title} »`,
   prepare: {
     title: (name: string) => `Call · ${name}`,

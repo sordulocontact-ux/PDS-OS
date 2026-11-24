@@ -20,6 +20,7 @@ import { routes } from "@/lib/auth/redirects";
 import type { ArtistRow } from "@/lib/catalog/artist-progress";
 import { catalog } from "@/lib/i18n/fr/catalog";
 import { records } from "@/lib/i18n/fr/records";
+import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/release/format";
 
 const fr = { catalog, records };
@@ -31,9 +32,10 @@ const sub =
 /** A value and, under it, what it says more (proto `.sub`). */
 function Lines({ main, under }: { main: string; under?: string | null }) {
   return (
-    <span className="block">
-      <span className="block break-words">{main}</span>
-      {under && <span className={sub}>{under}</span>}
+    <span className="block max-w-48">
+      {/* The figures' typeface on the date only, never on words. */}
+      <span className="block truncate tabular-nums">{main}</span>
+      {under && <span className={cn(sub, "truncate")}>{under}</span>}
     </span>
   );
 }
@@ -118,10 +120,10 @@ export function ArtistsTable({
                   names on hover. */}
               {artist.ongoing.length > 0 ? (
                 <span
-                  className="block"
+                  className="block max-w-48"
                   title={artist.ongoing.map((p) => p.title).join(", ")}
                 >
-                  <span className="block break-words">
+                  <span className="block truncate">
                     {artist.ongoing[0]!.title}
                     {artist.ongoing.length > 1 && (
                       <span className={secondary}>
@@ -133,7 +135,9 @@ export function ArtistsTable({
                     )}
                   </span>
                   {artist.ongoing[0]!.place && (
-                    <span className={sub}>{artist.ongoing[0]!.place}</span>
+                    <span className={cn(sub, "truncate")}>
+                      {artist.ongoing[0]!.place}
+                    </span>
                   )}
                 </span>
               ) : (
@@ -142,7 +146,7 @@ export function ArtistsTable({
                 </span>
               )}
             </DataTableCell>
-            <DataTableCell hideBelow="md" fill className="tabular-nums">
+            <DataTableCell hideBelow="md" fill>
               {artist.next ? (
                 <Lines
                   main={formatShortDate(artist.next.date)}

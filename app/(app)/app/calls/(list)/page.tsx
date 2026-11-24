@@ -23,7 +23,7 @@ import { loadMeetingFormData } from "@/lib/calls/invite";
 import { listAllCalls, type CallListItem } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
-import { filterParam } from "@/lib/ui/filter-options";
+import { filterValues } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import {
   asCalendarMode,
@@ -167,7 +167,7 @@ export default async function CallsPage({
             now={now}
             door={{ kind: "calls" }}
             view={asCallView(params.view)}
-            project={filterParam(params.project)}
+            project={filterValues(params.project)}
             deleter={callDeleter(access)}
             empty={
               <EmptyState

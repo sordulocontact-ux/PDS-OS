@@ -4,7 +4,7 @@ import { ProjectHeader } from "@/components/projects/project-header";
 import {
   sessionHours,
   sessionName,
-} from "@/components/sessions/sessions-table";
+} from "@/components/sessions/session-format";
 import { LinksSection } from "@/components/sessions/session-page/links-section";
 import { ReportSection } from "@/components/sessions/session-page/report-section";
 import { SessionContractWarnings } from "@/components/sessions/session-page/session-contract-warnings";

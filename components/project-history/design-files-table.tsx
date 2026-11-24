@@ -1,5 +1,6 @@
-import { IconLink, IconPaperclip } from "nucleo-sharp-essential";
+import { IconLink } from "nucleo-sharp-essential";
 
+import { FileTypeIcon } from "@/components/catalog/files/file-type-icon";
 import { IconArrowDown, IconExternalLink } from "@/components/icons";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
@@ -54,9 +55,13 @@ export function DesignFilesTable({
             <DataTableCell className="max-w-0 min-w-48">
               <DataTableMedia
                 visual={
-                  <DataTableIcon
-                    icon={file.kind === "file" ? IconPaperclip : IconLink}
-                  />
+                  file.kind === "file" && file.fileName ? (
+                    <FileTypeIcon
+                      file={{ fileName: file.fileName, mime: "" }}
+                    />
+                  ) : (
+                    <DataTableIcon icon={IconLink} />
+                  )
                 }
                 title={
                   <DataTableLink href={routes.projectDesign(projectId)}>

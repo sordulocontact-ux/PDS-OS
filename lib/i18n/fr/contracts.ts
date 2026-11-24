@@ -135,6 +135,31 @@ export const contracts = {
     chooseProject: "Choisir le projet",
     openTemplates: "Ouvrir les modèles de contrat",
   },
+  // The side sheet of a contract, from the list (the Réseau's model,
+  // docs/STYLE-FINANCE-PARTOUT.md § 6.7 bis, Sacha 24/11/2026).
+  sheet: {
+    expand: "Ouvrir le contrat",
+    document: "Voir le contrat",
+    email: "E-mail",
+    loading: "Chargement…",
+    loadFailed: "Le détail de ce contrat n'a pas pu être chargé.",
+    lines: {
+      parties: "Parties",
+      files: "Fichiers",
+      invoices: "Factures",
+    },
+    signs: "Signe",
+    linked: {
+      title: "Fiches liées",
+      project: "Projet",
+      artist: "Artiste",
+      deals: "Deals",
+      origin: "Juridique",
+    },
+    invoices: "Factures",
+    startsOn: "Début",
+    endsOn: "Fin",
+  },
   page: {
     // The contract's origin in the Juridique (JUR-17).
     legalOrigin: {

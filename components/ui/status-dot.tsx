@@ -7,7 +7,7 @@ const DOT: Record<Tone, string> = {
   neutral: "bg-[color:var(--text-muted)]",
   info: "bg-[color:var(--selection)]",
   warning: "bg-[color:var(--tone-warning-fg)]",
-  success: "bg-[color:var(--tone-success-fg)]",
+  success: "bg-[color:var(--tone-success-dot)]",
   danger: "bg-[color:var(--tone-danger-fg)]",
   action: "bg-[color:var(--tone-action-fg)]",
 };

@@ -2,7 +2,7 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { IconXmark } from "nucleo-sharp-essential";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type ComponentType, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useSectionThemeClass } from "@/components/ui/dialog";
@@ -10,6 +10,7 @@ import {
   sidePanelClass,
   sidePanelScrimClass,
 } from "@/components/ui/side-panel-class";
+import { useShownOrder } from "@/components/ui/table-sort";
 import { core } from "@/lib/i18n/fr/core";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,9 @@ const t = core.dialogs;
  * Midday's right panels). A panel floating on the right (sidePanelClass),
  * the row's name as its title beside the close button, then its content; no
  * counter, no arrows. The list stays in sight under the app's dark scrim;
- * ↑ ↓ go to the row before or after from the keyboard, Échap closes. Under
+ * ↑ ↓ go to the row before or after from the keyboard, in the order the
+ * table shows when it is sorted (`TableSortProvider` around the table and
+ * the sheet, `useShownOrder`), Échap closes. Under
  * `sm`, it takes the whole width. It takes its section's theme
  * (useSectionThemeClass), though it is drawn in a portal.
  */
@@ -32,34 +35,48 @@ export function SideSheet({
   index,
   total,
   onMove,
+  bar,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
+  // A record one reads more than an amount (a Réseau contact, after
+  // Accordee): the title small on a bar with a hairline, its icon before
+  // it and its gestures (expand, "⋯") before the close; the content shows
+  // the name large itself.
+  bar?: {
+    icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+    actions?: ReactNode;
+  };
   // 0-based place of the row in its list, and the list's length.
   index: number;
   total: number;
   onMove: (to: number) => void;
   children: ReactNode;
 }) {
+  // A sorted table: the row's place on screen, and the row at a place.
+  const shown = useShownOrder();
+  const sorted = shown !== null && shown.length === total;
   useEffect(() => {
     if (!open) return;
+    const at = sorted ? shown.indexOf(index) : index;
+    const go = (to: number) => onMove(sorted ? shown[to] : to);
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable]")) return;
-      if (e.key === "ArrowDown" && index < total - 1) {
+      if (e.key === "ArrowDown" && at >= 0 && at < total - 1) {
         e.preventDefault();
-        onMove(index + 1);
+        go(at + 1);
       }
-      if (e.key === "ArrowUp" && index > 0) {
+      if (e.key === "ArrowUp" && at > 0) {
         e.preventDefault();
-        onMove(index - 1);
+        go(at - 1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, index, total, onMove]);
+  }, [open, index, total, onMove, shown, sorted]);
   const theme = useSectionThemeClass();
 
   return (
@@ -73,29 +90,48 @@ export function SideSheet({
           data-slot="side-sheet"
           className={cn(sidePanelClass, theme)}
         >
-          <div className="flex items-start gap-3 px-6 pt-6 pb-2">
-            <DialogPrimitive.Title className="min-w-0 flex-1 text-display-sm font-medium break-words">
-              {title}
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Close
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="-mt-1 -mr-2"
-                />
-              }
-            >
-              <IconXmark aria-hidden />
-              <span className="sr-only">{t.close}</span>
-            </DialogPrimitive.Close>
-          </div>
-          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 pt-2 pb-6">
+          {bar ? (
+            <div className="flex h-14 shrink-0 items-center gap-2 border-b border-[color:var(--border-hairline)] pr-3 pl-5">
+              <bar.icon
+                aria-hidden
+                className="size-4 shrink-0 text-[color:var(--text-secondary)]"
+              />
+              <DialogPrimitive.Title className="min-w-0 flex-1 truncate text-[length:var(--type-body-md)] font-medium">
+                {title}
+              </DialogPrimitive.Title>
+              {bar.actions}
+              <SheetClose />
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 px-6 pt-6 pb-2">
+              <DialogPrimitive.Title className="min-w-0 flex-1 text-display-sm font-medium break-words">
+                {title}
+              </DialogPrimitive.Title>
+              <SheetClose className="-mt-1 -mr-2" />
+            </div>
+          )}
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6",
+              bar ? "pt-6" : "pt-2",
+            )}
+          >
             {children}
           </div>
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
+  );
+}
+
+function SheetClose({ className }: { className?: string }) {
+  return (
+    <DialogPrimitive.Close
+      render={<Button variant="ghost" size="icon-sm" className={className} />}
+    >
+      <IconXmark aria-hidden />
+      <span className="sr-only">{t.close}</span>
+    </DialogPrimitive.Close>
   );
 }
 

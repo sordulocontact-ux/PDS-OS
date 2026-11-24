@@ -192,7 +192,10 @@ export function BudgetTable({
             )}
           </DataTableRow>
         ))}
-        <DataTableRow className="border-t border-[color:var(--border-hairline)]">
+        <DataTableRow
+          pinned
+          className="border-t border-[color:var(--border-hairline)]"
+        >
           <DataTableCell fill className="font-semibold">
             {t.table.total}
           </DataTableCell>

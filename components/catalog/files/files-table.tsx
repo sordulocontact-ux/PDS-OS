@@ -1,8 +1,11 @@
 import { FileActions } from "@/components/catalog/files/file-actions";
 import {
-  FileAdded,
+  FILE_NARROW_COLUMN,
+  FileAddedOn,
+  FileAuthor,
   FileNameMedia,
 } from "@/components/catalog/files/file-cells";
+import { FilePreviewList } from "@/components/catalog/files/file-preview-list";
 import {
   DataTable,
   DataTableActionsCell,
@@ -24,13 +27,16 @@ import {
 } from "@/lib/catalog/file-rules";
 import { formatDuration } from "@/lib/catalog/types";
 import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { formatShortDate } from "@/lib/release/format";
+import { cn } from "@/lib/utils";
 
 const fr = { catalogFiles };
 
 // Files of an artist, a title, a project or a contract, newest first: the
 // same cells as the global library (file-cells.tsx): picture or icon, name
-// (opens the file in a new tab), precision, format and size, category, date
-// and author, then "⋯". A title's audio versions have their own list
+// (opens the file large over the list, FilePreviewList) and its precision,
+// then one fact a column (after Accordee, Sacha 24/11/2026): category, type,
+// size, who added it, when, then "⋯". A title's audio versions have their own list
 // (AudioVersionList).
 export function FilesTable({
   owner,
@@ -50,72 +56,106 @@ export function FilesTable({
 }) {
   const t = fr.catalogFiles;
   const labels: Record<string, string> = t.categories[owner.kind];
+  const previews = files.map((file) => ({
+    ...file,
+    context: labels[file.category] ?? labels.other,
+  }));
 
   return (
-    <DataTable>
-      <DataTableHeader>
-        <DataTableHead>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.category}</DataTableHead>
-        <DataTableHead hideBelow="md" fill>
-          {t.columns.added}
-        </DataTableHead>
-        <DataTableActionsHead label={t.columns.actions} />
-      </DataTableHeader>
-      <DataTableBody>
-        {files.map((file) => {
-          const writable = canEdit && canWriteFile(file, scope);
-          return (
-            <DataTableRow key={file.id}>
-              <DataTableCell>
-                <FileNameMedia
-                  file={file}
-                  previewUrl={file.previewUrl}
-                  subtitle={
-                    <>
-                      {/* The category column is hidden on phones. */}
-                      <span className="sm:hidden">
-                        {`${labels[file.category] ?? labels.other} · `}
-                      </span>
-                      {[
-                        file.version > 1 && t.versions.badge(file.version),
-                        file.description,
-                        fileFormat(file.fileName, file.mime),
-                        formatFileSize(file.bytes),
-                        file.durationSeconds &&
-                          formatDuration(file.durationSeconds),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </>
-                  }
-                />
-              </DataTableCell>
-              <DataTableCell hideBelow="sm">
-                <StatusBadge tone="neutral" size="sm">
-                  {labels[file.category] ?? labels.other}
-                </StatusBadge>
-              </DataTableCell>
-              <DataTableCell hideBelow="md" fill>
-                <FileAdded
-                  createdAt={file.createdAt}
-                  authorName={file.authorName}
-                />
-              </DataTableCell>
-              <DataTableActionsCell>
-                <FileActions
-                  owner={owner}
-                  file={file}
-                  canEdit={writable}
-                  canDelete={writable}
-                  organizationId={writable ? organizationId : null}
-                  categories={scope?.categories}
-                  reveal
-                />
-              </DataTableActionsCell>
-            </DataTableRow>
-          );
-        })}
-      </DataTableBody>
-    </DataTable>
+    <FilePreviewList files={previews}>
+      <DataTable>
+        <DataTableHeader>
+          <DataTableHead fill>{t.columns.name}</DataTableHead>
+          <DataTableHead hideBelow="sm">{t.columns.category}</DataTableHead>
+          <DataTableHead hideBelow="lg" className={FILE_NARROW_COLUMN}>
+            {t.columns.type}
+          </DataTableHead>
+          <DataTableHead
+            hideBelow="xl"
+            align="end"
+            className={FILE_NARROW_COLUMN}
+          >
+            {t.columns.size}
+          </DataTableHead>
+          <DataTableHead hideBelow="xl">{t.columns.addedBy}</DataTableHead>
+          <DataTableHead hideBelow="md">{t.columns.addedAt}</DataTableHead>
+          <DataTableActionsHead label={t.columns.actions} />
+        </DataTableHeader>
+        <DataTableBody>
+          {files.map((file) => {
+            const writable = canEdit && canWriteFile(file, scope);
+            const category = labels[file.category] ?? labels.other;
+            const format = fileFormat(file.fileName, file.mime);
+            const size = formatFileSize(file.bytes);
+            return (
+              <DataTableRow key={file.id}>
+                <DataTableCell fill>
+                  <FileNameMedia
+                    file={file}
+                    previewUrl={file.previewUrl}
+                    subtitle={
+                      <>
+                        {/* On a phone, the hidden columns. */}
+                        <span className="sm:hidden">
+                          {[
+                            category,
+                            format,
+                            size,
+                            formatShortDate(file.createdAt),
+                          ].join(" · ")}
+                        </span>
+                        <span className="hidden sm:inline">
+                          {[
+                            file.version > 1 && t.versions.badge(file.version),
+                            file.description,
+                            file.durationSeconds &&
+                              formatDuration(file.durationSeconds),
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      </>
+                    }
+                  />
+                </DataTableCell>
+                <DataTableCell hideBelow="sm">
+                  <StatusBadge tone="neutral" size="sm">
+                    {category}
+                  </StatusBadge>
+                </DataTableCell>
+                <DataTableCell hideBelow="lg" className={FILE_NARROW_COLUMN}>
+                  {format}
+                </DataTableCell>
+                <DataTableCell
+                  hideBelow="xl"
+                  align="end"
+                  className={cn(FILE_NARROW_COLUMN, "tabular-nums")}
+                  sort={file.bytes}
+                >
+                  {size}
+                </DataTableCell>
+                <DataTableCell hideBelow="xl">
+                  <FileAuthor name={file.authorName} />
+                </DataTableCell>
+                <DataTableCell hideBelow="md">
+                  <FileAddedOn createdAt={file.createdAt} />
+                </DataTableCell>
+                <DataTableActionsCell>
+                  <FileActions
+                    owner={owner}
+                    file={file}
+                    canEdit={writable}
+                    canDelete={writable}
+                    organizationId={writable ? organizationId : null}
+                    categories={scope?.categories}
+                    reveal
+                  />
+                </DataTableActionsCell>
+              </DataTableRow>
+            );
+          })}
+        </DataTableBody>
+      </DataTable>
+    </FilePreviewList>
   );
 }

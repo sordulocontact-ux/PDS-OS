@@ -11,7 +11,7 @@ import { fr } from "@/lib/i18n/fr";
 import { gmailAccounts } from "@/lib/mailbox/gmail-accounts";
 import { MAILBOX_LIMIT, listMailbox } from "@/lib/mailbox/queries";
 import { MAIL_KINDS } from "@/lib/mailbox/types";
-import { filterParam } from "@/lib/ui/filter-options";
+import { filterValues } from "@/lib/ui/filter-options";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.mailbox.title} · ${fr.app.name}` };
@@ -68,7 +68,7 @@ export default async function MailPage({
         truncated={mails.truncated ? t.states.truncated(MAILBOX_LIMIT) : null}
         hasGmail={hasGmail}
         vue={vue}
-        kind={MAIL_KINDS.find((k) => k === filterParam(params.type)) ?? null}
+        kinds={MAIL_KINDS.filter((k) => filterValues(params.type).includes(k))}
         compose={compose}
       />
     </SectionFrame>

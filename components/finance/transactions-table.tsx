@@ -23,6 +23,7 @@ import {
   txSubtitle,
   txTitle,
 } from "@/components/finance/transaction-sheet";
+import { TableSortProvider } from "@/components/ui/table-sort";
 import { useSheetRow } from "@/components/ui/use-sheet-row";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -218,8 +219,9 @@ export function TransactionsTable({
     ];
   }
 
+  // One sort for the table and its sheet: ↑ ↓ follow the rows as sorted.
   return (
-    <>
+    <TableSortProvider>
       <DataTable framed>
         <DataTableHeader>
           <DataTableHead hideBelow="sm">{c.date}</DataTableHead>
@@ -397,6 +399,6 @@ export function TransactionsTable({
           }
         />
       )}
-    </>
+    </TableSortProvider>
   );
 }

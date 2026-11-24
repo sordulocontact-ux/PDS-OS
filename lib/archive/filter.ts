@@ -12,7 +12,7 @@ export function archiveFilterGroup(archived: boolean): UrlFilterGroup {
     label: t.label,
     allLabel: t.live,
     options: [{ value: "archived", label: t.archived }],
-    current: archived ? "archived" : null,
+    current: archived ? ["archived"] : [],
     menuOnly: true,
   };
 }

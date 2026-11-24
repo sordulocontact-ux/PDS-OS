@@ -5,15 +5,18 @@ import {
   type DealContractDefaults,
 } from "@/components/deals/deal-contract-create";
 import { DealContractGenerate } from "@/components/deals/deal-contract-generate";
+import { DealParticipationNow } from "@/components/deals/deal-participation-now";
 import { nowHeading, nowSecondary } from "@/components/deals/now-classes";
+import type { ParticipationStep } from "@/lib/deals/participation-types";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 
 const t = dealMemos.contract.now;
 
 /** What « Maintenant » needs of the deal's contract before its circuit. */
 export type ContractStep = {
-  // The participation's contract, launched by the project's owner.
-  participation: boolean;
+  // The participation's contract, prepared in its project's Juridique
+  // (DealParticipationNow); "unread": its state could not be read.
+  participation: ParticipationStep | "unread" | null;
   // « Créer le contrat », for whoever creates contracts.
   create: DealContractDefaults | null;
 };
@@ -35,8 +38,10 @@ export function DealContractNow({
   dealId: string;
   step: ContractStep;
 }) {
-  if (step.participation)
+  if (step.participation === "unread")
     return <p className={nowSecondary}>{t.participation}</p>;
+  if (step.participation)
+    return <DealParticipationNow step={step.participation} />;
   return (
     <>
       <h2 className={nowHeading}>{t.create}</h2>

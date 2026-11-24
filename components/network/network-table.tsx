@@ -4,6 +4,7 @@ import { IconOffice, IconUser } from "nucleo-sharp-essential";
 
 import { RecordSelection } from "@/components/archive/record-selection";
 import { ContactActions } from "@/components/network/contact-actions";
+import { ContactSheet } from "@/components/network/contact-sheet";
 import { AddToListButton } from "@/components/network/lists/add-to-list-button";
 import { Avatar } from "@/components/ui/avatar";
 import {
@@ -18,10 +19,14 @@ import {
   DataTableLink,
   DataTableMedia,
   DataTableRow,
+  DataTableText,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
+import { TableSortProvider } from "@/components/ui/table-sort";
+import { useSheetRow } from "@/components/ui/use-sheet-row";
 import type { RecordRights } from "@/lib/archive/types";
+import { cn } from "@/lib/utils";
 import { routes } from "@/lib/auth/redirects";
 import { network } from "@/lib/i18n/fr/network";
 import { records } from "@/lib/i18n/fr/records";
@@ -34,8 +39,14 @@ import {
 
 const fr = { network, records };
 
+// A link in a cell, above the row's stretched link (its name opens the
+// sheet).
+const CELL_LINK =
+  "relative z-10 block max-w-48 truncate outline-none hover:underline focus-visible:underline";
+
 // The network, by name: a person or an organization (its icon), what it
-// does, how to reach it; the row opens its page, "⋯" edits, archives or
+// does, how to reach it; the row opens its side sheet (ContactSheet, after
+// Accordee, Sacha 24/11/2026) and from there its page, "⋯" edits, archives or
 // deletes it, checkboxes delete several at once (director) and add them to
 // a list (`lists`: who manages the Réseau, Ibé 18/11/2026).
 export function NetworkTable({
@@ -54,22 +65,25 @@ export function NetworkTable({
   const t = fr.network;
   const selection = fr.records.selection;
   const withSelection = rights.canArchive || lists !== null;
+  const [sheet, setSheet] = useSheetRow(contacts.map((c) => c.id));
 
   const table = (
     <DataTable>
       <DataTableHeader>
         {withSelection && <SelectAllHead label={selection.all} />}
+        {/* One fact a column (after Accordee, Sacha 24/11/2026); no column
+            takes the rest: the width is shared evenly (Sacha, 29/10). */}
         <DataTableHead>{t.columns.name}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.roles}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.projects}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.contact}</DataTableHead>
-        {/* No column takes the rest: the width is shared evenly (Sacha,
-            29/10). */}
-        <DataTableHead hideBelow="sm">{t.columns.city}</DataTableHead>
+        <DataTableHead hideBelow="lg">{t.columns.relations}</DataTableHead>
+        <DataTableHead hideBelow="xl">{t.columns.projects}</DataTableHead>
+        <DataTableHead hideBelow="lg">{t.columns.email}</DataTableHead>
+        <DataTableHead hideBelow="xl">{t.columns.phone}</DataTableHead>
+        <DataTableHead hideBelow="2xl">{t.columns.city}</DataTableHead>
         <DataTableActionsHead label={t.columns.actions} />
       </DataTableHeader>
       <DataTableBody>
-        {contacts.map((contact) => (
+        {contacts.map((contact, index) => (
           <DataTableRow key={contact.id}>
             {withSelection && (
               <SelectRowCell
@@ -98,6 +112,7 @@ export function NetworkTable({
                     href={
                       rights.archived ? null : routes.networkContact(contact.id)
                     }
+                    onOpen={rights.archived ? undefined : () => setSheet(index)}
                   >
                     {contact.name}
                   </DataTableLink>
@@ -108,50 +123,55 @@ export function NetworkTable({
                     <span className="md:hidden">
                       {rolesText(contact.roles)}
                     </span>
+                    {/* Where it belongs; a spotted artist without one, its
+                        TikTok. Person or organization: the tabs and the
+                        icon say it. */}
                     <span className="hidden md:inline">
-                      {[
-                        t.kinds[contact.kind],
-                        contact.parentName && t.memberOf(contact.parentName),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
+                      {contact.parentName
+                        ? t.memberOf(contact.parentName)
+                        : contact.tiktok && `@${contact.tiktok}`}
                     </span>
                   </>
                 }
               />
             </DataTableCell>
             <DataTableCell hideBelow="md">
-              <span className="flex min-w-0 flex-col">
-                <span className="line-clamp-2 whitespace-normal">
-                  {rolesText(contact.roles) || EMPTY_CELL}
-                </span>
-                {contact.relations.length > 0 && (
-                  <span className="truncate text-sm text-muted-foreground">
-                    {relationsText(contact.relations)}
-                  </span>
-                )}
-              </span>
-            </DataTableCell>
-            <DataTableCell hideBelow="sm">
-              <span className="line-clamp-2 whitespace-normal">
-                {projects[contact.id]?.join(", ") || EMPTY_CELL}
-              </span>
+              <DataTableText>
+                {rolesText(contact.roles) || EMPTY_CELL}
+              </DataTableText>
             </DataTableCell>
             <DataTableCell hideBelow="lg">
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate">
-                  {contact.email ??
-                    contact.phone ??
-                    (contact.tiktok ? `@${contact.tiktok}` : EMPTY_CELL)}
-                </span>
-                {contact.email && contact.phone && (
-                  <span className="truncate text-sm text-muted-foreground">
-                    {contact.phone}
-                  </span>
-                )}
-              </span>
+              <DataTableText>
+                {relationsText(contact.relations) || EMPTY_CELL}
+              </DataTableText>
             </DataTableCell>
-            <DataTableCell hideBelow="sm">
+            <DataTableCell hideBelow="xl">
+              <DataTableText>
+                {projects[contact.id]?.join(", ") || EMPTY_CELL}
+              </DataTableText>
+            </DataTableCell>
+            <DataTableCell hideBelow="lg">
+              {contact.email ? (
+                <a href={`mailto:${contact.email}`} className={CELL_LINK}>
+                  {contact.email}
+                </a>
+              ) : (
+                EMPTY_CELL
+              )}
+            </DataTableCell>
+            <DataTableCell hideBelow="xl">
+              {contact.phone ? (
+                <a
+                  href={`tel:${contact.phone}`}
+                  className={cn(CELL_LINK, "tabular-nums")}
+                >
+                  {contact.phone}
+                </a>
+              ) : (
+                EMPTY_CELL
+              )}
+            </DataTableCell>
+            <DataTableCell hideBelow="2xl">
               {contact.city ?? EMPTY_CELL}
             </DataTableCell>
             <DataTableActionsCell>
@@ -163,6 +183,20 @@ export function NetworkTable({
     </DataTable>
   );
 
+  // One sort for the table and its sheet: ↑ ↓ follow the rows as sorted.
+  const sorted = (
+    <TableSortProvider>
+      {table}
+      <ContactSheet
+        contacts={contacts}
+        rights={rights}
+        index={sheet}
+        onClose={() => setSheet(null)}
+        onMove={setSheet}
+      />
+    </TableSortProvider>
+  );
+
   return withSelection ? (
     <RecordSelection
       kind="contact"
@@ -170,9 +204,9 @@ export function NetworkTable({
       manage={rights.canArchive}
       actions={lists && <AddToListButton lists={lists} />}
     >
-      {table}
+      {sorted}
     </RecordSelection>
   ) : (
-    table
+    sorted
   );
 }

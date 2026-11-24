@@ -22,7 +22,11 @@ export const library = {
     name: "Nom",
     owner: "Rattaché à",
     category: "Catégorie",
-    addedAt: "Ajouté",
+    // One fact a column (after Accordee, Sacha 24/11/2026).
+    type: "Type",
+    size: "Taille",
+    addedBy: "Ajouté par",
+    addedAt: "Ajouté le",
     actions: "Actions",
   },
   search: {

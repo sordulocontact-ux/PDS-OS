@@ -1,3 +1,4 @@
+import { IconTimer2 } from "nucleo-sharp-essential";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TitleBlock } from "@/components/ui/title-block";
@@ -264,6 +265,9 @@ export function NowFrame({
   quiet?: boolean;
   children: React.ReactNode;
 }) {
+  // Its name written, with its icon, at the head of the frame (Sacha
+  // 24/11/2026: « le Maintenant n'est pas très clair, il mérite une
+  // icône »).
   return (
     <section
       aria-label={label}
@@ -273,6 +277,13 @@ export function NowFrame({
         quiet ? "gap-2.5 px-4 py-3.5" : "gap-3.5 p-5",
       )}
     >
+      <p
+        aria-hidden
+        className="flex items-center gap-1.5 text-caption font-medium text-[color:var(--text-secondary)]"
+      >
+        <IconTimer2 className="size-4 shrink-0" />
+        {label}
+      </p>
       {children}
     </section>
   );

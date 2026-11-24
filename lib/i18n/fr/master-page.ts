@@ -238,7 +238,9 @@ export const masterPage = {
       name: "Fichier",
       session: "Session",
       status: "Statut",
-      added: "Déposé",
+      // Who and when, each alone (after Accordee, Sacha 24/11/2026).
+      addedBy: "Déposé par",
+      addedAt: "Déposé le",
     },
     statuses: {
       provisional: "Provisoire",
@@ -248,7 +250,6 @@ export const masterPage = {
     noSession: "Sans session",
     link: "Lien",
     version: (n: number) => `v${n}`,
-    addedBy: (name: string) => `par ${name}`,
     fields: {
       file: "Fichier",
       description: "Ce que c'est",

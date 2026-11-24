@@ -15,6 +15,7 @@ import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { filterParamOf, filterValues } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import {
   loadRosterProgress,
@@ -31,8 +32,10 @@ export const metadata = {
 const TITLE_FILTERS = ["with", "without"] as const;
 type TitleFilter = (typeof TITLE_FILTERS)[number];
 
-const hasTitles = (artist: ArtistListItem, filter: TitleFilter | null) =>
-  filter === null || artist.masterCount > 0 === (filter === "with");
+// Several choices: any of them (with and without = every artist).
+const hasTitles = (artist: ArtistListItem, filters: TitleFilter[]) =>
+  filters.length === 0 ||
+  filters.some((filter) => artist.masterCount > 0 === (filter === "with"));
 
 export default async function ArtistsPage({
   searchParams,
@@ -45,7 +48,9 @@ export default async function ArtistsPage({
   const archived = canArchive && isArchivedView(params.view);
   // No filter = every artist ("Tous").
   const relation = isArtistRelation(params.relation) ? params.relation : null;
-  const titles = TITLE_FILTERS.find((value) => value === params.titles) ?? null;
+  const titles = TITLE_FILTERS.filter((value) =>
+    filterValues(params.titles).includes(value),
+  );
   // One read for the tab counts and the rows: the roster stays small. Where
   // the projects stand: every launched project's journeys, read once.
   const [{ artists: all, error }, roster] = await Promise.all([
@@ -67,14 +72,14 @@ export default async function ArtistsPage({
   const canCreate = can(access, "manage_catalog") && !archived;
   // No row: the archive, the filter, the tab or the roster is empty.
   const empty =
-    archived && !titles ? (
+    archived && titles.length === 0 ? (
       <EmptyState
         icon={IconBoxArchive}
         title={fr.records.archivedEmpty.artist}
         body={fr.records.archivedEmptyBody}
         action={<LiveViewLink href={viewHref(routes.artists, { relation })} />}
       />
-    ) : titles ? (
+    ) : titles.length > 0 ? (
       <EmptyState
         icon={IconMicrophone}
         title={t.filtersEmpty}
@@ -128,7 +133,7 @@ export default async function ArtistsPage({
             relation={relation}
             counts={counts}
             archived={archived}
-            filters={{ titles }}
+            filters={{ titles: filterParamOf(titles) }}
             pageAction={action}
           >
             {all.length === 0 ? (
@@ -166,7 +171,7 @@ export default async function ArtistsPage({
 // Only the choices some artist of the tab holds.
 function filterGroups(
   artists: ArtistListItem[],
-  current: TitleFilter | null,
+  current: TitleFilter[],
 ): UrlFilterGroup[] {
   const t = fr.catalog.artists.filters;
   return [
@@ -175,7 +180,7 @@ function filterGroups(
       label: t.titlesLabel,
       allLabel: t.titlesAll,
       options: TITLE_FILTERS.filter((value) =>
-        artists.some((a) => hasTitles(a, value)),
+        artists.some((a) => hasTitles(a, [value])),
       ).map((value) => ({ value, label: t.titles[value] })),
       current,
     },

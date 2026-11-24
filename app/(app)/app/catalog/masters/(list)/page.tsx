@@ -20,7 +20,7 @@ import { listMasterCoverThumbs } from "@/lib/catalog/covers";
 import { listMasters } from "@/lib/catalog/queries";
 import {
   AUDIO_FILTERS,
-  audioFilterOf,
+  audioFiltersOf,
   countTitleViews,
   inTitleView,
   matchesTitleFilters,
@@ -30,7 +30,12 @@ import {
 } from "@/lib/catalog/title-views";
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
-import { filterParam, optionsByName } from "@/lib/ui/filter-options";
+import {
+  filterParamsOf,
+  filterValues,
+  isFiltering,
+  optionsByName,
+} from "@/lib/ui/filter-options";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
@@ -52,9 +57,9 @@ export default async function MastersPage({
   const archived = canArchive && isArchivedView(params.view);
   const view = titleViewOf(params.state);
   const filters: TitleFilters = {
-    audio: audioFilterOf(params.audio),
-    artist: filterParam(params.artist),
-    project: filterParam(params.project),
+    audio: audioFiltersOf(params.audio),
+    artist: filterValues(params.artist),
+    project: filterValues(params.project),
   };
   // One read for the tab counts and the rows: the catalog stays small. The
   // covers are read beside it.
@@ -69,7 +74,7 @@ export default async function MastersPage({
   const filtered = all.filter((master) => matchesTitleFilters(master, filters));
   const ofView = all.filter((master) => inTitleView(master, view));
   const masters = filtered.filter((master) => inTitleView(master, view));
-  const filtering = Object.values(filters).some((value) => value !== null);
+  const filtering = isFiltering(filters);
   const newMaster =
     can(access, "manage_catalog") && !archived ? (
       <Link href={routes.mastersNew} className={buttonVariants({ size: "lg" })}>
@@ -132,7 +137,7 @@ export default async function MastersPage({
             demoRows.filter((d) => d.demoStatus !== "abandoned").length
           }
           archived={archived}
-          filters={{ ...filters }}
+          filters={filterParamsOf(filters)}
           pageAction={all.length > 0 ? newMaster : null}
         >
           {all.length === 0 ? (

@@ -73,6 +73,21 @@ export const rebillMissing = (spend: FinanceSpend) =>
 export const spendDay = (spend: FinanceSpend) =>
   spend.status === "paid" ? spend.spentOn : (spend.dueOn ?? spend.spentOn);
 
+/**
+ * Still to be paid on its due day: engaged or invoiced, not paid (nor by the
+ * bank) and not refused. A planned or proposed spend owes nothing yet.
+ */
+export const spendAwaited = (
+  spend: Pick<FinanceSpend, "status" | "paidByBank" | "refused">,
+) => {
+  const stage = spendStage(spend.status);
+  return (
+    !spend.paidByBank &&
+    !spend.refused &&
+    (stage === "committed" || stage === "invoiced")
+  );
+};
+
 // Dates as Finance says them: « 16/11 » in a table, « Lun. 16/11 » in a
 // sheet; the year only when it is not the current one.
 const dropYear = (full: string) =>

@@ -25,6 +25,7 @@ import { loadNewDealOptions } from "@/lib/deals/new-deal-options";
 import { loadDeals } from "@/lib/deals/queries";
 import { deals as t } from "@/lib/i18n/fr/deals";
 import { todayInParis } from "@/lib/insights/dates";
+import { filterParamsOf, isFiltering } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -71,7 +72,7 @@ export default async function DealsPage({
   const today = todayInParis();
   const view = dealViewOf(params.vue);
   const filters = dealFiltersOf(params);
-  const filtering = Object.values(filters).some((value) => value !== null);
+  const filtering = isFiltering(filters);
   const filtered = deals.filter((d) => matchesDeal(d, filters));
   const ofView = deals.filter((d) => inDealView(d, view, today));
   const shown = filtered.filter((d) => inDealView(d, view, today));
@@ -98,7 +99,7 @@ export default async function DealsPage({
           pageAction={action}
           views={DEAL_VIEWS.map((v) => ({
             href: viewHref(routes.deals, {
-              ...filters,
+              ...filterParamsOf(filters),
               vue: v === "open" ? null : v,
             }),
             label: VIEW_LABELS[v],

@@ -28,6 +28,8 @@ import {
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { financeSpends as t } from "@/lib/i18n/fr/finance-spends";
 import { budget } from "@/lib/i18n/fr/budget";
+import { filterParamOf, filterValues } from "@/lib/ui/filter-options";
+import { viewHref } from "@/lib/ui/view-href";
 import { parisPlace } from "@/lib/utils/calendar-period";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -39,8 +41,8 @@ const STAGE_OF: Partial<Record<SpendStatusSlug, SpendStage>> = {
   facture: "invoiced",
   paye: "paid",
 };
-const asStatus = (value: unknown): SpendStatusSlug | null =>
-  SPEND_STATUS_SLUGS.find((s) => s === value) ?? null;
+const isStatus = (value: string): value is SpendStatusSlug =>
+  (SPEND_STATUS_SLUGS as readonly string[]).includes(value);
 
 /**
  * Finance › Dépenses (Ibé's ticket, maquette 4, lot 3), laid out as the
@@ -64,33 +66,37 @@ export default async function FinanceSpendsPage({
   ]);
   const canManage = can(access, "manage_finance");
   const live = data.spends.filter((s) => !s.refused);
-  const status = asStatus(params.statut);
-  const envelope =
-    typeof params.enveloppe === "string" ? params.enveloppe : null;
+  // Several envelopes or statuses: any of them.
+  const statuses = filterValues(params.statut).filter(isStatus);
+  const envelopes = filterValues(params.enveloppe);
   const withoutProof = params.justificatif === "sans";
   const missing = (s: FinanceSpend) => !s.hasProof && proofExpected(s);
 
   const shown = live
-    .filter((s) =>
-      envelope === null
-        ? true
-        : envelope === OFF_BUDGET_SLUG
-          ? s.target.kind === "off_budget"
-          : s.target.id === envelope,
+    .filter(
+      (s) =>
+        envelopes.length === 0 ||
+        envelopes.some((envelope) =>
+          envelope === OFF_BUDGET_SLUG
+            ? s.target.kind === "off_budget"
+            : s.target.id === envelope,
+        ),
     )
-    .filter((s) =>
-      status === null
-        ? true
-        : status === "a-refacturer"
-          ? rebillMissing(s)
-          : spendStage(s.status) === STAGE_OF[status],
+    .filter(
+      (s) =>
+        statuses.length === 0 ||
+        statuses.some((status) =>
+          status === "a-refacturer"
+            ? rebillMissing(s)
+            : spendStage(s.status) === STAGE_OF[status],
+        ),
     )
     .filter((s) => !withoutProof || missing(s))
     .sort((a, b) => spendDay(b).localeCompare(spendDay(a)));
 
   // The envelopes some spend is on, named, then « Hors budget ».
   const names = new Map(treasury.targets.map((x) => [x.id, x.name]));
-  const envelopes = [
+  const envelopeOptions = [
     ...new Set(
       live
         .filter((s) => s.target.kind !== "off_budget")
@@ -100,8 +106,8 @@ export default async function FinanceSpendsPage({
     .map((id) => ({ value: id, label: names.get(id) ?? id }))
     .sort((a, b) => a.label.localeCompare(b.label, "fr"));
   const keep = {
-    enveloppe: envelope,
-    statut: status,
+    enveloppe: filterParamOf(envelopes),
+    statut: filterParamOf(statuses),
     justificatif: withoutProof ? "sans" : null,
   };
   const action = canManage ? <QuickExpenseButton /> : undefined;
@@ -132,17 +138,16 @@ export default async function FinanceSpendsPage({
               <UrlFilters
                 path={spendsHref({})}
                 params={{ justificatif: keep.justificatif }}
-                inline={2}
                 groups={[
                   {
                     key: "enveloppe",
                     label: t.filters.envelope,
                     allLabel: t.filters.allEnvelopes,
                     options: [
-                      ...envelopes,
+                      ...envelopeOptions,
                       { value: OFF_BUDGET_SLUG, label: budget.form.offBudget },
                     ],
-                    current: envelope,
+                    current: envelopes,
                   },
                   {
                     key: "statut",
@@ -152,7 +157,7 @@ export default async function FinanceSpendsPage({
                       value: s,
                       label: t.filters.statuses[s],
                     })),
-                    current: status,
+                    current: statuses,
                   },
                 ]}
               />
@@ -161,18 +166,18 @@ export default async function FinanceSpendsPage({
                 options={[
                   {
                     key: "all",
-                    href: spendsHref({
-                      enveloppe: keep.enveloppe ?? undefined,
-                      statut: keep.statut ?? undefined,
+                    href: viewHref(spendsHref({}), {
+                      enveloppe: keep.enveloppe,
+                      statut: keep.statut,
                     }),
                     label: t.proofView.all,
                     current: !withoutProof,
                   },
                   {
                     key: "missing",
-                    href: spendsHref({
-                      enveloppe: keep.enveloppe ?? undefined,
-                      statut: keep.statut ?? undefined,
+                    href: viewHref(spendsHref({}), {
+                      enveloppe: keep.enveloppe,
+                      statut: keep.statut,
                       justificatif: "sans",
                     }),
                     label: (

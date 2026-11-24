@@ -38,12 +38,13 @@ const t = fr.activationJourney;
 export async function ActivationsIndex({
   projectId,
   filter,
-  titleId = null,
+  titleIds = [],
 }: {
   projectId: string;
   filter: ActivationFilter;
-  // A collective (lot 10): the title the list is filtered on (`?titre=`).
-  titleId?: string | null;
+  // A collective (lot 10): the titles the list is filtered on (`?titre=`,
+  // any of them).
+  titleIds?: string[];
 }) {
   const [access, project, board, people, journeys, scopes] = await allInOrder([
     requireApproved(),
@@ -71,14 +72,18 @@ export async function ActivationsIndex({
       ? titleScopeLabel(scopeOf(scopes.activations, a.id), scopes.titles)
       : null,
   }));
-  // Filtered on a live title of the collective (an unknown one: no filter).
-  const title =
-    scopes?.titles.find((x) => x.id === titleId && !x.abandoned) ?? null;
-  const shown = title
-    ? rows.filter((a) =>
-        titleScopeCovers(scopeOf(scopes!.activations, a.id), title.id),
-      )
-    : rows;
+  // Filtered on live titles of the collective (unknown ones: no filter).
+  const chosen = (scopes?.titles ?? []).filter(
+    (x) => titleIds.includes(x.id) && !x.abandoned,
+  );
+  const shown =
+    scopes && chosen.length > 0
+      ? rows.filter((a) =>
+          chosen.some((x) =>
+            titleScopeCovers(scopeOf(scopes.activations, a.id), x.id),
+          ),
+        )
+      : rows;
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader projectId={projectId} />
@@ -102,7 +107,7 @@ export async function ActivationsIndex({
             scopes
               ? {
                   options: scopes.titles.filter((x) => !x.abandoned),
-                  current: title?.id ?? null,
+                  current: chosen.map((x) => x.id),
                 }
               : null
           }

@@ -18,6 +18,7 @@ import {
   type MailKind,
   type MailboxMessage,
 } from "@/lib/mailbox/types";
+import { filterParamOf } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 
 const fr = { mailbox, mailboxGmail };
@@ -39,7 +40,7 @@ export function MailboxViews({
   truncated,
   hasGmail,
   vue,
-  kind,
+  kinds,
   compose,
 }: {
   box: MailboxMessage[];
@@ -47,7 +48,8 @@ export function MailboxViews({
   truncated: string | null;
   hasGmail: boolean;
   vue: string | null;
-  kind: MailKind | null;
+  // ?type=: several kinds, any of them.
+  kinds: MailKind[];
   compose: ReactNode;
 }) {
   const t = fr.mailbox;
@@ -62,7 +64,11 @@ export function MailboxViews({
     b.sentAt.localeCompare(a.sentAt),
   );
   const ofKind = (list: MailboxMessage[]) =>
-    kind ? list.filter((m) => m.kinds.includes(kind)) : list;
+    kinds.length > 0
+      ? list.filter((m) => m.kinds.some((k) => kinds.includes(k)))
+      : list;
+  const filtering = kinds.length > 0;
+  const type = filterParamOf(kinds);
   const inView = onGmail
     ? mine
     : view
@@ -77,13 +83,13 @@ export function MailboxViews({
       pageAction={compose}
       views={[
         {
-          href: viewHref(routes.mailbox, { type: kind }),
+          href: viewHref(routes.mailbox, { type }),
           label: t.views.all,
           count: ofKind(all).length,
           current: !onGmail && view === null,
         },
         ...MAIL_VIEWS.map((v) => ({
-          href: viewHref(routes.mailbox, { vue: v.param, type: kind }),
+          href: viewHref(routes.mailbox, { vue: v.param, type }),
           label: t.views[v.key],
           count: ofKind(all).filter((m) => m.folder === v.folder).length,
           current: view?.key === v.key,
@@ -91,7 +97,7 @@ export function MailboxViews({
         ...(hasGmail
           ? [
               {
-                href: viewHref(routes.mailbox, { vue: GMAIL_VIEW, type: kind }),
+                href: viewHref(routes.mailbox, { vue: GMAIL_VIEW, type }),
                 label: g.view,
                 count: waiting ? undefined : ofKind(mine).length,
                 current: onGmail,
@@ -118,7 +124,7 @@ export function MailboxViews({
         <MailList
           messages={ofKind(inView)}
           filters={
-            present.size > 0 || kind ? (
+            present.size > 0 || filtering ? (
               <UrlFilters
                 path={routes.mailbox}
                 params={{ vue: onGmail ? GMAIL_VIEW : (view?.param ?? null) }}
@@ -130,7 +136,7 @@ export function MailboxViews({
                     options: MAIL_KINDS.filter((k) => present.has(k)).map(
                       (k) => ({ value: k, label: t.kinds[k] }),
                     ),
-                    current: kind,
+                    current: kinds,
                   },
                 ]}
               />
@@ -140,7 +146,7 @@ export function MailboxViews({
             <EmptyState
               icon={IconEnvelopeOpen}
               title={
-                kind
+                filtering
                   ? t.states.filtersEmpty
                   : onGmail
                     ? g.emptyTitle
@@ -149,7 +155,7 @@ export function MailboxViews({
                       : t.states.emptyTitle
               }
               body={
-                kind
+                filtering
                   ? t.states.filtersEmptyBody
                   : onGmail
                     ? g.emptyBody

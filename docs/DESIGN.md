@@ -231,6 +231,10 @@ Production orange, Livraison sarcelle, Défense jaune, Bilan ardoise) et son **t
 (Musical violet, Contenu vert tilleul, Événement sable), distincts des étapes puisqu'ils
 sont sur la même ligne. Jetons `--hue-<teinte>-bg` / `-fg` (`app/globals.css`), variantes
 de `StatusBadge`, correspondance dans `lib/ui/category-hues.ts` seulement.
+Le **type d'un fichier** est aussi une catégorie (`FileTypeIcon`, d'après Accordee, Sacha 24/11/2026) : disque
+teinté devant son nom, PDF rouge, tableur vert, texte bleu ciel, présentation orange, image violet, audio indigo,
+vidéo rose, archive sable, autre ardoise (`fileTypeHue`). Le rouge et le vert (`--hue-red-*`, `--hue-green-*`)
+sont réservés aux types de fichier : ailleurs ils se liraient comme un état.
 Le **titre d'une ligne** dans les tableaux du Juridique est aussi une catégorie : un tag dans
 une colonne « Titre », une teinte par titre selon sa place dans le projet (`titleHue`). Il
 n'est jamais ajouté au sous-titre de la ligne (demande de Sacha, 04/10/2026).
@@ -625,10 +629,12 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
 - **Pastilles** (`FilterChip`) : seulement des filtres ou des choix **qui se combinent**.
 - **Recherche et filtres d'une liste** (Figma Projets 90:4972, Sacha 29/10/2026) : sous les
   onglets, **une seule ligne** (`ListToolbar`) : la recherche, **deux fois plus large qu'un filtre**
-  (Sacha 29/10), puis les filtres principaux en listes déroulantes de même largeur (3 au plus, « Tous les … » quand rien n'est choisi), puis
-  le bouton carré des **filtres avancés** pour les autres ; « Effacer les filtres » au bout
-  dès qu'un filtre est posé. Recherche et listes déroulantes **dessinées comme les champs** (Sacha
-  29/10) : contour, fond, coins `rounded-lg`, texte 16 px ; jamais en pilule. Jamais les filtres principaux cachés derrière un bouton. En
+  (Sacha 29/10), puis, **jusqu'à 3 axes**, une liste déroulante à choix unique par axe, de même largeur
+  (« Tous les … » quand rien n'est choisi), Actifs / Archivés derrière le bouton carré ; **plus de 3 axes**
+  (Sacha 24/11/2026, d'après Accordee) : un seul bouton « Filtres » en contour, avec le nombre de cases
+  cochées, qui ouvre le panneau de tous les axes en cases à cocher, plusieurs choix par axe (OU dans un
+  axe, ET entre axes) ; « Effacer les filtres » au bout dès qu'un filtre est posé. Recherche et listes déroulantes **dessinées comme les champs** (Sacha
+  29/10) : contour, fond, coins `rounded-lg`, texte 16 px ; jamais en pilule. En
   place : Projets, Travail, Artistes, Catalogue, Réseau, Contrats, Fichiers, Calls (liste).
 - **Tableaux** (`DataTable`, Sacha 29/10/2026) : une carte comme les listes de l'accueil,
   contour, fond, en-tête sur bande douce, filet entre les lignes. Dans une carte de section,
@@ -940,8 +946,14 @@ composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 > à droite de la liste ») : dès `lg`, un mail s'ouvre dans un **volet de lecture** à droite de la liste, pas dans la fiche
 > latérale : on enchaîne les mails sans ouvrir ni fermer, comme dans toute messagerie. Sous `lg`, la fiche latérale
 > reprend (`MailInbox`, `docs/COMPOSANTS.md`).
-> Le verre centré ne reste que pour ⌘K, la visionneuse, la présentation, PO et le menu du téléphone
-> (`side="center"`). Ce qui suit décrit le **style classique**, gardé derrière l'interrupteur de Réglages.
+> **Écart voulu : l'aperçu d'un fichier** (`FilePreview`, d'après Accordee, Sacha 24/11/2026) : un clic sur le nom
+> d'un fichier l'ouvre dans une **grande modale centrée** (1 280 px au plus, `--dialog-width-viewer`, presque toute la
+> hauteur), pas dans le panneau de droite : une page de PDF, une image ou un tableur se lisent mal dans 520 px, et la
+> liste reste derrière le voile. En-tête sur une ligne (icône de type, nom, rattachement · taille · jour en gris,
+> « Ouvrir dans un nouvel onglet » et « Télécharger », filet, fermer), corps sur `--surface-sunken`. Il ne porte
+> aucun geste d'écriture : ceux-ci restent dans le « ⋯ » de la ligne.
+> Le verre centré ne reste que pour ⌘K, la visionneuse, l'aperçu d'un fichier, la présentation, PO et le menu du
+> téléphone (`side="center"`). Ce qui suit décrit le **style classique**, gardé derrière l'interrupteur de Réglages.
 
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,
 27/09/2026) : modifier un artiste, un master, un projet, confirmer, transmettre, créer
@@ -976,6 +988,10 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 - **Sur téléphone** (sous `sm`), la modale est posée en bas, pleine largeur, et **monte du bord
   bas** (`translate-y` 100 % → 0, `--duration-base`, `--ease-out`) au lieu de grandir de .97 ;
   elle redescend en sortant. Mouvement réduit : fondu seul.
+- **Un clic à côté ne perd jamais une saisie** (test UX du 24/11/2026 : deux testeurs sur quatre ont perdu leur
+  « Prochaine action » d'un clic mal placé, l'une s'en est crue fautive) : tant qu'un formulaire de la modale n'a pas
+  changé, un clic à côté la ferme ; dès qu'il a changé, le clic à côté ne fait rien. Échap et ✕ ferment toujours,
+  ils sont voulus (`components/ui/dialog-guard.ts`, dans `Dialog`, donc partout).
 - Hors périmètre : les menus et listes déroulantes en portail (`Select`, `DropdownMenu`,
   `Popover`, `Tooltip`).
 - **Entrée** : opacité et `scale(.97 → 1)` (montée du bord bas sur téléphone) en `--duration-base` (180 ms) `--ease-out`, le flou
@@ -992,6 +1008,14 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 - **Boutons d'une modale ou d'une décision** (décision C0) : le **principal d'abord, à
   gauche**, puis les secondaires (« Annuler » en dernier), comme le proto. Un seul endroit :
   `DialogFormActions` et `ReasonForm` ; aucune modale ne range ses boutons à la main.
+
+### Fiche latérale d'un enregistrement (24/11/2026)
+
+Le panneau d'un contact du Réseau (`ContactSheet`, d'après Accordee) est le **modèle validé par Sacha** pour la fiche
+latérale de tout enregistrement qu'on lit (contact, artiste, titre, deal…) : en-tête en barre, identité et gestes de
+communication, une carte de synthèse, blocs titrés sans carte absents quand ils sont vides, chargement en deux temps,
+↑ ↓ dans l'ordre affiché. Anatomie et règles : `docs/STYLE-FINANCE-PARTOUT.md` § 6.7 bis. Écart voulu avec la fiche
+d'une ligne d'argent de Finance (grand titre, montant en tête, § 6.7) : là, le montant est le premier fait.
 
 ### Pochette d'un projet (10/11/2026)
 

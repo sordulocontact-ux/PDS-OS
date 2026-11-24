@@ -94,6 +94,10 @@ export function inContractView(state: ContractState, view: ContractView) {
   return states.includes(state);
 }
 
+/** The due date is still awaited: the contract is not signed, nor ended. */
+export const awaitsDue = (state: ContractState): boolean =>
+  !["signed", "terminated", "expired"].includes(state);
+
 /** A due date to act on: not settled yet, and today or past. */
 export function isContractDue(
   contract: { status: ContractStatus; dueOn: string | null },
@@ -102,7 +106,7 @@ export function isContractDue(
   return (
     contract.dueOn !== null &&
     contract.dueOn <= today &&
-    !["signed", "terminated"].includes(contract.status)
+    awaitsDue(contract.status)
   );
 }
 

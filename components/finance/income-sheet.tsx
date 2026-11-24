@@ -1,5 +1,6 @@
 import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
 import { Button } from "@/components/ui/button";
+import { DueDate } from "@/components/ui/due-date";
 import { RowActions } from "@/components/ui/row-actions";
 import type { RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -81,7 +82,18 @@ export function IncomeSheet({
       <SheetFacts
         facts={[
           { label: t.target, value: target },
-          { label: t.due, value: formatDay(awaitedOn(income)) },
+          {
+            label: t.due,
+            value: (
+              <DueDate
+                dueOn={awaitedOn(income)}
+                awaited={state !== "cancelled" && remainingCents(income) > 0}
+                today={today}
+                showDate
+                fallback={formatDay(awaitedOn(income))}
+              />
+            ),
+          },
           ...opt(t.invoice, income.invoiceNumber),
           ...opt(
             t.invoicedOn,

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { SideSheet } from "@/components/ui/side-sheet";
+import { TableSortProvider } from "@/components/ui/table-sort";
 import { ReceiptSheet } from "@/components/finance/receipts/receipt-sheet";
 import { ReceiptsDropLayer } from "@/components/finance/receipts/receipts-drop-layer";
 import { ReceiptsTable } from "@/components/finance/receipts/receipts-table";
@@ -116,7 +117,8 @@ export function ReceiptsBox({
         }
       >
         {(visible) => (
-          <>
+          // One sort for the table and its sheet: ↑ ↓ follow the rows.
+          <TableSortProvider>
             <ForwardLine address={address} />
             {/* The grid (ReceiptCard) is set aside for now: the list only
                 (Sacha 15/11/2026). */}
@@ -132,7 +134,7 @@ export function ReceiptsBox({
               choices={choices}
               canManage={canManage}
             />
-          </>
+          </TableSortProvider>
         )}
       </SearchableList>
     </div>

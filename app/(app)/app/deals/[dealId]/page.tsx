@@ -17,6 +17,7 @@ import {
   memoReplyTo,
 } from "@/lib/deals/memo-mail-queries";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
+import { loadParticipationStep } from "@/lib/deals/participation-contract";
 import { loadDealContract, loadDealMemos } from "@/lib/deals/memo-queries";
 import { loadContractPage } from "@/lib/contracts/page-data";
 import { findContract } from "@/lib/contracts/queries";
@@ -230,13 +231,22 @@ async function DealTodo({
   const circuit = detail
     ? { contract: detail, data: await loadContractPage(detail, access) }
     : null;
+  // A participation's contract, as its project's Juridique knows it, for
+  // whoever reads the deal: its owner prepares it from here, the others see
+  // who it waits for (Sacha 24/11/2026).
+  const participation =
+    contractTime && !circuit && deal.participationId
+      ? ((await loadParticipationStep(deal, access).catch(() => null)) ??
+        "unread")
+      : null;
   const contractStep: ContractStep | null =
-    contractTime && deal.canWrite && !circuit
+    contractTime && !circuit && (participation || deal.canWrite)
       ? {
-          participation: deal.participationId !== null,
-          create: can(access, "manage_contracts")
-            ? dealContractDefaults(deal, access.organizationId)
-            : null,
+          participation,
+          create:
+            !deal.participationId && can(access, "manage_contracts")
+              ? dealContractDefaults(deal, access.organizationId)
+              : null,
         }
       : null;
   const latest = memos[0] ?? null;
@@ -275,10 +285,14 @@ async function DealTodo({
           organizationId: access.organizationId,
           counterpart: deal.counterpartName,
           director: can(access, "validate"),
+          negotiator:
+            deal.assignee && deal.assignee.id !== access.personId
+              ? deal.assignee.name
+              : null,
           dealName: dealName(deal),
           replyTo: await memoReplyTo(
             memos.find((m) => m.email)?.email?.from ?? null,
-            deal.counterpartId,
+            deal,
           ),
           copies: loop
             .filter((e) => e.kind === "contact" && e.email)

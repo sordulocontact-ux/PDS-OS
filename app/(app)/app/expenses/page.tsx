@@ -19,6 +19,7 @@ import { artistIdByName } from "@/lib/budget/envelope-queries";
 import { EXPENSES_LIMIT, loadExpenses } from "@/lib/budget/expenses-queries";
 import { lacksProof } from "@/lib/budget/types";
 import { expenses as t } from "@/lib/i18n/fr/expenses";
+import { filterParamsOf, isFiltering } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -43,15 +44,16 @@ export default async function ExpensesPage({
   const { expenses, truncated, error } = await loadExpenses(access.personId);
   const filters = expenseFiltersOf(params);
   const noProof = params.vue === NO_PROOF;
-  const filtering = Object.values(filters).some((value) => value !== null);
+  const filtering = isFiltering(filters);
   // The tabs count what the filters keep; the filters offer what the tab
   // holds.
   const filtered = expenses.filter((e) => matchesExpense(e, filters));
   const ofView = noProof ? expenses.filter(lacksProof) : expenses;
   const shown = noProof ? filtered.filter(lacksProof) : filtered;
   // Filtered on one artist: its envelope above the list (what remains).
-  const envelopeArtistId = filters.artist
-    ? await artistIdByName(filters.artist)
+  const envelopeArtist = filters.artist.length === 1 ? filters.artist[0] : null;
+  const envelopeArtistId = envelopeArtist
+    ? await artistIdByName(envelopeArtist)
     : null;
 
   // The phone has it in its header already (BUD 4).
@@ -69,10 +71,10 @@ export default async function ExpensesPage({
       toolsAction={expenses.length > 0}
     >
       {error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      {envelopeArtistId && filters.artist && (
+      {envelopeArtistId && envelopeArtist && (
         <ArtistEnvelopeCard
           artistId={envelopeArtistId}
-          artistName={filters.artist}
+          artistName={envelopeArtist}
         />
       )}
       {expenses.length === 0 ? (
@@ -87,13 +89,16 @@ export default async function ExpensesPage({
           pageAction={action}
           views={[
             {
-              href: viewHref(routes.expenses, filters),
+              href: viewHref(routes.expenses, filterParamsOf(filters)),
               label: t.views.all,
               count: filtered.length,
               current: !noProof,
             },
             {
-              href: viewHref(routes.expenses, { ...filters, vue: NO_PROOF }),
+              href: viewHref(routes.expenses, {
+                ...filterParamsOf(filters),
+                vue: NO_PROOF,
+              }),
               label: t.views.noProof,
               count: filtered.filter(lacksProof).length,
               current: noProof,

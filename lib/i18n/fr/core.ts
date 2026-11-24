@@ -10,6 +10,13 @@ export const core = {
     close: "Fermer",
     saving: "Enregistrement…",
   },
+  // An awaited due day said in words (components/ui/due-date.tsx).
+  dueDate: {
+    late: (days: number) => `${days} jour${days > 1 ? "s" : ""} de retard`,
+    ahead: (days: number) => `Dans ${days} jours`,
+    tomorrow: "Demain",
+    today: "Aujourd'hui",
+  },
   // What is left of a budget (components/ui/rest-amount.tsx).
   amounts: {
     restWord: "Reste",
@@ -41,6 +48,10 @@ export const core = {
     more: "Plus de filtres",
     moreCount: (count: number) =>
       `Plus de filtres, ${count} actif${count > 1 ? "s" : ""}`,
+    // More than 3 axes: one button, a panel of boxes to tick (FilterPanel).
+    panel: "Filtres",
+    panelCount: (count: number) =>
+      `Filtres, ${count} choix coché${count > 1 ? "s" : ""}`,
     clear: "Effacer les filtres",
   },
   // components/ui/audio-file.tsx, components/ui/audio-player.tsx

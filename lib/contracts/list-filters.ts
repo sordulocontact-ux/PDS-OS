@@ -1,5 +1,6 @@
 import type { UrlFilterGroup } from "@/components/ui/url-filters";
 import {
+  asContractView,
   CONTRACT_TYPES,
   CONTRACT_VIEW_KEYS,
   inContractView,
@@ -12,28 +13,45 @@ import type {
   TemplateSeries,
   TemplateStatus,
 } from "@/lib/legal/contracts/templates";
-import { optionsOfNames } from "@/lib/ui/filter-options";
+import {
+  filterValues,
+  matchesAny,
+  optionsOfNames,
+} from "@/lib/ui/filter-options";
 
 const fr = { contracts: contractsText, legalContracts };
 
 // The filters of the Contrats page (Sacha, 30/10/2026): the contract's state
 // first (?view=, the former tabs), then type, project; artist and owner
 // behind the filter button. Only what some contract holds is offered.
+// Several values per axis (the « Filtres » panel): any of them.
 
 export type ContractFilters = {
-  view: ContractView | null;
-  type: string | null;
-  project: string | null;
-  artist: string | null;
-  owner: string | null;
+  view: ContractView[];
+  type: string[];
+  project: string[];
+  artist: string[];
+  owner: string[];
 };
 
+type Params = Record<string, string | string[] | undefined>;
+
+export function contractFiltersOf(params: Params): ContractFilters {
+  return {
+    view: filterValues(params.view).flatMap((v) => asContractView(v) ?? []),
+    type: filterValues(params.type),
+    project: filterValues(params.project),
+    artist: filterValues(params.artist),
+    owner: filterValues(params.owner),
+  };
+}
+
 export const matchesContract = (c: ContractRow, f: ContractFilters) =>
-  (!f.view || inContractView(c.state, f.view)) &&
-  (!f.type || c.type === f.type) &&
-  (!f.project || c.projectTitle === f.project) &&
-  (!f.artist || c.artistName === f.artist) &&
-  (!f.owner || c.ownerName === f.owner);
+  (f.view.length === 0 || f.view.some((v) => inContractView(c.state, v))) &&
+  matchesAny(f.type, c.type) &&
+  matchesAny(f.project, c.projectTitle) &&
+  matchesAny(f.artist, c.artistName) &&
+  matchesAny(f.owner, c.ownerName);
 
 export function contractFilterGroups(
   contracts: ContractRow[],
@@ -85,10 +103,15 @@ export function contractFilterGroups(
 
 const TEMPLATE_STATES: TemplateStatus[] = ["draft", "validated", "retired"];
 
-export type TemplateFilters = { state: string | null; type: string | null };
+export type TemplateFilters = { state: string[]; type: string[] };
+
+export const templateFiltersOf = (params: Params): TemplateFilters => ({
+  state: filterValues(params.tstate),
+  type: filterValues(params.ttype),
+});
 
 export const matchesTemplate = (t: TemplateSeries, f: TemplateFilters) =>
-  (!f.state || t.status === f.state) && (!f.type || t.type === f.type);
+  matchesAny(f.state, t.status) && matchesAny(f.type, t.type);
 
 export function templateFilterGroups(
   templates: TemplateSeries[],

@@ -2878,6 +2878,77 @@ d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune 
   « Cap sur demain » amène Elio Danvers, « Néons » Mona Lys ; retirer « Néons » retire Mona Lys ; Elio retiré à la main
   ne revient pas quand « Marée haute » amène Ysolde Marnay. Aucun projet créé, le brouillon ouvert pendant le test supprimé.
 
+## Tableaux d'après Accordee : tri, une ligne, panneau du Réseau, filtres multiples, échéances (24/11/2026, branche `pre-prod`)
+
+- **Demande de Sacha** : reprendre cinq points des tableaux d'Accordee (demo.accordee.app, analysée le 24/11). La
+  pastille d'état teintée est laissée de côté pour l'instant (badge ou point : quand l'un, quand l'autre, à décider).
+- **Tri par colonne partout** (`components/ui/table-sort.tsx`, `lib/ui/table-sort.ts`) : un clic sur un en-tête de
+  `DataTable` trie (croissant, décroissant, ordre de départ), sans code par tableau. Les valeurs sont lues dans les
+  cellules rendues (`DataTableCell sort`, sinon `<time datetime>`, sinon le texte visible) ; nombres, montants, dates
+  françaises reconnus, vides en bas, à partir de 3 lignes. `DataTableRow pinned` pour un total (Budget, sous-budgets,
+  objectifs du Marketing). Pas de tri sur un tableau à `rowSpan`. ↑ ↓ d'une `SideSheet` suivent l'ordre trié sous un
+  `TableSortProvider` commun (Réseau, Dépenses, Encaissements, Transactions, Trésorerie, Justificatifs).
+- **Nom et sous-ligne** : essayés sur une seule ligne (`DataTableMedia`), remis sur deux lignes le même jour (Sacha :
+  la colonne du nom prenait la place des autres).
+- **Réseau, refait d'après la frame du panneau personne d'Accordee** (Sacha, 24/11) : le nom d'un contact ouvre
+  `ContactSheet`. En-tête en barre (icône, nom, « Ouvrir la fiche complète », « ⋯ », fermer), photo et nom en grand,
+  métiers · organisation, relations en pastilles, gestes « E-mail » (fenêtre de la page Mails pré-remplie) et
+  « Réunion » (le contact déjà invité, `MeetingForm defaultContactIds`). Puis, lus à l'ouverture par
+  `loadContactSheet` (session de l'utilisateur, RLS) et gardés pour ↑ ↓ : carte « Avec PDS » (la carte « Strong » sans
+  score : attendus de ses projets, dernier call, comptes), « Ses contacts dans l'équipe » (membres de ses calls),
+  « Fiches liées », « Ses factures » (factures qu'il a envoyées à PDS : à payer, en retard, payées), « Coordonnées »
+  (prochain call, entrée dans le Réseau). Écarts voulus : pas de score de relation (aucune règle métier pour le
+  calculer), pas de « Timeline » (Ibé, 23/11 : aucun historique à l'écran), pas de « Note » ni de « Tâche » (pas de
+  note ni de tâche rattachée à un contact dans PDS OS).
+- **Filtres** : plus de 3 axes → un seul bouton « Filtres » et un panneau à cases (plusieurs choix par axe, OU dans
+  l'axe, ET entre axes ; `components/ui/filter-panel.tsx`) : Contrats, Dépenses, Projets. Toutes les pages lisent des
+  valeurs multiples dans l'URL (virgules, `filterValues` de `lib/ui/filter-options.ts`).
+- **Échéances** : `DueDate` (`components/ui/due-date.tsx`, `lib/utils/due.ts`) dit « 26 jours de retard » en rouge,
+  « Dans 4 jours » en orange (7 jours), seulement si c'est encore attendu : Encaissements, Dépenses (`spendAwaited`),
+  Contrats (`awaitsDue`, remplace le badge « Échéance passée »).
+- **Fichiers, d'après la page Documents d'Accordee** : le nom d'un fichier (`/app/files`, onglet Fichiers d'un artiste,
+  titre, projet, contrat) ouvre `FilePreview`, grande modale centrée (écart noté dans `docs/DESIGN.md`) : PDF, image,
+  audio, vidéo, texte, CSV en tableur (A, B, C…), sinon « Aperçu indisponible » et Télécharger ; ← → dans l'ordre
+  affiché. Icône de type colorée (`FileTypeIcon`, `fileTypeHue`, nouveaux tokens `--hue-red-*` / `--hue-green-*`
+  réservés aux types). Reste : les fichiers de travail de la page Master (`work-files-section.tsx`).
+- **Un fait par colonne dans les tableaux de fichiers** (Sacha, 24/11) : type et taille sortis de la sous-ligne du nom,
+  « Ajouté » séparé en « Ajouté par » (avatar + nom) et « Ajouté le » (`FilesTable`, `LibraryTable`, fichiers de travail
+  du Master). Le panneau du Réseau montre la fiche de renseignements et son lien en tête des « Coordonnées », comme la
+  page du contact.
+- **Contrats sur le modèle du Réseau** (Sacha, 24/11) : le titre d'un contrat ouvre `ContractSheet` (en-tête en barre,
+  identité, « Voir le contrat » et « E-mail » au signataire, « Maintenant » en carte de synthèse, parties, fiches liées,
+  factures, informations), ↑ ↓ dans l'ordre trié ; Parties sur une ligne. Les briques de fiche sont devenues communes
+  (`ui/record-sheet*.tsx`, `useRecordSheetData`, `InvoicesSheetBlock`) et le titre de « Maintenant » une fonction pure
+  (`contractNowTitle`) partagée par la page et la fiche.
+- **Retouches du 24/11 (Sacha)** : dans la carte de synthèse, les parties et les fichiers d'un contrat (calls passés et
+  titres crédités d'un contact) se replient sous leur nombre, fermés au départ (le bloc « Parties » disparaît) ; point
+  vert de « Signé » plus vif (`--tone-success-dot`) ; `DataTableText` plafonne une cellule de texte à 192 px
+  (« Métier ou activité » s'étalait) ; plus d'icône répétée sur chaque ligne des Contrats et des Deals, ni de disque
+  d'icône en tête de la fiche d'un contrat (la petite icône reste dans sa barre).
+  Deals : le type (Musique, Label, Partenariat de marque) a sa colonne ; sous le nom, le projet d'un deal de titre
+  seulement. Une échéance dite en mots n'est plus en Geist Mono (la mono des chiffres ne va qu'à une date seule).
+  Test du deal Tavio Marlan : la direction sur un deal négocié par quelqu'un d'autre voit « En attente de … : rédiger
+  le deal memo » avec « Rédiger le deal memo » en contour (elle peut toujours l'écrire, `MemoStep.negotiator`) ; chaque
+  call d'un deal montre le résumé de son dernier compte rendu, replié dans sa carte (`DealCall.summary`). Le call de
+  test n'a produit aucune proposition de termes (Mistral local, citations non retrouvées mot pour mot) : à revoir en
+  pré-prod avec Claude. Sur la page d'un deal, les calls passent au-dessus de « Prochaine action » à toutes les étapes (`WORKS`). « Ouvrir le PDF » d'un deal memo l'ouvre dans le navigateur (`?view=1`, comme un contrat) au lieu de le télécharger, à la taille du geste d'à côté. « Renvoyer l'accord validé » d'un deal de musique pré-remplit « À » (contacts du deal, manager de l'artiste, fiche Réseau de l'artiste, `memoReplyTo`) et retire ce destinataire des copies.
+  **Contrat de participation préparé depuis le deal** (Sacha, 24/11) : en contractualisation, `DealParticipationNow`
+  montre l'état de la ligne de la personne dans le Juridique du projet et ses gestes (prévoir avec le modèle proposé et la
+  rémunération, ouvrir la fiche, générer), pour le responsable du projet ; les autres voient qui doit agir. Tout lecteur
+  qui n'écrit pas le deal voit « En attente de … : … ». Calls à toutes les étapes ; icône et libellé en tête de chaque
+  « Maintenant » (`NowFrame`, toute l'app).
+- **Pages annexes au design du Réseau** (Sacha, 24/11) : fiche latérale `CallSheet` pour les calls ; essayée aussi pour
+  Artistes, Titres, Maquettes et Sessions, retirée le même jour (trop riches pour une modale : leur nom ouvre leur page) ;
+  tableaux à une information par colonne coupée à 192 px, plus d'icône répétée (disque des titres sans pochette,
+  téléphone des calls, pochette vide des projets quand aucun n'en a), mono seulement sur les dates et chiffres
+  (« Sans date », « Sans échéance », prochaine sortie d'un artiste). Liste des Projets : tableau seul. Le nom affiché dans « À » est celui du contact choisi, plus le premier du Réseau qui partage l'adresse (`MailEnvelopeRows known`).
+- **Réseau, un fait par colonne** (Sacha, 24/11) : Nom (organisation dessous) | Métier | Relation | Avec PDS | E-mail |
+  Téléphone | Ville, une ligne de texte par cellule. « Personne / Organisation » n'a pas de colonne : les onglets et
+  l'icône de la ligne le disent déjà.
+- Guide de PO à jour (tri, filtres, fiche latérale du Réseau, aperçu d'un fichier). `pnpm build` passe. **Pas vérifié dans le navigateur**
+  (base locale arrêtée) : rendu du tri, du panneau de filtres et de la fiche du Réseau à regarder.
+- Reste : échéances non traitées (`components/invoices/pay-list.tsx` en premier, factures du portail, activations).
+
 ## Bandeau du haut : où l'on est et changer d'élément ; recherche dans la barre de gauche (24/11/2026, branche `pre-prod`)
 
 Demande de Sacha (24/11) : sur une page ouverte depuis un tableau (un budget, un deal, un contrat…), le nom en haut à
@@ -2895,3 +2966,19 @@ dans la navigation. Nouveau style validé par Ibé le même jour : plus de code 
   pages « nouveau » (titre, projet, membre, projet depuis une liste) en fil d'Ariane sans sélecteur. Sans migration.
 - Vérifié dans Chrome (compte de test du seed) : Budgets, « Budgets / Ciel ouvert ⌄ » → « Mirage », Deals, artiste avec
   changement en gardant l'onglet Projets.
+
+## Deals : test UX à quatre profils et ses trois premiers correctifs (24/11/2026)
+
+Test simulé du parcours Deals par une personne peu à l'aise avec l'ordinateur, une enfant, un business manager et une
+power user (`ux-tests/2026-11-24-deals-profils/rapport.md`, SUS 46). Corrigés dans la foulée :
+
+- **Une seule date de rappel** : « Pour le » et « Relancer le » deviennent « Me le rappeler le », écrite dans les deux
+  colonnes ; la carte dit « Rappel le … » ; le rappel part au plus tôt des deux dates
+  (`20261124170101_deal_reminder_on_next_action.sql`), donc aussi pour un deal qui n'a qu'un jour d'action ; la
+  notification dit « Rappel du jour » ; Travail, l'accueil et la liste montrent l'action elle-même le jour venu.
+- **« Ajouter au Réseau » depuis « Nouveau deal » marche** : le `submit` d'un `FormDialog` s'arrête à sa frontière
+  (portail React dans un autre formulaire), partout.
+- **Un clic à côté ne perd plus une saisie** : `Dialog` ne se ferme plus au clic extérieur quand un de ses formulaires a
+  changé (`ui/dialog-guard.ts`), Échap et ✕ ferment toujours.
+- Reste (rapport, gravité 3 et 2) : libellés des termes de marque en français (Fee, Livrables, Droits d'usage), un état
+  « Notre proposition » par défaut, prochaine action en tête d'une fiche en négociation, « À enregistrer » d'un call passé.

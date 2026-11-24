@@ -37,6 +37,8 @@ export const deals = {
   },
   table: {
     deal: "Deal",
+    // Its own column (Sacha, 24/11/2026): Musique, Label, Partenariat.
+    kind: "Type",
     stage: "Étape",
     next: "Prochaine action",
     assignee: "Négocié par",
@@ -197,7 +199,7 @@ export const deals = {
     assigneeHint:
       "Un membre qui négocie ; laissez vide pour l'affecter plus tard.",
     nextAction: "Prochaine action",
-    nextActionOn: "Pour le",
+    nextActionOn: "Me le rappeler le",
     submit: "Créer le deal",
     required: {
       participation: "Choisissez la participation.",
@@ -237,6 +239,11 @@ export const deals = {
       title: (who: string | null) =>
         who ? `Caler le call avec ${who}` : "Caler le call de négociation",
     },
+    // Where a deal stands for who does not write it (Sacha 24/11/2026).
+    waitFor: (who: string, todo: string) =>
+      `En attente ${/^[aeiouyhàâéèêëîïôöûü]/i.test(who) ? "d'" : "de "}${who} : ${todo.charAt(0).toLowerCase()}${todo.slice(1)}`,
+    waitUnassigned: "En attente : personne ne négocie encore ce deal.",
+    waitTodos: { sendBack: "renvoyer l'accord validé" },
     waitDirection:
       "La direction est prévenue : elle valide l'accord de principe ou le renvoie en négociation.",
     // The terms the direction validates, recalled above its button (UX test
@@ -281,20 +288,19 @@ export const deals = {
     },
     next: {
       action: "Prochaine action",
-      on: "Pour le",
-      followUp: "Relancer le",
-      followUpHint:
-        "Si personne n'a répondu d'ici là : PDS OS vous rappelle de relancer.",
+      // One date (UX test of 24/11/2026): « Pour le » and « Relancer le »
+      // read as the same, half the reminders never rang.
+      remindOn: "Me le rappeler le",
+      remindHint: "PDS OS vous prévient ce jour-là.",
+      remindedOn: (day: string) => `Rappel le ${day}`,
       call: "Prochain call",
       none: "Aucune",
       // The next action in one sentence (Sacha 20/11/2026: too many tables).
       noneAction: "Aucune prochaine action.",
       add: "Ajouter une prochaine action",
-      followUpOn: (day: string) => `Relancer le ${day}`,
       edit: "Modifier",
-      editTitle: "Prochaine action et relance",
-      editDescription:
-        "Ce que vous ferez ensuite, et quand relancer : PDS OS vous le rappelle le jour venu.",
+      editTitle: "Prochaine action",
+      editDescription: "Ce que vous ferez ensuite, et quand vous le rappeler.",
       submit: "Enregistrer",
     },
     info: {

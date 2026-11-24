@@ -3,10 +3,12 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import type { RowAction } from "@/components/ui/row-actions";
+import { DueDate } from "@/components/ui/due-date";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   proofExpected,
   sheetDay,
+  spendAwaited,
   spendTtc,
   type FinanceSpend,
 } from "@/lib/finance/spends";
@@ -30,6 +32,7 @@ export function SpendSheet({
   part = null,
   actions,
   proofIn,
+  today,
 }: {
   spend: FinanceSpend;
   envelope: string;
@@ -39,6 +42,8 @@ export function SpendSheet({
   // The organization its proof is kept in, when one may give it one (who
   // writes Finance): « Joindre le justificatif » right in the sheet.
   proofIn?: string;
+  // The page's Paris day, for the awaited due day said in words.
+  today?: string;
 }) {
   const post = spend.family
     ? spend.family === "other"
@@ -77,7 +82,20 @@ export function SpendSheet({
           { label: t.supplier, value: spend.supplier ?? financeSheet.none },
           { label: t.date, value: sheetDay(spend.spentOn) },
           ...(spend.dueOn
-            ? [{ label: t.due, value: sheetDay(spend.dueOn) }]
+            ? [
+                {
+                  label: t.due,
+                  value: (
+                    <DueDate
+                      dueOn={spend.dueOn}
+                      awaited={spendAwaited(spend)}
+                      today={today}
+                      showDate
+                      fallback={sheetDay(spend.dueOn)}
+                    />
+                  ),
+                },
+              ]
             : []),
           {
             label: t.rebill,

@@ -5,6 +5,7 @@
 import { shell } from "@/lib/i18n/fr/shell";
 import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectListItem, ProjectType } from "@/lib/projects/types";
+import { matchesAny } from "@/lib/ui/filter-options";
 import { normalizeSearch } from "@/lib/utils/search";
 
 const fr = { shell };
@@ -46,24 +47,28 @@ export function phaseLabel(p: ProjectListItem): string | null {
 
 export const DUE_FILTERS = ["any", "next30", "overdue", "none"] as const;
 export type DueFilter = (typeof DUE_FILTERS)[number];
+/** A due filter that keeps some projects (« any » is no filter). */
+export type DueChoice = Exclude<DueFilter, "any">;
 
+// Several values per filter (the « Filtres » panel): any of them; none =
+// no filter.
 export type ProjectFilters = {
   query: string;
-  type: ProjectType | "any";
+  type: ProjectType[];
   // The artist by name: the list carries no id (Contrats does the same).
-  artist: string | "any";
-  responsible: string | "any";
-  status: AdminStatus | "any";
-  due: DueFilter;
+  artist: string[];
+  responsible: string[];
+  status: AdminStatus[];
+  due: DueChoice[];
 };
 
 export const NO_FILTERS: ProjectFilters = {
   query: "",
-  type: "any",
-  artist: "any",
-  responsible: "any",
-  status: "any",
-  due: "any",
+  type: [],
+  artist: [],
+  responsible: [],
+  status: [],
+  due: [],
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -72,24 +77,24 @@ const addDays = (iso: string, days: number) =>
     .toISOString()
     .slice(0, 10);
 
-/** Every filter applies at once (they combine), with the search over the
- * project, its artist and its responsible. */
+function dueMatches(p: ProjectListItem, due: DueChoice, today: string) {
+  if (due === "none") return !p.dueDate;
+  if (due === "overdue") return !!p.dueDate && p.dueDate < today;
+  return !!p.dueDate && p.dueDate >= today && p.dueDate <= addDays(today, 30);
+}
+
+/** Every filter applies at once (they combine), any of its values within
+ * one, with the search over the project, its artist and its responsible. */
 export function matchesFilters(
   p: ProjectListItem,
   f: ProjectFilters,
   today: string,
 ): boolean {
-  if (f.type !== "any" && p.type !== f.type) return false;
-  if (f.artist !== "any" && p.artistName !== f.artist) return false;
-  if (f.responsible !== "any" && p.responsiblePersonId !== f.responsible)
-    return false;
-  if (f.status !== "any" && adminStatus(p) !== f.status) return false;
-  if (f.due === "none" && p.dueDate) return false;
-  if (f.due === "overdue" && !(p.dueDate && p.dueDate < today)) return false;
-  if (
-    f.due === "next30" &&
-    !(p.dueDate && p.dueDate >= today && p.dueDate <= addDays(today, 30))
-  )
+  if (!matchesAny(f.type, p.type)) return false;
+  if (!matchesAny(f.artist, p.artistName)) return false;
+  if (!matchesAny(f.responsible, p.responsiblePersonId)) return false;
+  if (!matchesAny(f.status, adminStatus(p))) return false;
+  if (f.due.length > 0 && !f.due.some((due) => dueMatches(p, due, today)))
     return false;
   const q = normalizeSearch(f.query.trim());
   if (!q) return true;
@@ -105,13 +110,13 @@ export function draftMatches(
   f: ProjectFilters,
 ): boolean {
   if (
-    f.type !== "any" ||
-    f.artist !== "any" ||
-    f.responsible !== "any" ||
-    f.due !== "any"
+    f.type.length > 0 ||
+    f.artist.length > 0 ||
+    f.responsible.length > 0 ||
+    f.due.length > 0
   )
     return false;
-  if (f.status !== "any" && f.status !== "draft") return false;
+  if (!matchesAny(f.status, "draft")) return false;
   const q = normalizeSearch(f.query.trim());
   return !q || normalizeSearch(draft.title).includes(q);
 }

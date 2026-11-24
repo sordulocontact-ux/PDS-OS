@@ -1,7 +1,8 @@
 import { ContractNowFrame } from "@/components/contracts/now/contract-now-frame";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import type { ContractPageData } from "@/lib/contracts/page-data";
-import { isMine, type ContractNowKind } from "@/lib/contracts/now";
+import { isMine } from "@/lib/contracts/now";
+import { contractNowTitle } from "@/lib/contracts/now-title";
 import type { ContractDetail } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
@@ -30,37 +31,22 @@ export function ContractNow({
 }) {
   const t = fr.contracts.now;
   const { now: kind, signer, proof, direction } = data;
+  const mine = isMine(kind);
+  const ended =
+    kind === "signed" || kind === "expired" || kind === "terminated";
+  const title = contractNowTitle({
+    kind,
+    contract,
+    directionName: direction,
+    signerName: signer?.name ?? null,
+    viaLink: proof?.sent?.via === "link",
+  });
   const directionName = direction ?? t.direction;
   const signerName = signer?.name ?? t.theParty;
   const changesAsked =
     contract.state === "draft" &&
     contract.reviewComment &&
     contract.reviewerName;
-
-  const waitOf: Partial<Record<ContractNowKind, [string, string, boolean]>> = {
-    await_decide: [directionName, t.todos.decide, false],
-    await_submit: [contract.ownerName, t.todos.submit, false],
-    await_send: [contract.ownerName, t.todos.send, false],
-    await_signer: [signerName, t.todos.signer, proof?.sent?.via === "link"],
-    await_countersign: [directionName, t.todos.countersign, false],
-    await_mark_signed: [contract.ownerName, t.todos.mark_signed, false],
-  };
-  const wait = waitOf[kind];
-  const mine = isMine(kind);
-  const ended =
-    kind === "signed" || kind === "expired" || kind === "terminated";
-
-  const title = mine
-    ? kind === "submit" && changesAsked
-      ? t.titles.resubmit
-      : t.titles[kind as keyof typeof t.titles]
-    : wait
-      ? t.waiting(...wait)
-      : kind === "signed"
-        ? t.signedTitle(contract.signedOn ? formatDate(contract.signedOn) : "")
-        : kind === "expired"
-          ? t.expiredTitle(contract.endsOn ? formatDate(contract.endsOn) : "")
-          : t.terminatedTitle;
 
   const sent = proof?.sent;
   const f = t.facts;

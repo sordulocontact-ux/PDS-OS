@@ -7,7 +7,7 @@ import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { displayTermValue } from "@/lib/deals/term-format";
 import type { DealTerm } from "@/lib/deals/terms";
-import type { Deal } from "@/lib/deals/types";
+import { isClosedStage, type Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
 import { myValidationTone } from "@/lib/ui/state-tones";
 
@@ -159,7 +159,20 @@ export function DealNow({
         <div>{planCall}</div>
       </NowFrame>
     );
-  if (!deal.canWrite) return null;
+  // Contracting, the contract's « Maintenant » (or its participation's, in
+  // its project's Juridique) for whoever reads the deal: it says itself
+  // who acts (Sacha 24/11/2026: the project's owner saw nothing).
+  if (deal.stage === "contracting" && contractNow) return <>{contractNow}</>;
+  // Who does not write the deal: where it stands, who acts, no gesture
+  // (Sacha 24/11/2026, « où en est le deal »).
+  if (!deal.canWrite) {
+    const wait = waitLineOf(deal);
+    return wait ? (
+      <NowFrame label={t.now} quiet>
+        <p className={secondary}>{wait}</p>
+      </NowFrame>
+    ) : null;
+  }
   if (deal.stage === "agreement" && deal.agreementStatus === "pending")
     return (
       <NowFrame label={t.now} quiet>
@@ -175,8 +188,6 @@ export function DealNow({
       (deal.stage === "agreement" && deal.agreementStatus === "validated"))
   )
     return <NowFrame label={t.now}>{memoNow}</NowFrame>;
-  // Framed by its own (DealContractNow in a NowFrame, or ContractNow).
-  if (deal.stage === "contracting" && contractNow) return <>{contractNow}</>;
   const next = nextStageOf(deal, terms, callHeld);
   // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à
   // rien »): negotiating, the terms are right below; « Changer d'étape » and
@@ -192,4 +203,19 @@ export function DealNow({
       <DealNowActions deal={deal} mode="move" next={next} lead={own} />
     </NowFrame>
   );
+}
+
+/** Where a deal stands for who does not write it: who acts, to do what. */
+function waitLineOf(deal: Deal): string | null {
+  const t = fr.deals.page;
+  if (isClosedStage(deal.stage)) return null;
+  if (deal.stage === "agreement" && deal.agreementStatus === "pending")
+    return t.waitDirection;
+  const who = deal.assignee?.name;
+  if (!who) return t.waitUnassigned;
+  const todo =
+    deal.stage === "agreement"
+      ? t.waitTodos.sendBack
+      : fr.deals.work.todo[deal.stage];
+  return todo ? t.waitFor(who, todo) : null;
 }

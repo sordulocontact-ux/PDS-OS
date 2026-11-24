@@ -1,8 +1,10 @@
-import { IconPhone } from "nucleo-sharp-essential";
+"use client";
+
 import { Fragment } from "react";
 
 import { CallStatusBadge } from "@/components/calls/call-badges";
 import { CallProjectPill } from "@/components/calls/call-project-pill";
+import { CallSheet } from "@/components/calls/call-sheet";
 import { CallSheetMenu } from "@/components/calls/call-sheet-menu";
 import { JoinCallLink } from "@/components/calls/join-call-link";
 import {
@@ -12,11 +14,12 @@ import {
   DataTableGroupRow,
   DataTableHead,
   DataTableHeader,
-  DataTableIcon,
   DataTableLink,
   DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
+import { TableSortProvider } from "@/components/ui/table-sort";
+import { useSheetRow } from "@/components/ui/use-sheet-row";
 import { canDeleteCall, type CallDeleter } from "@/lib/calls/delete-rule";
 import { callHref, type CallDoor } from "@/lib/calls/door";
 import {
@@ -72,47 +75,63 @@ export function CallsTable({
   const groups = inOrder(calls, now);
   const titled = groups.upcoming.length > 0 && groups.past.length > 0;
   const columns = withProject ? 5 : 4;
+  // The calls as the table shows them (to come, then past): the sheet's ↑ ↓.
+  const shown = CALL_VIEWS.flatMap((view) => groups[view]);
+  const [sheet, setSheet] = useSheetRow(shown.map((call) => call.id));
 
+  // One sort for the table and its sheet.
   return (
-    <DataTable>
-      <DataTableHeader>
-        <DataTableHead fill>{t.columns.title}</DataTableHead>
-        {withProject && (
-          <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
-        )}
-        <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-        <DataTableHead>{t.columns.status}</DataTableHead>
-        <DataTableHead className={ACTIONS_COLUMN}>
-          <span className="sr-only">{t.columns.actions}</span>
-        </DataTableHead>
-      </DataTableHeader>
-      <DataTableBody>
-        {CALL_VIEWS.map((view) => (
-          <Fragment key={view}>
-            {titled && (
-              <DataTableGroupRow columns={columns}>
-                <p className="flex items-center gap-2 text-[length:var(--type-body-md)] font-semibold text-[color:var(--text-primary)]">
-                  {t.views[view]}
-                  <span className="font-medium text-[color:var(--text-tertiary)] tabular-nums">
-                    {groups[view].length}
-                  </span>
-                </p>
-              </DataTableGroupRow>
-            )}
-            {groups[view].map((call) => (
-              <CallRow
-                key={call.id}
-                call={call}
-                now={now}
-                door={door}
-                withProject={withProject}
-                deletable={canDeleteCall(deleter, call)}
-              />
-            ))}
-          </Fragment>
-        ))}
-      </DataTableBody>
-    </DataTable>
+    <TableSortProvider>
+      <DataTable>
+        <DataTableHeader>
+          <DataTableHead fill>{t.columns.title}</DataTableHead>
+          {withProject && (
+            <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
+          )}
+          <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
+          <DataTableHead>{t.columns.status}</DataTableHead>
+          <DataTableHead className={ACTIONS_COLUMN}>
+            <span className="sr-only">{t.columns.actions}</span>
+          </DataTableHead>
+        </DataTableHeader>
+        <DataTableBody>
+          {CALL_VIEWS.map((view) => (
+            <Fragment key={view}>
+              {titled && (
+                <DataTableGroupRow columns={columns}>
+                  <p className="flex items-center gap-2 text-[length:var(--type-body-md)] font-semibold text-[color:var(--text-primary)]">
+                    {t.views[view]}
+                    <span className="font-medium text-[color:var(--text-tertiary)] tabular-nums">
+                      {groups[view].length}
+                    </span>
+                  </p>
+                </DataTableGroupRow>
+              )}
+              {groups[view].map((call) => (
+                <CallRow
+                  key={call.id}
+                  call={call}
+                  now={now}
+                  door={door}
+                  withProject={withProject}
+                  deletable={canDeleteCall(deleter, call)}
+                  onOpen={() => setSheet(shown.indexOf(call))}
+                />
+              ))}
+            </Fragment>
+          ))}
+        </DataTableBody>
+      </DataTable>
+      <CallSheet
+        rows={shown}
+        now={now}
+        door={door}
+        deletable={(call) => canDeleteCall(deleter, call)}
+        index={sheet}
+        onClose={() => setSheet(null)}
+        onMove={setSheet}
+      />
+    </TableSortProvider>
   );
 }
 
@@ -122,12 +141,15 @@ function CallRow({
   door,
   withProject,
   deletable,
+  onOpen,
 }: {
   call: CallListItem;
   now: Date;
   door: CallDoor;
   withProject: boolean;
   deletable: boolean;
+  // Its side sheet (CallSheet).
+  onOpen: () => void;
 }) {
   const upcoming = isUpcoming(call, now);
   const slot = formatSlot(call);
@@ -135,9 +157,9 @@ function CallRow({
     <DataTableRow>
       <DataTableCell fill className="max-w-0">
         <DataTableMedia
-          visual={<DataTableIcon icon={IconPhone} />}
+          // No phone repeated on every row (Sacha 24/11/2026).
           title={
-            <DataTableLink href={callHref(door, call.id)}>
+            <DataTableLink href={callHref(door, call.id)} onOpen={onOpen}>
               {call.title}
             </DataTableLink>
           }

@@ -110,10 +110,13 @@ export function MeetingForm({
   defaultOccurredAt,
   defaultEnd,
   defaults,
+  defaultContactIds,
   onSaved,
   onCancel,
 }: MeetingFormData & {
   defaultEnd?: string;
+  // Réseau contacts invited from the start (a contact's side sheet).
+  defaultContactIds?: string[];
   // A draft of PO: title, link and guests already filled.
   defaults?: { title: string; meetingUrl: string; attendeeIds: string[] };
   onSaved?: (id: string) => void;
@@ -131,6 +134,7 @@ export function MeetingForm({
       members={members}
       memberDetail={fr.calls.schedule.memberDetail}
       defaultMemberIds={defaults?.attendeeIds ?? []}
+      defaultContactIds={defaultContactIds}
       contacts={contacts}
       participantsHint={fr.calls.schedule.participantsHint}
       googleMeet={googleMeet}

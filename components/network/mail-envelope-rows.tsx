@@ -34,12 +34,17 @@ export function MailEnvelopeRows({
   tried,
   name,
   source,
+  known,
 }: {
   value: MailEnvelope;
   onChange: (next: MailEnvelope) => void;
   tried: boolean;
   name: string;
   source?: FactSource | null;
+  // Who an address stands for when the caller knows it (by lowercase
+  // address): several contacts may share one address, the Réseau's first
+  // is not always the one meant (Sacha 24/11/2026).
+  known?: Record<string, string>;
 }) {
   const t = fr.mail;
   const people = useNetworkEmails();
@@ -151,7 +156,8 @@ export function MailEnvelopeRows({
         // chips only while the row is changed (Sacha 22/11/2026).
         <span>
           {list.map((email, i) => {
-            const who = nameOfAddress(people, email);
+            const who =
+              known?.[email.toLowerCase()] ?? nameOfAddress(people, email);
             return (
               <span key={email}>
                 {i > 0 && ", "}

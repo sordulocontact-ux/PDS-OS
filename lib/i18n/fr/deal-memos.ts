@@ -35,6 +35,12 @@ export const dealMemos = {
     rewrite: "Rédiger la nouvelle version du deal memo",
     waitingAgain: (who: string) =>
       `En attente de la nouvelle version du deal memo de ${who}`,
+    // The direction on a deal someone else negotiates (Sacha 24/11/2026):
+    // the work is theirs, she may still write it.
+    waitingWrite: (who: string) =>
+      `En attente de ${who} : rédiger le deal memo`,
+    waitingRewrite: (who: string) =>
+      `En attente de ${who} : rédiger la nouvelle version du deal memo`,
   },
   toValidate: "À valider",
   receivedFrom: (from: string | null, day: string) =>
@@ -218,6 +224,37 @@ export const dealMemos = {
       open: "Ouvrir le contrat",
       participation:
         "Le contrat de la participation est lancé par le chef de projet : il est prévenu de l'accord validé.",
+      // The participation's contract as its project's Juridique knows it
+      // (DealParticipationNow, Sacha 24/11/2026).
+      plan: (person: string) => `Prévoir le contrat de ${person}`,
+      planWith: (template: string) => `Modèle proposé : ${template}`,
+      fee: "Rémunération",
+      feeHint: "En euros, vide si aucune.",
+      validate: "Valider",
+      planned: "Contrat prévu",
+      noTemplate:
+        "Aucun modèle validé ne correspond : choisissez-le dans le Juridique.",
+      choose: "Choisir dans le Juridique",
+      info: (person: string) => `En attente des renseignements de ${person}`,
+      missing: (fields: string) => `Il manque : ${fields}.`,
+      fiche: "Ouvrir sa fiche",
+      generate: "Générer le contrat",
+      generated: "Contrat généré",
+      awaiting: (titles: string) =>
+        `En attente de l'accord validé sur ${titles}.`,
+      notNeeded: (person: string) => `Pas de contrat nécessaire pour ${person}`,
+      noLine: (person: string, project: string) =>
+        `Le contrat de ${person} se prépare dans le Juridique de « ${project} ».`,
+      demarche: "Ouvrir dans le Juridique",
+      // Who prepares it, for the others.
+      waitOwner: (owner: string, todo: string) =>
+        `En attente ${/^[aeiouyhàâéèêëîïôöûü]/i.test(owner) ? "d'" : "de "}${owner} : ${todo}`,
+      todos: {
+        plan: "prévoir le contrat",
+        info: "compléter la fiche de renseignements",
+        generate: "générer le contrat",
+      },
+      theOwner: "la cheffe ou le chef de projet",
     },
     title: (deal: string) => `Contrat · ${deal}`,
     submit: "Lier le contrat",

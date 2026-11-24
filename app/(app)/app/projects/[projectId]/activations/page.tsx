@@ -1,6 +1,7 @@
 import { ActivationsIndex } from "@/components/activations/journey/activations-index";
 import { filterOf } from "@/lib/activations/journey";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { filterValues } from "@/lib/ui/filter-options";
 
 /**
  * Marketing › Activations, the list (Sacha 10/11/2026): the levers to
@@ -17,7 +18,7 @@ export default async function ProjectActivationsPage({
     <ActivationsIndex
       projectId={projectId}
       filter={filterOf(query.vue)}
-      titleId={typeof query.titre === "string" ? query.titre : null}
+      titleIds={filterValues(query.titre)}
     />
   );
 }

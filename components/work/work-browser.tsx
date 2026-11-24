@@ -12,7 +12,13 @@ import {
 import { SearchField } from "@/components/ui/search-field";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { work } from "@/lib/i18n/fr/work";
-import { optionsByName } from "@/lib/ui/filter-options";
+import {
+  filterParamOf,
+  filterValues,
+  isFiltering,
+  matchesAny,
+  optionsByName,
+} from "@/lib/ui/filter-options";
 import { normalizeSearch } from "@/lib/utils/search";
 import {
   WORK_GROUPS,
@@ -35,12 +41,14 @@ const FILTER_PARAMS = {
   module: "module",
   group: "echeance",
 } as const;
-type WorkFilters = Record<keyof typeof FILTER_PARAMS, string | null>;
+// Several values per filter: any of them.
+type WorkFilters = Record<keyof typeof FILTER_PARAMS, string[]>;
+const NO_FILTERS: WorkFilters = { project: [], module: [], group: [] };
 
 const matches = (row: WorkRow, filters: WorkFilters, needle: string) =>
-  (!filters.project || row.projectId === filters.project) &&
-  (!filters.module || row.module === filters.module) &&
-  (!filters.group || row.group === filters.group) &&
+  matchesAny(filters.project, row.projectId) &&
+  matchesAny(filters.module, row.module) &&
+  matchesAny(filters.group, row.group) &&
   (!needle ||
     normalizeSearch(
       [titleOf(row), row.projectTitle, moduleOf(row), placeOf(row)]
@@ -77,9 +85,9 @@ export function WorkBrowser({
 
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [filters, setFilters] = useState<WorkFilters>(() => ({
-    project: params.get(FILTER_PARAMS.project),
-    module: params.get(FILTER_PARAMS.module),
-    group: params.get(FILTER_PARAMS.group),
+    project: filterValues(params.get(FILTER_PARAMS.project)),
+    module: filterValues(params.get(FILTER_PARAMS.module)),
+    group: filterValues(params.get(FILTER_PARAMS.group)),
   }));
 
   // The URL says the tab, the search and the filters (shared, back button),
@@ -95,7 +103,7 @@ export function WorkBrowser({
     set(VIEW_PARAM, next.view === "all" ? null : next.view);
     set("q", next.query.trim() || null);
     for (const key of Object.keys(FILTER_PARAMS) as (keyof WorkFilters)[])
-      set(FILTER_PARAMS[key], next.filters[key]);
+      set(FILTER_PARAMS[key], filterParamOf(next.filters[key]));
     const text = url.toString();
     window.history.replaceState(
       null,
@@ -158,8 +166,8 @@ export function WorkBrowser({
     label,
     allLabel,
     options,
-    value: filters[key],
-    onChange: (value) => filter({ ...filters, [key]: value }),
+    values: filters[key],
+    onChange: (values) => filter({ ...filters, [key]: values }),
   });
   const f = t.filters;
   const controls = [
@@ -174,8 +182,7 @@ export function WorkBrowser({
       ).map((group) => ({ value: group, label: t.groups[group] })),
     ),
   ];
-  const narrowed =
-    needle !== "" || Object.values(filters).some((value) => value !== null);
+  const narrowed = needle !== "" || isFiltering(filters);
 
   return (
     <div className="flex flex-col gap-4">
@@ -200,10 +207,7 @@ export function WorkBrowser({
           />
         }
       >
-        <FilterBar
-          filters={controls}
-          onClear={() => filter({ project: null, module: null, group: null })}
-        />
+        <FilterBar filters={controls} onClear={() => filter(NO_FILTERS)} />
         {/* The new style: the views on the tools' line (§ 6.1). */}
         <SegmentedControl
           aria-label={t.viewsLabel}

@@ -96,7 +96,10 @@ export const network = {
     roles: "Métier ou activité",
     // The projects the contact is in (proto des pages, 29/10).
     projects: "Avec PDS",
-    contact: "Coordonnées",
+    // One fact a column (Sacha, 24/11/2026).
+    relations: "Relation",
+    email: "E-mail",
+    phone: "Téléphone",
     city: "Ville",
     actions: "Actions",
   },
@@ -249,6 +252,53 @@ export const network = {
     failed: "Le contact n'a pas pu être enregistré. Réessayez.",
     picture:
       "L'image n'a pas pu être enregistrée. Réessayez avec un JPEG, un PNG ou un WebP.",
+  },
+  // The side sheet of a contact, from the list (after Accordee's person
+  // panel, Sacha 24/11/2026).
+  sheet: {
+    expand: "Ouvrir la fiche complète",
+    email: "E-mail",
+    meeting: "Réunion",
+    meetingTitle: "Nouvelle réunion",
+    meetingDescription: "Le contact est déjà invité.",
+    loading: "Chargement…",
+    loadFailed: "Le détail de ce contact n'a pas pu être chargé.",
+    withPds: {
+      awaited: (open: number, late: number) =>
+        `${open} élément${open > 1 ? "s" : ""} attendu${open > 1 ? "s" : ""}` +
+        (late > 0 ? ` · ${late} en retard` : ""),
+      nothingAwaited: "Rien d'attendu en ce moment",
+      lastCall: (day: string) => `Dernier call le ${day}`,
+      noCall: "Aucun call pour l'instant",
+      calls: "Calls passés",
+      projects: "Projets avec PDS",
+      credits: "Titres crédités",
+      contracts: "Contrats",
+    },
+    team: {
+      title: "Ses contacts dans l'équipe",
+      calls: (n: number) => `${n} call${n > 1 ? "s" : ""} ensemble`,
+      closest: "Le plus proche",
+    },
+    linked: {
+      title: "Fiches liées",
+      organization: "Organisation",
+      artist: "Fiche artiste",
+      managedArtists: "Artistes managés",
+      members: "Personnes",
+      projects: "Projets",
+      contracts: "Contrats",
+      deals: "Deals",
+    },
+    invoices: "Ses factures",
+    details: {
+      title: "Coordonnées",
+      owner: "Propriétaire",
+      nextCall: "Prochain call",
+      noNextCall: "Aucun de prévu",
+      since: "Dans le Réseau depuis",
+      hidden: "Coordonnées privées",
+    },
   },
   page: {
     managedArtists: "Artistes managés",

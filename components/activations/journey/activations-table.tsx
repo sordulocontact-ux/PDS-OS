@@ -25,6 +25,7 @@ import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { activations } from "@/lib/i18n/fr/activations";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { ScopeTitle } from "@/lib/projects/title-scope-rules";
+import { filterParamOf } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
@@ -58,9 +59,9 @@ export function ActivationsTable({
   projectId: string;
   rows: ActivationRow[];
   filter: ActivationFilter;
-  // A collective (lot 10): its live titles to filter on, and the one
-  // chosen (`?titre=`, the view kept).
-  titles?: { options: ScopeTitle[]; current: string | null } | null;
+  // A collective (lot 10): its live titles to filter on, and the ones
+  // chosen (`?titre=`, any of them, the view kept).
+  titles?: { options: ScopeTitle[]; current: string[] } | null;
   action?: React.ReactNode;
 }) {
   const shown = rows.filter((a) => filtersOf(a, a.actions).includes(filter));
@@ -74,13 +75,15 @@ export function ActivationsTable({
         current: f === filter,
         href: viewHref(routes.projectActivations(projectId), {
           vue: f === "open" ? null : f,
-          titre: titles?.current ?? null,
+          titre: filterParamOf(titles?.current ?? []),
         }),
       }))}
       action={action}
     >
       {shown.length === 0 ? (
-        <EmptyNote>{titles?.current ? t.noneForTitle : t.noneHere}</EmptyNote>
+        <EmptyNote>
+          {titles?.current.length ? t.noneForTitle : t.noneHere}
+        </EmptyNote>
       ) : (
         <DataTable>
           <DataTableHeader>

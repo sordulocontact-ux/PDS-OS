@@ -17,7 +17,13 @@ import {
   listLibraryFiles,
   type LibraryFile,
 } from "@/lib/library/queries";
-import { filterParam, optionsOfNames } from "@/lib/ui/filter-options";
+import {
+  filterParamsOf,
+  filterValues,
+  isFiltering,
+  matchesAny,
+  optionsOfNames,
+} from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -25,16 +31,17 @@ export const metadata = { title: `${fr.library.title} · ${fr.app.name}` };
 
 const FILE_KINDS = ["audio", "image", "document"] as const;
 
+// Several values per axis: any of them.
 type FileFilters = {
-  category: string | null;
-  kind: string | null;
-  author: string | null;
+  category: string[];
+  kind: string[];
+  author: string[];
 };
 
 const matches = (file: LibraryFile, filters: FileFilters) =>
-  (!filters.category || file.categoryLabel === filters.category) &&
-  (!filters.kind || fileKind(file) === filters.kind) &&
-  (!filters.author || file.authorName === filters.author);
+  matchesAny(filters.category, file.categoryLabel) &&
+  matchesAny(filters.kind, fileKind(file)) &&
+  matchesAny(filters.author, file.authorName);
 
 /**
  * Every file the viewer may read, in its latest version (MVP "bibliothèque
@@ -53,11 +60,11 @@ export default async function FilesPage({
   const t = fr.library;
   const view = asLibrarySource(params.view);
   const filters: FileFilters = {
-    category: filterParam(params.category),
-    kind: filterParam(params.kind),
-    author: filterParam(params.author),
+    category: filterValues(params.category),
+    kind: filterValues(params.kind),
+    author: filterValues(params.author),
   };
-  const filtering = Object.values(filters).some((value) => value !== null);
+  const filtering = isFiltering(filters);
 
   if (library.error)
     return (
@@ -84,13 +91,16 @@ export default async function FilesPage({
           label={t.viewsLabel}
           views={[
             {
-              href: viewHref(routes.files, filters),
+              href: viewHref(routes.files, filterParamsOf(filters)),
               label: t.views.all,
               count: filtered.length,
               current: view === null,
             },
             ...LIBRARY_SOURCES.map((source) => ({
-              href: viewHref(routes.files, { ...filters, view: source }),
+              href: viewHref(routes.files, {
+                ...filterParamsOf(filters),
+                view: source,
+              }),
               label: t.views[source],
               count: filtered.filter((file) => file.source === source).length,
               current: view === source,

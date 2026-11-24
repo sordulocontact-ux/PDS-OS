@@ -53,10 +53,11 @@ export const catalogFiles = {
     name: "Nom",
     category: "Catégorie",
     audioState: "État",
+    // One fact a column (after Accordee, Sacha 24/11/2026).
+    type: "Type",
+    size: "Taille",
     addedBy: "Ajouté par",
     addedAt: "Ajouté le",
-    // Date, and who under it (as the global library).
-    added: "Ajouté",
     actions: "Actions",
   },
   search: {
@@ -198,6 +199,22 @@ export const catalogFiles = {
     removeOne: "Supprimer cette version",
   },
   open: (name: string) => `Ouvrir ${name} dans un nouvel onglet`,
+  // The large view a file's name opens over the list (FilePreview).
+  preview: {
+    show: (name: string) => `Voir ${name}`,
+    openTab: "Ouvrir dans un nouvel onglet",
+    download: "Télécharger",
+    close: "Fermer",
+    previous: "Fichier précédent",
+    next: "Fichier suivant",
+    unavailable: "Aperçu indisponible pour ce type de fichier",
+    failed: "Le fichier n'a pas pu être lu. Téléchargez-le pour l'ouvrir.",
+    loading: "Lecture du fichier…",
+    // A long text or CSV: only its start is shown.
+    cut: "Début du fichier seulement : téléchargez-le pour tout voir.",
+    empty: "Ce fichier est vide.",
+    listen: (name: string) => `Écouter ${name}`,
+  },
   remove: (name: string) => `Retirer ${name}`,
   confirmTitle: "Supprimer ce fichier ?",
   // Deleting the latest version: the previous one becomes the current one.

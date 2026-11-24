@@ -6,6 +6,13 @@
 const first = (name: string) => name.split(" ")[0] ?? name;
 
 export const invoices = {
+  // The invoices block of a record's side sheet (a contact, a contract).
+  sheet: {
+    toPay: (count: number, amount: string) => `${count} à payer · ${amount}`,
+    allPaid: "Toutes payées",
+    due: (day: string) => `Échéance le ${day}`,
+    late: "En retard",
+  },
   // Where an invoice stands (the team, the Juridique, « À payer »).
   states: {
     requested: "Facture attendue",

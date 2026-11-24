@@ -9,7 +9,11 @@ import { callsHref, type CallDoor } from "@/lib/calls/door";
 import { callViewOf, CALL_VIEWS, type CallView } from "@/lib/calls/format";
 import type { CallListItem } from "@/lib/calls/queries";
 import { calls as callsFr } from "@/lib/i18n/fr/calls";
-import { optionsByName } from "@/lib/ui/filter-options";
+import {
+  filterParamOf,
+  matchesAny,
+  optionsByName,
+} from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 
 const fr = { calls: callsFr };
@@ -38,8 +42,8 @@ export function CallsListView({
   now: Date;
   door: CallDoor;
   view: CallView | null;
-  // ?project= of Calls: a project's id, or « internal ».
-  project: string | null;
+  // ?project= of Calls: projects' ids, or « internal » (any of them).
+  project: string[];
   deleter: CallDeleter;
   empty: React.ReactNode;
   // The page's own action, at the end of the tabs' line in the new style
@@ -50,9 +54,9 @@ export function CallsListView({
   const t = fr.calls.all;
   const path = callsHref(door);
   const withFilter = door.kind === "calls";
-  const kept = withFilter ? { project } : {};
+  const kept = withFilter ? { project: filterParamOf(project) } : {};
   const matches = (call: CallListItem) =>
-    !withFilter || !project || (call.projectId ?? INTERNAL) === project;
+    !withFilter || matchesAny(project, call.projectId ?? INTERNAL);
 
   // The tabs count what the filters keep; the filters offer what the tab
   // holds.
@@ -65,7 +69,7 @@ export function CallsListView({
   const shown = view
     ? filtered.filter((call) => callViewOf(call, now) === view)
     : filtered;
-  const filtering = withFilter && project !== null;
+  const filtering = withFilter && project.length > 0;
   const listHref = (value: CallView | null) =>
     viewHref(path, { ...kept, view: value });
 
@@ -124,7 +128,7 @@ export function CallsListView({
 // project last.
 function projectFilter(
   calls: CallListItem[],
-  current: string | null,
+  current: string[],
 ): UrlFilterGroup[] {
   const t = fr.calls.all;
   const projects = new Map<string, string>();

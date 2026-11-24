@@ -1,11 +1,15 @@
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  SortableHeadLabel,
+  SortedTableBody,
+  TableSortProvider,
+} from "@/components/ui/table-sort";
 import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +60,29 @@ export { DataTableViews } from "@/components/ui/data-table-views";
 // Shown in a cell that has no value.
 export const EMPTY_CELL = "—";
 
+/**
+ * A cell's text on one line, cut by « … » at the column's width (192 px):
+ * a table grows a column to its longest text otherwise, cut or not (the
+ * Réseau's « Métier ou activité », Sacha 24/11/2026). The whole text on
+ * hover.
+ */
+export function DataTableText({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      title={typeof children === "string" ? children : undefined}
+      className={cn("block max-w-48 truncate", className)}
+    >
+      {children}
+    </span>
+  );
+}
+
 // `framed`: keeps its frame, band and inset inside a section card too. The
 // pages outside a project (Catalogue, Sessions studio, Réseau) ask for it
 // (Sacha, 06/11/2026); a project's pages keep the bare table for now.
@@ -75,7 +102,10 @@ export function DataTable({
           "table-flat in-[.section-card]:rounded-none in-[.section-card]:border-0 in-[.section-card]:bg-transparent",
       )}
     >
-      <Table>{children}</Table>
+      {/* A click on a column's head sorts the rows (table-sort.tsx). */}
+      <TableSortProvider>
+        <Table>{children}</Table>
+      </TableSortProvider>
     </div>
   );
 }
@@ -107,12 +137,12 @@ export function DataTableHead({
   return (
     <TableHead
       className={cn(
-        "h-11 px-3.5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
+        "relative h-11 px-3.5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
         column(columnProps),
         className,
       )}
     >
-      {children}
+      <SortableHeadLabel>{children}</SortableHeadLabel>
     </TableHead>
   );
 }
@@ -123,9 +153,9 @@ export function DataTableHead({
 // it included.
 export function DataTableBody({ children }: { children: React.ReactNode }) {
   return (
-    <TableBody className="[&>tr+tr>:is(td,th)]:border-t [&>tr+tr>:is(td,th)]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>:is(td,th)]:border-transparent">
+    <SortedTableBody className="[&>tr+tr>:is(td,th)]:border-t [&>tr+tr>:is(td,th)]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>:is(td,th)]:border-transparent">
       {children}
-    </TableBody>
+    </SortedTableBody>
   );
 }
 
@@ -137,12 +167,17 @@ export function DataTableBody({ children }: { children: React.ReactNode }) {
 export function DataTableRow({
   children,
   className,
+  pinned = false,
 }: {
   children: React.ReactNode;
   className?: string;
+  // A total (or a line « hors sous-budgets »): stays where it is when the
+  // table is sorted.
+  pinned?: boolean;
 }) {
   return (
     <TableRow
+      data-sort-fixed={pinned ? "" : undefined}
       className={cn(
         "group/row relative [transform:translate(0)] border-0 hover:bg-transparent has-[[data-row-link]]:hover:bg-[var(--control-bg-hover)]",
         ROW_INSET,
@@ -164,6 +199,7 @@ export function DataTableCell({
   colSpan,
   rowSpan,
   scope,
+  sort,
   ...columnProps
 }: ColumnProps & {
   children: React.ReactNode;
@@ -171,10 +207,14 @@ export function DataTableCell({
   colSpan?: number;
   rowSpan?: number;
   scope?: "row" | "rowgroup";
+  // What the column's sort reads when the text does not sort well (an ISO
+  // date shown as « Hier », an amount in words); the text otherwise.
+  sort?: string | number;
 }) {
   const Cell = scope ? TableHead : TableCell;
   return (
     <Cell
+      data-sort={sort}
       colSpan={colSpan}
       rowSpan={rowSpan}
       scope={scope}
@@ -253,13 +293,16 @@ export function DataTableMedia({
   title: React.ReactNode;
   subtitle?: React.ReactNode;
 }) {
+  // The subtitle under the title, two short lines rather than one long one
+  // that takes the room of the other columns (Sacha 24/11/2026, back from
+  // a single line after the Réseau and the Contrats).
   return (
     <div className="flex items-center gap-3">
       {visual}
       <div className="flex min-w-0 flex-col">
-        {title}
+        <span className="flex min-w-0">{title}</span>
         {subtitle && (
-          <span className="truncate text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]">
+          <span className="min-w-0 truncate text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]">
             {subtitle}
           </span>
         )}
@@ -271,13 +314,20 @@ export function DataTableMedia({
 // Round sunken disc holding an icon, the visual of rows without a picture.
 export function DataTableIcon({
   icon: Icon,
+  className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
+  // Its hue (a file's type, `hueClass`) or a larger disc
+  // (`size-20 [&>svg]:size-9`).
+  className?: string;
 }) {
   return (
     <span
       aria-hidden
-      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-sunken)] text-[color:var(--text-secondary)]"
+      className={cn(
+        "flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-sunken)] text-[color:var(--text-secondary)]",
+        className,
+      )}
     >
       <Icon className="size-5" />
     </span>
@@ -296,6 +346,8 @@ export function DataTableGroupRow({
 }) {
   return (
     <TableRow
+      // Stays in place when the table is sorted; its rows sort under it.
+      data-sort-fixed=""
       className={cn(
         "border-0 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] has-aria-expanded:bg-[var(--surface-soft)]",
         ROW_INSET,

@@ -8,7 +8,6 @@ import {
 } from "@/components/deals/deal-memo-send";
 import { MemoFileButton } from "@/components/deals/deal-memo-card";
 import { Button } from "@/components/ui/button";
-import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
@@ -138,14 +137,14 @@ export function DealMemoGestures({
                   memo.files[0]?.url ? (
                     <MemoFileButton file={memo.files[0]} />
                   ) : (
-                    <PdfExportButton
-                      href={routes.dealMemoPdf(dealId, memo.id)}
-                      fileName={t.pdf.file(dealName, memo.number)}
-                      label={t.openFile}
-                      pendingLabel={t.pdf.pending}
-                      failedLabel={t.pdf.failed}
-                      variant="outline"
-                      size="sm"
+                    // Opened in the browser, not downloaded (Sacha
+                    // 24/11/2026).
+                    <MemoFileButton
+                      file={{
+                        id: memo.id,
+                        name: t.pdf.file(dealName, memo.number),
+                        url: `${routes.dealMemoPdf(dealId, memo.id)}?view=1`,
+                      }}
                     />
                   )
                 }

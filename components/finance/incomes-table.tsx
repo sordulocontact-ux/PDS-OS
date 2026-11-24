@@ -17,6 +17,7 @@ import {
 } from "@/components/finance/income-dialog";
 import { IncomeForm } from "@/components/finance/income-form";
 import { Button } from "@/components/ui/button";
+import { DueDate } from "@/components/ui/due-date";
 import {
   DataTable,
   DataTableActionsCell,
@@ -33,6 +34,7 @@ import {
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { SideSheet } from "@/components/ui/side-sheet";
+import { TableSortProvider } from "@/components/ui/table-sort";
 import { IncomeSheet } from "@/components/finance/income-sheet";
 import { useSheetRow } from "@/components/ui/use-sheet-row";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -58,7 +60,6 @@ import { clientInvoices } from "@/lib/i18n/fr/client-invoices";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { incomeStateTone } from "@/lib/ui/state-tones";
-import { daysBetween } from "@/lib/utils/calendar-period";
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
@@ -265,7 +266,8 @@ export function IncomesTable({
   }
 
   return (
-    <>
+    // One sort for the table and its sheet: ↑ ↓ follow the rows as sorted.
+    <TableSortProvider>
       <DataTable framed>
         <DataTableHeader>
           <DataTableHead fill>{c.invoice}</DataTableHead>
@@ -283,7 +285,6 @@ export function IncomesTable({
             const state = incomeState(income, today);
             const received = receivedCents(income);
             const open = isOpen(income);
-            const gap = daysBetween(today, awaitedOn(income));
             const last = lastReminder(income);
             const nextParts = [
               income.nextActionOn ? short(income.nextActionOn) : null,
@@ -313,18 +314,12 @@ export function IncomesTable({
                     subtitle={targetOf(income)}
                   />
                 </DataTableCell>
-                <DataTableCell hideBelow="sm" className="tabular-nums">
-                  <DataTableMedia
-                    title={formatDay(awaitedOn(income), { weekday: false })}
-                    subtitle={
-                      open
-                        ? gap < 0
-                          ? t.incomes.dueIn.ago(-gap)
-                          : gap > 0
-                            ? t.incomes.dueIn.ahead(gap)
-                            : t.incomes.dueIn.today
-                        : undefined
-                    }
+                <DataTableCell hideBelow="sm">
+                  <DueDate
+                    dueOn={awaitedOn(income)}
+                    awaited={open && !income.cancelledAt}
+                    today={today}
+                    fallback={formatDay(awaitedOn(income), { weekday: false })}
                   />
                 </DataTableCell>
                 <DataTableCell hideBelow="md">
@@ -406,6 +401,6 @@ export function IncomesTable({
           onClose={() => setOpen(null)}
         />
       )}
-    </>
+    </TableSortProvider>
   );
 }

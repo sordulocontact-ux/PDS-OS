@@ -10,6 +10,7 @@ import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
 import { fileOpenActions } from "@/components/catalog/files/file-open-actions";
+import { FileAuthor } from "@/components/catalog/files/file-cells";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
@@ -121,15 +122,14 @@ export function WorkFilesSection({
             <DataTableHead>{t.columns.name}</DataTableHead>
             <DataTableHead hideBelow="sm">{t.columns.session}</DataTableHead>
             <DataTableHead hideBelow="md">{t.columns.status}</DataTableHead>
-            <DataTableHead hideBelow="lg" fill>
-              {t.columns.added}
-            </DataTableHead>
+            <DataTableHead hideBelow="xl">{t.columns.addedBy}</DataTableHead>
+            <DataTableHead hideBelow="lg">{t.columns.addedAt}</DataTableHead>
             <DataTableActionsHead label={fr.records.menu.column} />
           </DataTableHeader>
           <DataTableBody>
             {items.map((item) => (
               <DataTableRow key={`${item.kind}-${item.id}`}>
-                <DataTableCell>
+                <DataTableCell fill>
                   <DataTableMedia
                     title={item.name}
                     subtitle={[
@@ -157,11 +157,11 @@ export function WorkFilesSection({
                     <span className="text-muted-foreground">{t.noStatus}</span>
                   )}
                 </DataTableCell>
-                <DataTableCell hideBelow="lg" fill>
-                  <span className="text-muted-foreground">
-                    <Timestamp iso={item.createdAt} show="day" />{" "}
-                    {t.addedBy(item.authorName)}
-                  </span>
+                <DataTableCell hideBelow="xl">
+                  <FileAuthor name={item.authorName} />
+                </DataTableCell>
+                <DataTableCell hideBelow="lg">
+                  <Timestamp iso={item.createdAt} show="day" />
                 </DataTableCell>
                 <DataTableActionsCell>
                   <RowActions

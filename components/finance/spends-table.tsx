@@ -9,6 +9,7 @@ import {
 } from "nucleo-sharp-essential";
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { SideSheet } from "@/components/ui/side-sheet";
+import { TableSortProvider } from "@/components/ui/table-sort";
 import { PostLabel } from "@/components/finance/post-label";
 import { IncomeForm } from "@/components/finance/income-form";
 import { SpendSheet } from "@/components/finance/spend-sheet";
@@ -27,6 +28,7 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
+import { DueDate } from "@/components/ui/due-date";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -35,6 +37,7 @@ import { isFinanceTarget, type BudgetLine } from "@/lib/budget/types";
 import {
   proofExpected,
   rebillMissing,
+  spendAwaited,
   spendDay,
   spendTtc,
   tableDay,
@@ -46,6 +49,7 @@ import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { financeSpends } from "@/lib/i18n/fr/finance-spends";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { spendCashTone } from "@/lib/ui/state-tones";
+import { todayInParis } from "@/lib/insights/dates";
 import { formatAmount } from "@/lib/utils/money";
 import { cn } from "@/lib/utils";
 
@@ -102,6 +106,7 @@ export function SpendsTable({
   columns,
   hideEnvelope = false,
   partNames = {},
+  today = todayInParis(),
 }: {
   spends: FinanceSpend[];
   targets: FinanceTarget[];
@@ -116,6 +121,9 @@ export function SpendsTable({
   // Spend id → the sub-budget it is filed in (UX test of 23/11/2026: no
   // proof of the filing on the spend).
   partNames?: Record<string, string>;
+  // The page's Paris day, so the awaited due days read the same on the
+  // server and in the browser.
+  today?: string;
 }) {
   const show = (column: SpendColumn) => !columns || columns.has(column);
   const t = fr.financeSpends;
@@ -168,7 +176,8 @@ export function SpendsTable({
   }
 
   return (
-    <>
+    // One sort for the table and its sheet: ↑ ↓ follow the rows as sorted.
+    <TableSortProvider>
       <DataTable framed>
         <DataTableHeader>
           <DataTableHead fill>{c.label}</DataTableHead>
@@ -256,7 +265,12 @@ export function SpendsTable({
                 )}
                 {show("day") && (
                   <DataTableCell hideBelow="sm" className="tabular-nums">
-                    {tableDay(spendDay(spend))}
+                    <DueDate
+                      dueOn={spendDay(spend)}
+                      awaited={spendAwaited(spend)}
+                      today={today}
+                      fallback={tableDay(spendDay(spend))}
+                    />
                   </DataTableCell>
                 )}
                 {show("state") && (
@@ -323,6 +337,7 @@ export function SpendsTable({
             part={partNames[spends[sheet].id] ?? null}
             actions={canManage ? actionsOf(spends[sheet]) : []}
             proofIn={canManage && organizationId ? organizationId : undefined}
+            today={today}
           />
         </SideSheet>
       )}
@@ -373,6 +388,6 @@ export function SpendsTable({
           )}
         </FormDialog>
       )}
-    </>
+    </TableSortProvider>
   );
 }

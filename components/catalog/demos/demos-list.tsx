@@ -9,6 +9,7 @@ import {
   DataTableHeader,
   DataTableLink,
   DataTableRow,
+  DataTableText,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
@@ -43,43 +44,49 @@ export function DemosList({
       filters={filters}
       empty={empty}
     >
-      {(visible) => (
-        <DataTable>
-          <DataTableHeader>
-            <DataTableHead>{t.columns.title}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.columns.artists}</DataTableHead>
-            <DataTableHead fill>{t.columns.status}</DataTableHead>
-          </DataTableHeader>
-          <DataTableBody>
-            {visible.map((demo) => (
-              <DataTableRow key={demo.id}>
-                <DataTableCell>
-                  <DataTableLink href={routes.master(demo.id)}>
-                    {demo.title}
-                  </DataTableLink>
-                </DataTableCell>
-                <DataTableCell hideBelow="sm" className="break-words">
-                  {demo.artists}
-                </DataTableCell>
-                <DataTableCell fill>
-                  <span className="flex flex-wrap gap-1.5">
-                    {demo.demoStatus && (
-                      <StatusBadge tone={demoStatusTone[demo.demoStatus]}>
-                        {t.statuses[demo.demoStatus]}
-                      </StatusBadge>
-                    )}
-                    {demo.provisional && (
-                      <StatusBadge tone="warning" title={t.provisionalHint}>
-                        {t.provisional}
-                      </StatusBadge>
-                    )}
-                  </span>
-                </DataTableCell>
-              </DataTableRow>
-            ))}
-          </DataTableBody>
-        </DataTable>
-      )}
+      {(visible) => <DemosTable rows={visible} />}
     </SearchableList>
+  );
+}
+
+/** The maquettes, one fact a column; a name opens the title's page. */
+function DemosTable({ rows }: { rows: MasterRow[] }) {
+  const t = fr.demos;
+  return (
+    <DataTable>
+      <DataTableHeader>
+        <DataTableHead>{t.columns.title}</DataTableHead>
+        <DataTableHead hideBelow="sm">{t.columns.artists}</DataTableHead>
+        <DataTableHead fill>{t.columns.status}</DataTableHead>
+      </DataTableHeader>
+      <DataTableBody>
+        {rows.map((demo) => (
+          <DataTableRow key={demo.id}>
+            <DataTableCell>
+              <DataTableLink href={routes.master(demo.id)}>
+                {demo.title}
+              </DataTableLink>
+            </DataTableCell>
+            <DataTableCell hideBelow="sm">
+              <DataTableText>{demo.artists}</DataTableText>
+            </DataTableCell>
+            <DataTableCell fill>
+              <span className="flex flex-wrap gap-1.5">
+                {demo.demoStatus && (
+                  <StatusBadge tone={demoStatusTone[demo.demoStatus]}>
+                    {t.statuses[demo.demoStatus]}
+                  </StatusBadge>
+                )}
+                {demo.provisional && (
+                  <StatusBadge tone="warning" title={t.provisionalHint}>
+                    {t.provisional}
+                  </StatusBadge>
+                )}
+              </span>
+            </DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }

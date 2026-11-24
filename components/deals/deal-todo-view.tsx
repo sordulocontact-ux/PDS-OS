@@ -64,16 +64,19 @@ type Work = DealWork;
 // read (Sacha 23/11/2026, no more « Dossier » tab).
 const CLOSED: Work[] = ["contract", "memo", "terms", "contacts", "calls"];
 export const WORKS: Record<DealStage, Work[]> = {
-  to_contact: ["contacts", "next", "calls", "terms"],
+  // The calls always above « Prochaine action » (Sacha 24/11/2026).
+  to_contact: ["contacts", "calls", "next", "terms"],
   call_planned: ["calls", "next", "contacts", "terms"],
   // The deal memo is the accord de principe (réunion avec Ibé du 18/11/2026,
   // 20261122110101): right under the terms while negotiating, first at the
   // accord. The loop and the contract come after the terms, which matter
   // more until the contract is drawn up (Sacha 22/11/2026); then the
   // contract comes up.
-  negotiation: ["terms", "memo", "next", "calls", "contract"],
-  agreement: ["memo", "next", "terms", "contract"],
-  contracting: ["memo", "contract", "next"],
+  negotiation: ["terms", "memo", "calls", "next", "contract"],
+  // The calls at every stage, their reports folded in them: the memory of
+  // the negotiation, read again at the contract (Sacha 24/11/2026).
+  agreement: ["memo", "calls", "next", "terms", "contract"],
+  contracting: ["memo", "contract", "calls", "next"],
   signed: CLOSED,
   abandoned: CLOSED,
 };
@@ -182,8 +185,10 @@ export function DealTodoView({
     p.kind === "term" ? [p] : [],
   );
   const nextProposals = proposals.filter((p) => p.kind === "next_action");
-  // Calls right above: the next one is not repeated beside the action.
-  const callsFirst = WORKS[deal.stage][0] === "calls";
+  // Calls above the action: the next one is not repeated beside it.
+  const order = WORKS[deal.stage];
+  const callsFirst =
+    order.includes("calls") && order.indexOf("calls") < order.indexOf("next");
   // Contracting, the next gesture is the contract's: an empty « Prochaine
   // action » says nothing (Sacha 23/11/2026).
   const nextShown =

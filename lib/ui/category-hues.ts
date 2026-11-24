@@ -1,4 +1,5 @@
 import { BUDGET_FAMILIES, type BudgetFamily } from "@/lib/budget/types";
+import type { FileType } from "@/lib/catalog/file-type";
 /**
  * Category hues of docs/DESIGN.md § 3 ter: tell categories apart at a glance
  * in a table (the stage a project is at, its type). A hue carries no state,
@@ -17,7 +18,10 @@ export type Hue =
   | "lime"
   | "teal"
   | "sand"
-  | "slate";
+  | "slate"
+  // File types only (fileTypeHue): read as a state anywhere else.
+  | "red"
+  | "green";
 
 /** One hue per stage of the business (project_stages.key), in order. */
 const stageHues: Record<string, Hue> = {
@@ -96,6 +100,23 @@ export const hueClass: Record<Hue, string> = {
   teal: "bg-[var(--hue-teal-bg)] text-[color:var(--hue-teal-fg)]",
   sand: "bg-[var(--hue-sand-bg)] text-[color:var(--hue-sand-fg)]",
   slate: "bg-[var(--hue-slate-bg)] text-[color:var(--hue-slate-fg)]",
+  red: "bg-[var(--hue-red-bg)] text-[color:var(--hue-red-fg)]",
+  green: "bg-[var(--hue-green-bg)] text-[color:var(--hue-green-fg)]",
+};
+
+/** A file's type at a glance in every table of files (FileTypeIcon), as in
+ * any file manager (Accordee, Sacha 24/11/2026): the PDF red, the
+ * spreadsheet green, the text blue, the slides orange. */
+export const fileTypeHue: Record<FileType, Hue> = {
+  pdf: "red",
+  sheet: "green",
+  text: "sky",
+  slides: "orange",
+  image: "violet",
+  audio: "indigo",
+  video: "pink",
+  archive: "sand",
+  other: "slate",
 };
 
 /** The calendar's hue of a call: one per project, the same on every week

@@ -63,7 +63,7 @@ export default async function ProjectCallsPage({
         now={now}
         door={{ kind: "project", projectId }}
         view={asCallView(view)}
-        project={null}
+        project={[]}
         deleter={callDeleter(access)}
         empty={
           <section className="flex flex-col gap-4">

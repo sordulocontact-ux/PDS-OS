@@ -73,10 +73,17 @@ export function DealMemoSendForm({
 }) {
   const c = fr.dealMemos.correction;
   // Who it goes to, written in the card (Sacha 22/11/2026): the memo's
-  // sender (else the counterpart's address), the loop in « Cc ».
+  // sender, else the counterpart's or the artist's side (memoReplyTo), the
+  // loop in « Cc », without the one already in « À ».
+  const to = replyTo?.email ?? "";
   const [envelope, setEnvelope] = useState<MailEnvelope>({
-    to: replyTo?.email ?? "",
-    cc: correction === null ? copies.join(", ") : "",
+    to,
+    cc:
+      correction === null
+        ? copies
+            .filter((copy) => copy.toLowerCase() !== to.toLowerCase())
+            .join(", ")
+        : "",
     bcc: "",
     subject:
       correction !== null
@@ -118,7 +125,17 @@ export function DealMemoSendForm({
         line={canEmail ? undefined : fr.contracts.now.mail.line}
         to={envelope.to}
         subject={envelope.subject}
-        envelope={{ value: envelope, onChange: setEnvelope, tried }}
+        envelope={{
+          value: envelope,
+          onChange: setEnvelope,
+          tried,
+          // The person chosen, not the Réseau's first contact sharing the
+          // address (Sacha 24/11/2026).
+          known:
+            replyTo && replyTo.source === "network"
+              ? { [replyTo.email.toLowerCase()]: replyTo.name }
+              : undefined,
+        }}
         toSource={
           replyTo && envelope.to.trim() === replyTo.email
             ? replyTo.source === "email"
