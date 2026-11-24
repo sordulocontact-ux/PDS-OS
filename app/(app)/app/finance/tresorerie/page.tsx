@@ -31,6 +31,8 @@ import {
 } from "@/lib/finance/treasury";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { treasury as t } from "@/lib/i18n/fr/treasury";
+import { filterParamOf, filterValues } from "@/lib/ui/filter-options";
+import { viewHref } from "@/lib/ui/view-href";
 import { parisPlace } from "@/lib/utils/calendar-period";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -61,12 +63,21 @@ export default async function FinanceTreasuryPage({
     loadTreasury(addDays(today, horizon)),
     loadBudgets(),
   ]);
-  const treasury = computeTreasury({ ...data, today, horizon });
+  // As much of the past as of the future (Sacha 24/11/2026).
+  const treasury = computeTreasury({
+    ...data,
+    today,
+    horizon,
+    past: horizon,
+  });
   const canManage = can(access, "manage_finance");
   const live = budgets.envelopes.filter((e) => !e.archived);
-  const chosen = live.find((e) => e.id === params.enveloppe) ?? null;
+  // Several budgets chosen: the pie adds them up.
+  const ids = filterValues(params.enveloppe);
+  const chosen = live.filter((e) => ids.includes(e.id));
+  const enveloppe = filterParamOf(chosen.map((e) => e.id));
   // The pie counts what is committed, invoiced or paid; the planned is not.
-  const spent = (chosen ? [chosen] : live)
+  const spent = (chosen.length > 0 ? chosen : live)
     .flatMap((e) => linesOf(e, budgets.spends))
     .filter((s) => !s.refused && spendStage(s.status) !== "planned");
   // The same budgets and the same figure as the overview's card.
@@ -76,6 +87,8 @@ export default async function FinanceTreasuryPage({
     paid: data.paid,
     treasury,
     today,
+    // The months behind as many as the horizon's ahead.
+    before: Math.max(3, Math.round(horizon / 30.4)),
   });
   const p = t.page;
 
@@ -91,7 +104,10 @@ export default async function FinanceTreasuryPage({
           label={p.horizon}
           options={TREASURY_HORIZONS.map((days) => ({
             key: String(days),
-            href: `${routes.financeTreasury}?horizon=${days}${chosen ? `&enveloppe=${chosen.id}` : ""}`,
+            href: viewHref(routes.financeTreasury, {
+              horizon: String(days),
+              enveloppe,
+            }),
             label: p.horizonOption(days),
             current: days === horizon,
           }))}
@@ -125,14 +141,13 @@ export default async function FinanceTreasuryPage({
               <UrlFilters
                 path={routes.financeTreasury}
                 params={{ horizon: String(horizon) }}
-                inline={1}
                 groups={[
                   {
                     key: "enveloppe",
                     label: t.envelopeFilter.label,
                     allLabel: t.envelopeFilter.all,
                     options: live.map((e) => ({ value: e.id, label: e.name })),
-                    current: chosen?.id ?? null,
+                    current: chosen.map((e) => e.id),
                   },
                 ]}
               />

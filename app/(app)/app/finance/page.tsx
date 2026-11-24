@@ -46,7 +46,13 @@ export default async function FinanceOverviewPage({
   const watch = await loadFinanceWatch(today);
   const { treasury: data, budgets } = watch;
   const canManage = can(access, "manage_finance");
-  const treasury = computeTreasury({ ...data, today, horizon });
+  // As much of the past as of the future (Sacha 24/11/2026).
+  const treasury = computeTreasury({
+    ...data,
+    today,
+    horizon,
+    past: horizon,
+  });
   const names = new Map([
     ...data.targets.map((x) => [x.id, x.name] as const),
     ...budgets.envelopes.map((e) => [e.id, e.name] as const),

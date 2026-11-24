@@ -43,7 +43,9 @@ export const asHorizon = (value: unknown): TreasuryHorizon => {
     : DEFAULT_HORIZON;
 };
 
-// How far back the chart shows the real balance.
+// How far back the chart shows the real balance by default; Trésorerie and
+// the overview look back as far as their horizon (Sacha 24/11/2026: « on
+// voit le futur mais pas trop le passé »).
 export const PAST_DAYS = 30;
 
 export type Statement = { cents: number; asOf: string };
@@ -177,6 +179,7 @@ export function computeTreasury({
   engines = EMPTY_ENGINES,
   today,
   horizon,
+  past = PAST_DAYS,
 }: {
   statement: Statement | null;
   reserveCents: number;
@@ -189,28 +192,43 @@ export function computeTreasury({
   // TREASURY_HORIZONS on Trésorerie (up to a year); the Planning reads up to the end of
   // the month it shows (at most 180 days).
   horizon: number;
+  // Days of real balance before today.
+  past?: number;
 }): Treasury | null {
   if (!statement) return null;
   const until = addDays(today, horizon);
 
   // The real balance, day by day, from the statement to today. A spend
   // marked paid has left the account, even dated later: counted today.
+  // Before the statement, the balance is read backwards from it: the
+  // statement less what came in and went out between that day and it.
   const realMoves = new Map<string, number>();
   const move = (day: string, cents: number) => {
     const on = day > today ? today : day;
-    if (on <= statement.asOf) return;
     realMoves.set(on, (realMoves.get(on) ?? 0) + cents);
   };
   receipts.forEach((r) => move(r.day, r.cents));
   paid.forEach((p) => move(p.day, -p.cents));
-  installmentsPaid(engines, statement.asOf, today).forEach((p) =>
-    move(p.day, -p.cents),
-  );
+  const back = addDays(today, -past);
+  installmentsPaid(
+    engines,
+    back < statement.asOf ? back : statement.asOf,
+    today,
+  ).forEach((p) => move(p.day, -p.cents));
 
-  const start = maxDay(statement.asOf, addDays(today, -PAST_DAYS));
+  // Never before the first move PDS OS knows (nor the statement): earlier,
+  // the balance would be a flat line nothing records.
+  const known = [...realMoves.keys()].reduce(
+    (first, day) => (day < first ? day : first),
+    statement.asOf,
+  );
+  const start = maxDay(known, back);
   const points: TreasuryPoint[] = [];
   let cents = statement.cents;
-  for (const [day, value] of realMoves) if (day <= start) cents += value;
+  for (const [day, value] of realMoves) {
+    if (day > statement.asOf && day <= start) cents += value;
+    if (day > start && day <= statement.asOf) cents -= value;
+  }
   for (let day = start; day <= today; day = addDays(day, 1)) {
     if (day > start) cents += realMoves.get(day) ?? 0;
     points.push({ day, cents, forecast: false });

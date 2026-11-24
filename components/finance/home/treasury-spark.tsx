@@ -10,14 +10,16 @@ const W = 260;
 const H = 72;
 
 /**
- * The balance from today to the horizon, as a line through one balance a
- * week and the low point (lib/finance/treasury-line.ts, Sacha 24/11/2026), with the minimum reserve dashed in red: the small chart of the
+ * The balance before and after today, as a line through one balance a week,
+ * today and the low point (lib/finance/treasury-line.ts, Sacha 24/11/2026:
+ * the past too, as much as the horizon): the real balance solid, the
+ * forecast dashed, as Trésorerie's curve, the minimum reserve dashed in red: the small chart of the
  * overview's « Trésorerie » card, its days named under it every week or
  * two (Ibé 16/11/2026: « qu'on voie soit les jours, soit les mois »).
  * Decorative: the card's sentence says the figures.
  */
 export function TreasurySpark({ treasury }: { treasury: Treasury }) {
-  const points = treasury.points.filter((p) => p.forecast);
+  const points = treasury.points;
   if (points.length < 2) return null;
   const days = points.map((p) => Date.parse(`${p.day}T00:00:00Z`));
   const values = points.map((p) => p.cents);
@@ -29,13 +31,25 @@ export function TreasurySpark({ treasury }: { treasury: Treasury }) {
   const range = days[days.length - 1] - first || 1;
   const x = (day: number) => ((day - first) / range) * W;
   const y = (cents: number) => 6 + ((hi - cents) / span) * (H - 12);
-  const lowIndex = values.indexOf(Math.min(...values));
-  const path = linePath(
-    lineIndices(points.length, 0, [lowIndex]).map((i) => ({
-      x: x(days[i]),
-      y: y(points[i].cents),
-    })),
+  const todayIndex = Math.max(
+    points.findIndex((p) => p.forecast),
+    0,
   );
+  const lowIndex = points.findIndex(
+    (p) => p.forecast && p.day === treasury.low.day,
+  );
+  const picked = lineIndices(points.length, todayIndex, [
+    todayIndex - 1,
+    lowIndex,
+  ]);
+  const at = (i: number) => ({ x: x(days[i]), y: y(points[i].cents) });
+  const real = picked.filter((i) => !points[i].forecast).map(at);
+  // The forecast leaves from today's real balance.
+  const forecast = [
+    ...real.slice(-1),
+    ...picked.filter((i) => points[i].forecast).map(at),
+  ];
+  const todayAt = (days[todayIndex] - first) / range;
   const ticks = dayTicks(points.map((p) => p.day));
   return (
     <div>
@@ -69,18 +83,38 @@ export function TreasurySpark({ treasury }: { treasury: Treasury }) {
             vectorEffect="non-scaling-stroke"
           />
         )}
+        {todayAt > 0 && (
+          <line
+            x1={todayAt * W}
+            x2={todayAt * W}
+            y1={0}
+            y2={H}
+            stroke="var(--text-tertiary)"
+            strokeDasharray="2 4"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
         <path
-          d={path}
+          d={linePath(real)}
           fill="none"
           stroke="var(--text-primary)"
           strokeWidth={1.5}
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
         />
+        <path
+          d={linePath(forecast)}
+          fill="none"
+          stroke="var(--text-primary)"
+          strokeWidth={1.5}
+          strokeDasharray="4 3"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
       </svg>
       <DayAxis
         ticks={ticks}
-        marker={{ at: 0, label: fr.treasury.chart.today }}
+        marker={{ at: todayAt, label: fr.treasury.chart.today }}
       />
     </div>
   );
