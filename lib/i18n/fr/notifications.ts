@@ -219,7 +219,7 @@ export const notifications = {
     deal_agreement_refused: (actor: string, project: string) =>
       `${actor} renvoie l'accord de principe en négociation${dealOf(project)} : voyez pourquoi.`,
     deal_follow_up_due: (_actor: string, project: string) =>
-      `Une relance est due aujourd'hui${dealOf(project)}.`,
+      `Rappel du jour${dealOf(project)} : votre prochaine action est pour aujourd'hui.`,
     deal_memo_received: (_actor: string, project: string) =>
       `Un deal memo est arrivé par e-mail${dealOf(project)} : à envoyer à la direction pour validation.`,
     deal_memo_submitted: (actor: string, project: string) =>

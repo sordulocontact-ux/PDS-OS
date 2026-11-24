@@ -53,7 +53,18 @@ export function FormDialog({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {open && <div className="flex flex-col gap-6">{children}</div>}
+        {/* Its form's submit stops here: drawn in a portal inside another
+            form (« Ajouter au Réseau » from « Nouveau deal »), React would
+            carry it up to that form, whose own submit cancelled it (UX tests
+            of 22 and 24/11/2026). */}
+        {open && (
+          <div
+            className="flex flex-col gap-6"
+            onSubmit={(event) => event.stopPropagation()}
+          >
+            {children}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

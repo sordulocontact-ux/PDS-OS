@@ -32,8 +32,10 @@ function moveOf(deal: Deal, today: string): DealWork | null {
     due,
     overdue: due !== null && due < today,
   });
+  // Its reminder's day come: the action itself when there is one (one date
+  // since the UX test of 24/11/2026), else « Relancer ».
   if (deal.followUpOn && deal.followUpOn <= today)
-    return at(t.followUp, deal.followUpOn);
+    return at(deal.nextAction ?? t.followUp, deal.followUpOn);
   if (deal.nextAction) return at(deal.nextAction, deal.nextActionOn);
   if (deal.followUpOn) return at(t.followUp, deal.followUpOn);
   return at(t.todo[deal.stage] ?? t.followUp, null);

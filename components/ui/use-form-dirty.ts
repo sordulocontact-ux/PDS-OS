@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const snapshot = (form: HTMLFormElement) =>
+/** What a form holds, comparable as text (useFormDirty, the dialog guard). */
+export const formSnapshot = (form: HTMLFormElement) =>
   JSON.stringify(
     [...new FormData(form).entries()].map(([key, value]) => [
       key,
@@ -26,7 +27,7 @@ export function useFormDirty() {
   useEffect(() => {
     const id = requestAnimationFrame(() =>
       requestAnimationFrame(() => {
-        if (formRef.current) initial.current = snapshot(formRef.current);
+        if (formRef.current) initial.current = formSnapshot(formRef.current);
       }),
     );
     return () => cancelAnimationFrame(id);
@@ -37,7 +38,7 @@ export function useFormDirty() {
     requestAnimationFrame(() => {
       const form = formRef.current;
       if (!form || initial.current === null) return;
-      setDirty(snapshot(form) !== initial.current);
+      setDirty(formSnapshot(form) !== initial.current);
     });
   }, []);
 

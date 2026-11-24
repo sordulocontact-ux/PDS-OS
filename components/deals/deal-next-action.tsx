@@ -19,6 +19,15 @@ import { formatDay } from "@/lib/utils/day";
 
 const fr = { deals, dialogs };
 
+/** The day PDS OS reminds: the earlier of the action's day and the
+ * follow-up's, as flag_due_deal_follow_ups tells it (a deal written before
+ * the one date of 24/11/2026 may have both). ISO days compare as text. */
+function remindDay(nextActionOn: string | null, followUpOn: string | null) {
+  if (nextActionOn && followUpOn)
+    return nextActionOn < followUpOn ? nextActionOn : followUpOn;
+  return nextActionOn ?? followUpOn;
+}
+
 /** The next action and follow-up; on a proposal of PO (BIZ 6), the action
  * and day it proposes, saving applies it. */
 export function NextActionForm({
@@ -41,13 +50,17 @@ export function NextActionForm({
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+        // One date (UX test of 24/11/2026: « Pour le » and « Relancer le »
+        // read as the same, half the reminders never rang): the action's day
+        // is the day PDS OS reminds, written as both.
+        const remindOn = String(data.get("remindOn") ?? "");
         run(() =>
           setDealNextAction(
             deal.id,
             {
               nextAction: String(data.get("nextAction") ?? ""),
-              nextActionOn: String(data.get("nextActionOn") ?? ""),
-              followUpOn: String(data.get("followUpOn") ?? ""),
+              nextActionOn: remindOn,
+              followUpOn: remindOn,
             },
             proposal?.id,
           ),
@@ -62,19 +75,16 @@ export function NextActionForm({
         defaultValue={proposal?.action ?? deal.nextAction ?? ""}
       />
       <Field
-        id={`deal-${deal.id}-next-on`}
-        name="nextActionOn"
+        id={`deal-${deal.id}-remind-on`}
+        name="remindOn"
         type="date"
-        label={t.on}
-        defaultValue={(proposal ? proposal.on : deal.nextActionOn) ?? ""}
-      />
-      <Field
-        id={`deal-${deal.id}-follow-up`}
-        name="followUpOn"
-        type="date"
-        label={t.followUp}
-        hint={t.followUpHint}
-        defaultValue={deal.followUpOn ?? ""}
+        label={t.remindOn}
+        hint={t.remindHint}
+        defaultValue={
+          (proposal
+            ? proposal.on
+            : remindDay(deal.nextActionOn, deal.followUpOn)) ?? ""
+        }
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
@@ -106,6 +116,7 @@ export function DealNextAction({
   const t = fr.deals.page.next;
   const [open, setOpen] = useState(false);
   const none = !deal.nextAction && !deal.followUpOn;
+  const remind = remindDay(deal.nextActionOn, deal.followUpOn);
   return (
     <div className="flex flex-col gap-2">
       {/* One sentence, not a table (Sacha 20/11/2026): the action and its
@@ -134,14 +145,9 @@ export function DealNextAction({
             <p className="text-body-md font-semibold text-pretty">
               {deal.nextAction ?? t.noneAction}
             </p>
-            {(deal.nextActionOn || deal.followUpOn) && (
+            {remind && (
               <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-                {[
-                  deal.nextActionOn && formatDay(deal.nextActionOn),
-                  deal.followUpOn && t.followUpOn(formatDay(deal.followUpOn)),
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
+                {t.remindedOn(formatDay(remind))}
               </p>
             )}
           </div>

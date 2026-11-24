@@ -5,6 +5,11 @@ import { createContext, useContext } from "react";
 import { IconXmark } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
+import {
+  DialogGuardProvider,
+  useDialogGuard,
+  useDialogGuardNote,
+} from "@/components/ui/dialog-guard";
 import { useDesignStyle } from "@/components/shell/use-design-style";
 import {
   panelWidth,
@@ -64,7 +69,15 @@ function useSectionThemeClass() {
 // content padded and scrolling.
 const rightPanel = cn(sidePanelClass, "gap-5 overflow-y-auto p-6");
 
-const Dialog = DialogPrimitive.Root;
+/** The modal's root, its form kept from a click beside (dialog-guard.ts). */
+function Dialog({ onOpenChange, ...props }: DialogPrimitive.Root.Props) {
+  const { guard, onOpenChange: guarded } = useDialogGuard(onOpenChange);
+  return (
+    <DialogGuardProvider value={guard}>
+      <DialogPrimitive.Root onOpenChange={guarded} {...props} />
+    </DialogGuardProvider>
+  );
+}
 const DialogTrigger = DialogPrimitive.Trigger;
 
 function DialogContent({
@@ -92,6 +105,12 @@ function DialogContent({
 }) {
   const section = useContext(DialogSideContext);
   const style = useDesignStyle();
+  const note = useDialogGuardNote();
+  // A form's values read before it is touched (dialog-guard.ts).
+  const guardProps = {
+    onFocusCapture: (event: React.FocusEvent) => note?.(event.target),
+    onPointerDownCapture: (event: React.PointerEvent) => note?.(event.target),
+  };
   const side =
     sideProp ?? section.side ?? (style === "classic" ? "center" : "right");
   if (side === "right")
@@ -106,6 +125,7 @@ function DialogContent({
             section.className,
             className,
           )}
+          {...guardProps}
           {...props}
         >
           {children}
@@ -144,6 +164,7 @@ function DialogContent({
           "surface-glass rounded-t-3xl border border-[color:var(--border-default)] bg-[var(--surface-glass)] backdrop-blur-[var(--glass-panel-blur)] sm:rounded-3xl",
           className,
         )}
+        {...guardProps}
         {...props}
       >
         {children}

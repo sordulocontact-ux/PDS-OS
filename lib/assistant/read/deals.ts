@@ -109,7 +109,10 @@ export async function readDeals(
               ),
             ]
           : []),
-        ...(d.followUpOn ? [t.followUp(formatDay(d.followUpOn))] : []),
+        // One date since 24/11/2026: said once when it is the action's.
+        ...(d.followUpOn && d.followUpOn !== d.nextActionOn
+          ? [t.followUp(formatDay(d.followUpOn))]
+          : []),
         ...(d.abandonReason ? [t.abandoned(d.abandonReason)] : []),
         ...memoLines(d.id),
         ...(countOf(calls, d.id) > 0
