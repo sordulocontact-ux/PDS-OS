@@ -78,13 +78,13 @@ select throws_ok($$ insert into public.budget_lines (organization_id, off_budget
 select throws_ok($$ insert into public.budget_lines (organization_id, label, amount_cents, status, spent_on)
                     values (pg_temp.id_of('org'), 'Y', 100, 'planned', '2026-03-06') $$,
   '23514', null, 'a spend has an envelope, or is « hors budget »');
-select throws_ok($$ insert into public.budget_lines (organization_id, project_id, label, amount_cents,
+select lives_ok($$ insert into public.budget_lines (organization_id, project_id, label, amount_cents,
                                                      status, spent_on)
                     values (pg_temp.id_of('org'), pg_temp.id_of('p_morris'), 'Z', 100, 'planned',
                             '2026-03-06') $$,
-  '42501', null, 'business does not write a project''s spends');
-select is((select count(*)::int from public.budget_lines where project_id = pg_temp.id_of('p_morris')), 0,
-  'nor select them');
+  'business writes a project''s spends (20261124190101)');
+select is((select count(*)::int from public.budget_lines where project_id = pg_temp.id_of('p_morris')), 2,
+  'and selects them');
 select is((select count(*)::int from public.finance_spends()
             where label in ('Studio ' || (select v from vars where k = 'tag'),
                             'Loyer ' || (select v from vars where k = 'tag'),
@@ -103,13 +103,13 @@ select ok((select rebill_income_id is not null from public.finance_spends()
             where label = 'Loyer ' || (select v from vars where k = 'tag')),
   'the expected income rebilling a spend is read with it');
 
--- The direction keeps its rule on projects; the others read nothing of Finance --------------
+-- The direction writes a project's spends as the Finance; the others read nothing of Finance -
 select pg_temp.act_as(pg_temp.id_of('director'));
-select throws_ok($$ insert into public.budget_lines (organization_id, project_id, label, amount_cents,
+select lives_ok($$ insert into public.budget_lines (organization_id, project_id, label, amount_cents,
                                                      status, spent_on)
                     values (pg_temp.id_of('org'), pg_temp.id_of('p_morris'), 'W', 100, 'planned',
                             '2026-03-06') $$,
-  '42501', null, 'the director still does not write a project''s spends');
+  'the director writes a project''s spends, as the Finance (20261124190101)');
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select is((select count(*)::int from public.finance_cost_centers)
           + (select count(*)::int from public.budget_lines where cost_center_id is not null or off_budget)

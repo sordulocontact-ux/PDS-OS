@@ -60,6 +60,7 @@ export function BudgetLineForm({
   deliverables = [],
   organizationId = null,
   storedProof,
+  asFinance = false,
   onDone,
   onCancel = onDone,
 }: {
@@ -75,6 +76,9 @@ export function BudgetLineForm({
   // A file already kept in finance-files (a proof of Finance › Justificatifs,
   // « Créer la dépense »): a Finance spend's proof when no other is chosen.
   storedProof?: { path: string; name: string };
+  // A project's spend written as the Finance, not by its owner (24/11/2026):
+  // its proof goes to finance-files, the project's Files being the owner's.
+  asFinance?: boolean;
   onDone: () => void;
   onCancel?: () => void;
 }) {
@@ -114,6 +118,13 @@ export function BudgetLineForm({
   // A line that follows an invoice: its amount and state are the invoice's.
   const followsInvoice = Boolean(line?.invoiceId);
   const onProject = target?.kind === "project";
+  // Where its proof is kept: finance-files for the Finance's own budgets and
+  // for a project written as the Finance, else the project's or artist's.
+  const proofInFinance =
+    target !== null &&
+    (isFinanceTarget(target) ||
+      asFinance ||
+      ("byFinance" in target && target.byFinance === true));
 
   const errors = lineFormErrors({ ...v, ...classification, target });
   const missing = Object.values(errors).filter(Boolean).length;
@@ -135,9 +146,9 @@ export function BudgetLineForm({
       // Finance spend's in finance-files, the others in their library).
       let attachmentFileId = "";
       let financeProof: { path: string; name: string } | undefined =
-        storedProof && isFinanceTarget(target) ? storedProof : undefined;
+        storedProof && proofInFinance ? storedProof : undefined;
       if (proof && organizationId) {
-        if (isFinanceTarget(target)) {
+        if (proofInFinance) {
           const stored = await uploadFinanceFile(organizationId, proof);
           if (!stored.ok) return { ok: false, error: t.attachmentFailed };
           financeProof = { path: stored.path, name: stored.name };

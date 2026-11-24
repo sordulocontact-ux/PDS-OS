@@ -65,6 +65,9 @@ export type ExpenseTarget = BudgetTarget & {
   // Its sub-budgets, for the Finance: a spend goes straight into one
   // (Sacha 24/11/2026).
   parts?: { id: string; name: string }[];
+  // A project the reader does not run, written as the Finance (24/11/2026):
+  // its proof goes to finance-files, not to the project's Files.
+  byFinance?: boolean;
 };
 
 export type BudgetLine = {

@@ -21,6 +21,7 @@ export function BudgetLineSheet({
   levers,
   deliverables,
   organizationId,
+  asFinance,
   open,
   onOpenChange,
 }: {
@@ -29,6 +30,8 @@ export function BudgetLineSheet({
   levers?: BudgetLever[];
   deliverables?: BudgetDeliverable[];
   organizationId?: string | null;
+  // A project's spend written as the Finance (BudgetLineForm).
+  asFinance?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -47,6 +50,7 @@ export function BudgetLineSheet({
         levers={levers}
         deliverables={deliverables}
         organizationId={organizationId}
+        asFinance={asFinance}
         onDone={() => onOpenChange(false)}
       />
     </FormDialog>

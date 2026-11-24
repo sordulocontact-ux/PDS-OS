@@ -119,6 +119,7 @@ export function AddEnvelopeSpendButton({
           target={{ kind, id }}
           line={null}
           organizationId={organizationId}
+          asFinance={kind === "project"}
           onDone={() => setOpen(false)}
         />
       </FormDialog>

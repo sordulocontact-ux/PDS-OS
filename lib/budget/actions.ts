@@ -196,7 +196,8 @@ export async function saveBudgetLine(
     due_on: p.data.dueOn,
     rebillable: p.data.rebillable ?? false,
     validator_person_id: p.data.validatorId,
-    ...(finance && proof !== undefined
+    // A Finance budget's proof, or a project's written as the Finance.
+    ...((finance || onProject) && proof !== undefined
       ? { proof_path: proof?.path ?? null, proof_name: proof?.name ?? null }
       : {}),
   };

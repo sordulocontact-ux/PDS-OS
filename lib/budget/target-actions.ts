@@ -11,7 +11,9 @@ const RECENT = 5;
 
 /**
  * What a quick spend can go to (BUD 4), for the reader: the projects they
- * run (not archived) and, for the artists' budgets' readers, every artist
+ * run (not archived), every project of Finance › Budgets for the Finance
+ * (24/11/2026: « un DG ou business peut faire tout ce qu'il veut sur la
+ * finance »), and, for the artists' budgets' readers, every artist
  * not archived; for the Finance (manage_finance, lot 3 of Ibé's ticket),
  * its cost centers and « Hors budget »; the ones they last spent on
  * first, then « Hors budget » (a structure spend must be found, UX test of
@@ -29,49 +31,69 @@ export async function loadExpenseTargets(): Promise<{
   const supabase = await createClient();
   const artists = can(access, "read_artist_budgets");
   const finance = can(access, "manage_finance");
-  const [projectsRes, artistsRes, recentRes, centersRes, partsRes] =
-    await Promise.all([
-      supabase
-        .from("projects")
-        .select("id, title")
-        .eq("owner_person_id", access.personId)
-        .is("archived_at", null)
-        .order("title"),
-      artists
-        ? supabase
-            .from("artists")
-            .select("id, name")
-            .is("archived_at", null)
-            .order("name")
-        : Promise.resolve({ data: [], error: null }),
-      supabase
-        .from("budget_lines")
-        .select("project_id, artist_id, cost_center_id")
-        .eq("created_by", access.personId)
-        .order("created_at", { ascending: false })
-        .limit(50),
-      finance
-        ? supabase
-            .from("finance_cost_centers")
-            .select("id, name")
-            .is("archived_at", null)
-            .order("name")
-        : Promise.resolve({ data: [], error: null }),
-      supabase
-        .from("finance_budget_parts")
-        .select("id, name, target_kind, target_id")
-        .order("created_at"),
-    ]);
+  const [
+    projectsRes,
+    financeProjectsRes,
+    artistsRes,
+    recentRes,
+    centersRes,
+    partsRes,
+  ] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, title")
+      .eq("owner_person_id", access.personId)
+      .is("archived_at", null)
+      .order("title"),
+    // The projects the Finance sees, owner or not (a business manager
+    // does not see a project by table).
+    finance
+      ? supabase.rpc("finance_projects")
+      : Promise.resolve({ data: [], error: null }),
+    artists
+      ? supabase
+          .from("artists")
+          .select("id, name")
+          .is("archived_at", null)
+          .order("name")
+      : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from("budget_lines")
+      .select("project_id, artist_id, cost_center_id")
+      .eq("created_by", access.personId)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    finance
+      ? supabase
+          .from("finance_cost_centers")
+          .select("id, name")
+          .is("archived_at", null)
+          .order("name")
+      : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from("finance_budget_parts")
+      .select("id, name, target_kind, target_id")
+      .order("created_at"),
+  ]);
   const partsOf = (kind: string, id: string) =>
     (partsRes.data ?? [])
       .filter((p) => p.target_kind === kind && p.target_id === id)
       .map((p) => ({ id: p.id, name: p.name }));
+  const owned = new Set((projectsRes.data ?? []).map((p) => p.id));
   const all: ExpenseTarget[] = [
     ...(projectsRes.data ?? []).map((p) => ({
       kind: "project" as const,
       id: p.id,
       label: p.title,
     })),
+    ...(financeProjectsRes.data ?? [])
+      .filter((p) => !p.archived && !owned.has(p.project_id))
+      .map((p) => ({
+        kind: "project" as const,
+        id: p.project_id,
+        label: p.title,
+        byFinance: true,
+      })),
     ...(artistsRes.data ?? []).map((a) => ({
       kind: "artist" as const,
       id: a.id,

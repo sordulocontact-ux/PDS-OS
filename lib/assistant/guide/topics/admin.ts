@@ -148,7 +148,7 @@ export const adminTopics: GuideTopic[] = [
     where: "Valable dans toute l'application.",
     facts: [
       "Une étape validée est définitive : on ne la rouvre pas.",
-      "Dans un projet lancé, seul son responsable écrit. La direction lit et valide.",
+      "Dans un projet lancé, seul son responsable écrit. La direction lit et valide. Une exception : les dépenses d'un projet, que la Finance (direction, business managers, business) ajoute, modifie et supprime aussi.",
       "Un poste n'est pas une permission : un poste donne un ensemble de droits, et c'est ce droit que l'application vérifie.",
       "Les trois postes sont Directeur général, Chef de projet et Directeur créatif. Un projet n'est visible que de la direction, de son responsable, de la personne à qui il est transmis, de sa direction artistique, des ingénieurs internes de son Master et de son équipe de production.",
       "Seule la direction archive, restaure ou supprime un artiste, un titre, un projet ou un contact. Archiver garde tout ; supprimer est définitif et refusé tant que l'élément est utilisé ailleurs.",
@@ -159,7 +159,7 @@ export const adminTopics: GuideTopic[] = [
     faq: [
       {
         q: "Pourquoi ne puis-je pas modifier ce projet ?",
-        a: "Dans un projet lancé, seul son responsable peut écrire. Les autres lisent.",
+        a: "Dans un projet lancé, seul son responsable peut écrire. Les autres lisent. Seules ses dépenses s'écrivent aussi par la Finance.",
       },
       {
         q: "Peut-on supprimer un projet ?",

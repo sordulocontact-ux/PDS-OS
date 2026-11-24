@@ -92,11 +92,13 @@ export default async function FinanceEnvelopePage({
   const posts = byPost(lines);
   const here = `${routes.financeBudgets}/${slug}/${id}`;
   const canManage = can(access, "manage_finance");
-  // Who may write the envelope's lines: the Finance its cost centers, the
-  // artists' budgets' readers an artist (a project's owner from its Budget).
+  // Who may import the envelope's lines: the Finance its cost centers, the
+  // artists' budgets' readers an artist.
   const canImport =
     (kind === "cost_center" && canManage) ||
     (kind === "artist" && can(access, "read_artist_budgets"));
+  // A spend is added to a project's budget by the Finance too (24/11/2026).
+  const canAddSpend = canImport || (kind === "project" && canManage);
   const share = envelope.pdsShareBp;
 
   return (
@@ -106,7 +108,7 @@ export default async function FinanceEnvelopePage({
       switcher={{ kind: "budget", id }}
       action={
         <>
-          {canImport && access.organizationId && (
+          {canAddSpend && access.organizationId && (
             <AddEnvelopeSpendButton
               kind={kind}
               id={id}

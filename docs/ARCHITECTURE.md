@@ -3099,11 +3099,23 @@ date de sortie de la Stratégie, NDA : à décider).
     de droit de mise à jour sur `project_id` / `artist_id`). **Date de la dépense** `spent_on`
     (jour de Paris par défaut, reprise de `created_at` pour les lignes existantes) : la période d'une
     enveloppe d'artiste la lit. Les lignes d'un projet gardent leurs règles (`can_read_project_budget`,
-    le responsable écrit) ; celles d'un artiste sont lues **et saisies** par la nouvelle permission
+    le responsable écrit), **plus la Finance** depuis le 24/11/2026 (ci-dessous) ; celles d'un artiste sont lues **et saisies** par la nouvelle permission
     **`read_artist_budgets`** (direction, chefs de projet, business managers ; pas le business
     developer ni la direction créative), sur un artiste non archivé (`is_open_artist`). Une ligne
     d'artiste ne sert ni levier, ni livrable, ni activation (triggers : projet nul). Un artiste qui a
     des dépenses ne se supprime pas (`delete_artist_row` → `artist_in_use`).
+  - **La Finance écrit les dépenses de tout projet** (Sacha 24/11/2026 : « un DG ou business peut faire
+    tout ce qu'il veut sur la finance », migration `20261124190101_finance_writes_project_spends.sql`,
+    test `finance-project-spends.test.sql`) : `manage_finance` ajoute, modifie et supprime une ligne de
+    projet, `read_finance` la lit (même une business manager qui ne voit pas le projet). Seule exception
+    à « dans un projet lancé, seul son responsable écrit » ; le reste du projet ne change pas. Où :
+    « Pour » de Dépenses et Finance › Dépenses (`loadExpenseTargets` : les projets de `finance_projects()`
+    non archivés, `ExpenseTarget.byFinance` quand le lecteur ne pilote pas le projet), « Ajouter une
+    dépense » de Finance › Budgets sur un budget de projet, « Modifier » sur place dans Finance › Dépenses
+    (`SpendsTable`) et dans Dépenses (`Expense.writable` / `byFinance`). Le Budget du projet reste la page
+    de son responsable. **Justificatif** d'une dépense de projet écrite par la Finance : dans
+    `finance-files` (`proof_path`, `BudgetLineForm asFinance`), les Fichiers du projet n'étant écrits
+    que par son responsable.
   - **Justificatif** (BUD 1) : facultatif, une photo du ticket ou un PDF, posé **en premier** dans le
     formulaire ; rangé dans la bibliothèque de ce à quoi la dépense appartient, jamais un second
     stockage : Fichiers du projet (catégorie Autres, comme avant) ou fichiers de l'artiste, catégorie

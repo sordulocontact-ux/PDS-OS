@@ -2532,6 +2532,11 @@ cliquer et tout s'enchaîner »).
   « Pour » de Dépenses) ; découper reste à la Finance. Corrigé au passage : une business manager sans accès au projet ne
   pouvait pas découper son budget (« part_unknown_budget »). Migration `20261124180101_budget_parts_project_owner.sql`,
   test `budget-parts-owner.test.sql` (9 cas). **Migration à pousser en prod.**
+- Fait le 24/11 (Sacha : « je suis DG, je devrais pouvoir le faire, un DG ou business peut faire tout ce qu'il veut sur
+  la finance ») : la Finance (`manage_finance`) ajoute, modifie et supprime les dépenses de tout projet (« Pour » de
+  Dépenses, « Ajouter une dépense » de Finance › Budgets sur un projet, « Modifier » dans Finance › Dépenses et Dépenses),
+  justificatif dans `finance-files`. Migration `20261124190101_finance_writes_project_spends.sql`, test
+  `finance-project-spends.test.sql` ; cinq tests qui disaient l'ancienne règle mis à jour. **Migration à pousser en prod.**
 
 ## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
 

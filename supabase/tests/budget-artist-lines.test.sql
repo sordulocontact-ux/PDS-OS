@@ -84,7 +84,7 @@ select lives_ok($$ select pg_temp.artist_line('artist', 'Grec après la session'
 select is((select spent_on from public.budget_lines where label = 'Grec après la session'),
   (now() at time zone 'Europe/Paris')::date, 'a spend is dated today by default (Paris)');
 select is((select count(*)::int from public.budget_lines where project_id = pg_temp.id_of('project')),
-  0, 'a business manager still does not read a project''s lines');
+  1, 'a business manager reads a project''s lines, as the Finance (20261124190101)');
 select throws_ok($$ select pg_temp.artist_line('archived', 'Taxi') $$,
   '42501', null, 'no spend on an archived artist');
 select throws_ok($$

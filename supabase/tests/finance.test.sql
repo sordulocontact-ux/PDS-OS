@@ -1,7 +1,7 @@
 -- Finance (supabase/migrations/20261112150101_finance.sql): read_finance is
 -- the direction's, the business managers' and « business »'s only; they read
 -- every total of the organization through the finance_* functions, while the
--- rows keep their own rules (a business does not select a project's lines).
+-- rows keep their own rules (a project's lines read as the Finance since 20261124190101).
 -- Run with `supabase test db`.
 begin;
 select plan(14);
@@ -89,7 +89,7 @@ select is((select label from public.finance_lines('largest', '2026-03-01', '2026
             limit 1),
           'Studio', 'the largest engaged spend of the period');
 select is((select count(*)::int from public.budget_lines where project_id = pg_temp.id_of('p_morris')),
-          0, 'the rows keep their rules: business does not select a project''s lines');
+          2, 'business selects a project''s lines, as the Finance (20261124190101)');
 
 -- Nothing for the others ----------------------------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('manager'));

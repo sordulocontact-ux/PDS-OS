@@ -90,8 +90,8 @@ function asLine(spend: FinanceSpend, targetLabel: string | null): BudgetLine {
  * Every spend of the label (Finance › Dépenses): what and from whom, its
  * budget (project, artist, other, « Hors budget »), the day it goes
  * out, its state, its amount TTC (HT below). The Finance changes the
- * spends of its own envelopes and plans the rebilling of a rebillable one;
- * a project's or an artist's spend is changed from its Budget.
+ * spends of its own envelopes and of the projects and plans the rebilling
+ * of a rebillable one; an artist's spend is changed from its Budget.
  */
 export function SpendsTable({
   spends,
@@ -134,9 +134,10 @@ export function SpendsTable({
 
   function actionsOf(spend: FinanceSpend): RowAction[] {
     return [
-      // A cost center's or off-budget spend is changed here; a project's or
-      // an artist's in its own Budget.
-      isFinanceTarget(spend.target)
+      // A cost center's, off-budget or (for the Finance, 24/11/2026)
+      // project's spend is changed here; an artist's in its own Budget.
+      isFinanceTarget(spend.target) ||
+      (canManage && spend.target.kind === "project")
         ? {
             key: "edit",
             label: t.edit,
@@ -343,6 +344,7 @@ export function SpendsTable({
               target={open.spend.target}
               line={asLine(open.spend, envelopeOf(open.spend))}
               organizationId={organizationId}
+              asFinance={open.spend.target.kind === "project"}
               onDone={() => setOpen(null)}
             />
           ) : (

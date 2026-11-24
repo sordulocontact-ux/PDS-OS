@@ -76,11 +76,12 @@ select throws_ok($$
 $$, '42501', null, 'the role of a line is never moved');
 reset role;
 
-select pg_temp.act_as(pg_temp.id_of('director'));
+-- Another manager (the Finance writes it too since 20261124190101).
+select pg_temp.act_as(pg_temp.id_of('other'));
 select throws_ok($$
   insert into public.budget_lines (organization_id, project_id, label, amount_cents, master_role)
   values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Mastering', 20000, 'mastering')
-$$, '42501', null, 'only the owner writes the budget');
+$$, '42501', null, 'a manager who does not run the project does not write its budget');
 reset role;
 
 select * from finish();

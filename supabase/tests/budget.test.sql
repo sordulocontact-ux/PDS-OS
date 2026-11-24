@@ -1,4 +1,5 @@
--- Budget lines: read by whoever sees the project, written by its owner only.
+-- Budget lines: read by whoever sees the project, written by its owner and by the Finance
+-- (20261124190101).
 -- Run with `supabase test db`.
 begin;
 select plan(14);
@@ -80,19 +81,19 @@ select throws_ok($$
   values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Auteur', 100, pg_temp.id_of('other_person'))
 $$, '42501', null, 'created_by is not writable by the client');
 
--- Director: reads, never writes -------------------------------------------------
+-- Director: reads, and writes as the Finance (manage_finance, 24/11/2026) -------
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
 select is((select count(*)::int from public.budget_lines where project_id = pg_temp.id_of('project')),
           1, 'the director reads the lines');
-select throws_ok($$
+select lives_ok($$
   insert into public.budget_lines (organization_id, project_id, label, amount_cents)
-  values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Intrus', 100)
-$$, '42501', null, 'the director cannot add a line');
-update public.budget_lines set amount_cents = 1 where id = pg_temp.id_of('line');
-delete from public.budget_lines where id = pg_temp.id_of('line');
-select is((select amount_cents from public.budget_lines where id = pg_temp.id_of('line')),
-          240000::bigint, 'the director can neither update nor delete a line');
+  values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Ajout direction', 100)
+$$, 'the director, as the Finance, adds a line');
+delete from public.budget_lines
+ where project_id = pg_temp.id_of('project') and label = 'Ajout direction';
+select is((select count(*)::int from public.budget_lines where project_id = pg_temp.id_of('project')),
+          1, 'and removes it');
 
 -- Another project manager: sees nothing ----------------------------------------
 reset role;

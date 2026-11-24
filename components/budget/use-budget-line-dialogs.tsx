@@ -48,6 +48,13 @@ export function useBudgetLineDialogs({
           levers={samePage ? levers : []}
           deliverables={samePage ? deliverables : []}
           organizationId={organizationId}
+          // A Dépenses line of a project the reader does not run, changed
+          // as the Finance (24/11/2026).
+          asFinance={
+            editing !== null &&
+            "byFinance" in editing &&
+            editing.byFinance === true
+          }
           open={open}
           onOpenChange={setOpen}
         />
