@@ -1,5 +1,6 @@
 import { DayAxis } from "@/components/ui/day-axis";
 import type { Treasury } from "@/lib/finance/treasury";
+import { lineIndices, linePath } from "@/lib/finance/treasury-line";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";
 import { dayTicks } from "@/lib/utils/day-ticks";
 
@@ -9,8 +10,8 @@ const W = 260;
 const H = 72;
 
 /**
- * The balance from today to the horizon, as steps (each move changes it on
- * its day), with the minimum reserve dashed in red: the small chart of the
+ * The balance from today to the horizon, as a line through one balance a
+ * week and the low point (lib/finance/treasury-line.ts, Sacha 24/11/2026), with the minimum reserve dashed in red: the small chart of the
  * overview's « Trésorerie » card, its days named under it every week or
  * two (Ibé 16/11/2026: « qu'on voie soit les jours, soit les mois »).
  * Decorative: the card's sentence says the figures.
@@ -28,13 +29,13 @@ export function TreasurySpark({ treasury }: { treasury: Treasury }) {
   const range = days[days.length - 1] - first || 1;
   const x = (day: number) => ((day - first) / range) * W;
   const y = (cents: number) => 6 + ((hi - cents) / span) * (H - 12);
-  const path = points
-    .map((p, i) =>
-      i === 0
-        ? `M0,${y(p.cents).toFixed(1)}`
-        : `L${x(days[i]).toFixed(1)},${y(points[i - 1].cents).toFixed(1)} L${x(days[i]).toFixed(1)},${y(p.cents).toFixed(1)}`,
-    )
-    .join(" ");
+  const lowIndex = values.indexOf(Math.min(...values));
+  const path = linePath(
+    lineIndices(points.length, 0, [lowIndex]).map((i) => ({
+      x: x(days[i]),
+      y: y(points[i].cents),
+    })),
+  );
   const ticks = dayTicks(points.map((p) => p.day));
   return (
     <div>
@@ -73,6 +74,7 @@ export function TreasurySpark({ treasury }: { treasury: Treasury }) {
           fill="none"
           stroke="var(--text-primary)"
           strokeWidth={1.5}
+          strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
         />
       </svg>

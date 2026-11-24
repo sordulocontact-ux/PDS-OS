@@ -3412,8 +3412,8 @@ part financée), puis Rapprochement Qonto, alertes et moteurs (Orchard, Pay Late
 - **Calculs** (code, `lib/finance/treasury.ts`, `money-in.ts`, `cockpit.ts`) : solde du jour = dernier relevé
   + encaissements − dépenses payées datées après lui (une dépense payée datée plus tard compte aujourd'hui) ;
   prévision = + reste de chaque entrée ouverte à son échéance (sinon date prévue), − chaque dépense non payée
-  à son échéance ; ce qui est en retard compte aujourd'hui. Courbe en marches (30 jours de réel, puis
-  l'horizon), point bas, réserve. État d'une entrée calculé : prévue, facturée, en retard (date dépassée),
+  à son échéance ; ce qui est en retard compte aujourd'hui. Courbe en ligne (30 jours de réel, puis
+  l'horizon ; un solde par semaine, aujourd'hui et le point bas reliés en droites, `lib/finance/treasury-line.ts`, 24/11), point bas, réserve. État d'une entrée calculé : prévue, facturée, en retard (date dépassée),
   partiellement encaissée, encaissée, annulée (`incomeStateTone`). « Disponible sur les budgets » = reste des
   enveloppes de projets en cours (celles des artistes non ajoutées : leurs projets les consomment déjà).
   « À surveiller » : passage sous la réserve, entrées en retard, budgets ≥ 82 % ou dépassés, dépenses sans

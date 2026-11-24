@@ -4,6 +4,11 @@ import { useState, type KeyboardEvent, type PointerEvent } from "react";
 
 import { DayAxis } from "@/components/ui/day-axis";
 import type { TreasuryPoint } from "@/lib/finance/treasury";
+import {
+  lineIndices,
+  linePath,
+  nearestIndex,
+} from "@/lib/finance/treasury-line";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
@@ -27,20 +32,13 @@ function axis(low: number, high: number) {
   return { bottom, top, ticks };
 }
 
-// A balance moves on the day money comes or goes: drawn in steps, never a
-// curve that would invent a value between two days.
-function stepPath(points: { x: number; y: number }[]) {
-  return points
-    .map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `H${p.x}V${p.y}`))
-    .join("");
-}
-
 /**
  * The treasury's curve (Ibé's ticket, maquettes 1 and 6), drawn as Midday
- * draws its reports (13/11/2026): one ink, the real balance solid up to
+ * draws its reports (13/11/2026): a line through one balance a week, today
+ * and the low point (lib/finance/treasury-line.ts, Sacha 24/11/2026), one ink, the real balance solid up to
  * today, the forecast dashed after it, the minimum reserve dotted amber,
  * the low point marked; the grid in faint dashes. Hover, touch or the arrow keys
- * read a day's balance. The figures it draws are those of the calendar
+ * read the balance of a point of the line. The figures it draws are those of the calendar
  * below it (lib/finance/treasury.ts).
  */
 export function TreasuryChart({
@@ -70,16 +68,19 @@ export function TreasuryChart({
   const y = (cents: number) => ((top - cents) / (top - bottom)) * 100;
   const todayIndex = points.findIndex((p) => p.forecast);
   const lowIndex = points.findIndex((p) => p.forecast && p.day === low.day);
-  const real = points.flatMap((p, i) =>
-    p.forecast ? [] : [{ x: x(i), y: y(p.cents) }],
-  );
+  // The last real day (the day before today's forecast point, or the end).
+  const lastReal = todayIndex > 0 ? todayIndex - 1 : todayIndex < 0 ? last : -1;
+  const picked = lineIndices(points.length, Math.max(todayIndex, 0), [
+    lastReal,
+    lowIndex,
+  ]);
+  const at = (i: number) => ({ x: x(i), y: y(points[i].cents) });
+  const real = picked.filter((i) => !points[i].forecast).map(at);
   // The forecast starts from today's real balance: what is late and counted
-  // today shows as a step down (or up) on today's line.
+  // today shows as a slope on today's line.
   const forecast = [
     ...real.slice(-1),
-    ...points.flatMap((p, i) =>
-      p.forecast ? [{ x: x(i), y: y(p.cents) }] : [],
-    ),
+    ...picked.filter((i) => points[i].forecast).map(at),
   ];
   const shown = active === null ? null : points[active];
   // A day named every week or two under the axis, with its grid line
@@ -92,20 +93,23 @@ export function TreasuryChart({
       Math.max((event.clientX - box.left) / box.width, 0),
       1,
     );
-    setActive(Math.round(ratio * last));
+    setActive(nearestIndex(picked, Math.round(ratio * last)));
   }
   function key(event: KeyboardEvent<HTMLDivElement>) {
     const step = {
       ArrowLeft: -1,
       ArrowRight: 1,
-      Home: -points.length,
-      End: points.length,
+      Home: -picked.length,
+      End: picked.length,
     }[event.key];
     if (step === undefined) return;
     event.preventDefault();
-    setActive((current) =>
-      Math.min(Math.max((current ?? todayIndex) + step, 0), points.length - 1),
-    );
+    setActive((current) => {
+      const from = picked.indexOf(
+        nearestIndex(picked, current ?? Math.max(todayIndex, 0)),
+      );
+      return picked[Math.min(Math.max(from + step, 0), picked.length - 1)];
+    });
   }
 
   return (
@@ -199,17 +203,19 @@ export function TreasuryChart({
               />
             )}
             <path
-              d={stepPath(real)}
+              d={linePath(real)}
               fill="none"
               strokeWidth={2}
+              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
               className="stroke-[var(--text-primary)]"
             />
             <path
-              d={stepPath(forecast)}
+              d={linePath(forecast)}
               fill="none"
               strokeWidth={2}
               strokeDasharray="5 4"
+              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
               className="stroke-[var(--text-tertiary)]"
             />
