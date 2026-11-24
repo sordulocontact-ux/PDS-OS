@@ -9,7 +9,6 @@ import { MasterActions } from "@/components/catalog/master-actions";
 import { MasterTabs } from "@/components/catalog/master-page/master-tabs";
 import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { TitleCover } from "@/components/catalog/title/title-cover";
-import { BackLink } from "@/components/shell/back-link";
 import { ReturnBanner } from "@/components/shell/return-banner";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
@@ -23,6 +22,9 @@ import { variantText } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { demoStatusTone } from "@/lib/ui/state-tones";
 import { allInOrder } from "@/lib/utils/parallel";
+import { shell as shellText } from "@/lib/i18n/fr/shell";
+
+const shellNav = shellText.nav;
 
 // The tab names the title and the section, as a project's pages do
 // (« Nuit blanche · Fichiers · PDS OS »).
@@ -66,15 +68,20 @@ export default async function MasterLayout({
       list={false}
       className="max-w-6xl"
       above={
-        <>
-          <BackLink href={demo ? routes.demos : routes.masters}>
-            {demo ? fr.demos.back : t.back}
-          </BackLink>
-          <Suspense fallback={null}>
-            <ReturnBanner scope={master.id} />
-          </Suspense>
-        </>
+        <Suspense fallback={null}>
+          <ReturnBanner scope={master.id} />
+        </Suspense>
       }
+      parent={
+        demo
+          ? { label: fr.demos.title, href: routes.demos }
+          : { label: shellNav.masters, href: routes.masters }
+      }
+      switcher={{
+        kind: demo ? "demo" : "master",
+        id: master.id,
+        base: routes.master(master.id),
+      }}
       title={master.title}
       leading={
         <TitleCover

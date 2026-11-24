@@ -617,7 +617,42 @@ export const shell = {
       moreSections: "Aussi dans ce projet",
     },
   },
-  // The app's ⌘K search (components/shell/app-search.tsx).
+  // The top band of a page (SectionTopbar): where one is, and the switcher
+  // of a record opened from a list (Sacha 24/11/2026).
+  topbar: {
+    crumb: "Fil d'Ariane",
+    switcher: {
+      open: (name: string) => `${name} — changer`,
+      placeholder: "Rechercher…",
+      noResult: (query: string) => `Rien pour « ${query} »`,
+      loading: "Chargement…",
+      error: "La liste n'a pas pu être chargée.",
+      search: {
+        budget: "Rechercher un budget",
+        deal: "Rechercher un deal",
+        contract: "Rechercher un contrat",
+        contact: "Rechercher un contact",
+        list: "Rechercher une liste",
+        artist: "Rechercher un artiste",
+        master: "Rechercher un titre",
+        demo: "Rechercher une maquette",
+        selection: "Rechercher une sélection",
+      },
+      all: {
+        budget: "Tous les budgets",
+        deal: "Tous les deals",
+        contract: "Tous les contrats",
+        contact: "Tout le Réseau",
+        list: "Toutes les listes",
+        artist: "Tous les artistes",
+        master: "Tout le catalogue",
+        demo: "Toutes les maquettes",
+        selection: "Toutes les sélections",
+      },
+    },
+  },
+  // The app's ⌘K search (components/shell/app-search.tsx), at the top of the
+  // main sidebar since 24/11/2026.
   appSearch: {
     open: "Rechercher…",
     placeholder: "Rechercher une page, un projet, un artiste, un titre…",

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { CreateProjectForm } from "@/components/projects/create-project-form";
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -88,22 +87,21 @@ export default async function NewProjectPage({
       className="max-w-2xl"
       title={t.title}
       description={holder ? t.collective.subtitle : t.subtitle}
-      above={
-        <BackLink
-          href={
-            fromSelection
-              ? routes.artistSelection(fromSelection.id)
-              : fromMaster
-                ? routes.master(fromMaster.id)
-                : routes.projects
-          }
-        >
-          {fromSelection
-            ? t.collective.backToSelection(fromSelection.name)
-            : fromMaster
-              ? fr.catalog.master.backTo(fromMaster.title)
-              : fr.shell.project.back}
-        </BackLink>
+      parent={
+        fromSelection
+          ? [
+              { label: fr.shell.nav.artists, href: routes.artists },
+              {
+                label: fromSelection.name,
+                href: routes.artistSelection(fromSelection.id),
+              },
+            ]
+          : fromMaster
+            ? [
+                { label: fr.shell.nav.masters, href: routes.masters },
+                { label: fromMaster.title, href: routes.master(fromMaster.id) },
+              ]
+            : { label: fr.shell.nav.projects, href: routes.projects }
       }
     >
       {" "}

@@ -5,6 +5,7 @@ import { useRef } from "react";
 
 import { IconSidebar } from "@/components/icons";
 import { AccountMenu } from "@/components/shell/account-menu";
+import { AppSearch } from "@/components/shell/app-search";
 import { NavLinks } from "@/components/shell/nav-links";
 import { PdsLogo } from "@/components/shell/pds-logo";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
@@ -19,7 +20,7 @@ const fr = { shell };
 // Desktop sidebar against the screen's edge, full height, full width or
 // collapsed to icons (Figma "PDS OS", nodes 47:12055 and 47:12047,
 // docs/DESIGN.md § 4): the "PDS" square and the collapse button, the
-// navigation, then the account and the bell. Collapsed by default inside a
+// search (⌘K) then the navigation, then the account and the bell. Collapsed by default inside a
 // project; the IconSidebar button overrides it for the current visit only.
 // On a short screen the head and the account stay put and only the pages
 // scroll between them, fading at the edge with more (Sacha, 16/11/2026, as
@@ -83,8 +84,13 @@ export function Sidebar({
       </div>
       <div
         ref={pagesRef}
-        className={cn("-mx-2 min-h-0 flex-1 px-2", scrollFadeY)}
+        className={cn(
+          "-mx-2 flex min-h-0 flex-1 flex-col gap-1 px-2",
+          scrollFadeY,
+        )}
       >
+        {/* The app's ⌘K, first of the navigation (Sacha 24/11/2026). */}
+        <AppSearch collapsed={collapsed} />
         <NavLinks
           isAdmin={isAdmin}
           permissions={permissions}

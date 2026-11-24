@@ -1,9 +1,9 @@
 "use client";
 
-import { IconMagnifier } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useDeferredValue, useEffect, useId, useState } from "react";
 
+import { SearchTrigger } from "@/components/shell/search-trigger";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { SearchField } from "@/components/ui/search-field";
@@ -52,7 +52,17 @@ const SECTIONS: SearchRow[] = FINANCE_SECTIONS.map((s) => ({
  * Ctrl K from any Finance page; ↑ ↓ to choose, Entrée to open. The index is
  * read by code after the page shows (`useFinancePulse`).
  */
-export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
+export function FinanceSearch({
+  pulse,
+  shortcut = true,
+  iconOnly = false,
+}: {
+  pulse: FinancePulse | null;
+  // The magnifier alone (a phone's top band).
+  iconOnly?: boolean;
+  // ⌘K: the sidebar's one, not a phone's second entry.
+  shortcut?: boolean;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [byKeys, setByKeys] = useState(false);
@@ -63,16 +73,20 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
   const needle = normalizeSearch(useDeferredValue(query));
 
   useEffect(() => {
+    if (!shortcut) return;
     function onKey(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        // Before the app's ⌘K (the main sidebar's): on a Finance page,
+        // Finance's search answers (AppSearch skips a prevented event).
         event.preventDefault();
         setByKeys(true);
         setOpen((was) => !was);
       }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", onKey, { capture: true });
+  }, [shortcut]);
 
   const rows = needle
     ? [...SECTIONS, ...(pulse?.items ?? [])].filter((row) =>
@@ -122,19 +136,12 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
 
   return (
     <>
-      <button
-        type="button"
+      <SearchTrigger
+        label={t.open}
+        collapsed={iconOnly}
+        shortcut={shortcut}
         onClick={() => changeOpen(true)}
-        className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md text-left text-body-md text-[color:var(--text-tertiary)] transition-colors duration-[var(--duration-fast)] outline-none hover:text-[color:var(--text-secondary)] focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <IconMagnifier
-          aria-hidden
-          className="size-4 shrink-0 text-[color:var(--text-secondary)]"
-        />
-        <span className="min-w-0 truncate">{t.open}</span>
-        <Kbd className="max-sm:hidden">⌘K</Kbd>
-        <span className="flex-1" />
-      </button>
+      />
       <Dialog open={open} onOpenChange={changeOpen}>
         <DialogContent
           closeLabel={t.close}

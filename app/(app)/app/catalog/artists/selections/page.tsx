@@ -4,7 +4,6 @@ import Link from "next/link";
 import { FormMessage } from "@/components/auth/form-message";
 import { NewSelectionButton } from "@/components/catalog/selections/new-selection-button";
 import { SelectionsTable } from "@/components/catalog/selections/selections-table";
-import { BackLink } from "@/components/shell/back-link";
 import { EmptyState } from "@/components/shell/empty-state";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
@@ -79,7 +78,7 @@ export default async function ArtistSelectionsPage({
       description={t.subtitle}
       action={shown.length > 0 ? newButton : null}
       list={false}
-      above={<BackLink href={routes.artists}>{t.backToArtists}</BackLink>}
+      parent={{ label: fr.shell.nav.artists, href: routes.artists }}
     >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>

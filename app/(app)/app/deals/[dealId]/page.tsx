@@ -9,7 +9,6 @@ import { DealStageMenu } from "@/components/deals/deal-stage-menu";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { DealTodoView } from "@/components/deals/deal-todo-view";
 import { NewDealButton } from "@/components/deals/new-deal-button";
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import {
@@ -48,6 +47,9 @@ import { deals as t } from "@/lib/i18n/fr/deals";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
 import { personName } from "@/lib/projects/types";
+import { shell as shellText } from "@/lib/i18n/fr/shell";
+
+const shellNav = shellText.nav;
 
 /** The members who negotiate, for whoever may assign the deal. */
 async function negotiatorsFor(canAssign: boolean) {
@@ -143,7 +145,8 @@ export default async function DealPage({
   return (
     <SectionFrame
       list={false}
-      above={<BackLink href={routes.deals}>{t.page.back}</BackLink>}
+      parent={{ label: shellNav.deals, href: routes.deals }}
+      switcher={{ kind: "deal", id: deal.id }}
       title={dealName(deal)}
       badge={<DealStageBadge deal={deal} size="md" />}
       action={

@@ -22,6 +22,7 @@ export function SearchableList<T>({
   noResult,
   filters,
   empty,
+  autoFocus = false,
   children,
 }: {
   items: T[];
@@ -32,6 +33,9 @@ export function SearchableList<T>({
   noResult: (query: string) => string;
   filters?: React.ReactNode;
   empty?: React.ReactNode;
+  // The field takes the focus when shown (a switcher's menu, opened to
+  // search).
+  autoFocus?: boolean;
   children: (visible: T[]) => React.ReactNode;
 }) {
   const [query, setQuery] = useState("");
@@ -50,6 +54,7 @@ export function SearchableList<T>({
         search={
           <SearchField
             aria-label={label}
+            autoFocus={autoFocus}
             placeholder={placeholder}
             maxLength={100}
             value={query}

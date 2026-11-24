@@ -1,10 +1,10 @@
 "use client";
 
-import { IconMagnifier } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useDeferredValue, useEffect, useId, useState } from "react";
 
 import { AppSearchResults } from "@/components/shell/app-search-results";
+import { SearchTrigger } from "@/components/shell/search-trigger";
 import { useAppSearch } from "@/components/shell/use-app-search";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
@@ -15,14 +15,23 @@ import type { SearchHit } from "@/lib/search/types";
 const fr = { shell };
 
 /**
- * The app's ⌘K search, in the top band of every section outside a project
- * (SectionTopbar, docs/STYLE-FINANCE-PARTOUT.md § 5.1): modelled on
- * Finance's. Nothing typed, the pages the reader may open; typed, the
+ * The app's ⌘K search, at the top of the main sidebar since 24/11/2026
+ * (Sacha: the top band says where one is), and in a phone's menu (no ⌘K
+ * there: `shortcut`): modelled on Finance's. Nothing typed, the pages the reader may open; typed, the
  * projects, artists, titles, contacts, contracts, deals, calls and sessions
  * whose name matches (`appSearch`, read with the reader's session). ⌘K or
  * Ctrl K anywhere; ↑ ↓ to choose, Entrée to open.
  */
-export function AppSearch() {
+export function AppSearch({
+  collapsed = false,
+  shortcut = true,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  shortcut?: boolean;
+  // A result chosen (a phone's menu closes).
+  onNavigate?: () => void;
+}) {
   const t = fr.shell.appSearch;
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -35,7 +44,10 @@ export function AppSearch() {
   const current = Math.min(active, Math.max(hits.length - 1, 0));
 
   useEffect(() => {
+    if (!shortcut) return;
     function onKey(event: KeyboardEvent) {
+      // A section's own ⌘K (Finance's) answers first and takes it.
+      if (event.defaultPrevented) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setByKeys(true);
@@ -44,11 +56,12 @@ export function AppSearch() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [shortcut]);
 
   function go(row: SearchHit | undefined) {
     if (!row) return;
     setOpen(false);
+    onNavigate?.();
     router.push(row.href);
   }
 
@@ -63,19 +76,12 @@ export function AppSearch() {
 
   return (
     <>
-      <button
-        type="button"
+      <SearchTrigger
+        label={t.open}
+        collapsed={collapsed}
+        shortcut={shortcut}
         onClick={() => changeOpen(true)}
-        className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md text-left text-body-md text-[color:var(--text-tertiary)] transition-colors duration-[var(--duration-fast)] outline-none hover:text-[color:var(--text-secondary)] focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <IconMagnifier
-          aria-hidden
-          className="size-4 shrink-0 text-[color:var(--text-secondary)]"
-        />
-        <span className="min-w-0 truncate">{t.open}</span>
-        <Kbd className="max-sm:hidden">⌘K</Kbd>
-        <span className="flex-1" />
-      </button>
+      />
       <Dialog open={open} onOpenChange={changeOpen}>
         <DialogContent
           closeLabel={t.close}

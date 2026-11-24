@@ -5,11 +5,11 @@ import {
   CreateProjectForm,
   type ProjectFormDefaults,
 } from "@/components/projects/create-project-form";
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { getNetworkList } from "@/lib/network/lists";
 import { networkListRoutes } from "@/lib/network/lists-types";
@@ -101,9 +101,11 @@ export default async function NetworkListProjectPage({
       className="max-w-2xl"
       title={fr.shell.newProject.title}
       description={t.project.subtitle(list.name)}
-      above={
-        <BackLink href={networkListRoutes.list(list.id)}>{list.name}</BackLink>
-      }
+      parent={[
+        { label: fr.shell.nav.network, href: routes.network },
+        { label: t.title, href: networkListRoutes.lists },
+        { label: list.name, href: networkListRoutes.list(list.id) },
+      ]}
     >
       {outside.length > 0 && (
         <FormMessage kind="info">{t.project.notInCatalog(outside)}</FormMessage>

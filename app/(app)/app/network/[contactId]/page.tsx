@@ -18,7 +18,6 @@ import {
 } from "@/components/network/contact-relations";
 import { emailEnabled } from "@/lib/email/send";
 import { EditContactButton } from "@/components/network/edit-contact-button";
-import { BackLink } from "@/components/shell/back-link";
 import { ReturnBanner } from "@/components/shell/return-banner";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { Avatar } from "@/components/ui/avatar";
@@ -36,6 +35,9 @@ import { loadNetworkFiche } from "@/lib/network/fiche";
 import { loadContactPrivacy } from "@/lib/network/privacy-queries";
 import { getNetworkContact } from "@/lib/network/queries";
 import { rolesText } from "@/lib/network/types";
+import { shell as shellText } from "@/lib/i18n/fr/shell";
+
+const shellNav = shellText.nav;
 
 export const metadata = { title: `${fr.network.title} · ${fr.app.name}` };
 
@@ -87,14 +89,13 @@ export default async function NetworkContactPage({
     <SectionFrame
       list={false}
       above={
-        <>
-          <BackLink href={routes.network}>{p.back}</BackLink>
-          {/* Opened from a contract of the Juridique to complete it (JUR-10). */}
-          <Suspense fallback={null}>
-            <ReturnBanner scope={contact.id} />
-          </Suspense>
-        </>
+        // Opened from a contract of the Juridique to complete it (JUR-10).
+        <Suspense fallback={null}>
+          <ReturnBanner scope={contact.id} />
+        </Suspense>
       }
+      parent={{ label: shellNav.network, href: routes.network }}
+      switcher={{ kind: "contact", id: contact.id }}
       leading={
         <Avatar
           name={contact.name}

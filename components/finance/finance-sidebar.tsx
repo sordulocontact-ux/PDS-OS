@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
+import { FinanceSearch } from "@/components/finance/search/finance-search";
 import { useFinancePulse } from "@/components/finance/search/use-finance-pulse";
 import {
   ContextNavLink,
@@ -23,12 +24,13 @@ const fr = { finance, treasury };
  * (15/11/2026, docs/FINANCE-V2.md, after Midday): one flat list, each
  * section with its icon, in the order of a day's work, with what waits in
  * it (operations to reconcile, proofs to process, late invoices; lot 5, as
- * the proto). Desktop only.
+ * the proto), under Finance's search. Desktop only.
  */
 export function FinanceSidebar() {
   const pathname = usePathname();
   const t = fr.treasury.tabs;
-  const counts = useFinancePulse()?.counts;
+  const pulse = useFinancePulse();
+  const counts = pulse?.counts;
   const waiting: Partial<Record<string, number>> = {
     reconcile: counts?.reconcile,
     receipts: counts?.receipts,
@@ -43,6 +45,11 @@ export function FinanceSidebar() {
         </p>
       }
     >
+      {/* Finance's ⌘K, first of its column (Sacha 24/11/2026: the search
+          in the navigation, the top band saying where one is). */}
+      <div className="pt-1">
+        <FinanceSearch pulse={pulse} />
+      </div>
       <ul className="flex flex-col gap-px pt-1">
         {FINANCE_SECTIONS.map((section) => {
           const Icon = section.icon;

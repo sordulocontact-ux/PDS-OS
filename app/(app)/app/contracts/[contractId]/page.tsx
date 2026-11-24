@@ -8,7 +8,6 @@ import { ContractParties } from "@/components/contracts/contract-parties";
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import { EditContractButton } from "@/components/contracts/edit-contract-button";
 import { ContractNow } from "@/components/contracts/now/contract-now";
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -18,6 +17,9 @@ import { fileViewOf } from "@/lib/catalog/file-rules";
 import { loadContractPage } from "@/lib/contracts/page-data";
 import { findContract } from "@/lib/contracts/queries";
 import { fr } from "@/lib/i18n/fr";
+import { shell as shellText } from "@/lib/i18n/fr/shell";
+
+const shellNav = shellText.nav;
 
 export const metadata = { title: `${fr.contracts.title} · ${fr.app.name}` };
 
@@ -44,7 +46,8 @@ export default async function ContractPage({
   return (
     <SectionFrame
       list={false}
-      above={<BackLink href={routes.contracts}>{p.back}</BackLink>}
+      parent={{ label: shellNav.contracts, href: routes.contracts }}
+      switcher={{ kind: "contract", id: contract.id }}
       title={contract.title}
       badge={<ContractStateBadge state={contract.state} size="md" />}
       description={[t.types[contract.type], contract.parties.join(", ")]

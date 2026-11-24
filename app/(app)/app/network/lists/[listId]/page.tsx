@@ -7,12 +7,12 @@ import {
   ListContacts,
   type ListContact,
 } from "@/components/network/lists/list-contacts";
-import { BackLink } from "@/components/shell/back-link";
 import { EmptyState } from "@/components/shell/empty-state";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { getNetworkList } from "@/lib/network/lists";
 import { networkListRoutes } from "@/lib/network/lists-types";
@@ -84,7 +84,11 @@ export default async function NetworkListPage({
     <SectionFrame
       list={false}
       className="max-w-5xl"
-      above={<BackLink href={networkListRoutes.lists}>{t.back}</BackLink>}
+      parent={[
+        { label: fr.shell.nav.network, href: routes.network },
+        { label: t.title, href: networkListRoutes.lists },
+      ]}
+      switcher={{ kind: "list", id: list.id }}
       title={list.name}
       badge={
         <StatusBadge tone={networkListStateTone[list.state]}>

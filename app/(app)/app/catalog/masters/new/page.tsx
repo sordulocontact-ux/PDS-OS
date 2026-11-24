@@ -1,5 +1,4 @@
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { Card, CardContent } from "@/components/ui/card";
 import { requirePermission } from "@/lib/auth/dal";
@@ -39,26 +38,23 @@ export default async function NewMasterPage({
       className="max-w-2xl"
       title={demo ? fr.demos.newDemo : t.title}
       description={demo ? fr.demos.createHint : t.subtitle}
-      above={
-        <BackLink
-          href={
-            original
-              ? routes.masterVariants(original.id)
-              : fromArtist
-                ? routes.artist(fromArtist.id)
-                : demo
-                  ? routes.demos
-                  : routes.masters
-          }
-        >
-          {original
-            ? fr.catalog.master.backTo(original.title)
-            : fromArtist
-              ? fr.catalog.artist.backTo(fromArtist.name)
-              : demo
-                ? fr.demos.back
-                : fr.catalog.master.back}
-        </BackLink>
+      parent={
+        original
+          ? [
+              { label: fr.shell.nav.masters, href: routes.masters },
+              {
+                label: original.title,
+                href: routes.masterVariants(original.id),
+              },
+            ]
+          : fromArtist
+            ? [
+                { label: fr.shell.nav.artists, href: routes.artists },
+                { label: fromArtist.name, href: routes.artist(fromArtist.id) },
+              ]
+            : demo
+              ? { label: fr.demos.title, href: routes.demos }
+              : { label: fr.shell.nav.masters, href: routes.masters }
       }
     >
       <Card>

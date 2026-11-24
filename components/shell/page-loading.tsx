@@ -1,7 +1,7 @@
-import { AppSearch } from "@/components/shell/app-search";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionTopbar } from "@/components/shell/section-topbar";
+import { TopbarCrumb } from "@/components/shell/topbar-crumb";
 import {
   LoadingRegion,
   Skeleton,
@@ -34,9 +34,7 @@ export function PageLoading({
   return (
     <>
       {section && (
-        <SectionTopbar>
-          <AppSearch />
-        </SectionTopbar>
+        <SectionTopbar>{title && <TopbarCrumb title={title} />}</SectionTopbar>
       )}
       <LoadingRegion label={fr.auth.common.loading}>
         <PageContainer className={cn(section && "modern:gap-6")}>

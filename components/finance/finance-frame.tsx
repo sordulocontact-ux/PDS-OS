@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { FinanceSidebar } from "@/components/finance/finance-sidebar";
 import { FinanceTopbar } from "@/components/finance/search/finance-topbar";
+import type { CrumbSwitcher } from "@/components/shell/topbar-crumb";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionTabs } from "@/components/shell/section-tabs";
@@ -31,24 +32,25 @@ const fr = { treasury };
  * title (the sidebar already says where one is, as in the proto) and opens
  * on its tools; its h1 stays for screen readers, its action on the right.
  * An envelope's page (`title`) keeps its name as a visible title. Lot 5:
- * every page opens on the top band of the proto (⌘K search across the
- * line, the alerts bell), the page's action under it on the right. Every
+ * every page opens on the top band of the proto (where one is since
+ * 24/11/2026, « Budgets / Ciel ouvert ⌄ », the search heading the Finance
+ * sidebar; the alerts bell), the page's action under it on the right. Every
  * modal of the section opens as the panel on the right (DialogSideProvider).
  */
 export function FinanceFrame({
   section,
   title,
+  switcher,
   action,
-  above,
   header = true,
   children,
 }: {
   section: FinanceSection;
   // A page under a section (an envelope) names itself; else the section.
   title?: string;
+  // An envelope's name in the top band opens the other budgets.
+  switcher?: CrumbSwitcher;
   action?: ReactNode;
-  // A back link over the title (an envelope's page).
-  above?: ReactNode;
   header?: boolean;
   children: ReactNode;
 }) {
@@ -58,7 +60,7 @@ export function FinanceFrame({
       <div className="finance-scope flex flex-1">
         <FinanceSidebar />
         <div className="min-w-0 flex-1">
-          <FinanceTopbar />
+          <FinanceTopbar record={title ? { title, switcher } : undefined} />
           <PageContainer className="gap-6">
             <div
               className={cn(
@@ -67,7 +69,6 @@ export function FinanceFrame({
                 !(header && (title || action)) && "md:hidden",
               )}
             >
-              {header && above}
               {header &&
                 (title ? (
                   <PageHeader title={title} action={action} />

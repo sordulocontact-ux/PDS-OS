@@ -11,7 +11,6 @@ import { FinanceFrame } from "@/components/finance/finance-frame";
 import { PostPie } from "@/components/finance/post-pie";
 import { PostsTable } from "@/components/finance/posts-table";
 import { SpendsTable } from "@/components/finance/spends-table";
-import { BackLink } from "@/components/shell/back-link";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
@@ -104,7 +103,7 @@ export default async function FinanceEnvelopePage({
     <FinanceFrame
       section="budgets"
       title={envelope.name}
-      above={<BackLink href={routes.financeBudgets}>{t.back}</BackLink>}
+      switcher={{ kind: "budget", id }}
       action={
         <>
           {canImport && access.organizationId && (

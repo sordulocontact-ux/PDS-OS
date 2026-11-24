@@ -231,9 +231,14 @@ De gauche à droite, tout collé au bord, pleine hauteur :
    14 px, et à droite le **nombre de ce qui attend** (`CountBadge`) quand il y en a. Pas de groupes titrés.
    Active : fond `--surface-sunken`, encre ; survol : `--surface-soft`. Sur téléphone, la colonne devient une
    rangée d'onglets (`SectionTabs`).
-3. **Bandeau du haut** (`FinanceTopbar` → à remonter en `components/shell/section-topbar.tsx`) : 56 px,
-   toute la largeur de la page, filet `--border-hairline` dessous, collé en haut au défilement ; la **recherche ⌘K**
-   sans contour sur toute la ligne, à droite la **cloche** (bouton-icône `outline` 32 px) avec son compteur.
+3. **Bandeau du haut** (`SectionTopbar`, `components/shell/section-topbar.tsx`) : 56 px, toute la largeur de la
+   page, filet `--border-hairline` dessous, collé en haut au défilement ; **où l'on est** (`TopbarCrumb`, Sacha
+   24/11/2026) : le nom de la section sur sa page (« Deals »), « Deals / Sortie Nova ⌄ » sur une page ouverte
+   depuis une liste — la section est le lien vers la liste (plus de lien retour), le nom ouvre les autres
+   éléments de la liste avec une recherche (`RecordSwitcher`, comme le `ProjectSwitcher`) ; à droite la
+   **cloche** de Finance (bouton-icône `outline` 32 px) avec son compteur. La **recherche ⌘K** n'est plus dans le
+   bandeau : elle est en tête de la barre principale (`AppSearch`, loupe seule une fois repliée) et, dans
+   Finance, en tête de sa colonne (`FinanceSearch`, son ⌘K passe avant celui de l'app).
 4. **La page** (`PageContainer gap-6`) :
    - **pas de titre visible** sur une page de section : le `<h1>` reste pour les lecteurs d'écran
      (`className="sr-only"`) — la colonne dit déjà où l'on est ;
@@ -519,6 +524,10 @@ bandeau du design system, cellules à 15 px).
 ---
 
 ## 13. Les deux styles tant qu'Ibé n'a pas validé (16/11/2026)
+
+> **24/11/2026 : Ibé a validé le nouveau style.** On ne code plus pour l'ancien (`classic:`, `useDesignStyle`) :
+> un changement se fait pour le nouveau seul. L'interrupteur et l'ancien rendu restent en place tant que le
+> nettoyage (lot 6) n'est pas demandé.
 
 Décision de Sacha (16/11/2026) : le nouveau style est posé sur **toute** l'app, mais l'ancien reste **entier**
 derrière un interrupteur, pour qu'Ibé compare. S'il valide, on supprime l'ancien ; s'il refuse, on revient à

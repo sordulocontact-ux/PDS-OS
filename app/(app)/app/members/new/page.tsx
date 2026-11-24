@@ -1,4 +1,3 @@
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAdmin } from "@/lib/auth/dal";
@@ -20,7 +19,7 @@ export default async function NewMemberPage() {
     <SectionFrame
       className="max-w-2xl"
       list={false}
-      above={<BackLink href={routes.members}>{t.back}</BackLink>}
+      parent={{ label: fr.shell.nav.members, href: routes.members }}
       title={t.title}
       description={t.subtitle}
     >

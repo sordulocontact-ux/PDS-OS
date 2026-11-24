@@ -10,7 +10,6 @@ import { ArtistEditDialog } from "@/components/catalog/artist-page/artist-edit-d
 import { ArtistTabs } from "@/components/catalog/artist-page/artist-tabs";
 import { ArtistIdentityNow } from "@/components/catalog/artist-page/identity-now";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
-import { BackLink } from "@/components/shell/back-link";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
@@ -22,6 +21,9 @@ import { showsArtistBusiness } from "@/lib/deals/artist-has-deals";
 import { countryName } from "@/lib/catalog/countries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
+import { shell as shellText } from "@/lib/i18n/fr/shell";
+
+const shellNav = shellText.nav;
 
 // Artist frame: header (picture, name, actions), « Maintenant » when the
 // direction has a proposal of identity to decide (streamed: the header does
@@ -63,7 +65,12 @@ export default async function ArtistLayout({
       title={artist.name}
       list={false}
       header={false}
-      above={<BackLink href={routes.artists}>{t.back}</BackLink>}
+      parent={{ label: shellNav.artists, href: routes.artists }}
+      switcher={{
+        kind: "artist",
+        id: artist.id,
+        base: routes.artist(artist.id),
+      }}
       className="max-w-5xl"
     >
       <div className="flex flex-col gap-4">

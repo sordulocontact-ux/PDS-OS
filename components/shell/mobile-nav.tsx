@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { IconMenu } from "@/components/icons";
+import { AppSearch } from "@/components/shell/app-search";
 import { NavLinks } from "@/components/shell/nav-links";
 import { PdsLogo } from "@/components/shell/pds-logo";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ export function MobileNav({
             <span className="sr-only">{fr.shell.brand}</span>
           </DialogTitle>
         </DialogHeader>
+        <AppSearch shortcut={false} onNavigate={() => setOpen(false)} />
         <NavLinks
           isAdmin={isAdmin}
           permissions={permissions}

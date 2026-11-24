@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { TemplateRowActions } from "@/components/contracts/templates/template-row-actions";
 import { TemplateView } from "@/components/contracts/templates/template-view";
 import { TemplateValidateButton } from "@/components/contracts/templates/template-validate-button";
-import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -38,11 +37,10 @@ export default async function ContractTemplatePage({
   return (
     <SectionFrame
       list={false}
-      above={
-        <BackLink href={routes.contractTemplateList}>
-          {t.backToLibrary}
-        </BackLink>
-      }
+      parent={[
+        { label: fr.shell.nav.contracts, href: routes.contracts },
+        { label: t.title, href: routes.contractTemplateList },
+      ]}
       title={`${template.name} · ${t.version(template.version)}`}
       badge={
         <StatusBadge tone={templateStatusTone[template.status]}>

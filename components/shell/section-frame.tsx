@@ -1,18 +1,23 @@
-import { AppSearch } from "@/components/shell/app-search";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionTopbar } from "@/components/shell/section-topbar";
+import {
+  TopbarCrumb,
+  type CrumbLink,
+  type CrumbSwitcher,
+} from "@/components/shell/topbar-crumb";
 import { cn } from "@/lib/utils";
 
 /**
  * A page of a section outside a project (Réseau, Artistes, Catalogue,
  * Contrats, Deals, Calls, Sessions studio, Équipe, Retours, Fichiers,
- * Dépenses, Repérage; docs/STYLE-FINANCE-PARTOUT.md § 5.1). In the new
- * style: the top band with the app's ⌘K search, then the page, 24 px
- * between its blocks; a section's own page (`list`) shows no title, its
- * action alone on the right. A page under the section (a contact, a title)
- * keeps its name, its back link above it (`above`). The classic style shows
- * the page as it was: no band, the title and its description.
+ * Dépenses, Repérage; docs/STYLE-FINANCE-PARTOUT.md § 5.1): the top band
+ * saying where one is (TopbarCrumb, Sacha 24/11/2026: the section's name,
+ * or « Deals / Sortie Nova ⌄ » for a page opened from its list, `parent`,
+ * the name switching to another record of the list, `switcher`), then the
+ * page, 24 px between its blocks; a section's own page (`list`) shows no
+ * title under the band, its action alone on the right. A page under the
+ * section (a contact, a title) keeps its name as the page's title.
  */
 export function SectionFrame({
   title,
@@ -21,6 +26,8 @@ export function SectionFrame({
   leading,
   badge,
   above,
+  parent,
+  switcher,
   list = true,
   toolsAction = false,
   header = true,
@@ -32,8 +39,13 @@ export function SectionFrame({
   action?: React.ReactNode;
   leading?: React.ReactNode;
   badge?: React.ReactNode;
-  // A back link over the title (a page under the section).
+  // Something over the title (a page under the section).
   above?: React.ReactNode;
+  // The list it was opened from, a link in the band (in place of a back
+  // link); a page further down gives the whole way.
+  parent?: CrumbLink | CrumbLink[];
+  // The record's name in the band opens the others of that list.
+  switcher?: CrumbSwitcher;
   // False for a page under the section, which keeps its title visible.
   list?: boolean;
   // The page also gives `action` to its DataTableViews (`pageAction`): in
@@ -48,7 +60,11 @@ export function SectionFrame({
   return (
     <>
       <SectionTopbar>
-        <AppSearch />
+        <TopbarCrumb
+          parents={parent === undefined ? [] : [parent].flat()}
+          title={title}
+          switcher={switcher}
+        />
       </SectionTopbar>
       <PageContainer className={cn("modern:gap-6", className)}>
         {above}

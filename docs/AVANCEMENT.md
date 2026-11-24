@@ -2863,3 +2863,21 @@ d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune 
 - Vérifié dans Chrome (« Voir comme » Claire Morel avec l'accord de Maël, remis sur Lina Haddad ensuite) :
   « Cap sur demain » amène Elio Danvers, « Néons » Mona Lys ; retirer « Néons » retire Mona Lys ; Elio retiré à la main
   ne revient pas quand « Marée haute » amène Ysolde Marnay. Aucun projet créé, le brouillon ouvert pendant le test supprimé.
+
+## Bandeau du haut : où l'on est et changer d'élément ; recherche dans la barre de gauche (24/11/2026, branche `pre-prod`)
+
+Demande de Sacha (24/11) : sur une page ouverte depuis un tableau (un budget, un deal, un contrat…), le nom en haut à
+la place de la recherche, comme le sélecteur d'un projet, pour passer à un autre sans revenir à la liste ; la recherche
+dans la navigation. Nouveau style validé par Ibé le même jour : plus de code pour l'ancien.
+
+- `SectionTopbar` (dans les deux styles) porte `TopbarCrumb` : le nom de la section sur sa page, « Deals / Sortie Nova ⌄ »
+  sur une page ouverte depuis une liste ; la section est le lien vers la liste (les `BackLink` des pages hors projet sont
+  retirés), le nom ouvre `RecordSwitcher` (budgets, deals, contrats, contacts, listes, artistes, titres, maquettes,
+  sélections ; `loadRecordSwitcher`, lu à l'ouverture avec la session ; l'onglet ouvert d'un artiste ou d'un titre est gardé).
+- `SwitcherMenu` = menu commun du sélecteur de projet et de celui du bandeau (recherche avec le focus, coché, « Tous les … »).
+- Recherche ⌘K (`AppSearch`) en tête de la barre principale (loupe seule repliée) et dans le menu du téléphone ; dans
+  Finance, `FinanceSearch` en tête de sa colonne, son ⌘K passe avant celui de l'app. `SearchTrigger` commun.
+- Pages : budget (Finance), deal, contrat, modèle de contrat, contact, liste, artiste, titre / maquette, sélection, plus les
+  pages « nouveau » (titre, projet, membre, projet depuis une liste) en fil d'Ariane sans sélecteur. Sans migration.
+- Vérifié dans Chrome (compte de test du seed) : Budgets, « Budgets / Ciel ouvert ⌄ » → « Mirage », Deals, artiste avec
+  changement en gardant l'onglet Projets.

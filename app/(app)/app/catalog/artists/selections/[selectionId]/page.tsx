@@ -6,7 +6,6 @@ import {
   SelectionActions,
 } from "@/components/catalog/selections/selection-actions";
 import { SelectionArtistsTable } from "@/components/catalog/selections/selection-artists-table";
-import { BackLink } from "@/components/shell/back-link";
 import { EmptyState } from "@/components/shell/empty-state";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
@@ -68,7 +67,11 @@ export default async function ArtistSelectionPage({
     <SectionFrame
       list={false}
       className="max-w-5xl"
-      above={<BackLink href={routes.artistSelections}>{t.back}</BackLink>}
+      parent={[
+        { label: fr.shell.nav.artists, href: routes.artists },
+        { label: t.title, href: routes.artistSelections },
+      ]}
+      switcher={{ kind: "selection", id: selection.id }}
       title={selection.name}
       description={describe(selection, access.personId)}
       action={

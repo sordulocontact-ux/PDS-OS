@@ -3,7 +3,6 @@ import { IconUnorderedList } from "nucleo-sharp-essential";
 import { FormMessage } from "@/components/auth/form-message";
 import { NetworkListsTable } from "@/components/network/lists/network-lists-table";
 import { NewListButton } from "@/components/network/lists/new-list-button";
-import { BackLink } from "@/components/shell/back-link";
 import { EmptyState } from "@/components/shell/empty-state";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { DataTableViews } from "@/components/ui/data-table";
@@ -49,7 +48,7 @@ export default async function NetworkListsPage({
     <SectionFrame
       title={t.title}
       list={false}
-      above={<BackLink href={routes.network}>{t.backToNetwork}</BackLink>}
+      parent={{ label: fr.shell.nav.network, href: routes.network }}
       action={shown.length > 0 ? newButton : null}
     >
       {error ? (
