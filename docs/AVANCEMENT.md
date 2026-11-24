@@ -2527,6 +2527,11 @@ cliquer et tout s'enchaîner »).
   la liste « Pour » du formulaire de dépense (Dépenses, Finance › Dépenses), chaque budget découpé est suivi de ses
   sous-budgets (« Frais de structure › Loyer ») ; les choisir remplit le budget et le champ « Sous-budget ». Vérifié dans
   Chrome (dépense enregistrée dans le sous-budget, puis données de test supprimées). Sans migration.
+- Fait le 24/11 (Sacha : « ajouter une dépense dans le sous-budget marketing de Ciel ouvert », en un geste) : le
+  responsable d'un projet lit les sous-budgets de son projet et y range ses dépenses (formulaire du Budget du projet,
+  « Pour » de Dépenses) ; découper reste à la Finance. Corrigé au passage : une business manager sans accès au projet ne
+  pouvait pas découper son budget (« part_unknown_budget »). Migration `20261124180101_budget_parts_project_owner.sql`,
+  test `budget-parts-owner.test.sql` (9 cas). **Migration à pousser en prod.**
 
 ## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
 

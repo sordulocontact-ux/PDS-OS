@@ -3756,6 +3756,12 @@ justificatif », P2 du ticket Cockpit Finance).
   formulaire de dépense (`BudgetPartField`, sous le montant quand le budget est connu). Le nom du sous-budget est lu par
   `partNamesOf` / `loadSpendPartNames` et dit sur chaque dépense (page du budget, Finance › Dépenses, fiche). Lu par PO
   (`readBudgets`, un budget nommé : une phrase par part et le non réparti).
+- **Le responsable d'un projet range ses dépenses** (24/11/2026, `20261124180101_budget_parts_project_owner.sql`) : il lit
+  les parts des projets dont il est responsable (`is_project_owner`), `assign_budget_part` et `finance_budget_part_lines()`
+  l'acceptent pour les dépenses de ses projets seulement ; découper (écrire les parts) reste `manage_finance`. Il choisit
+  donc le sous-budget dans le formulaire de son Budget et dans « Pour » (`loadExpenseTargets` lit les parts sous RLS pour
+  tous). `check_budget_part` est `security definer` : une business manager sans `view_all_projects` découpe un budget de
+  projet qu'elle ne voit pas.
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 

@@ -223,8 +223,9 @@ export async function saveBudgetLine(
     if (error) return failure(error);
     lineId = data.id;
   }
-  if (p.data.partId !== undefined && can(access, "manage_finance")) {
-    // The same function as « Rattacher des dépenses » from the part.
+  if (p.data.partId !== undefined) {
+    // The same function as « Rattacher des dépenses » from the part: the
+    // Finance, or the owner for a spend of their project (24/11/2026).
     const { error } = await supabase.rpc("assign_budget_part", {
       p_line_ids: [lineId],
       p_part_id: p.data.partId || null,

@@ -136,7 +136,8 @@ const spendPartsInput = z.object({
 
 /** The parts of the budget a spend belongs to and the one it is in, for the
  * « Sous-budget » choice of the spend form. Read with the session (the
- * Finance reads parts; anyone else gets none, so no choice is shown). */
+ * Finance reads parts, a project's owner their project's; anyone else gets
+ * none, so no choice is shown). */
 export async function loadSpendParts(
   input: z.input<typeof spendPartsInput>,
 ): Promise<{ parts: { id: string; name: string }[]; current: string | null }> {

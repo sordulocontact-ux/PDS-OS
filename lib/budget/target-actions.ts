@@ -15,9 +15,9 @@ const RECENT = 5;
  * not archived; for the Finance (manage_finance, lot 3 of Ibé's ticket),
  * its cost centers and « Hors budget »; the ones they last spent on
  * first, then « Hors budget » (a structure spend must be found, UX test of
- * 15/11/2026), then by name; for the Finance, each with its sub-budgets
- * (24/11/2026). Read with the user's session; the database still decides
- * on saving.
+ * 15/11/2026), then by name; each with the sub-budgets the reader may see
+ * (24/11/2026: the Finance all, a project's owner their project's). Read
+ * with the user's session; the database still decides on saving.
  */
 export async function loadExpenseTargets(): Promise<{
   organizationId: string | null;
@@ -57,12 +57,10 @@ export async function loadExpenseTargets(): Promise<{
             .is("archived_at", null)
             .order("name")
         : Promise.resolve({ data: [], error: null }),
-      finance
-        ? supabase
-            .from("finance_budget_parts")
-            .select("id, name, target_kind, target_id")
-            .order("created_at")
-        : Promise.resolve({ data: [], error: null }),
+      supabase
+        .from("finance_budget_parts")
+        .select("id, name, target_kind, target_id")
+        .order("created_at"),
     ]);
   const partsOf = (kind: string, id: string) =>
     (partsRes.data ?? [])
