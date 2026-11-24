@@ -2848,3 +2848,18 @@ d'Ariane, comme le Master. Vérifié dans Chrome sur « Assurance 30 ». Aucune 
   L'icône d'alertes n'a pas pu être vue : aucun artiste d'Assurance 30 n'en a pour Lina (elle lit le Juridique).
 - `components/legal/waiver-lines.tsx` exporte aussi `waiverTexts` (les mêmes mots que `WaiverLines`).
 
+## Création d'un collectif : les artistes des titres choisis sont préremplis (23/11/2026, branche `pre-prod`)
+
+- **Demande de Maël** : en créant un projet collectif musical, on choisit d'abord les titres, puis les artistes. Les
+  artistes crédités sur un titre choisi s'ajoutent maintenant d'eux-mêmes aux « Artistes invités » (jamais l'artiste
+  principal, PDS par défaut). Retirer le titre retire les artistes qu'il avait amenés ; un artiste retiré à la main ne
+  revient pas tant que son titre reste. Cocher « Projet collectif » après avoir choisi les titres les ajoute aussi.
+  Seulement à la création par la direction (le champ « Artistes invités » n'existe pas ailleurs).
+- `MasterOption` porte `credited` (id et nom des crédités, dans l'ordre), rempli par `toMasterListItem`,
+  `masterOption` et `toMasters` (`lib/projects/queries.ts`). Aucune migration.
+- **Limite connue** : à la création, `create_collective_project` donne toujours à chaque invité un titre sans nom et une
+  participation proposée ; il n'est pas rattaché au titre choisi qui l'a amené. Le rattacher demanderait de changer
+  `create_collective_project` (migration, à pousser par Sacha).
+- Vérifié dans Chrome (« Voir comme » Claire Morel avec l'accord de Maël, remis sur Lina Haddad ensuite) :
+  « Cap sur demain » amène Elio Danvers, « Néons » Mona Lys ; retirer « Néons » retire Mona Lys ; Elio retiré à la main
+  ne revient pas quand « Marée haute » amène Ysolde Marnay. Aucun projet créé, le brouillon ouvert pendant le test supprimé.

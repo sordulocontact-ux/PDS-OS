@@ -79,6 +79,10 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
     variantLabel: row.variant_label,
     audioState: audioStateOf(row.audio_state),
     artists: formatCredits(toCredits(row.credits)),
+    credited: toCredits(row.credits).map((c) => ({
+      id: c.artistId,
+      name: c.name,
+    })),
     isrc: row.isrc,
     durationSeconds: row.duration_seconds,
     finalValidatedAt: row.final_validated_at,
@@ -324,8 +328,9 @@ export function masterOption({
   variant,
   variantLabel,
   artists,
+  credited,
 }: MasterOption): MasterOption {
-  return { id, title, variant, variantLabel, artists };
+  return { id, title, variant, variantLabel, artists, credited };
 }
 
 export async function listMasterOptions(): Promise<MasterOption[]> {

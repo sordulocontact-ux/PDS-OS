@@ -101,6 +101,7 @@ function toMasters(
           variant: variantOf(link.master.variant),
           variantLabel: link.master.variant_label,
           artists: formatCredits(credits),
+          credited: credits.map((c) => ({ id: c.artistId, name: c.name })),
           credits,
         },
       ];
