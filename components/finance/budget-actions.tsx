@@ -11,7 +11,6 @@ import { useState } from "react";
 
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { BudgetImportForm } from "@/components/finance/budget-import-form";
-import { PartForm } from "@/components/finance/budget-part-forms";
 import { RemoveBudgetDialog } from "@/components/finance/remove-budget-dialog";
 import {
   CostCenterForm,
@@ -127,15 +126,13 @@ export function AddEnvelopeSpendButton({
   );
 }
 
-type Gesture =
-  "import" | "show" | "rename" | "revise" | "share" | "template" | "part";
+type Gesture = "import" | "show" | "rename" | "revise" | "share" | "template";
 
 /**
  * What the Finance does on one budget, in a « ⋯ » beside « Ajouter une
  * dépense »: rename and revise a cost center (with its reason), plan a
  * show, set the share PDS finances, keep its lines as a template, import
- * lines (where the reader writes them: `canImport`), cut the budget into
- * sub-budgets, remove a budget made by hand (never a project's or an
+ * lines (where the reader writes them: `canImport`), remove a budget made by hand (never a project's or an
  * artist's). Every form opens in the panel on the right.
  */
 export function EnvelopeMenu({
@@ -176,7 +173,6 @@ export function EnvelopeMenu({
     ...(center ? [action("rename", t.actions.rename, IconPenWriting2)] : []),
     ...(center ? [action("revise", t.actions.revise, IconRefresh)] : []),
     ...(canManage ? [action("share", t.actions.share, IconSliders)] : []),
-    ...(canManage ? [action("part", t.actions.addPart, IconPlus)] : []),
     ...(canManage && lines.length > 0
       ? [action("template", t.actions.template, IconCopy)]
       : []),
@@ -206,10 +202,6 @@ export function EnvelopeMenu({
     template: {
       title: t.templateForm.title,
       form: <TemplateForm lines={lines} onDone={close} />,
-    },
-    part: {
-      title: t.partForm.addTitle,
-      form: <PartForm kind={kind} targetId={id} part={null} onDone={close} />,
     },
   };
   return (

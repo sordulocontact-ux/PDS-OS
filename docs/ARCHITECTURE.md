@@ -3746,11 +3746,15 @@ justificatif », P2 du ticket Cockpit Finance).
   `attach_project_live`.
 - **Calculs en code** (`splitBudget`) : dépensé d'une part = engagé + facturé + payé de ses dépenses (comme le budget, un
   devis refusé ne compte pas), reste = montant − dépensé ; **non réparti** = budget − somme des parts, plus ce que les
-  dépenses sans part ont dépensé. Les parts peuvent dépasser le budget (révisé après coup) : non refusé, la ligne dit
-  « Dépassé de … » en rouge. Les sous-postes existants ne portent pas de montant : réutilisés seulement pour **pré-cocher**
-  les dépenses dont le sous-poste porte le nom de la part (« Rattacher des dépenses »).
-- Pas encore dans le formulaire de dépense (`BudgetLineForm`, `lib/budget/`) : le rattachement se fait depuis la ligne du
-  sous-budget. Lu par PO (`readBudgets`, un budget nommé : une phrase par part et le non réparti).
+  dépenses sans part ont dépensé ; **prévu** = les dépenses « Estimé » (colonne à côté du dépensé depuis le test UX du
+  23/11 : une dépense estimée rangée semblait ne pas compter). Les parts peuvent dépasser le budget (révisé après coup) :
+  non refusé, la ligne « Hors sous-budget » dit « Dépassé de … » en rouge ; des dépenses rangées nulle part ne sont pas un
+  dépassement (« N dépenses à ranger », en gris). Les sous-postes existants ne portent pas de montant : réutilisés
+  seulement pour **pré-cocher** les dépenses dont le sous-poste porte le nom de la part (« Ranger des dépenses »).
+- Ranger : la ligne d'un sous-budget ou son bouton « Ranger des dépenses » (`PartRow`), ou le champ « Sous-budget » du
+  formulaire de dépense (`BudgetPartField`, sous le montant quand le budget est connu). Le nom du sous-budget est lu par
+  `partNamesOf` / `loadSpendPartNames` et dit sur chaque dépense (page du budget, Finance › Dépenses, fiche). Lu par PO
+  (`readBudgets`, un budget nommé : une phrase par part et le non réparti).
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 

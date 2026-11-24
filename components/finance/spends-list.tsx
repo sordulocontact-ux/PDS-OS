@@ -34,6 +34,7 @@ export function SpendsList({
   filters,
   add,
   empty,
+  partNames,
 }: {
   spends: FinanceSpend[];
   targets: FinanceTarget[];
@@ -44,6 +45,8 @@ export function SpendsList({
   // « + » at the end of the tools, after the columns' menu.
   add?: ReactNode;
   empty: ReactNode;
+  // Spend id → its sub-budget (SpendsTable).
+  partNames?: Record<string, string>;
 }) {
   const [columns, toggle] = useSpendColumns();
   const name = new Map(targets.map((x) => [x.id, x.name]));
@@ -58,6 +61,7 @@ export function SpendsList({
           ? budget.families[s.family]
           : s.familyDetail,
         name.get(s.target.id),
+        partNames?.[s.id],
       ]}
       label={t.searchLabel}
       placeholder={t.search}
@@ -80,6 +84,7 @@ export function SpendsList({
             organizationId={organizationId}
             ownerId={ownerId}
             columns={columns}
+            partNames={partNames}
           />
           <Total spends={visible} />
         </div>

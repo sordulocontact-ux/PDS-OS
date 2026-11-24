@@ -180,6 +180,15 @@ export function BudgetLineForm({
     });
   }
 
+  const partField = (
+    <BudgetPartField
+      target={target}
+      lineId={line?.id}
+      value={partId}
+      onChange={setPartId}
+    />
+  );
+
   return (
     <form ref={root} noValidate onSubmit={send} className="flex flex-col gap-5">
       {organizationId && (
@@ -202,6 +211,9 @@ export function BudgetLineForm({
         hint={followsInvoice ? t.followsInvoice : undefined}
         onChange={(e) => setV({ ...v, amount: e.target.value })}
       />
+      {/* Right under the amount when the budget is known (UX test of
+          23/11/2026: lost at the bottom, taken for « Sous-poste »). */}
+      {fixedTarget && partField}
       <Field
         name="label"
         label={t.label}
@@ -237,12 +249,7 @@ export function BudgetLineForm({
                 onChange={setChosen}
               />
             )}
-            <BudgetPartField
-              target={target}
-              lineId={line?.id}
-              value={partId}
-              onChange={setPartId}
-            />
+            {!fixedTarget && partField}
             <BudgetStatusDateFields
               status={v.status}
               spentOn={v.spentOn}

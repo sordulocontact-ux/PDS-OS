@@ -57,6 +57,8 @@ export const financeSpends = {
   proofLater: "Pas encore",
   ht: (amount: string) => `${amount} HT`,
   rebillable: "Refacturable",
+  // The sub-budget a spend is filed in (UX test of 23/11/2026).
+  inPart: (name: string) => `Sous-budget « ${name} »`,
   rowActions: (label: string) => `Actions pour « ${label} »`,
   edit: "Modifier",
   editInProject: "Modifier dans le projet",

@@ -27,11 +27,14 @@ const amount = (cents: number) => formatAmount(cents, { ht: false });
 export function SpendSheet({
   spend,
   envelope,
+  part = null,
   actions,
   proofIn,
 }: {
   spend: FinanceSpend;
   envelope: string;
+  // The sub-budget it is filed in, when its budget is cut.
+  part?: string | null;
   actions: RowAction[];
   // The organization its proof is kept in, when one may give it one (who
   // writes Finance): « Joindre le justificatif » right in the sheet.
@@ -70,6 +73,7 @@ export function SpendSheet({
               financeSheet.none
             ),
           },
+          ...(part ? [{ label: t.part, value: part }] : []),
           { label: t.supplier, value: spend.supplier ?? financeSheet.none },
           { label: t.date, value: sheetDay(spend.spentOn) },
           ...(spend.dueOn

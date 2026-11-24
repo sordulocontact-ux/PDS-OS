@@ -120,16 +120,25 @@ export const financeBudgets = {
   // A budget cut into named parts (retour d'Ibé du 18/11/2026).
   parts: {
     title: "Sous-budgets",
+    // Always there for the Finance (UX test of 23/11/2026: cutting was
+    // only found in « ⋯ »).
+    none: "Aucun sous-budget.",
+    cut: "Découper ce budget",
     part: "Sous-budget",
-    amount: "Montant",
+    amount: "Montant HT",
+    planned: "Prévu",
     spent: "Dépensé",
     rest: "Reste",
-    unallocated: "Non réparti",
-    // The cell of what no part holds: « 3 000 € » to cut, or « Dépassé de … ».
-    toAllocate: "À répartir",
+    // What no part holds: the budget's amount left to cut and the spends
+    // filed in no part. Spends to file are not an overrun (UX test of
+    // 23/11/2026: « j'ai cassé quelque chose ? »).
+    outside: "Hors sous-budget",
+    toFile: (count: number) =>
+      plural(count, "dépense à ranger", "dépenses à ranger"),
     rowActions: (name: string) => `Actions pour « ${name} »`,
+    open: (name: string) => `Ranger des dépenses dans « ${name} »`,
     edit: "Modifier",
-    attach: "Rattacher des dépenses",
+    attach: "Ranger des dépenses",
     remove: "Supprimer",
   },
   // What PO says of a cut budget (computed by code, lib/assistant/read).
@@ -145,7 +154,7 @@ export const financeBudgets = {
     addTitle: "Ajouter un sous-budget",
     editTitle: "Modifier le sous-budget",
     name: "Nom",
-    amount: "Montant",
+    amount: "Montant HT",
     save: "Enregistrer",
     saving: "Enregistrement…",
     errors: { name: "Donnez un nom.", amount: "Indiquez un montant en euros." },

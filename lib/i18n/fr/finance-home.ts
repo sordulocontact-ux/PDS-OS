@@ -134,6 +134,7 @@ export const financeSheet = {
     status: "Statut",
     date: "Date",
     post: "Poste",
+    part: "Sous-budget",
     supplier: "Fournisseur",
     due: "Échéance",
     rebill: "Refacturable",

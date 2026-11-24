@@ -2518,6 +2518,11 @@ cliquer et tout s'enchaîner »).
 - Fait le 23/11 : champ « Sous-budget » dans le formulaire de dépense (`BudgetPartField` dans `BudgetLineForm`) : affiché
   seulement si le budget a des sous-budgets et que la personne les lit, « Aucun » ou un sous-budget, pré-rempli à la modification ;
   enregistré par `assign_budget_part` (même fonction que « Rattacher des dépenses »), via `saveBudgetLine` (`partId`), sans migration.
+- Fait le 24/11 (test UX du 23/11, `ux-tests/2026-11-23-finance-budgets/rapport.md`) : section « Sous-budgets » toujours là pour
+  la Finance (« Découper ce budget », retiré du « ⋯ » du budget) ; colonne « Prévu » (une dépense « Estimé » rangée se voit) ;
+  ligne cliquable et bouton « Ranger des dépenses » (ex-« Rattacher des dépenses ») ; « Hors sous-budget » remplace « Non réparti »,
+  sans rouge pour des dépenses à ranger ; « Sous-budget « … » » sur chaque dépense (page du budget, Finance › Dépenses, fiche) ;
+  champ « Sous-budget » juste sous le montant quand le budget est connu ; montants des sous-budgets dits HT. Sans migration.
 
 ## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
 

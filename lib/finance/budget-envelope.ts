@@ -16,6 +16,9 @@ export type BudgetPart = {
 export type PartRow = BudgetPart & {
   // Committed, invoiced or paid: what the part already spent, as the budget.
   spentCents: number;
+  // Estimated, not committed yet: shown beside the spent (UX test of
+  // 23/11/2026: a spend filed while « Estimé » seemed not to count).
+  plannedCents: number;
   restCents: number;
   lines: number;
 };
@@ -29,6 +32,7 @@ export type PartsSummary = {
   unallocatedCents: number | null;
   // What the spends outside every part already spent.
   looseSpentCents: number;
+  loosePlannedCents: number;
   looseLines: number;
 };
 
@@ -50,6 +54,7 @@ export function splitBudget(
     return {
       ...part,
       spentCents,
+      plannedCents: totals.plannedCents,
       restCents: part.amountCents - spentCents,
       lines: totals.lines,
     };
@@ -63,6 +68,7 @@ export function splitBudget(
     unallocatedCents:
       budgetCents === null ? null : budgetCents - allocatedCents,
     looseSpentCents: engagedOf(loose),
+    loosePlannedCents: loose.plannedCents,
     looseLines: loose.lines,
   };
 }
@@ -76,5 +82,19 @@ export function namedLike(
   return (
     spend.subpost !== null &&
     spend.subpost.trim().toLowerCase() === part.name.trim().toLowerCase()
+  );
+}
+
+/** Spend id → the name of its part, for the spends filed in one. */
+export function partNamesOf(
+  parts: Pick<BudgetPart, "id" | "name">[],
+  partOf: Record<string, string>,
+): Record<string, string> {
+  const name = new Map(parts.map((p) => [p.id, p.name]));
+  return Object.fromEntries(
+    Object.entries(partOf).flatMap(([spend, part]) => {
+      const found = name.get(part);
+      return found ? [[spend, found]] : [];
+    }),
   );
 }

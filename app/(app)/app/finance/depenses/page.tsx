@@ -15,6 +15,7 @@ import {
   spendsHref,
   type SpendStatusSlug,
 } from "@/lib/finance/spend-links";
+import { loadSpendPartNames } from "@/lib/finance/budget-envelope-queries";
 import { loadSpends } from "@/lib/finance/spend-queries";
 import {
   proofExpected,
@@ -54,11 +55,12 @@ export default async function FinanceSpendsPage({
   searchParams,
 }: PageProps<"/app/finance/depenses">) {
   const today = parisPlace(new Date()).day;
-  const [access, params, data, treasury] = await allInOrder([
+  const [access, params, data, treasury, partNames] = await allInOrder([
     requirePermission("read_finance"),
     searchParams,
     loadSpends(),
     loadTreasury(today),
+    loadSpendPartNames(),
   ]);
   const canManage = can(access, "manage_finance");
   const live = data.spends.filter((s) => !s.refused);
@@ -124,6 +126,7 @@ export default async function FinanceSpendsPage({
           ownerId={access.personId}
           empty={<EmptyNote>{t.emptyView}</EmptyNote>}
           add={add}
+          partNames={partNames}
           filters={
             <>
               <UrlFilters

@@ -1,9 +1,7 @@
-import {
-  AddPartButton,
-  PartMenu,
-} from "@/components/finance/budget-part-actions";
+import { AddPartButton } from "@/components/finance/budget-part-actions";
 import type { PartCandidate } from "@/components/finance/budget-part-forms";
-import { ConsumptionMeter } from "@/components/finance/consumption-meter";
+import { PartRow } from "@/components/finance/budget-part-row";
+import { EmptyNote } from "@/components/shell/empty-state";
 import {
   DataTable,
   DataTableActionsCell,
@@ -15,8 +13,11 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { RestAmount } from "@/components/ui/rest-amount";
-import { namedLike, splitBudget } from "@/lib/finance/budget-envelope";
-import { loadBudgetParts } from "@/lib/finance/budget-envelope-queries";
+import {
+  namedLike,
+  splitBudget,
+  type BudgetPart,
+} from "@/lib/finance/budget-envelope";
 import type { EnvelopeKind } from "@/lib/finance/envelopes";
 import type { FinanceSpend } from "@/lib/finance/spends";
 import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
@@ -28,29 +29,49 @@ const amount = (cents: number) => formatAmount(cents, { ht: false });
 
 /**
  * A budget cut into sub-budgets (retour d'Ibé du 18/11/2026): each with its
- * amount, what it spent (committed, invoiced and paid, as the budget) and
- * what is left, then what no sub-budget holds (the budget less the parts,
- * and what the spends outside every part spent). Nothing when the budget is
- * not cut; the Finance cuts it from « ⋯ ». Spends join a sub-budget from its
- * own « ⋯ », its sub-post naming it pre-ticks them.
+ * amount, what is planned, what it spent (committed, invoiced and paid, as
+ * the budget) and what is left, then what no sub-budget holds. Always there
+ * for the Finance, with « Découper ce budget » while it is not cut (UX test
+ * of 23/11/2026); a reader sees it only once cut.
  */
-export async function BudgetParts({
+export function BudgetParts({
   kind,
   id,
   budgetCents,
+  parts,
+  partOf,
   spends,
   canManage,
 }: {
   kind: EnvelopeKind;
   id: string;
   budgetCents: number | null;
+  parts: BudgetPart[];
+  partOf: Record<string, string>;
   // Every spend of the budget, whatever the status filter of the page.
   spends: FinanceSpend[];
   canManage: boolean;
 }) {
   const t = fr.financeBudgets;
-  const { parts, partOf } = await loadBudgetParts(kind, id);
-  if (parts.length === 0) return null;
+  if (parts.length === 0 && !canManage) return null;
+  const head = (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <h3 className="text-body-lg font-medium">{t.parts.title}</h3>
+      {canManage && parts.length > 0 && (
+        <AddPartButton kind={kind} targetId={id} />
+      )}
+    </div>
+  );
+  if (parts.length === 0)
+    return (
+      <section className="flex flex-col gap-3">
+        {head}
+        <EmptyNote action={<AddPartButton kind={kind} targetId={id} first />}>
+          {t.parts.none}
+        </EmptyNote>
+      </section>
+    );
+
   const summary = splitBudget(parts, spends, partOf, budgetCents);
   const partName = new Map(parts.map((p) => [p.id, p.name]));
   const candidates = (part: { name: string }): PartCandidate[] =>
@@ -65,78 +86,46 @@ export async function BudgetParts({
         suggested: namedLike(part, s),
       }));
   const loose = summary.unallocatedCents;
+  const looseLeft = loose === null ? null : loose - summary.looseSpentCents;
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-body-lg font-medium">{t.parts.title}</h3>
-        {canManage && <AddPartButton kind={kind} targetId={id} />}
-      </div>
+      {head}
       <DataTable framed>
         <DataTableHeader>
           <DataTableHead fill>{t.parts.part}</DataTableHead>
           <DataTableHead align="end" hideBelow="sm">
             {t.parts.amount}
           </DataTableHead>
+          <DataTableHead align="end" hideBelow="lg">
+            {t.parts.planned}
+          </DataTableHead>
           <DataTableHead align="end" hideBelow="md">
             {t.parts.spent}
           </DataTableHead>
           <DataTableHead align="end">{t.parts.rest}</DataTableHead>
-          <DataTableHead hideBelow="md" className="w-[22%]">
+          <DataTableHead hideBelow="md" className="w-[18%]">
             {t.columns.consumed}
           </DataTableHead>
-          {canManage && <DataTableActionsHead label={t.actions.more} />}
+          {canManage && (
+            <DataTableActionsHead label={t.actions.more} className="w-auto" />
+          )}
         </DataTableHeader>
         <DataTableBody>
-          {summary.rows.map((row) => {
-            const share = row.amountCents
-              ? row.spentCents / row.amountCents
-              : 0;
-            return (
-              <DataTableRow key={row.id}>
-                <DataTableCell fill>
-                  <span className="truncate font-medium">{row.name}</span>
-                </DataTableCell>
-                <DataTableCell
-                  align="end"
-                  hideBelow="sm"
-                  className="tabular-nums"
-                >
-                  {amount(row.amountCents)}
-                </DataTableCell>
-                <DataTableCell
-                  align="end"
-                  hideBelow="md"
-                  className="tabular-nums"
-                >
-                  {amount(row.spentCents)}
-                </DataTableCell>
-                <DataTableCell align="end">
-                  <RestAmount cents={row.restCents} bare />
-                </DataTableCell>
-                <DataTableCell hideBelow="md">
-                  <ConsumptionMeter
-                    share={share}
-                    label={t.figures.used(row.name, Math.round(share * 100))}
-                  />
-                </DataTableCell>
-                {canManage && (
-                  <DataTableActionsCell>
-                    <PartMenu
-                      kind={kind}
-                      targetId={id}
-                      part={row}
-                      candidates={candidates(row)}
-                    />
-                  </DataTableActionsCell>
-                )}
-              </DataTableRow>
-            );
-          })}
-          {(loose !== null || summary.looseLines > 0) && (
+          {summary.rows.map((row) => (
+            <PartRow
+              key={row.id}
+              kind={kind}
+              targetId={id}
+              part={row}
+              candidates={candidates(row)}
+              canManage={canManage}
+            />
+          ))}
+          {((loose !== null && loose !== 0) || summary.looseLines > 0) && (
             <DataTableRow>
               <DataTableCell fill>
                 <span className="truncate text-[color:var(--text-secondary)]">
-                  {t.parts.unallocated}
+                  {t.parts.outside}
                 </span>
               </DataTableCell>
               <DataTableCell
@@ -148,14 +137,30 @@ export async function BudgetParts({
               </DataTableCell>
               <DataTableCell
                 align="end"
+                hideBelow="lg"
+                className="tabular-nums"
+              >
+                {amount(summary.loosePlannedCents)}
+              </DataTableCell>
+              <DataTableCell
+                align="end"
                 hideBelow="md"
                 className="tabular-nums"
               >
                 {amount(summary.looseSpentCents)}
               </DataTableCell>
               <DataTableCell align="end">
-                {loose !== null && (
-                  <RestAmount cents={loose - summary.looseSpentCents} bare />
+                {/* Red only when the sub-budgets exceed the budget; spends
+                    filed in no part are to file, not an overrun. */}
+                {loose !== null && loose < 0 ? (
+                  <RestAmount cents={loose} bare />
+                ) : summary.looseLines > 0 &&
+                  (looseLeft === null || looseLeft < 0) ? (
+                  <span className="whitespace-nowrap text-[color:var(--text-secondary)]">
+                    {t.parts.toFile(summary.looseLines)}
+                  </span>
+                ) : (
+                  looseLeft !== null && <RestAmount cents={looseLeft} bare />
                 )}
               </DataTableCell>
               <DataTableCell hideBelow="md">{null}</DataTableCell>

@@ -101,6 +101,7 @@ export function SpendsTable({
   ownerId,
   columns,
   hideEnvelope = false,
+  partNames = {},
 }: {
   spends: FinanceSpend[];
   targets: FinanceTarget[];
@@ -112,6 +113,9 @@ export function SpendsTable({
   columns?: Set<SpendColumn>;
   // On a budget's own page, where the envelope column says nothing.
   hideEnvelope?: boolean;
+  // Spend id → the sub-budget it is filed in (UX test of 23/11/2026: no
+  // proof of the filing on the spend).
+  partNames?: Record<string, string>;
 }) {
   const show = (column: SpendColumn) => !columns || columns.has(column);
   const t = fr.financeSpends;
@@ -201,7 +205,14 @@ export function SpendsTable({
                       </DataTableLink>
                     }
                     subtitle={
-                      [spend.subpost, spend.rebillable && t.rebillable]
+                      [
+                        partNames[spend.id] && t.inPart(partNames[spend.id]),
+                        // A sub-post naming its sub-budget says it twice.
+                        spend.subpost?.trim().toLowerCase() !==
+                          partNames[spend.id]?.trim().toLowerCase() &&
+                          spend.subpost,
+                        spend.rebillable && t.rebillable,
+                      ]
                         .filter(Boolean)
                         .join(" · ") || null
                     }
@@ -308,6 +319,7 @@ export function SpendsTable({
           <SpendSheet
             spend={spends[sheet]}
             envelope={envelopeOf(spends[sheet])}
+            part={partNames[spends[sheet].id] ?? null}
             actions={canManage ? actionsOf(spends[sheet]) : []}
             proofIn={canManage && organizationId ? organizationId : undefined}
           />

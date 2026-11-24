@@ -18,6 +18,8 @@ import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { partNamesOf } from "@/lib/finance/budget-envelope";
+import { loadBudgetParts } from "@/lib/finance/budget-envelope-queries";
 import { loadBudgets } from "@/lib/finance/budget-queries";
 import { kindOfSlug } from "@/lib/finance/envelope-slugs";
 import {
@@ -65,16 +67,23 @@ export default async function FinanceEnvelopePage({
   searchParams,
 }: PageProps<"/app/finance/budgets/[kind]/[id]">) {
   const today = parisPlace(new Date()).day;
-  const [access, { kind: slug, id }, query, data, treasury] = await allInOrder([
-    requirePermission("read_finance"),
-    params,
-    searchParams,
-    loadBudgets(),
-    loadTreasury(today),
-  ]);
+  const [access, { kind: slug, id }, query, data, treasury, cut] =
+    await allInOrder([
+      requirePermission("read_finance"),
+      params,
+      searchParams,
+      loadBudgets(),
+      loadTreasury(today),
+      // Its sub-budgets, read with the rest (one round trip).
+      params.then((p) => {
+        const k = kindOfSlug(p.kind);
+        return k ? loadBudgetParts(k, p.id) : null;
+      }),
+    ]);
   const kind = kindOfSlug(slug);
   const envelope = data.envelopes.find((e) => e.kind === kind && e.id === id);
-  if (!kind || !envelope) notFound();
+  if (!kind || !envelope || !cut) notFound();
+  const { parts, partOf } = cut;
   const row = envelopeRow(envelope, data.spends);
   // The status filter (lot 4): the figures, the pie and the lines follow it;
   // what is left stays the envelope's, whole.
@@ -175,6 +184,8 @@ export default async function FinanceEnvelopePage({
         kind={kind}
         id={id}
         budgetCents={envelope.currentCents}
+        parts={parts}
+        partOf={partOf}
         spends={all}
         canManage={canManage}
       />
@@ -208,6 +219,7 @@ export default async function FinanceEnvelopePage({
           {lines.length === 0 && <EmptyNote>{t.detail.noLines}</EmptyNote>}
           <SpendsTable
             hideEnvelope
+            partNames={partNamesOf(parts, partOf)}
             spends={lines}
             targets={treasury.targets}
             canManage={canManage}
