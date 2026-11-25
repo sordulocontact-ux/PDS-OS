@@ -121,6 +121,7 @@ export function TemplateRowActions({
             name: template.name,
             type: template.type,
             language: template.language,
+            font: template.font,
             roles: template.roles,
             usage: template.usage ?? "",
             body: template.body,

@@ -42,3 +42,28 @@ export function markedTextOf(html: string): string | null {
     .trim();
   return text || null;
 }
+
+/** The typeface most of a text pasted from Word or a page is written in
+ * (Sacha 25/11/2026, « récupérer la typo du contrat »): the first family of
+ * each `font-family`, counted by the characters it styles; null when none. */
+export function pastedFontOf(html: string): string | null {
+  if (!html.trim()) return null;
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const count = new Map<string, number>();
+  const walk = (node: Node, font: string | null) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const length = (node.textContent ?? "").trim().length;
+      if (font && length) count.set(font, (count.get(font) ?? 0) + length);
+      return;
+    }
+    if (!(node instanceof HTMLElement)) return;
+    if (node.tagName === "STYLE" || node.tagName === "SCRIPT") return;
+    const own = node.style.fontFamily
+      .split(",")[0]
+      ?.trim()
+      .replace(/^["']|["']$/g, "");
+    for (const child of node.childNodes) walk(child, own || font);
+  };
+  walk(doc.body, null);
+  return [...count].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}

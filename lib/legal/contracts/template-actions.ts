@@ -10,6 +10,7 @@ import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { CONTRACT_TYPES } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { unknownPlaceholders } from "@/lib/legal/contracts/fields";
+import { DOCUMENT_FONT_IDS } from "@/lib/legal/contracts/document-fonts";
 import { CONTRACT_LANGUAGES } from "@/lib/legal/contracts/language";
 import { FORM_ROLES } from "@/lib/legal/forms/definition";
 import { schedulePendingPushes } from "@/lib/notifications/push";
@@ -26,6 +27,8 @@ const templateSchema = z.object({
   type: z.enum(CONTRACT_TYPES),
   // The language it is written in (Ibé, 18/11/2026); never translated.
   language: z.enum(CONTRACT_LANGUAGES).default("fr"),
+  // Its Word file's typeface (Sacha 25/11/2026); null: the default look.
+  font: z.enum(DOCUMENT_FONT_IDS).nullable().default(null),
   roles: z.array(z.enum(FORM_ROLES)).min(1).max(FORM_ROLES.length),
   usage: z.string().trim().max(500),
   body: z.string().min(1).max(200_000),
@@ -74,6 +77,7 @@ export async function createContractTemplate(
       p_source_path: parsed.data.source?.path,
       p_source_name: parsed.data.source?.name,
       p_language: parsed.data.language,
+      p_font: parsed.data.font ?? undefined,
     },
   );
   if (error) {

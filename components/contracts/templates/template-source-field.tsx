@@ -13,6 +13,7 @@ import {
   uploadTemplateSource,
   type TemplateSource,
 } from "@/lib/legal/contracts/upload-source";
+import type { DocumentFont } from "@/lib/legal/contracts/document-fonts";
 
 const fr = { legalContracts };
 
@@ -35,7 +36,7 @@ export function TemplateSourceField({
   ref?: React.Ref<TemplateSourceHandle>;
   organizationId: string;
   initial: TemplateSource | null;
-  onText: (text: string, name: string) => void;
+  onText: (text: string, name: string, font: DocumentFont | null) => void;
 }) {
   const t = fr.legalContracts.templates.source;
   const input = useRef<HTMLInputElement>(null);
@@ -49,7 +50,7 @@ export function TemplateSourceField({
       const result = await uploadTemplateSource(organizationId, file);
       if (!result.ok) return setError(result.error);
       setSource(result.source);
-      onText(result.text, result.source.name);
+      onText(result.text, result.source.name, result.font);
     });
   useImperativeHandle(ref, () => ({ read }));
   const { dragging, handlers } = useFileDrop({

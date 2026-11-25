@@ -39,6 +39,7 @@ export async function GET(
       title: contract.title,
       body: document.latest.body,
       language: document.language,
+      font: document.font,
       letterhead: await loadContractLetterhead(
         await createClient(),
         contractId,

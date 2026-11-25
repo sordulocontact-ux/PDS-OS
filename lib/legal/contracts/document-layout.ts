@@ -4,6 +4,7 @@
 // variables »). Client-safe: strings only, no DOM.
 
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { documentFontCss } from "@/lib/legal/contracts/document-fonts";
 import { bodySegments } from "@/lib/legal/contracts/template-text";
 
 export const escapeHtml = (value: string) =>
@@ -107,7 +108,8 @@ export function templateBodyHtml(
  * The look of the text, under `scope`. A printed document, not the app: its
  * own neutral colors, the same in the PDF, the preview frame and the
  * editor. The look of Ibé's model contract: Arial 10 pt, justified, tight
- * letter spacing.
+ * letter spacing; in its Word file's typeface when it has one
+ * (`data-font`, document-fonts.ts).
  */
 export const documentCss = (scope: string) => `
   ${scope} { font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
@@ -119,7 +121,8 @@ export const documentCss = (scope: string) => `
   ${scope} u { text-underline-offset: 1.5pt; }
   ${scope} .field { display: inline; padding: 0 4px; border-bottom: 1px solid #8a8a8a;
     background: #f1f1f1; color: #4a4a4a; font-weight: 600; font-size: 9pt;
-    -webkit-box-decoration-break: clone; box-decoration-break: clone; }`;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  ${documentFontCss(scope)}`;
 
 /**
  * The text on its A4 sheet, on screen: the preview frame and the editor

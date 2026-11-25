@@ -3022,4 +3022,13 @@ PDF, pas un truc avec les écritures »).
   - **Liste « Ce que PO a repéré » supprimée** (Sacha, même jour) : les valeurs repérées sont remplacées et
     surlignées dans la page ; un clic sur l'une ouvre un petit menu (changer d'information, « Remettre « … » »,
     « Retirer », `DocumentFieldPopover`) ; un contrat collé en entier est lu comme un import ; PO en échec = un toast.
-- Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word ; une clé d'IA locale valide.
+  - **Un modèle s'ouvre en modale depuis la liste** (Sacha, même jour : « je veux pas que ça ouvre une page ») :
+    `TemplateDialog` (état, « Valider », le document) ; la page du modèle reste pour les liens de PO et de la demande.
+  - **La typo du contrat reprise** (Sacha, même jour) : la police la plus utilisée d'un Word (`docxFont`, styles et
+    thème compris) ou d'un texte collé (`pastedFontOf`) devient celle du modèle (`contract_templates.font`, migration
+    `20261125200101`), dans la page, l'aperçu et les PDF de tous les contrats faits avec lui. Une police Microsoft passe
+    par sa jumelle libre aux mêmes métriques (Calibri → Carlito, Cambria → Caladea, Times New Roman → Tinos, Arial →
+    Arimo…, `document-fonts.ts`), chargée depuis Google Fonts ; une police inconnue garde l'Arial par défaut. Le pied de
+    page du PDF reste en Arial. Vérifié : PDF imprimé en Tinos, détection sur trois Word de test.
+- Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
+  (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

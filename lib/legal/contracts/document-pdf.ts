@@ -7,6 +7,10 @@ import {
   sheetCss,
   templateBodyHtml,
 } from "@/lib/legal/contracts/document-layout";
+import {
+  documentFontHref,
+  type DocumentFont,
+} from "@/lib/legal/contracts/document-fonts";
 import type { ContractLanguage } from "@/lib/legal/contracts/language";
 import { htmlToPdf } from "@/lib/pdf/render";
 
@@ -48,17 +52,21 @@ function page({
   language,
   main,
   letterhead,
+  font,
 }: {
   title: string;
   language: ContractLanguage;
   main: string;
   letterhead?: Letterhead | null;
+  // Its template's typeface, from Google Fonts (printed once loaded).
+  font?: DocumentFont | null;
 }): string {
   return `<!doctype html>
 <html lang="${language}">
 <head>
 <meta charset="utf-8">
 <title>${escape(title)}</title>
+${font ? `<link rel="stylesheet" href="${documentFontHref(font)}">` : ""}
 <style>
   @page { size: A4; margin: 19mm 22mm 24mm 25mm; }
   * { box-sizing: border-box; margin: 0; }
@@ -70,7 +78,7 @@ function page({
   }
 </style>
 </head>
-<body><main>${letterheadHtml(letterhead)}${main}</main></body>
+<body><main${font ? ` data-font="${font}"` : ""}>${letterheadHtml(letterhead)}${main}</main></body>
 </html>`;
 }
 
@@ -85,13 +93,15 @@ export function documentHtml({
   body,
   language = "fr",
   letterhead = null,
+  font = null,
 }: {
   title: string;
   body: string;
   language?: ContractLanguage;
   letterhead?: Letterhead | null;
+  font?: DocumentFont | null;
 }): string {
-  return page({ title, language, letterhead, main: bodyHtml(body) });
+  return page({ title, language, letterhead, font, main: bodyHtml(body) });
 }
 
 /**
@@ -103,6 +113,7 @@ export function contractPdf(input: {
   body: string;
   language?: ContractLanguage;
   letterhead?: Letterhead | null;
+  font?: DocumentFont | null;
 }): Promise<Uint8Array> {
   return htmlToPdf(documentHtml(input), { cssPage: true, footer: input.title });
 }
@@ -118,11 +129,13 @@ export function templateHtml({
   title,
   body,
   language,
+  font = null,
 }: {
   title: string;
   body: string;
   language: ContractLanguage;
+  font?: DocumentFont | null;
 }): string {
   const main = templateBodyHtml(body);
-  return page({ title, language, main });
+  return page({ title, language, main, font });
 }

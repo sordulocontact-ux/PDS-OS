@@ -10,7 +10,11 @@ import {
   sourceExtensionOf,
   TEMPLATE_SOURCE_BUCKET,
 } from "@/lib/legal/contracts/source-rules";
-import { sourceText } from "@/lib/legal/contracts/source-text";
+import {
+  documentFontOf,
+  type DocumentFont,
+} from "@/lib/legal/contracts/document-fonts";
+import { docxFont, sourceText } from "@/lib/legal/contracts/source-text";
 import { createClient } from "@/lib/supabase/server";
 
 // The source file of a template (ticket Juridique 03, « ContractTemplate :
@@ -22,7 +26,10 @@ const MAX_TEXT = 200_000;
 
 export async function readTemplateSource(
   path: string,
-): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; text: string; font: DocumentFont | null }
+  | { ok: false; error: string }
+> {
   const t = fr.legalContracts.templates.source;
   const access = await requireApproved();
   const valid = z.string().min(1).max(500).safeParse(path);
@@ -45,15 +52,19 @@ export async function readTemplateSource(
     return { ok: false, error: t.failed };
   }
   let text: string | null;
+  // A Word file's typeface (Sacha 25/11/2026); a PDF or a text says none.
+  let font: DocumentFont | null = null;
   try {
-    text = await sourceText(Buffer.from(await data.arrayBuffer()), ext);
+    const file = Buffer.from(await data.arrayBuffer());
+    text = await sourceText(file, ext);
+    if (ext === "docx") font = documentFontOf(docxFont(file));
   } catch (cause) {
     console.error("readTemplateSource:", cause);
     return { ok: false, error: t.unreadable };
   }
   if (!text) return { ok: false, error: t.unreadable };
   if (text.length > MAX_TEXT) return { ok: false, error: t.tooLong };
-  return { ok: true, text };
+  return { ok: true, text, font };
 }
 
 /** A short-lived link to a template's source file. */

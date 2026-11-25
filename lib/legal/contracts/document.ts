@@ -5,6 +5,10 @@ import {
   asContractLanguage,
   type ContractLanguage,
 } from "@/lib/legal/contracts/language";
+import {
+  isDocumentFont,
+  type DocumentFont,
+} from "@/lib/legal/contracts/document-fonts";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,6 +31,8 @@ export type ContractDocument = {
   template: { name: string; version: number } | null;
   // Its template's language (Ibé, 18/11/2026): the PDF's.
   language: ContractLanguage;
+  // Its template's typeface (Sacha 25/11/2026): the PDF's.
+  font: DocumentFont | null;
   fields: Array<{ id: string; label: string; value: string; source: string }>;
   financialNeedCents: number | null;
   proof: { signed: boolean; evidence: boolean };
@@ -65,7 +71,7 @@ export async function getContractDocument(
   const [template, people] = await Promise.all([
     supabase
       .from("contract_templates")
-      .select("name, version, language")
+      .select("name, version, language, font")
       .eq("id", rows[0].template_id)
       .maybeSingle(),
     peopleIds.length > 0
@@ -102,6 +108,7 @@ export async function getContractDocument(
       ? { name: template.data.name, version: rows[0].template_version }
       : null,
     language: asContractLanguage(template.data?.language),
+    font: isDocumentFont(template.data?.font) ? template.data.font : null,
     fields: Object.entries(injected).map(([id, v]) => ({
       id,
       label: fr.legalContracts.fields[id] ?? id,

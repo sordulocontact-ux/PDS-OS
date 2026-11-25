@@ -25,7 +25,12 @@ import {
 } from "@/lib/legal/contracts/document-layout";
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
 import type { ExcerptAt } from "@/lib/legal/contracts/template-text";
-import { markedTextOf } from "@/lib/legal/contracts/pasted-marks";
+import {
+  documentFontHref,
+  documentFontOf,
+  type DocumentFont,
+} from "@/lib/legal/contracts/document-fonts";
+import { markedTextOf, pastedFontOf } from "@/lib/legal/contracts/pasted-marks";
 
 export type DocumentEditorHandle = {
   /** Every `excerpt` (where its context says) becomes the value, shown
@@ -59,6 +64,7 @@ export function DocumentEditor({
   placeholder,
   fields = false,
   busy,
+  font = null,
   onChange,
   onFile,
   onPasteContract,
@@ -72,12 +78,15 @@ export function DocumentEditor({
   fields?: boolean;
   // What is being done to the page (« PO lit le contrat… »).
   busy?: string | null;
+  // The contract's typeface (its Word file's), as its PDF prints it.
+  font?: DocumentFont | null;
   onChange?: (body: string) => void;
   // A file dropped on the page (a template's source file); else a drop does
   // nothing.
   onFile?: (file: File) => void;
-  // A whole contract pasted on an empty page: read like an imported file.
-  onPasteContract?: (body: string) => void;
+  // A whole contract pasted on an empty page: read like an imported file,
+  // with the typeface it was written in.
+  onPasteContract?: (body: string, font: DocumentFont | null) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const { caret, marks } = usePageCaret(rootRef);
@@ -145,13 +154,17 @@ export function DocumentEditor({
 
   const onPaste = (event: React.ClipboardEvent) => {
     event.preventDefault();
+    const html = event.clipboardData.getData("text/html");
     const text =
-      markedTextOf(event.clipboardData.getData("text/html")) ??
-      event.clipboardData.getData("text/plain");
+      markedTextOf(html) ?? event.clipboardData.getData("text/plain");
     const wasEmpty = !body.trim();
     pasteText(rootRef.current!, text.replace(/\r\n?/g, "\n"));
     sync();
-    if (wasEmpty) onPasteContract?.(serialize(rootRef.current!));
+    if (wasEmpty)
+      onPasteContract?.(
+        serialize(rootRef.current!),
+        documentFontOf(pastedFontOf(html)),
+      );
   };
 
   // The clicked value: another field, its text back, or taken out.
@@ -166,6 +179,13 @@ export function DocumentEditor({
       <style href={PAGE} precedence="default">
         {PAGE_CSS}
       </style>
+      {font && (
+        <link
+          rel="stylesheet"
+          href={documentFontHref(font)}
+          precedence="default"
+        />
+      )}
       <Label id={`${name}-label`} required>
         {label}
       </Label>
@@ -191,6 +211,7 @@ export function DocumentEditor({
           suppressContentEditableWarning
           spellCheck
           data-placeholder={placeholder}
+          data-font={font ?? undefined}
           data-empty={body.trim() ? undefined : ""}
           onInput={() => {
             dropCaretHolders(rootRef.current!);

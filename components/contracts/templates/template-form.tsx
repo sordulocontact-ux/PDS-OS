@@ -23,6 +23,7 @@ import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import type { DocumentFont } from "@/lib/legal/contracts/document-fonts";
 import {
   CONTRACT_LANGUAGES,
   type ContractLanguage,
@@ -42,6 +43,8 @@ export type TemplateDraft = {
   type: ContractType;
   // French when not given (Ibé, 18/11/2026: the contract's language).
   language?: ContractLanguage;
+  // Its Word file's typeface; the default look when not given.
+  font?: DocumentFont | null;
   roles: FormRole[];
   usage: string;
   body: string;
@@ -93,6 +96,8 @@ export function TemplateForm({
   const [language, setLanguage] = useState<ContractLanguage>(
     initial?.language ?? "fr",
   );
+  // The typeface of the imported or pasted contract (Sacha 25/11/2026).
+  const [font, setFont] = useState<DocumentFont | null>(initial?.font ?? null);
   const [proposed, setProposed] = useState(false);
 
   // Only what is still empty: what the person chose is kept.
@@ -117,7 +122,8 @@ export function TemplateForm({
   // A contract imported or pasted whole: what it says of itself, at once
   // and without PO (its title, the type it names, its roles, its language),
   // then its values found by the code and PO.
-  function readContract(text: string) {
+  function readContract(text: string, typeface: DocumentFont | null) {
+    setFont(typeface);
     const read = aboutFromText(text);
     setLanguage(read.language);
     fillAbout({
@@ -136,6 +142,7 @@ export function TemplateForm({
         name: String(form.get("name") ?? ""),
         type: String(form.get("type") ?? "") as ContractType,
         language,
+        font,
         roles: jsonListOf(form.get("roles")) as FormRole[],
         usage: String(form.get("usage") ?? ""),
         body: String(form.get("body") ?? ""),
@@ -159,17 +166,19 @@ export function TemplateForm({
         ref={source}
         organizationId={organizationId}
         initial={initial?.source ?? null}
-        onText={(text, name) => {
-          // The text it replaces stays one click away.
+        onText={(text, name, typeface) => {
+          // The text it replaces stays one click away, in its typeface.
           const before = body;
+          const fontBefore = font;
           editor.current?.load(text);
-          readContract(text);
+          readContract(text, typeface);
           if (before.trim())
             toast.success(t.source.imported(name), {
               action: {
                 label: t.source.undo,
                 onClick: () => {
                   editor.current?.load(before);
+                  setFont(fontBefore);
                 },
               },
             });
@@ -235,6 +244,7 @@ export function TemplateForm({
         fields
         defaultValue={initial?.body}
         busy={finder.pending ? t.values.finding : null}
+        font={font}
         onChange={setBody}
         onFile={(file) => source.current?.read(file)}
         onPasteContract={readContract}

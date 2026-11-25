@@ -132,6 +132,70 @@ export function docxText(file: Buffer): string | null {
   return paragraphs.join(empty * 3 >= full ? "\n" : "\n\n");
 }
 
+// A font named by a run, a style or the defaults: its own name, or the
+// theme's (minor: the body's, major: the headings').
+const NAMED_FONT = /<w:rFonts\b[^>]*?\bw:(?:ascii|hAnsi)="([^"]+)"/;
+const THEME_FONT =
+  /<w:rFonts\b[^>]*?\bw:(?:asciiTheme|hAnsiTheme)="(minor|major)/;
+
+/** The typeface most of a Word document's text is written in (Sacha
+ * 25/11/2026, « récupérer la typo du contrat »): each run's own font, else
+ * its style's, its paragraph's style's, the document's default; counted by
+ * characters. Null when the file says none. */
+export function docxFont(file: Buffer): string | null {
+  const xml = unzipEntry(file, "word/document.xml")?.toString("utf8");
+  if (!xml) return null;
+  const styles = unzipEntry(file, "word/styles.xml")?.toString("utf8") ?? "";
+  const themeXml =
+    unzipEntry(file, "word/theme/theme1.xml")?.toString("utf8") ?? "";
+  const theme: Record<string, string | undefined> = {
+    minor: /<a:minorFont>\s*<a:latin typeface="([^"]+)"/.exec(themeXml)?.[1],
+    major: /<a:majorFont>\s*<a:latin typeface="([^"]+)"/.exec(themeXml)?.[1],
+  };
+  const fontIn = (props: string): string | null => {
+    const named = NAMED_FONT.exec(props)?.[1];
+    if (named) return decode(named);
+    const themed = THEME_FONT.exec(props)?.[1];
+    return themed ? (theme[themed] ?? null) : null;
+  };
+  const byStyle = new Map<string, string>();
+  let normal: string | null = null;
+  for (const [style] of styles.matchAll(/<w:style\b[\s\S]*?<\/w:style>/g)) {
+    const id = /w:styleId="([^"]+)"/.exec(style)?.[1];
+    const font = fontIn(/<w:rPr>([\s\S]*?)<\/w:rPr>/.exec(style)?.[1] ?? "");
+    if (id && font) byStyle.set(id, font);
+    if (
+      /w:type="paragraph"[^>]*w:default="1"|w:default="1"[^>]*w:type="paragraph"/.test(
+        style,
+      )
+    )
+      normal = font;
+  }
+  const fallback =
+    normal ??
+    fontIn(/<w:rPrDefault>[\s\S]*?<\/w:rPrDefault>/.exec(styles)?.[0] ?? "") ??
+    theme.minor ??
+    null;
+
+  const count = new Map<string, number>();
+  for (const [p] of xml.matchAll(/<w:p[\s>][\s\S]*?<\/w:p>/g)) {
+    const pStyle = /<w:pStyle w:val="([^"]+)"/.exec(p)?.[1];
+    const paragraphFont = (pStyle && byStyle.get(pStyle)) ?? fallback;
+    for (const [r] of p.matchAll(/<w:r[\s>][\s\S]*?<\/w:r>/g)) {
+      const length = [...r.matchAll(/<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>/g)]
+        .map((m) => m[1].trim().length)
+        .reduce((a, b) => a + b, 0);
+      if (!length) continue;
+      const props = /<w:rPr>([\s\S]*?)<\/w:rPr>/.exec(r)?.[1] ?? "";
+      const rStyle = /<w:rStyle w:val="([^"]+)"/.exec(props)?.[1];
+      const font =
+        fontIn(props) ?? (rStyle && byStyle.get(rStyle)) ?? paragraphFont;
+      if (font) count.set(font, (count.get(font) ?? 0) + length);
+    }
+  }
+  return [...count].sort((a, b) => b[1] - a[1])[0]?.[0] ?? fallback;
+}
+
 async function pdfText(file: Buffer): Promise<string | null> {
   const { extractText, getDocumentProxy } = await import("unpdf");
   const pdf = await getDocumentProxy(new Uint8Array(file));
