@@ -33,7 +33,8 @@ export function ValueSuggestionRow({
   onUndo,
   onIgnore,
 }: {
-  excerpt: string;
+  // null: a line to fill in by hand (« ____ »), found by its place.
+  excerpt: string | null;
   field: ContractFieldId;
   count: number;
   replacedCount: number | null;
@@ -47,7 +48,9 @@ export function ValueSuggestionRow({
   return (
     <li className="flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center sm:gap-3">
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="font-medium break-words">« {excerpt} »</span>
+        <span className="font-medium break-words">
+          {excerpt === null ? t.blank : `« ${excerpt} »`}
+        </span>
         <span className="text-sm text-muted-foreground">
           {replaced
             ? t.replaced(replacedCount)
@@ -65,7 +68,10 @@ export function ValueSuggestionRow({
               typeof next === "string" && onField(next as ContractFieldId)
             }
           >
-            <SelectTrigger size="sm" aria-label={t.fieldLabel(excerpt)}>
+            <SelectTrigger
+              size="sm"
+              aria-label={t.fieldLabel(excerpt ?? t.blank)}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

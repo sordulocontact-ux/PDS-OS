@@ -21,11 +21,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { documentCss, sheetCss } from "@/lib/legal/contracts/document-layout";
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
+import type { ExcerptAt } from "@/lib/legal/contracts/template-text";
 import { markedTextOf } from "@/lib/legal/contracts/pasted-marks";
 
 export type DocumentEditorHandle = {
-  /** Every `excerpt` becomes the value; the blanks are returned for undo. */
-  replace(excerpt: string, id: ContractFieldId): HTMLElement[];
+  /** Every `excerpt` (where its context says) becomes the value; the
+   * blanks are returned for undo. */
+  replace(at: ExcerptAt, id: ContractFieldId): HTMLElement[];
   restore(chips: HTMLElement[], excerpt: string): void;
   /** Replaces the whole text (an imported file). */
   load(body: string): void;
@@ -54,6 +56,7 @@ export function DocumentEditor({
   fields = false,
   highlight,
   onChange,
+  onFile,
 }: {
   ref?: React.Ref<DocumentEditorHandle>;
   name: string;
@@ -62,8 +65,11 @@ export function DocumentEditor({
   placeholder?: string;
   // A template: « Insérer une information » in the toolbar.
   fields?: boolean;
-  highlight?: string[];
+  highlight?: ExcerptAt[];
   onChange?: (body: string) => void;
+  // A file dropped on the page (a template's source file); else a drop does
+  // nothing.
+  onFile?: (file: File) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const caret = useRef<Range | null>(null);
@@ -108,8 +114,8 @@ export function DocumentEditor({
   useEffect(() => () => void globalThis.CSS?.highlights?.delete(HIGHLIGHT), []);
 
   useImperativeHandle(ref, () => ({
-    replace(excerpt, id) {
-      const chips = replaceExcerpt(rootRef.current!, excerpt, id);
+    replace(at, id) {
+      const chips = replaceExcerpt(rootRef.current!, at, id);
       sync();
       return chips;
     },
@@ -198,7 +204,15 @@ export function DocumentEditor({
           }}
           onKeyDown={onKeyDown}
           onPaste={onPaste}
-          onDrop={(event) => event.preventDefault()}
+          onDragOver={(event) => {
+            if (onFile && event.dataTransfer.types.includes("Files"))
+              event.preventDefault();
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            if (file && onFile) onFile(file);
+          }}
           className={`${PAGE} outline-none focus-visible:ring-3 focus-visible:ring-ring/50`}
         />
       </div>

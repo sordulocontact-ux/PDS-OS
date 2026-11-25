@@ -9,7 +9,10 @@ import { LoadingRegion, SkeletonRows } from "@/components/ui/skeleton";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
-import { countExcerpt } from "@/lib/legal/contracts/template-text";
+import {
+  countExcerpt,
+  type ExcerptAt,
+} from "@/lib/legal/contracts/template-text";
 import {
   suggestTemplateValues,
   type TemplateAbout,
@@ -19,6 +22,11 @@ import {
 const fr = { legalContracts };
 
 type Row = ValueSuggestion & { chips: HTMLElement[] | null };
+
+// A blank (« ____ ») is found by its place: two rows may share its text.
+const keyOf = (row: ExcerptAt) => `${row.context ?? ""}\u0000${row.excerpt}`;
+const countOf = (body: string, row: ExcerptAt) =>
+  countExcerpt(body, row.excerpt, row.context);
 
 export type ValueSuggestionsHandle = {
   /** An imported contract: PO reads it and what he finds is replaced at
@@ -43,7 +51,7 @@ export function ValueSuggestions({
   ref?: React.Ref<ValueSuggestionsHandle>;
   editor: React.RefObject<DocumentEditorHandle | null>;
   body: string;
-  onPending: (excerpts: string[]) => void;
+  onPending: (excerpts: ExcerptAt[]) => void;
   /** What PO says the template is (name, type, roles, usage). */
   onAbout?: (about: TemplateAbout) => void;
 }) {
@@ -54,12 +62,12 @@ export function ValueSuggestions({
   const [fileName, setFileName] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const open = (rows ?? []).filter(
-    (r) => !r.chips && countExcerpt(body, r.excerpt) > 0,
+  const open = (rows ?? []).filter((r) => !r.chips && countOf(body, r) > 0);
+  const openKey = JSON.stringify(
+    open.map(({ excerpt, context }) => ({ excerpt, context })),
   );
-  const openKey = open.map((r) => r.excerpt).join("\n");
   useEffect(() => {
-    onPending(openKey ? openKey.split("\n") : []);
+    onPending(JSON.parse(openKey) as ExcerptAt[]);
   }, [openKey, onPending]);
 
   // Longest first: « Jean Dupont » before « Dupont ».
@@ -67,7 +75,7 @@ export function ValueSuggestions({
     [...list]
       .sort((a, b) => b.excerpt.length - a.excerpt.length)
       .map((row) => {
-        const chips = editor.current?.replace(row.excerpt, row.field) ?? [];
+        const chips = editor.current?.replace(row, row.field) ?? [];
         return { ...row, chips, count: chips.length };
       });
 
@@ -85,7 +93,7 @@ export function ValueSuggestions({
       if (result.about) onAbout?.(result.about);
       const applied = apply ? applyAll(found) : found;
       // Back in reading order once applied.
-      setRows(found.map((r) => applied.find((a) => a.excerpt === r.excerpt)!));
+      setRows(found.map((r) => applied.find((a) => keyOf(a) === keyOf(r))!));
       setNotice(
         result.quota ??
           (result.partial
@@ -111,37 +119,37 @@ export function ValueSuggestions({
     },
   }));
 
-  const update = (excerpt: string, change: Partial<Row>) =>
+  const update = (row: Row, change: Partial<Row>) =>
     setRows((current) =>
       (current ?? []).map((r) =>
-        r.excerpt === excerpt ? { ...r, ...change } : r,
+        keyOf(r) === keyOf(row) ? { ...r, ...change } : r,
       ),
     );
 
   const replace = (row: Row) => {
-    const chips = editor.current?.replace(row.excerpt, row.field) ?? [];
-    update(row.excerpt, { chips, count: chips.length });
+    const chips = editor.current?.replace(row, row.field) ?? [];
+    update(row, { chips, count: chips.length });
   };
   const undo = (row: Row) => {
     if (row.chips) editor.current?.restore(row.chips, row.excerpt);
-    update(row.excerpt, { chips: null });
+    update(row, { chips: null });
   };
   // A value already replaced moves to its new field in the text too.
   const changeField = (row: Row, field: ContractFieldId) => {
-    if (!row.chips) return update(row.excerpt, { field });
+    if (!row.chips) return update(row, { field });
     editor.current?.restore(row.chips, row.excerpt);
-    const chips = editor.current?.replace(row.excerpt, field) ?? [];
-    update(row.excerpt, { field, chips, count: chips.length });
+    const chips = editor.current?.replace(row, field) ?? [];
+    update(row, { field, chips, count: chips.length });
   };
   const ignore = (row: Row) =>
     setRows((current) =>
-      (current ?? []).filter((r) => r.excerpt !== row.excerpt),
+      (current ?? []).filter((r) => keyOf(r) !== keyOf(row)),
     );
   const replaceAll = () => {
     const applied = applyAll(open);
     setRows((current) =>
       (current ?? []).map(
-        (r) => applied.find((a) => a.excerpt === r.excerpt) ?? r,
+        (r) => applied.find((a) => keyOf(a) === keyOf(r)) ?? r,
       ),
     );
   };
@@ -193,11 +201,11 @@ export function ValueSuggestions({
         <ul className="flex flex-col divide-y divide-[var(--border-hairline)]">
           {rows.map((row) => (
             <ValueSuggestionRow
-              key={row.excerpt}
-              excerpt={row.excerpt}
+              key={keyOf(row)}
+              excerpt={row.context ? null : row.excerpt}
               field={row.field}
               replacedCount={row.chips ? row.count : null}
-              count={countExcerpt(body, row.excerpt)}
+              count={countOf(body, row)}
               onField={(field) => changeField(row, field)}
               onReplace={() => replace(row)}
               onUndo={() => undo(row)}

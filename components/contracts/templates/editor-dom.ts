@@ -10,7 +10,10 @@ import {
   templateBodyHtml,
 } from "@/lib/legal/contracts/document-layout";
 import { isBold, isUnderline } from "@/lib/legal/contracts/pasted-marks";
-import { excerptStarts } from "@/lib/legal/contracts/template-text";
+import {
+  excerptStarts,
+  type ExcerptAt,
+} from "@/lib/legal/contracts/template-text";
 
 // Typed after a blank so the caret can sit there; never saved.
 const CARET_HOLDER = "\u200b";
@@ -104,10 +107,31 @@ function textNodes(root: HTMLElement): Text[] {
   return nodes;
 }
 
-/** Each place `excerpt` is written, whole words only, in document order. */
-export function excerptRanges(root: HTMLElement, excerpt: string): Range[] {
+/** The text before `node` in its paragraph, values written {{id}}: what a
+ * blank's context is matched against. */
+function leadOf(root: HTMLElement, node: Text): string {
+  let block: Node = node;
+  while (block.parentNode && block.parentNode !== root)
+    block = block.parentNode;
+  const range = document.createRange();
+  range.setStart(block === node ? root : block, 0);
+  range.setEnd(node, 0);
+  return [...range.cloneContents().childNodes].map(inlineText).join("");
+}
+
+/** Each place `excerpt` is written, whole words only, in document order;
+ * with a `context`, only where the text before it says so. */
+export function excerptRanges(
+  root: HTMLElement,
+  { excerpt, context }: ExcerptAt,
+): Range[] {
   return textNodes(root).flatMap((node) =>
-    excerptStarts(node.data, excerpt).map((at) => {
+    excerptStarts(
+      node.data,
+      excerpt,
+      context,
+      context ? leadOf(root, node) : "",
+    ).map((at) => {
       const range = document.createRange();
       range.setStart(node, at);
       range.setEnd(node, at + excerpt.length);
@@ -120,11 +144,11 @@ export function excerptRanges(root: HTMLElement, excerpt: string): Range[] {
  * replacement can be undone. */
 export function replaceExcerpt(
   root: HTMLElement,
-  excerpt: string,
+  at: ExcerptAt,
   id: string,
 ): HTMLElement[] {
   // From the last one: the earlier offsets of a text node stay valid.
-  return excerptRanges(root, excerpt)
+  return excerptRanges(root, at)
     .reverse()
     .map((range) => {
       const chip = createChip(id);
@@ -244,7 +268,7 @@ export function dropCaretHolders(root: HTMLElement) {
 }
 
 /** Marks the excerpts still to decide on, where the browser can. */
-export function highlightExcerpts(root: HTMLElement, excerpts: string[]) {
+export function highlightExcerpts(root: HTMLElement, excerpts: ExcerptAt[]) {
   if (typeof CSS === "undefined" || !("highlights" in CSS)) return;
   const ranges = excerpts.flatMap((e) => excerptRanges(root, e));
   if (ranges.length === 0) CSS.highlights.delete(HIGHLIGHT);

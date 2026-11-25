@@ -1,7 +1,7 @@
 "use client";
 
 import { IconPaperclip } from "nucleo-sharp-essential";
-import { useRef, useState, useTransition } from "react";
+import { useImperativeHandle, useRef, useState, useTransition } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
@@ -16,16 +16,23 @@ import {
 
 const fr = { legalContracts };
 
+export type TemplateSourceHandle = {
+  /** A file dropped elsewhere (the contract's page) read as if imported. */
+  read(file: File): void;
+};
+
 /**
  * « Fichier source » of a template: a Word, PDF or text file chosen or
  * dropped here, kept with the template; its text goes to the editor
  * (`onText`). Submitted as source_path / source_name.
  */
 export function TemplateSourceField({
+  ref,
   organizationId,
   initial,
   onText,
 }: {
+  ref?: React.Ref<TemplateSourceHandle>;
   organizationId: string;
   initial: TemplateSource | null;
   onText: (text: string, name: string) => void;
@@ -44,6 +51,7 @@ export function TemplateSourceField({
       setSource(result.source);
       onText(result.text, result.source.name);
     });
+  useImperativeHandle(ref, () => ({ read }));
   const { dragging, handlers } = useFileDrop({
     disabled: pending,
     onFiles: ([file]) => read(file),

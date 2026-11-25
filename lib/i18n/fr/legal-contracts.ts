@@ -7,6 +7,9 @@ export const legalContracts = {
     "personne.email": "E-mail",
     "personne.telephone": "Téléphone",
     "personne.adresse": "Adresse postale",
+    "personne.date_naissance": "Date de naissance",
+    "personne.lieu_naissance": "Lieu de naissance",
+    "contrat.date": "Date du contrat",
     "personne.statut": "Personne ou société",
     "personne.societe": "Raison sociale",
     "personne.siret": "SIREN / SIRET",
@@ -49,6 +52,7 @@ export const legalContracts = {
     mapping: "Contrats à prévoir",
     organization: "Structure",
     deal: "Deal memo validé",
+    document: "Jour où le contrat est préparé",
   } as Record<string, string>,
   // JUR-16: a value that does not apply to the person, as the contract says it.
   notApplicable: "Sans objet",
@@ -181,8 +185,7 @@ export const legalContracts = {
       body: "Texte du modèle",
       submit: "Enregistrer le modèle",
       submitting: "Enregistrement…",
-      proposed:
-        "Nom, type, rôles et usage proposés par PO d'après le contrat : corrigez-les si besoin.",
+      proposed: "Repris du contrat : corrigez si besoin.",
       unknown: (ids: string) => `Champs inconnus : ${ids}.`,
       invalid: "Vérifiez le nom, le type, les rôles et le texte.",
     },
@@ -202,7 +205,7 @@ export const legalContracts = {
         deal: "Les termes du deal",
       },
       placeholder:
-        "Collez ici le texte du contrat, déjà relu par votre juriste.",
+        "Collez ici le texte du contrat ou déposez son fichier, déjà relu par votre juriste.",
     },
     source: {
       title: "Fichier source",
@@ -242,6 +245,8 @@ export const legalContracts = {
       times: (n: number) => (n === 1 ? "1 fois" : `${n} fois`),
       gone: "Plus dans le texte",
       fieldLabel: (excerpt: string) => `Valeur pour « ${excerpt} »`,
+      // A blank found by its place (« née le ____ »).
+      blank: "Ligne à remplir",
       replace: "Remplacer",
       ignore: "Ignorer",
       undo: "Annuler",

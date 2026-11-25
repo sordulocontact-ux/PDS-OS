@@ -9,7 +9,10 @@ import {
   DocumentEditor,
   type DocumentEditorHandle,
 } from "@/components/contracts/document-editor";
-import { TemplateSourceField } from "@/components/contracts/templates/template-source-field";
+import {
+  TemplateSourceField,
+  type TemplateSourceHandle,
+} from "@/components/contracts/templates/template-source-field";
 import {
   ValueSuggestions,
   type ValueSuggestionsHandle,
@@ -28,9 +31,11 @@ import {
   type ContractLanguage,
 } from "@/lib/legal/contracts/language";
 import { createContractTemplate } from "@/lib/legal/contracts/template-actions";
+import { aboutFromText } from "@/lib/legal/contracts/template-about";
 import type { TemplateAbout } from "@/lib/legal/contracts/template-values";
 import type { TemplateSource } from "@/lib/legal/contracts/upload-source";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
+import type { ExcerptAt } from "@/lib/legal/contracts/template-text";
 import { jsonListOf } from "@/lib/utils/form-data";
 
 const fr = { contracts, legalContracts, legalDocuments, legalForms };
@@ -77,9 +82,10 @@ export function TemplateForm({
   const [error, setError] = useState<string | null>(null);
   const editor = useRef<DocumentEditorHandle>(null);
   const suggestions = useRef<ValueSuggestionsHandle>(null);
+  const source = useRef<TemplateSourceHandle>(null);
   const [body, setBody] = useState(initial?.body ?? "");
   // Values found by « Repérer les valeurs », still to replace or ignore.
-  const [toDecide, setToDecide] = useState<string[]>([]);
+  const [toDecide, setToDecide] = useState<ExcerptAt[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   // Name, type, roles and usage: typed, or proposed by PO from the contract.
   const [about, setAbout] = useState<TemplateAbout>({
@@ -140,12 +146,23 @@ export function TemplateForm({
   return (
     <form ref={formRef} action={submit} className="flex flex-col gap-4">
       <TemplateSourceField
+        ref={source}
         organizationId={organizationId}
         initial={initial?.source ?? null}
         onText={(text, name) => {
           // The text it replaces stays one click away.
           const before = body;
           editor.current?.load(text);
+          // What the contract says of itself, at once and without PO: its
+          // title, the type it names, its roles and its language.
+          const read = aboutFromText(text);
+          setLanguage(read.language);
+          fillAbout({
+            name: read.name ?? "",
+            type: read.type ?? "other",
+            roles: read.roles,
+            usage: "",
+          });
           suggestions.current?.analyze(text, name);
           if (before.trim())
             toast.success(t.source.imported(name), {
@@ -211,6 +228,14 @@ export function TemplateForm({
           </ToneCallout>
         )}
       </Fragment>
+      {/* Above the page: what PO found is read before the contract. */}
+      <ValueSuggestions
+        ref={suggestions}
+        editor={editor}
+        body={body}
+        onPending={setToDecide}
+        onAbout={fillAbout}
+      />
       <DocumentEditor
         ref={editor}
         name="body"
@@ -220,13 +245,7 @@ export function TemplateForm({
         defaultValue={initial?.body}
         highlight={toDecide}
         onChange={setBody}
-      />
-      <ValueSuggestions
-        ref={suggestions}
-        editor={editor}
-        body={body}
-        onPending={setToDecide}
-        onAbout={fillAbout}
+        onFile={(file) => source.current?.read(file)}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

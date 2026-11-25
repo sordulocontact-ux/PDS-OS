@@ -3000,4 +3000,23 @@ PDF, pas un truc avec les écritures »).
   le texte d'un fichier importé n'est plus replié derrière « Afficher le texte », valeurs repérées surlignées.
 - Supprimés : `TemplateBodyEditor`, `field-chip.tsx` ; `DropdownMenuGroup` ajouté à `ui/dropdown-menu.tsx`.
 - **Aucune migration** : le texte stocké ne change pas (`**gras**`, `__souligné__`, `{{champ}}`).
-- Reste : vérifier dans un vrai Chrome la frappe, le collage depuis Word et la nouvelle version d'un modèle.
+- **Suite du même jour, après un essai de Sacha** :
+  - **Un Word importé garde sa mise en page** (`source-text.ts`, `docxText`) : chaque paragraphe Word = un paragraphe
+    du contrat (sauf si l'auteur sépare déjà ses blocs par des paragraphes vides : une adresse reste groupée), gras et
+    souligné des runs repris en marques ; avant, tout devenait un seul bloc collé.
+  - **Un fichier déposé sur la page** est importé comme par « Importer un fichier » (`DocumentEditor onFile`,
+    `TemplateSourceHandle.read`) ; avant, le dépôt ne faisait rien.
+  - **Trois informations** : « Date de naissance », « Lieu de naissance » (`personne.date_naissance` /
+    `lieu_naissance`, lues dans la fiche, « Sans objet » pour une société) et « Date du contrat » (`contrat.date`, le
+    jour où le contrat est préparé, en toutes lettres, source `document`). La fiche de renseignements demande la date et
+    le lieu de naissance (v3, facultatifs).
+  - **Lignes à remplir repérées par leur place** (`value-patterns.ts`, `blanksByPlace`) : « né(e) le ____ », « à ____ »
+    juste après, « Fait à …, le ____ » ; une suggestion porte un `context` (motif du texte qui précède, `ExcerptAt`)
+    respecté par le comptage, le surlignage, Remplacer et Annuler ; « Ligne à remplir » dans la liste.
+  - **Nom, type, rôles et langue pré-remplis par le code** (`template-about.ts`) : le titre du contrat (première ligne
+    en capitales ou en gras) donne le nom et le type, le type les rôles, les mots les plus courants la langue ; PO ne
+    complète que ce qui reste vide. Ce que PO a repéré passe au-dessus de la page (son avertissement était invisible
+    sous le contrat).
+  - Constaté en local : la clé Mistral n'a plus d'abonnement (« You need a subscription to access this API »), PO ne lit
+    plus les contrats en local ; Claude en prod.
+- Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word ; une clé d'IA locale valide.

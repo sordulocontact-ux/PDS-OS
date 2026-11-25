@@ -10,6 +10,9 @@ export const CONTRACT_FIELD_IDS = [
   "personne.email",
   "personne.telephone",
   "personne.adresse",
+  // « né(e) le … à … » (Sacha 25/11/2026), asked by the fiche.
+  "personne.date_naissance",
+  "personne.lieu_naissance",
   "personne.statut",
   "personne.societe",
   "personne.siret",
@@ -20,6 +23,9 @@ export const CONTRACT_FIELD_IDS = [
   "projet.titres",
   "remuneration",
   "organisation.nom",
+  // « Fait à Paris, le … »: the day the document is written (Sacha
+  // 25/11/2026).
+  "contrat.date",
   // The terms of a deal (its validated deal memo), for the long contract
   // generated from the deal (Sacha 22/11/2026, 20261122140101); one per term
   // of lib/deals/terms.ts, music, label and brand.
@@ -56,6 +62,8 @@ export const CONTRACT_FIELD_GROUPS: Record<
   person: [
     "personne.nom_civil",
     "personne.nom_artiste",
+    "personne.date_naissance",
+    "personne.lieu_naissance",
     "personne.adresse",
     "personne.email",
     "personne.telephone",
@@ -65,7 +73,12 @@ export const CONTRACT_FIELD_GROUPS: Record<
     "personne.ipi",
   ],
   project: ["projet.titre", "projet.artiste", "projet.titres"],
-  agreement: ["remuneration", "personne.roles", "organisation.nom"],
+  agreement: [
+    "remuneration",
+    "personne.roles",
+    "organisation.nom",
+    "contrat.date",
+  ],
   deal: CONTRACT_FIELD_IDS.filter((id) => id.startsWith("deal.")),
 };
 
@@ -80,7 +93,9 @@ export type FieldSource =
   | "mapping"
   | "organization"
   // The terms of a deal's validated memo.
-  | "deal";
+  | "deal"
+  // The document itself: the day it is written.
+  | "document";
 
 // Same pattern as contract_placeholders (SQL).
 const PLACEHOLDER = /\{\{\s*([a-z0-9_.]+)\s*\}\}/g;
@@ -121,6 +136,8 @@ export const FIELD_HOME = {
   "personne.email": "fiche",
   "personne.telephone": "fiche",
   "personne.adresse": "fiche",
+  "personne.date_naissance": "fiche",
+  "personne.lieu_naissance": "fiche",
   "personne.statut": "fiche",
   "personne.societe": "fiche",
   "personne.siret": "fiche",
@@ -131,4 +148,5 @@ export const FIELD_HOME = {
   "projet.titres": "credits",
   remuneration: "mapping",
   "organisation.nom": "organization",
+  "contrat.date": "document",
 } as Record<ContractFieldId, FieldSource>;
