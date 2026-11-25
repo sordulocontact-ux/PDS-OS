@@ -5556,6 +5556,14 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   fil de Master, Juridique et Distribution, le nom du titre (`titleCrumb`, `scopeCrumb`, `releaseCrumb` d'une sortie de
   titre) mène à sa page, le chevron change de titre ; `ProjectHeaderView` reconnaît l'étape ouverte à son chemin seul,
   sans `?titre=` / `?sortie=`, pour que le fil finisse sur elle (« Master / Néons / Source »).
+  **Une entrée, deux vues** (25/11/2026) : « Titres » remplace les entrées « Titres » et « Titres et artistes » ; la
+  section `tracks` couvre `/tracks` et `/titles`. Les deux pages ont le même en-tête (`TitlesHeader` : artiste
+  principal, titres, artistes ; « Ajouter un titre », « Changer l'artiste principal », « Participations et contrats »)
+  et les vues `TitlesViews` (`DataTableViews` à liens) : **Par titre** (`/tracks`, les parcours) et **Par artiste**
+  (`/titles`, le récap où se font les gestes). Sur la Vue d'ensemble, le récap s'appelle « Artistes » (« Titres »
+  avant le lancement, tableau complet). Un titre qui sort avec la compilation (`TitleDeposit.withCompilation`) :
+  `TitleProgress.withCompilation`, carte Distribution avec `scope` « avec la compilation » (après le nom dans
+  `OverviewProgress`, sous l'étape dans « Titres » : « Avec la compilation », « À vous · compilation »).
 - **Artiste principal une fois** (`lib/legal/main-artist.ts`) : à l'État des lieux, à la Confirmation et au Cadrage
   (« PDS · Artiste principal · tous les titres »).
 - **Noms de titre** : `withProjectTitleNames` (`journey-context.ts`) donne aux titres d'un collectif le libellé du projet

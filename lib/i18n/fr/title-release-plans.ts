@@ -77,7 +77,7 @@ export const titleReleasePlans = {
     empty: {
       title: "Aucun titre pour l'instant",
       body: "Chaque titre du projet reçoit son plan de sortie dès qu'il est ajouté.",
-      action: "Titres et artistes",
+      action: "Titres",
     },
   },
 

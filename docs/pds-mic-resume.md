@@ -291,7 +291,11 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   les sélecteurs des modules restent des raccourcis. Le nom d'un titre dans « Titres et
   artistes » ouvre sa page. Calcul : `lib/projects/title-journeys.ts` (`masterTitleJourney`, portée de
   `legalTitleLayout`, `distributionContext` de la sortie du titre ou de la compilation, puis `workflowCards`). Cadrage
-  et Marketing restent ceux du projet.
+  et Marketing restent ceux du projet. Depuis le 25/11/2026, **une seule entrée « Titres », deux vues** : Par titre
+  (`/tracks`) et Par artiste (`/titles`, l'ancien « Titres et artistes »), même en-tête et mêmes gestes ; le récap de
+  la Vue d'ensemble s'appelle « Artistes ». La Distribution d'un titre qui sort avec la compilation le dit
+  (« Distribution · avec la compilation », « Avec la compilation » dans la liste) : ce qui s'y fait vaut pour tous les
+  titres de la compilation.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son

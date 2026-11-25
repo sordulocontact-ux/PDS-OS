@@ -103,13 +103,13 @@ export const distribution = {
       missingFeaturing: (names: string) =>
         `À créditer en featuring au Catalogue : ${names}.`,
       provisional: () =>
-        "Donnez-lui son nom dans « Titres et artistes » : un titre provisoire ne part pas.",
+        "Donnez-lui son nom dans « Titres » : un titre provisoire ne part pas.",
       withoutMaster: (label: string) =>
         `${label} n'est pas encore au Catalogue : il manque à la compilation.`,
       contractsMissing: (names: string) =>
         `Contrat non signé de ${names}, sans dérogation de sortie.`,
       contractsOk: "Signés, ou couverts par une dérogation de sortie.",
-      contractsSource: "Titres et artistes",
+      contractsSource: "Titres",
       contractsWhere: "Juridique › Participations et contrats",
       coverNone:
         "Pas de pochette : déposez-la dans les fichiers du titre, au Catalogue.",
@@ -475,7 +475,7 @@ export const distribution = {
     gate: {
       // A collective's release (lot 15).
       provisional: (names: string) =>
-        `Dépôt impossible : titre provisoire (${names}). Donnez-lui son nom dans « Titres et artistes ».`,
+        `Dépôt impossible : titre provisoire (${names}). Donnez-lui son nom dans « Titres ».`,
       readOnly: {
         archived:
           "Sortie archivée par le changement du mode de sortie : son dépôt se lit, il ne se soumet plus.",

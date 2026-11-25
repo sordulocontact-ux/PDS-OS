@@ -1,12 +1,9 @@
-import Link from "next/link";
-
 import { IconDisc } from "@/components/icons";
 import {
   WorkflowProgress,
   WorkflowRing,
 } from "@/components/projects/tracks/workflow-progress";
 import { EmptyState } from "@/components/shell/empty-state";
-import { buttonVariants } from "@/components/ui/button";
 import {
   DataTable,
   DataTableBody,
@@ -19,6 +16,7 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
+import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import { titleTracks } from "@/lib/i18n/fr/title-tracks";
 import { joinArtistNames } from "@/lib/projects/participation-rules";
 import type { TitleProgress } from "@/lib/projects/title-journeys";
@@ -26,7 +24,7 @@ import { masterNameOf } from "@/lib/projects/title-rules";
 import type { WorkflowKey } from "@/lib/workflow-status/rules";
 import { cn } from "@/lib/utils";
 
-const fr = { titleTracks };
+const fr = { projectTitles, titleTracks };
 const t = fr.titleTracks.list;
 
 // Three workflows of 192 px beside the title fit from 1280 px with the
@@ -40,33 +38,31 @@ const t = fr.titleTracks.list;
  * page, where the rest is. The live titles, then the abandoned ones (out
  * of every workflow, lot 9). `workflows`: the columns, the workflows of the
  * project worked by title that the viewer may open. Under 1280 px, the
- * rings on one line under the title's name, in place of its guests.
+ * rings on one line under the title's name, in place of its guests. No
+ * title yet: the board's empty state, « Ajouter un titre » being in the
+ * head of « Titres » (`canManage`).
  */
 export function TracksList({
   projectId,
   rows,
   workflows,
+  canManage,
 }: {
   projectId: string;
   rows: TitleProgress[];
   workflows: WorkflowKey[];
+  canManage: boolean;
 }) {
-  if (rows.length === 0)
+  if (rows.length === 0) {
+    const empty = fr.projectTitles.board.empty;
     return (
       <EmptyState
         icon={IconDisc}
-        title={t.empty.title}
-        body={t.empty.body}
-        action={
-          <Link
-            href={routes.projectTitles(projectId)}
-            className={buttonVariants({ variant: "outline" })}
-          >
-            {t.empty.action}
-          </Link>
-        }
+        title={empty.title}
+        body={canManage ? empty.body : empty.readOnly}
       />
     );
+  }
   const live = rows.filter((r) => !r.abandoned);
   const abandoned = rows.filter((r) => r.abandoned);
   const columns = 1 + workflows.length;

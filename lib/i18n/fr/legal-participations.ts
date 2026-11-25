@@ -37,8 +37,8 @@ export const legalParticipations = {
   noParticipation: "Aucun artiste invité sur ce titre.",
   empty: {
     title: "Aucun artiste invité pour l'instant",
-    body: "Invitez des artistes sur les titres depuis Titres et artistes.",
-    link: "Ouvrir Titres et artistes",
+    body: "Invitez des artistes sur les titres depuis « Titres ».",
+    link: "Ouvrir « Titres »",
   },
   negotiation: {
     none: "Pas de dossier de négociation",

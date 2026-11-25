@@ -1,54 +1,66 @@
 import { notFound } from "next/navigation";
 
-import { ProjectHeader } from "@/components/projects/project-header";
+import {
+  TitlesHeader,
+  TitlesViews,
+} from "@/components/projects/titles/titles-head";
 import { TracksList } from "@/components/projects/tracks/tracks-list";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import { titleCounts } from "@/lib/projects/title-board-rules";
+import { canEditProject } from "@/lib/projects/edit-access";
+import { titleBoardChoices } from "@/lib/projects/title-board";
 import { loadTitlesProgress } from "@/lib/projects/title-journeys";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import type { ModuleFact } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
 import type { WorkflowKey } from "@/lib/workflow-status/rules";
 
 export const metadata = { title: fr.titleTracks.title };
 
 /**
- * « Titres » of a launched collective (Maël 25/11/2026: the title as the
- * way in, the trail's switcher a shortcut): each title with its Master,
- * Juridique and Distribution, as a project's « Progression » says them;
- * the row opens the title's page. Never shown for another project (404, no
- * entry in its navigation). The titles are added and edited in « Titres et
- * artistes ».
+ * « Titres » of a launched collective, « Par titre » (Maël 25/11/2026: the
+ * title as the way in, the trail's switcher a shortcut): each title with
+ * its Master, Juridique and Distribution, as a project's « Progression »
+ * says them; the row opens the title's page. « Par artiste » (/titles) is
+ * the other view of the same head (TitlesHeader). Never shown for another
+ * project (404, no entry in its navigation).
  */
 export default async function ProjectTracksPage({
   params,
 }: PageProps<"/app/projects/[projectId]/tracks">) {
   const { projectId } = await params;
-  const [, project] = await allInOrder([
+  const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
   if (!project.collective) notFound();
+  // A launched project: only its owner writes (is_project_owner).
+  const canManage = canEditProject(access, project);
   const rows = await loadTitlesProgress(project.id);
+  const titles = rows.map((row) => row.title);
+  const choices = await titleBoardChoices(project, titles, canManage);
   // The columns: the workflows of the project worked by title that the
   // viewer may open (every live title has the same).
   const workflows: WorkflowKey[] = (
     rows.find((row) => !row.abandoned)?.cards ?? []
   ).flatMap((card) => (card.restricted ? [] : [card.workflow]));
-  const t = fr.projectTitles.board.facts;
-  const counts = titleCounts(rows.map((row) => row.title));
-  const facts: ModuleFact[] = [
-    {
-      key: "titles",
-      label: t.titles,
-      value: t.titleCounts(counts.active, counts.planned, counts.abandoned),
-    },
-  ];
   return (
     <div className="flex flex-col gap-6">
-      <ProjectHeader projectId={projectId} facts={facts} />
-      <TracksList projectId={projectId} rows={rows} workflows={workflows} />
+      <TitlesHeader
+        project={project}
+        titles={titles}
+        canManage={canManage}
+        canOpenLegal={can(access, "manage_legal")}
+        choices={choices}
+      />
+      <TitlesViews projectId={project.id} current="tracks">
+        <TracksList
+          projectId={project.id}
+          rows={rows}
+          workflows={workflows}
+          canManage={canManage}
+        />
+      </TitlesViews>
     </div>
   );
 }

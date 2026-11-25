@@ -1,11 +1,11 @@
 // The titles of a collective project (docs/pds-mic-plan.md, lot 2): the
-// view « Titres et artistes » (lot 6), its gestures, their history.
+// board (lot 6, « Titres » by artist since 25/11/2026), its gestures, their
+// history.
 // « de » elides before a vowel: « Ouvrir le deal d'Iris Moon ».
 const de = (name: string) =>
   /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
 
 export const projectTitles = {
-  title: "Titres et artistes",
   empty: "Aucun titre pour l'instant.",
   // A title without a working title nor a master (Ibé 18/11 : « pourquoi il
   // y a titre sans nom ? ») is called by its guests: « Titre de Jay (à
@@ -148,7 +148,7 @@ export const projectTitles = {
       // « Artistes du projet » (projectArtists), the main one included.
       artists: "Artistes",
     },
-    label: "Titres et artistes du projet",
+    label: "Titres du projet, par artiste",
     // The other columns: recap.columns (lot L2b).
     columns: {
       title: "Titre",
@@ -532,6 +532,8 @@ export const projectTitles = {
         "Au Juridique une fois l'artiste crédité sur le titre au Catalogue",
     },
     overview: {
+      // The section of the overview, as on a title's page.
+      title: "Artistes",
       seeAll: "Tout voir",
       empty: "Aucun artiste invité pour l'instant.",
     },
@@ -586,7 +588,7 @@ export const projectTitles = {
       "Le projet n'a pas d'artiste principal : choisissez-en un avant de créer le titre au Catalogue.",
     // update_project on a collective (the project's edit form).
     keptInProject:
-      "Un titre du projet collectif n'est pas retiré : abandonnez-le depuis « Titres et artistes ».",
+      "Un titre du projet collectif n'est pas retiré : abandonnez-le depuis « Titres ».",
   },
   // The project's Activité (lib/overview/activity.ts).
   events: {

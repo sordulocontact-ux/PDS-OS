@@ -505,12 +505,9 @@ export const shell = {
         steering: "Pilotage",
       },
       overview: "Vue d'ensemble",
-      // A collective's titles, each with its journeys (Maël 25/11/2026);
-      // no entry for any other project.
+      // A collective's titles, by title (each with its journeys) or by
+      // artist (Maël 25/11/2026); no entry for any other project.
       tracks: "Titres",
-      // A collective's titles and their artists (lot 6 of
-      // docs/pds-mic-plan.md); no entry for any other project.
-      titles: "Titres et artistes",
       // A collective's releases (lot 13).
       releases: "Sorties",
       // Its titles' Plans de sortie (lot 14).

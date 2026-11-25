@@ -228,7 +228,7 @@ export default async function ProjectOverviewPage({
       {recap && (
         <PageSection
           id="titles"
-          title={fr.projectTitles.title}
+          title={fr.projectTitles.recap.overview.title}
           action={
             <ViewLink
               href={routes.projectTitles(project.id)}
@@ -288,7 +288,8 @@ async function collectiveTitles(project: ProjectDetail, access: Access) {
   return (
     <PageSection
       id="titles"
-      title={fr.projectTitles.title}
+      // Its titles and their artists, edited here before the launch.
+      title={fr.titleTracks.title}
       action={
         canManage ? (
           <TitlesActions

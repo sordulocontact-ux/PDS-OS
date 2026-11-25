@@ -3094,3 +3094,26 @@ lignes) ; le faire comme « Titres et artistes », en tags au lieu de points par
   contrats » garde ses mots longs.
 - Vérifié dans Chrome sur « Assurance 30 » à 1280 px, 1000 px et 390 px, et sur la page du titre Néons ; aucune
   erreur dans la console.
+
+## PDS Mic : une seule entrée « Titres », et la Distribution partagée avec la compilation (25/11/2026)
+
+Maël, après la page « Titres » : deux listes de titres se ressemblaient trop, et la Distribution d'un titre qui sort
+avec la compilation se lisait comme la sienne. Sans migration.
+
+- **Une entrée, deux vues** : « Titres » remplace « Titres » et « Titres et artistes » dans la barre du projet. Même
+  en-tête sur les deux pages (`TitlesHeader` : artiste principal, titres, artistes ; « Ajouter un titre », « Changer
+  l'artiste principal », « Participations et contrats »), puis **Par titre** (`/tracks`) et **Par artiste**
+  (`/titles`) au-dessus du tableau (`TitlesViews`, `DataTableViews`). Les adresses ne changent pas. Sans titre, « Par
+  titre » montre l'état vide du tableau (plus de lien vers l'autre page).
+- Les textes qui disaient « Titres et artistes » disent « Titres » (Distribution, Juridique, Master, Plans de
+  sortie, refus de `update_project`). Le récap de la Vue d'ensemble s'appelle « Artistes », comme sur la page d'un
+  titre ; avant le lancement, le tableau complet s'appelle « Titres ».
+- **Compilation** : la carte Distribution d'un titre sans sortie à lui dit « Distribution · avec la compilation » sur
+  sa page ; dans « Titres », « Avec la compilation » sous l'étape (« À vous · compilation » quand c'est au lecteur).
+- **Pour Sacha** : `lib/overview/cards.ts` (champ facultatif `scope` d'une carte) et
+  `components/overview/overview-progress.tsx` (il l'écrit après le nom du workflow) ; rien ne change sur la Vue
+  d'ensemble d'un projet, qui ne le donne pas. `lib/ui/project-sections.ts` : l'entrée `titles` du collectif est
+  retirée, `tracks` couvre les deux adresses.
+- Vérifié dans Chrome sur « Assurance 30 » : une entrée « Titres », passage d'une vue à l'autre, en-tête identique,
+  390 px ; la compilation forcée le temps d'une capture (aucun projet de la base de dev n'en a) ; aucune erreur dans
+  la console.

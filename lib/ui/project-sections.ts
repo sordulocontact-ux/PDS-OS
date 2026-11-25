@@ -70,8 +70,8 @@ const below =
 // listed at all (UX test of 09/10/2026: the creative director read it).
 // `workflows`: the ones this project has (lib/workflow-status/rules.ts,
 // from its data); all four when not given. `collective`: a collective
-// project (lot 6 of docs/pds-mic-plan.md) has « Titres et artistes » right
-// after its overview; no other project has it.
+// project (lot 6 of docs/pds-mic-plan.md) has « Titres » right after its
+// overview; no other project has it.
 export function projectSections(
   projectId: string,
   {
@@ -116,18 +116,16 @@ export function projectSections(
     // titles, their artists and where each one stands.
     ...(collective
       ? [
-          // Its titles, the way into each one's journeys (Maël 25/11/2026).
+          // Its titles, one entry and two views (Maël 25/11/2026): « Par
+          // titre », the way into each one's journeys, and « Par artiste »
+          // (/titles, until then « Titres et artistes »).
           {
             key: "tracks",
             label: t.tracks,
             href: routes.projectTracks(projectId),
-            match: below(routes.projectTracks(projectId)),
-          },
-          {
-            key: "titles",
-            label: t.titles,
-            href: routes.projectTitles(projectId),
-            match: below(routes.projectTitles(projectId)),
+            match: (p: string) =>
+              below(routes.projectTracks(projectId))(p) ||
+              below(routes.projectTitles(projectId))(p),
           },
           // Its releases: per title and/or the compilation (lot 13).
           {

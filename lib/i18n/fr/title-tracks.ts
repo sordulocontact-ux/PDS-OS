@@ -1,6 +1,6 @@
-// A collective's titles as the way in (Maël 25/11/2026): the list of its
-// titles, each with its journeys, and one title's page (its « Maintenant »,
-// its « Progression », its artists).
+// A collective's titles as the way in (Maël 25/11/2026): « Titres », by
+// title (each with its journeys) or by artist (projectTitles.board), and
+// one title's page (its « Maintenant », its « Progression », its artists).
 export const titleTracks = {
   title: "Titres",
   list: {
@@ -17,11 +17,12 @@ export const titleTracks = {
     // compilation: its journey is the compilation's. After « À vous · ».
     withCompilation: "Avec la compilation",
     compilation: "compilation",
-    empty: {
-      title: "Aucun titre pour l'instant",
-      body: "Les titres s'ajoutent dans « Titres et artistes ».",
-      action: "Ouvrir « Titres et artistes »",
-    },
+  },
+  // The two views of « Titres », above the table.
+  views: {
+    label: "Vue",
+    byTitle: "Par titre",
+    byArtist: "Par artiste",
   },
   page: {
     artists: "Artistes",

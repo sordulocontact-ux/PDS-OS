@@ -64,7 +64,7 @@ export const masterFileRequests = {
     title_abandoned:
       "Un des titres choisis est abandonné : retirez-le de la demande.",
     title_not_in_master:
-      "Un des titres choisis n'est pas encore au Catalogue : déposez d'abord un audio depuis Titres et artistes.",
+      "Un des titres choisis n'est pas encore au Catalogue : déposez d'abord un audio depuis « Titres ».",
     title_not_found: "Un des titres choisis ne fait plus partie du projet.",
     request_closed:
       "Cette demande est déjà close (fichier reçu ou demande annulée) : rechargez la page.",
