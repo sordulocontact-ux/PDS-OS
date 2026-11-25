@@ -9,8 +9,8 @@ import {
 import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
+import { TemplateDialog } from "@/components/contracts/templates/template-dialog";
 import { TemplateForm } from "@/components/contracts/templates/template-form";
-import { TemplateView } from "@/components/contracts/templates/template-view";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
@@ -95,8 +95,6 @@ export function TemplateRowActions({
         ]
       : []),
   ];
-  const title = `${template.name} · ${t.version(template.version)}`;
-
   return (
     <>
       <RowActions
@@ -104,15 +102,10 @@ export function TemplateRowActions({
         actions={actions}
         size={size}
       />
-      <FormDialog
-        open={open === "view"}
-        onOpenChange={(next) => !next && setOpen(null)}
-        title={title}
-        closeLabel={t.close}
-        size="wide"
-      >
-        <TemplateView template={template} />
-      </FormDialog>
+      <TemplateDialog
+        template={open === "view" ? template : null}
+        onClose={() => setOpen(null)}
+      />
       <FormDialog
         open={open === "version"}
         onOpenChange={(next) => !next && setOpen(null)}
