@@ -163,6 +163,7 @@ export const legalContracts = {
       "Il ne sera proposé pour aucun contrat. La raison reste visible avec cette version ; une correction se fait par une nouvelle version.",
     refuseReason: "Pourquoi le refuser",
     refused: "Modèle refusé.",
+    saved: "Modèle enregistré, à valider dans Contrats › Modèles.",
     retireReason: "Pourquoi le retirer",
     retired: "Modèle retiré.",
     retiredBecause: (reason: string) => `Retiré ou refusé : ${reason}`,

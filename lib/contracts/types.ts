@@ -183,4 +183,8 @@ export type ContractFormOptions = {
   owners: { personId: string; name: string }[];
   projects: { id: string; title: string }[];
   artists: { id: string; name: string }[];
+  // The organization a template is written for, when the viewer writes
+  // templates (manage_legal): « Créer un modèle réutilisable » opens its
+  // form right there (Sacha 25/11/2026); null: the choice is not offered.
+  templateOrganizationId: string | null;
 };

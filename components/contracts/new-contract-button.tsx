@@ -22,6 +22,8 @@ export function NewContractButton({ projectId }: { projectId?: string } = {}) {
       icon={IconPlus}
       variant={projectId ? "outline" : "default"}
       size={projectId ? "sm" : "lg"}
+      // Wide: « Créer un modèle réutilisable » writes the contract on its page.
+      dialogSize="wide"
       title={t.createTitle}
       description={t.createDescription}
       closeLabel={t.close}

@@ -192,6 +192,10 @@ export async function loadContractFormOptions(
     })),
     projects: projects.data ?? [],
     artists: artists.data ?? [],
+    templateOrganizationId:
+      can(access, "manage_legal") && access.organizationId
+        ? access.organizationId
+        : null,
   };
 }
 

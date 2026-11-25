@@ -3165,5 +3165,8 @@ PDF, pas un truc avec les écritures »).
     par sa jumelle libre aux mêmes métriques (Calibri → Carlito, Cambria → Caladea, Times New Roman → Tinos, Arial →
     Arimo…, `document-fonts.ts`), chargée depuis Google Fonts ; une police inconnue garde l'Arial par défaut. Le pied de
     page du PDF reste en Arial. Vérifié : PDF imprimé en Tinos, détection sur trois Word de test.
+  - **Plus d'icône devant les modèles** dans la liste ; **« Nouveau contrat › Créer un modèle réutilisable »** ouvre le
+    formulaire du modèle dans la même fenêtre (plus de renvoi vers la page des modèles), proposé seulement à qui écrit
+    les modèles (`manage_legal`) ; enregistré, il rejoint Contrats › Modèles, à valider (Sacha, même jour).
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

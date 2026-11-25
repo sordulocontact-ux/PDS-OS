@@ -1,6 +1,5 @@
 "use client";
 
-import { IconFile } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { TemplateDialog } from "@/components/contracts/templates/template-dialog";
@@ -14,7 +13,6 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
-  DataTableIcon,
   DataTableMedia,
   DataTableLink,
   DataTableRow,
@@ -57,7 +55,6 @@ export function TemplatesTable({
             <DataTableRow key={template.seriesId}>
               <DataTableCell>
                 <DataTableMedia
-                  visual={<DataTableIcon icon={IconFile} />}
                   title={
                     <DataTableLink
                       href={null}

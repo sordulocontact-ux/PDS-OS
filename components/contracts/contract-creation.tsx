@@ -4,13 +4,16 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ContractForm } from "@/components/contracts/contract-form";
+import { TemplateForm } from "@/components/contracts/templates/template-form";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
+import { toast } from "@/components/ui/toast";
 import { routes } from "@/lib/auth/redirects";
 import type { ContractFormOptions } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 
-const fr = { contracts };
+const fr = { contracts, legalContracts };
 
 type Scenario = "import" | "generate" | "template";
 
@@ -19,7 +22,8 @@ type Scenario = "import" | "generate" | "template";
  * that already exists (recorded here, its parties and its file added on
  * its page, as the steps say), one generated from a template (done from
  * the project's Juridique, where its values are read), or a reusable
- * template (the templates library).
+ * template, written right here (Sacha 25/11/2026: not sent to the templates
+ * page), then added to Contrats › Modèles, to be validated.
  */
 export function ContractCreation({
   options,
@@ -32,6 +36,18 @@ export function ContractCreation({
 }) {
   const t = fr.contracts.creation;
   const [scenario, setScenario] = useState<Scenario | null>(null);
+
+  if (scenario === "template" && options.templateOrganizationId)
+    return (
+      <TemplateForm
+        organizationId={options.templateOrganizationId}
+        onCancel={() => setScenario(null)}
+        onDone={() => {
+          toast.success(fr.legalContracts.templates.saved);
+          onClose();
+        }}
+      />
+    );
 
   if (scenario === "import")
     return (
@@ -61,7 +77,15 @@ export function ContractCreation({
         choices={[
           { value: "import", label: t.import, hint: t.importHint },
           { value: "generate", label: t.generate, hint: t.generateHint },
-          { value: "template", label: t.template, hint: t.templateHint },
+          ...(options.templateOrganizationId
+            ? [
+                {
+                  value: "template" as const,
+                  label: t.template,
+                  hint: t.templateHint,
+                },
+              ]
+            : []),
         ]}
       />
       {scenario === "generate" && (
@@ -80,16 +104,6 @@ export function ContractCreation({
           }
         >
           {projectId ? t.openProjectContracts : t.chooseProject}
-        </Button>
-      )}
-      {scenario === "template" && (
-        <Button
-          size="lg"
-          className="self-end"
-          nativeButton={false}
-          render={<Link href={routes.contractTemplateList} />}
-        >
-          {t.openTemplates}
         </Button>
       )}
     </div>
