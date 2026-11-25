@@ -3019,3 +3019,12 @@ Sans migration.
   Corrigé après coup : la liste disait « À venir » là où la page du titre dit « Étape 1 sur 5 · Source » (même mot
   partout maintenant) ; sur la page d'un titre, le nom du titre n'est plus répété sous chaque artiste.
   Pas de titre abandonné dans ce projet : le groupe « Abandonnés » n'a pas été vu.
+
+## Fil d'Ariane d'un projet : le fond d'un sélecteur n'est plus coupé à gauche (25/11/2026)
+
+- Au survol de « Néons ⌄ » ou de « Projet ⌄ » (« Juridique / Projet ⌄ / Cadrage juridique »), le fond gris
+  commençait pile sur le nom : l'étape du fil était en `truncate` (`overflow: hidden`) et coupait les 6 px que le
+  bouton prend avant son nom (`-ml-1.5 px-1.5`). Une étape à sélecteur n'est plus coupée (`flex min-w-0`), son nom se
+  coupe déjà dans le bouton.
+- **Pour Sacha** : une ligne dans `components/shell/module/module-crumbs.tsx`, rien d'autre ne bouge.
+- Vérifié dans Chrome sur « Assurance 30 » : page d'un titre et Cadrage juridique.

@@ -33,7 +33,15 @@ export function ModuleCrumbs({
       <ol className="flex min-w-0 items-center gap-2 text-body-md font-medium text-[color:var(--text-tertiary)]">
         {crumbs.map((crumb, index) => (
           <Fragment key={`${index}-${crumb.label}`}>
-            <li className={cn("min-w-0 truncate", index < last && "shrink-0")}>
+            {/* A switcher cuts its own label: clipping its segment would cut
+                its hover background, which starts 6 px before the label. */}
+            <li
+              className={cn(
+                "min-w-0",
+                crumb.options && crumb.options.length > 1 ? "flex" : "truncate",
+                index < last && "shrink-0",
+              )}
+            >
               {crumb.options && crumb.options.length > 1 ? (
                 <CrumbSwitcher
                   crumb={{ ...crumb, options: crumb.options }}
