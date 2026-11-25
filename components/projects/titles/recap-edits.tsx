@@ -1,6 +1,6 @@
 "use client";
 
-import { IconMsgs, IconPenWriting2, IconPhone } from "nucleo-sharp-essential";
+import { IconMsgWriting, IconPenWriting2 } from "nucleo-sharp-essential";
 import { useState, type FormEvent } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -126,9 +126,10 @@ const isReleaseValue = (value: unknown): value is ReleaseValue =>
 // -------------------------------------------------------------------- Note
 
 /** The artist's note in its « Note » column (Maël 23/11/2026), two lines
- * at most (the whole on hover); clicked, it opens to be changed. Empty:
- * « Ajouter une note » for whoever writes the title. Read only: the note
- * alone, or nothing. */
+ * at most (the whole on hover); clicked, it opens to be changed. Empty: an
+ * icon, « Ajouter une note sur … » in its tooltip, for whoever writes the
+ * title (Maël 25/11/2026: words there read as a note), as « Ajouter le
+ * contact ». Read only: the note alone, or nothing. */
 export function NoteLine({
   projectId,
   participationId,
@@ -157,17 +158,24 @@ export function NoteLine({
     ) : null;
   return (
     <>
-      <button
-        type="button"
-        className={cn(LINE_BUTTON, lines)}
-        title={note ?? undefined}
-        onClick={() => setOpen(true)}
-      >
-        {/* The note itself is read, after what the button does. */}
-        {note && <span className="sr-only">{`${t.edit(artist)} : `}</span>}
-        {note ?? t.add}
-        {!note && <span className="sr-only">{` · ${artist}`}</span>}
-      </button>
+      {note ? (
+        <button
+          type="button"
+          className={cn(LINE_BUTTON, lines)}
+          title={note}
+          onClick={() => setOpen(true)}
+        >
+          {/* The note itself is read, after what the button does. */}
+          <span className="sr-only">{`${t.edit(artist)} : `}</span>
+          {note}
+        </button>
+      ) : (
+        <span className="-my-1 flex items-center">
+          <IconAction label={t.addFor(artist)} onClick={() => setOpen(true)}>
+            <IconMsgWriting aria-hidden className="size-4" />
+          </IconAction>
+        </span>
+      )}
       <FormDialog
         open={open}
         onOpenChange={setOpen}
@@ -237,65 +245,32 @@ function NoteForm({
 
 // ----------------------------------------------------------------- Contact
 
-/** A number for a link: digits, and the « + » of an international one. */
-const telHref = (phone: string) => `tel:${phone.replace(/[^0-9+]/g, "")}`;
-
-/** The international number WhatsApp's link wants, without « + »: « 06 12
- * 34 56 78 » is a French number (the team's), « +44… » or « 0044… » kept
- * as written. Null: no digit. */
-export function whatsappNumber(phone: string): string | null {
-  const international = phone.trim().startsWith("+");
-  const digits = phone.replace(/\D/g, "");
-  if (!digits) return null;
-  if (international) return digits;
-  if (digits.startsWith("00")) return digits.slice(2);
-  if (digits.startsWith("0") && digits.length === 10)
-    return `33${digits.slice(1)}`;
-  return digits;
-}
-
 const ICON_LINK = cn(
   buttonVariants({ variant: "ghost", size: "icon-xs" }),
   "relative z-10",
 );
 
-/** An icon button of the contact's row, its name in a quick tooltip and
+/** An icon button of the contact's cell, its name in a quick tooltip and
  * for screen readers (docs/DESIGN.md « Rangée de boutons »). */
 function IconAction({
   label,
-  href,
-  newTab = false,
   onClick,
   children,
 }: {
   label: string;
-  // A link (a number to call, WhatsApp in a new tab), else a button.
-  href?: string;
-  newTab?: boolean;
-  onClick?: () => void;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          href ? (
-            <a
-              href={href}
-              aria-label={label}
-              className={ICON_LINK}
-              {...(newTab
-                ? { target: "_blank", rel: "noopener noreferrer" }
-                : {})}
-            />
-          ) : (
-            <button
-              type="button"
-              aria-label={label}
-              className={ICON_LINK}
-              onClick={onClick}
-            />
-          )
+          <button
+            type="button"
+            aria-label={label}
+            className={ICON_LINK}
+            onClick={onClick}
+          />
         }
       >
         {children}
@@ -306,8 +281,9 @@ function IconAction({
 }
 
 /**
- * Who to call for the artist (the Excel's « Contact »), under the artist's
- * name: its role (« Manager », « Producteur », else « Contact »), name, number, and « Appeler » / « WhatsApp »; a
+ * Who to call for the artist (the Excel's « Contact »): its role
+ * (« Manager », « Producteur », else « Contact ») and name, then its number,
+ * as text (no call nor WhatsApp button in the table, Maël 25/11/2026); a
  * private contact's coordinates the reader may not read stay « Coordonnées
  * privées ». For whoever writes the title (another contact of the Réseau, a
  * new one) or the Réseau (the number): « Contact de l'artiste » in a modal;
@@ -360,8 +336,7 @@ export function ContactFacts({
       </span>
     ) : null;
 
-  const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;
-  // Two lines (Maël 23/11/2026): who, then the number and its gestures.
+  // Two lines (Maël 23/11/2026): who, then the number and its pencil.
   return (
     <span className="flex max-w-full min-w-0 flex-col gap-0.5">
       <span className="flex max-w-full min-w-0 items-baseline gap-1.5">
@@ -383,30 +358,13 @@ export function ContactFacts({
               </span>
             )
           )}
-          <span className="-my-0.5 -mr-1 flex shrink-0 items-center">
-            {contact.phone && (
-              <IconAction
-                label={t.call(contact.name)}
-                href={telHref(contact.phone)}
-              >
-                <IconPhone aria-hidden className="size-4" />
-              </IconAction>
-            )}
-            {whatsapp && (
-              <IconAction
-                label={t.whatsapp(contact.name)}
-                href={`https://wa.me/${whatsapp}`}
-                newTab
-              >
-                <IconMsgs aria-hidden className="size-4" />
-              </IconAction>
-            )}
-            {modes.length > 0 && (
+          {modes.length > 0 && (
+            <span className="-my-0.5 -mr-1 flex shrink-0 items-center">
               <IconAction label={t.edit(artist)} onClick={() => setOpen(true)}>
                 <IconPenWriting2 aria-hidden className="size-4" />
               </IconAction>
-            )}
-          </span>
+            </span>
+          )}
         </span>
       )}
       {dialog}

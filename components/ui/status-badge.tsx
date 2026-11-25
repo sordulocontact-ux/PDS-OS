@@ -39,16 +39,24 @@ export function StatusBadge({
   tone,
   size,
   dot = false,
+  tag = false,
   className,
   children,
   ...props
 }: React.ComponentProps<"span"> &
-  VariantProps<typeof statusBadgeVariants> & { dot?: boolean }) {
+  VariantProps<typeof statusBadgeVariants> & {
+    dot?: boolean;
+    // A tag keeps its pill where states are drawn as a dot and their text
+    // (globals.css): the main state of a row among several columns of
+    // states (« Titres et artistes », Maël 25/11/2026).
+    tag?: boolean;
+  }) {
   return (
     <span
       data-slot="status-badge"
       // Read by a section theme (Finance draws a state as a dot and its text).
       data-tone={tone ?? "neutral"}
+      data-tag={tag ? "" : undefined}
       className={cn(statusBadgeVariants({ tone, size }), className)}
       {...props}
     >

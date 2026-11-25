@@ -5588,6 +5588,10 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
 - **« Caler le call » chargé une fois** : `loadSharedNegotiationCall` + `negotiationCallData`
   (`lib/deals/negotiation-call-rules.ts`) ; `planNegotiationCall` revalide le projet ; `agreementStatus` dans
   `loadParticipationDealStates`.
+- **Tableau allégé** (Maël 25/11/2026) : mots courts du tableau seulement, `recapContractWords(contrat, true)`
+  (« Envoyé », « À contresigner », « Attend l'accord ») et `AccordFacts board` (« Validé », « À valider », sans
+  négociateur) ; le Statut en `StatusBadge tag` (`data-tag`, que les règles « point et mot » de `globals.css`
+  sautent) ; Contact sans `tel:` ni `wa.me` ; note vide = icône `IconMsgWriting` à infobulle.
 - **Notifications** `participation_confirmed` / `participation_declined` : déclencheur sur `title_participations`
   (fonction `title_participations_notify_owner`), au responsable du projet (`projects.owner_person_id`) ; jamais à
   l'auteur ; `loadParticipationSubjects` dans `lib/notifications/subjects.ts`. Activité : `release_decided`,

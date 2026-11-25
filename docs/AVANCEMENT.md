@@ -3028,3 +3028,24 @@ Sans migration.
   coupe déjà dans le bouton.
 - **Pour Sacha** : une ligne dans `components/shell/module/module-crumbs.tsx`, rien d'autre ne bouge.
 - Vérifié dans Chrome sur « Assurance 30 » : page d'un titre et Cadrage juridique.
+
+## PDS Mic : « Titres et artistes » allégé (25/11/2026)
+
+Maël : trop d'états en point + mot côte à côte, des textes trop longs, des boutons d'appel dans les cases. Sans
+migration.
+
+- **Statut en tag** : « À contacter », « Contacté », « D'accord » gardent leur pilule à fond pâle (`StatusBadge tag`,
+  `ContactStatePill tag`), les autres colonnes restent en point + mot. Règle ajoutée à `docs/DESIGN.md` § 3 (un seul
+  tag par ligne, pour son état principal).
+- **Mots courts** dans le tableau seulement : Contrat « Envoyé », « À contresigner », « Attend l'accord »
+  (`recapContractWords(contrat, true)`) ; Accord « Validé », « À valider » (`AccordFacts board`). Le récap compact
+  et « Participations et contrats » gardent les longs.
+- **Retirés des cases** : le négociateur sous l'Accord (lu sur le deal), la fiche du Beatmaker (son nom seul),
+  les boutons Appeler et WhatsApp du Contact (le numéro reste en texte, le crayon aussi).
+- **Note vide** : plus le texte « Ajouter une note » (il se lisait comme une note), une icône bulle et stylo avec
+  l'infobulle « Ajouter une note sur … », comme « Ajouter le contact ».
+- **Pour Sacha** : `components/ui/status-badge.tsx` (prop `tag`) et `app/globals.css` (les règles « point et mot »
+  sautent un `[data-tag]`) ; rien ne change ailleurs tant qu'un écran ne passe pas `tag`.
+- Vérifié dans Chrome sur « Assurance 30 » (vu comme Lina Haddad) : tags gris, orange et vert ; Contact sans
+  icônes d'appel ; Accord « Validé » sans nom ; Contrat « Attend l'accord », « Envoyé », « À contresigner »,
+  « Signé » ; Beatmaker en un nom.

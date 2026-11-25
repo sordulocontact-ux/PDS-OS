@@ -1478,9 +1478,11 @@ button[data-busy]::before {
 /* Un état en Finance : un point de couleur et son texte, sans fond, comme le
    proto avant le design system (Sacha, 15/11/2026 : « plus clair » que les
    badges). Le texte reste à l'encre, sauf avertissement et danger. Les
-   teintes de catégorie (projet, artiste…) gardent leur pastille. */
+   teintes de catégorie (projet, artiste…) gardent leur pastille, comme un tag
+   (`StatusBadge tag` : l'état principal d'une ligne parmi plusieurs colonnes
+   d'états, Maël 25/11/2026). */
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"]:is(
+  [data-slot="status-badge"]:not([data-tag]):is(
     [data-tone="neutral"],
     [data-tone="info"],
     [data-tone="success"],
@@ -1499,29 +1501,29 @@ button[data-busy]::before {
   font-weight: inherit;
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"][data-tone="info"] {
+  [data-slot="status-badge"]:not([data-tag])[data-tone="info"] {
   --state-dot: var(--tone-info-fg);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"][data-tone="success"] {
+  [data-slot="status-badge"]:not([data-tag])[data-tone="success"] {
   --state-dot: var(--tone-success-dot);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"][data-tone="action"] {
+  [data-slot="status-badge"]:not([data-tag])[data-tone="action"] {
   --state-dot: var(--selection);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"][data-tone="warning"] {
+  [data-slot="status-badge"]:not([data-tag])[data-tone="warning"] {
   --state-dot: var(--tone-warning-fg);
   color: var(--tone-warning-fg);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"][data-tone="danger"] {
+  [data-slot="status-badge"]:not([data-tag])[data-tone="danger"] {
   --state-dot: var(--tone-danger-fg);
   color: var(--tone-danger-fg);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"]:is(
+  [data-slot="status-badge"]:not([data-tag]):is(
     [data-tone="neutral"],
     [data-tone="info"],
     [data-tone="success"],
@@ -1537,7 +1539,7 @@ button[data-busy]::before {
   background: var(--state-dot);
 }
 :is(:root:not([data-style="classic"]), .finance-scope)
-  [data-slot="status-badge"]
+  [data-slot="status-badge"]:not([data-tag])
   > .rounded-full[aria-hidden] {
   display: none;
 }

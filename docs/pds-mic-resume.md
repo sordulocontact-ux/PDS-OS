@@ -108,10 +108,13 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Depuis le 21/11/2026 (retours d'Ibé du 18/11) les colonnes Contrat, Négociation et Négocié par
   n'existent plus : c'est le **récap** (`loadTitleRecap`). Depuis le 22/11/2026, **une ligne par
   artiste** avec les colonnes de l'Excel d'Ibé : Artiste (titre dessous), Statut (À contacter,
-  Contacté, D'accord, A refusé, Retiré), Contact, Accord (étape du deal, jour du call,
-  négociateur ; « Call à caler », le geste « Caler le call » étant dans le « ⋯ » de la ligne
-  depuis le 25/11/2026, plus aucun bouton dans le tableau), Taux, Fiche de renseignement (ouvre la fiche), Contrat, puis Mix, Sortie,
-  Distribution, Beatmaker, Note ; le tableau défile dans son cadre, Artiste fixe à gauche. Un deal est toujours
+  Contacté, D'accord, A refusé, Retiré ; en tag depuis le 25/11/2026, les autres états en
+  point + mot), Contact (qui et son numéro, sans bouton Appeler ni WhatsApp), Accord (étape
+  en mots courts, « Validé », « À valider », jour du call ; « Call à caler », le geste « Caler
+  le call » étant dans le « ⋯ » de la ligne depuis le 25/11/2026, plus aucun bouton dans le
+  tableau), Taux, Fiche de renseignement (ouvre la fiche), Contrat (« Envoyé », « À
+  contresigner », « Attend l'accord »), puis Mix, Sortie, Distribution, Beatmaker (le nom
+  seul), Note ; le tableau défile dans son cadre, Artiste fixe à gauche. Un deal est toujours
   lu sous la RLS : jamais « Pas de dossier » à tort. La ligne
   d'un titre porte (récap : Mix, fiche beatmaker, Sortie, Distribution) son **Master** (calculé sur `master_mix_versions` du projet et
   `masters.audio_state` : À mixer, Mix Vn à valider, Mix/Master Vn+1 attendu, Mix validé,

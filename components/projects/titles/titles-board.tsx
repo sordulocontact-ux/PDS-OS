@@ -249,11 +249,12 @@ const Empty = () => <span className={muted}>{EMPTY_CELL}</span>;
  * artiste »): one row per artist on a title, as the overview's recap, with
  * the columns of the Excel — Artiste (its title under the name, « Nommer »
  * while it has none; its waivers), Statut (« À contacter », « Contacté »,
- * « D'accord »), Contact (the Excel's TEL: « Appeler », « WhatsApp »),
- * Accord (deal, call; « Caler le call »), Taux, Fiche de renseignement
- * (« Pas envoyée », « Envoyée », « Renseignée », opening the fiche itself),
- * Contrat, Mix, Sortie (edited here), Distribution, Beatmaker (and their
- * fiche), Note (edited here, Maël 23/11/2026). The fiche's personal data
+ * « D'accord », a tag: the row's main state), Contact (the Excel's TEL: who
+ * and the number, no call button, Maël 25/11/2026), Accord (the deal's
+ * stage in short, « Call à caler »), Taux, Fiche de renseignement (« Pas
+ * envoyée », « Envoyée », « Renseignée », opening the fiche itself), Contrat
+ * (in short), Mix, Sortie (edited here), Distribution, Beatmaker (the name
+ * alone), Note (edited here, Maël 23/11/2026). The fiche's personal data
  * stay in the fiche.
  * A title's facts repeat on each of its artists' rows, as in the Excel; a
  * title without an artist has its own row. « Le tableau lit, les modules
@@ -834,37 +835,21 @@ function AlertsIcon({ alerts, strong }: { alerts: string[]; strong: boolean }) {
   );
 }
 
-/** The title's beatmakers in two lines: their names (cut short, the whole
- * on hover), then the fiche of the one, or how many of theirs are filled. */
+/** The title's beatmakers: their names alone, cut short (the whole on
+ * hover); their fiches stay in the Juridique (Maël 25/11/2026). */
 function BeatmakerFacts({
   people,
 }: {
   people: RecapTitle["recap"]["beatmakers"];
 }) {
-  const r = fr.projectTitles.recap;
   if (people.length === 0) return <Empty />;
   const names = people.map((person) => person.name).join(", ");
-  const fiches = people.flatMap((person) =>
-    person.fiche ? [{ fiche: person.fiche, name: person.name }] : [],
-  );
   return (
-    <span className="flex max-w-full min-w-0 flex-col items-start gap-1">
-      <span
-        className="max-w-full truncate text-[color:var(--text-secondary)]"
-        title={names}
-      >
-        {names}
-      </span>
-      {fiches.length === 1 ? (
-        <FichePill fiche={fiches[0].fiche} name={fiches[0].name} />
-      ) : fiches.length > 1 ? (
-        <span className={cn(caption, "max-w-full truncate")}>
-          {r.legal.fichesFilled(
-            fiches.filter((f) => f.fiche.state === "filled").length,
-            fiches.length,
-          )}
-        </span>
-      ) : null}
+    <span
+      className="block max-w-full truncate text-[color:var(--text-secondary)]"
+      title={names}
+    >
+      {names}
     </span>
   );
 }
@@ -1039,7 +1024,7 @@ function ArtistRow({
   const plansCallHere =
     !dimmed && facts.accord !== null && plansCall(call, facts.accord);
 
-  const status = <ContactStatePill status={participation.status} />;
+  const status = <ContactStatePill status={participation.status} tag />;
   // The alerts in words: a tooltip beside the name in the table (two lines
   // a cell), lines under the name on a card.
   const alerts = [
@@ -1122,6 +1107,7 @@ function ArtistRow({
                 accord={facts.accord}
                 artist={artist}
                 rate={false}
+                board
                 // The gesture is in the row's « ⋯ »; the cell says it.
                 planCall={
                   plansCallHere ? (

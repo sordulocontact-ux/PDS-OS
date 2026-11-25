@@ -177,6 +177,11 @@ Le ton `action` est **gris** (fond `--tone-neutral-bg`, texte encre) depuis le 1
 blanc, gris, sans violet ») : il garde son nom et son sens, sa pastille ne se distingue plus
 par la couleur mais par son libellé (« À valider », « ✦ PO »).
 
+Dans le style actuel, un état s'affiche en **point de couleur et mot** (sans fond, `globals.css`).
+Un **tag** (`StatusBadge tag`) garde sa pilule à fond pâle : il est réservé à l'**état principal
+d'une ligne** quand plusieurs colonnes d'états se suivent, pour qu'il ne se perde pas parmi les
+points (Maël 25/11/2026, Statut de « Titres et artistes »). Un seul tag par ligne.
+
 - **État d'une information** (un fait, un champ, une dimension, une valeur) : trois mots et
   trois tons, les mêmes dans tous les modules (Ibé, 01/11 : « « à faire » serait plus
   compréhensible » ; Sacha, 06/11/2026) : **À faire** (`warning`, il manque quelque chose),

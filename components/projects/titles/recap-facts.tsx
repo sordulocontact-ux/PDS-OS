@@ -90,10 +90,18 @@ function LinkedPill({
 }
 
 /** « À contacter » (grey), « Contacté » (orange), « D'accord » (green),
- * « A refusé », « Retiré » (grey): where the artist stands. */
-export function ContactStatePill({ status }: { status: ParticipationStatus }) {
+ * « A refusé », « Retiré » (grey): where the artist stands. `tag`: in its
+ * pill where states are a dot and their text (the board's Statut, the row's
+ * main state, Maël 25/11/2026). */
+export function ContactStatePill({
+  status,
+  tag = false,
+}: {
+  status: ParticipationStatus;
+  tag?: boolean;
+}) {
   return (
-    <StatusBadge tone={participationStatusTone[status]} size="sm">
+    <StatusBadge tone={participationStatusTone[status]} size="sm" tag={tag}>
       {fr.projectTitles.participations.statuses[status]}
     </StatusBadge>
   );
@@ -101,12 +109,15 @@ export function ContactStatePill({ status }: { status: ParticipationStatus }) {
 
 /** A deal's stage in the recap, on one line: « Accord validé », « Accord à
  * valider », « Négociation »… in the deal badge's tone (dealStageToneOf);
- * the deal's own badge (DealStageBadge) keeps its longer words elsewhere. */
+ * the deal's own badge (DealStageBadge) keeps its longer words elsewhere.
+ * `short`: « Validé », « À valider » under the board's « Accord » column. */
 function AccordPill({
   stage,
   agreementStatus,
+  short,
 }: Pick<RecapAccord, "agreementStatus"> & {
   stage: NonNullable<RecapAccord["stage"]>;
+  short: boolean;
 }) {
   const a = fr.projectTitles.recap.accord;
   return (
@@ -117,7 +128,7 @@ function AccordPill({
       className="h-5! whitespace-nowrap!"
     >
       {stage === "agreement" && agreementStatus
-        ? a.agreement[agreementStatus]
+        ? (short ? a.agreementShort : a.agreement)[agreementStatus]
         : a.stages[stage]}
     </StatusBadge>
   );
@@ -127,10 +138,9 @@ function AccordPill({
  * The accord of an artist (the Business module), two lines at most (Maël
  * 23/11/2026: « 2 lignes par case »): its deal's stage in short (« Accord
  * à valider » while the direction decides), linked to the deal; under it
- * `planCall` (« Caler le call », given by the board when the row may plan
- * it; « Call à caler » in the compact recap), else on one line the rate,
- * the day of the call planned (« Call le 23/11 ») and who negotiates, the
- * whole on hover. Nothing known: « — ».
+ * `planCall` (« Call à caler », given when the row may plan it), else on
+ * one line the rate, the day of the call planned (« Call le 23/11 ») and
+ * who negotiates, the whole on hover. Nothing known: « — ».
  */
 export function AccordFacts({
   accord,
@@ -139,6 +149,7 @@ export function AccordFacts({
   inline = false,
   rate = true,
   brief = false,
+  board = false,
 }: {
   accord: RecapAccord;
   artist: string;
@@ -149,6 +160,9 @@ export function AccordFacts({
   // The stage alone, no rate, call nor negotiator (the overview's recap,
   // Maël 23/11/2026: too much there).
   brief?: boolean;
+  // The board's « Accord » column (Maël 25/11/2026): the stage in short
+  // (« Validé », « À valider »), and no negotiator (read on the deal).
+  board?: boolean;
 }) {
   const r = fr.projectTitles.recap;
   const stage = accord.stage;
@@ -166,7 +180,7 @@ export function AccordFacts({
           ? r.accord.callOn(formatShortDay(accord.nextCallAt, { bare: true }))
           : null,
         // Who negotiates, once the deal is read; « À affecter » before.
-        stage
+        stage && !board
           ? (accord.negotiator ??
             (accord.href && stage !== "abandoned"
               ? fr.projectTitles.board.negotiation.unassigned
@@ -188,10 +202,15 @@ export function AccordFacts({
             <AccordPill
               stage={stage}
               agreementStatus={accord.agreementStatus}
+              short={board}
             />
           </ViewLink>
         ) : (
-          <AccordPill stage={stage} agreementStatus={accord.agreementStatus} />
+          <AccordPill
+            stage={stage}
+            agreementStatus={accord.agreementStatus}
+            short={board}
+          />
         ))}
       {planCall ??
         (details.length > 0 && (
@@ -207,12 +226,13 @@ export function AccordFacts({
 }
 
 /** A participation's contract as a pill, the same in the recap and in
- * « Participations et contrats »: its words (recapContractWords) and tone;
- * null: none expected. */
+ * « Participations et contrats »: its words (recapContractWords; `short`:
+ * the board's) and tone; null: none expected. */
 export function contractStatePill(
   contract: RecapContract,
+  short = false,
 ): { words: string; tone: Tone } | null {
-  const words = recapContractWords(contract);
+  const words = recapContractWords(contract, short);
   if (words === null) return null;
   switch (contract.kind) {
     case "agreement":
@@ -230,13 +250,13 @@ export function contractStatePill(
 }
 
 /** The recap's pill: « Contrat · À rédiger » (« En attente de l'accord »
- * alone; `bare`, under a « Contrat » column: its words alone); null: none
- * expected. */
+ * alone; `bare`, under the board's « Contrat » column: its short words
+ * alone); null: none expected. */
 function contractPill(
   contract: RecapContract,
   bare = false,
 ): { label: string; full: string; tone: Tone } | null {
-  const pill = contractStatePill(contract);
+  const pill = contractStatePill(contract, bare);
   if (!pill) return null;
   const label =
     bare || contract.kind === "waiting_agreement"
@@ -245,9 +265,9 @@ function contractPill(
   return { label, full: label, tone: pill.tone };
 }
 
-/** The artist's contract alone (the board's « Contrat » column), its words
- * without « Contrat · », opening the person's démarche. None expected:
- * « — ». */
+/** The artist's contract alone (the board's « Contrat » column), its short
+ * words without « Contrat · » (« Envoyé », « À contresigner »), opening the
+ * person's démarche. None expected: « — ». */
 export function ContractFacts({
   contract,
 }: {

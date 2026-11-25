@@ -364,6 +364,13 @@ export const projectTitles = {
     waitingAgreement: "En attente de l'accord",
     // A contract the reader may not read.
     hidden: "Lié",
+    // The board's « Contrat » column, in short (Maël 25/11/2026: « le texte
+    // de l'état est beaucoup trop long »); elsewhere the words above.
+    short: {
+      signature_pending: "Envoyé",
+      countersign: "À contresigner",
+      waitingAgreement: "Attend l'accord",
+    },
   },
 
   // The recap of a collective (retours d'Ibé du 18/11/2026, lot 2): « Titres
@@ -435,7 +442,9 @@ export const projectTitles = {
       done: "Titre nommé.",
     },
     note: {
-      add: "Ajouter une note",
+      // No note yet: an icon and its tooltip, so that it never reads as a
+      // note (Maël 25/11/2026).
+      addFor: (artist: string) => `Ajouter une note sur ${artist}`,
       edit: (artist: string) => `Modifier la note sur ${artist}`,
       title: (artist: string) => `Note sur ${artist}`,
       label: "Note",
@@ -458,9 +467,15 @@ export const projectTitles = {
         pending: "Accord à valider",
         validated: "Accord validé",
       },
+      // Under the board's « Accord » column (Maël 25/11/2026).
+      agreementShort: {
+        pending: "À valider",
+        validated: "Validé",
+      },
       // « Call le Sam. 05/12/2026 » (formatDay).
       callOn: (day: string) => `Call le ${day}`,
-      // The overview's recap (read only) says it, the board has the button.
+      // A call to plan: the overview's recap links it to the board, the
+      // board says it under the stage (the gesture in the row's « ⋯ »).
       callToPlan: "Call à caler",
     },
     contact: {
@@ -476,8 +491,6 @@ export const projectTitles = {
       // The icon's tooltip and name, none yet.
       addFor: (artist: string) => `Ajouter le contact ${de(artist)}`,
       edit: (artist: string) => `Modifier le contact ${de(artist)}`,
-      call: (name: string) => `Appeler ${name}`,
-      whatsapp: (name: string) => `Écrire à ${name} sur WhatsApp`,
       hidden: "Coordonnées privées",
       modes: {
         phone: "Numéro",
@@ -515,9 +528,6 @@ export const projectTitles = {
         `Ouvrir la fiche de renseignement ${de(name)} : ${state}`,
       // No démarche yet (a guest not credited in the Catalogue): the fiche
       // has no page to open, read on hover.
-      // Several beatmakers: their fiches in one line.
-      fichesFilled: (filled: number, total: number) =>
-        `Fiches · ${filled} sur ${total} renseignées`,
       ficheLater:
         "Au Juridique une fois l'artiste crédité sur le titre au Catalogue",
       // The contract's state (participationContract) after « Contrat · ».

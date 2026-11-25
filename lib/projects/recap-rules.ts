@@ -613,16 +613,23 @@ export function recapContract(input: {
 
 /** The state of a participation's contract in words, the same wherever it
  * shows (projectTitles.participationContract: the recap, its compact
- * version, « Participations et contrats »); null: none expected. */
-export function recapContractWords(contract: RecapContract): string | null {
+ * version, « Participations et contrats »); `short`: the board's « Contrat »
+ * column (« Envoyé », « À contresigner », « Attend l'accord », Maël
+ * 25/11/2026). Null: none expected. */
+export function recapContractWords(
+  contract: RecapContract,
+  short = false,
+): string | null {
   const words = projectTitles.participationContract;
   switch (contract.kind) {
     case "agreement":
-      return contract.back
-        ? words.back[contract.back]
+      if (contract.back)
+        return short ? words.short[contract.back] : words.back[contract.back];
+      return short && contract.state === "signature_pending"
+        ? words.short.signature_pending
         : words.states[contract.state];
     case "waiting_agreement":
-      return words.waitingAgreement;
+      return short ? words.short.waitingAgreement : words.waitingAgreement;
     case "hidden":
       return words.hidden;
     case "none":
