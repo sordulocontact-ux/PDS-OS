@@ -3075,3 +3075,22 @@ migration.
   `releaseCrumb`.
 - Vérifié dans Chrome sur « Assurance 30 » : carte Master, Juridique, Distribution puis retour par le nom du titre, à
   chaque fois en haut de page ; aucune erreur dans la console.
+
+## PDS Mic : le récap de la Vue d'ensemble, Fiche et Contrat séparés (25/11/2026)
+
+Maël : la colonne Juridique du tableau des artistes (Vue d'ensemble d'un collectif, « Artistes » de la page d'un
+titre) prenait trop de place (« Fiche · Renseignée » puis « Contrat · Envoyé · en attente de retour » sur trois
+lignes) ; le faire comme « Titres et artistes », en tags au lieu de points partout. Sans migration.
+
+- **Deux colonnes** : Fiche (« Pas envoyée », « Envoyée », « Renseignée ») et Contrat (« À rédiger », « Envoyé »,
+  « À contresigner », « Attend l'accord », « Signé »), les mots courts du tableau (`FichePill`, `ContractFacts`).
+  Accord en mots courts aussi (« Validé », « À valider », `AccordFacts brief board`).
+- **Statut en tag** (`ContactStatePill tag`), comme dans « Titres et artistes » : l'état principal de la ligne, les
+  autres colonnes restent en point + mot.
+- Une ligne par case, deux pour l'Accord avec « Call à caler ». Sous 1280 px, les colonnes passent sous le nom côte à
+  côte, et seulement celles qui ont une valeur (plus de « Accord — »).
+- Retirés, plus utilisés : `LegalFacts`, les libellés « Fiche · … » / « Contrat · … », la colonne « Juridique » du
+  récap (`recap.columns.legal`), la prop `bare` de `FichePill` (toujours le mot seul). « Participations et
+  contrats » garde ses mots longs.
+- Vérifié dans Chrome sur « Assurance 30 » à 1280 px, 1000 px et 390 px, et sur la page du titre Néons ; aucune
+  erreur dans la console.

@@ -337,9 +337,9 @@ export const projectTitles = {
   },
 
   // The state of a participation's contract (RecapContract), the same words
-  // wherever it shows: the recap and its compact version (after « Contrat ·
-  // »), « Participations et contrats ». Without repeating the word contract;
-  // the Juridique's own words stay its own (« Contrat nécessaire »).
+  // wherever it shows: the recap's « Contrat » columns, « Participations et
+  // contrats ». Without repeating the word contract; the Juridique's own
+  // words stay its own (« Contrat nécessaire »).
   participationContract: {
     // By AgreementState.
     states: {
@@ -364,8 +364,9 @@ export const projectTitles = {
     waitingAgreement: "En attente de l'accord",
     // A contract the reader may not read.
     hidden: "Lié",
-    // The board's « Contrat » column, in short (Maël 25/11/2026: « le texte
-    // de l'état est beaucoup trop long »); elsewhere the words above.
+    // The « Contrat » column of the board and of the overview's recap, in
+    // short (Maël 25/11/2026: « le texte de l'état est beaucoup trop long »);
+    // « Participations et contrats » keeps the words above.
     short: {
       signature_pending: "Envoyé",
       countersign: "À contresigner",
@@ -399,14 +400,14 @@ export const projectTitles = {
       rate: "Taux",
       // The Excel's « QUESTIONNAIRE REMPLI ».
       fiche: "Fiche de renseignement",
+      // The same column in the overview's recap, narrower.
+      ficheShort: "Fiche",
       contract: "Contrat",
       mix: "Mix",
       release: "Sortie",
       distribution: "Distribution",
       beatmaker: "Beatmaker",
       note: "Note",
-      // The overview's compact recap: the fiche and the contract together.
-      legal: "Juridique",
     },
     // The title's gestures in an artist's « ⋯ », after the artist's own:
     // their words say they are the title's.
@@ -512,7 +513,6 @@ export const projectTitles = {
       created: "Contact ajouté au Réseau.",
     },
     legal: {
-      fiche: (state: string) => `Fiche · ${state}`,
       // The fiche in three words (RecapFicheState, Maël 22/11/2026:
       // « renseignée, envoyée, pas envoyée »); the Juridique keeps its finer
       // ones.
@@ -530,8 +530,6 @@ export const projectTitles = {
       // has no page to open, read on hover.
       ficheLater:
         "Au Juridique une fois l'artiste crédité sur le titre au Catalogue",
-      // The contract's state (participationContract) after « Contrat · ».
-      contract: (state: string) => `Contrat · ${state}`,
     },
     overview: {
       seeAll: "Tout voir",

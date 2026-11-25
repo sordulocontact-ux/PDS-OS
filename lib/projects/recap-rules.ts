@@ -612,10 +612,10 @@ export function recapContract(input: {
 }
 
 /** The state of a participation's contract in words, the same wherever it
- * shows (projectTitles.participationContract: the recap, its compact
- * version, « Participations et contrats »); `short`: the board's « Contrat »
- * column (« Envoyé », « À contresigner », « Attend l'accord », Maël
- * 25/11/2026). Null: none expected. */
+ * shows (projectTitles.participationContract: « Participations et
+ * contrats »); `short`: the « Contrat » column of the board and of the
+ * overview's recap (« Envoyé », « À contresigner », « Attend l'accord »,
+ * Maël 25/11/2026). Null: none expected. */
 export function recapContractWords(
   contract: RecapContract,
   short = false,

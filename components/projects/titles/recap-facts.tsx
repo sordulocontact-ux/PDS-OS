@@ -227,7 +227,8 @@ export function AccordFacts({
 
 /** A participation's contract as a pill, the same in the recap and in
  * « Participations et contrats »: its words (recapContractWords; `short`:
- * the board's) and tone; null: none expected. */
+ * the « Contrat » column of the board and of the overview's recap) and
+ * tone; null: none expected. */
 export function contractStatePill(
   contract: RecapContract,
   short = false,
@@ -249,63 +250,19 @@ export function contractStatePill(
   }
 }
 
-/** The recap's pill: « Contrat · À rédiger » (« En attente de l'accord »
- * alone; `bare`, under the board's « Contrat » column: its short words
- * alone); null: none expected. */
-function contractPill(
-  contract: RecapContract,
-  bare = false,
-): { label: string; full: string; tone: Tone } | null {
-  const pill = contractStatePill(contract, bare);
-  if (!pill) return null;
-  const label =
-    bare || contract.kind === "waiting_agreement"
-      ? pill.words
-      : fr.projectTitles.recap.legal.contract(pill.words);
-  return { label, full: label, tone: pill.tone };
-}
-
-/** The artist's contract alone (the board's « Contrat » column), its short
- * words without « Contrat · » (« Envoyé », « À contresigner »), opening the
- * person's démarche. None expected: « — ». */
+/** The artist's contract alone (the « Contrat » column of the board and of
+ * the overview's recap), its short words (« À rédiger », « Envoyé », « À
+ * contresigner »), opening the person's démarche. None expected: « — ». */
 export function ContractFacts({
   contract,
 }: {
   contract: { state: RecapContract; href: string | null };
 }) {
-  const pill = contractPill(contract.state, true);
+  const pill = contractStatePill(contract.state, true);
   if (!pill) return <span className={muted}>{EMPTY_CELL}</span>;
   return (
     <span className={factsClass(false)}>
-      <LinkedPill href={contract.href} tone={pill.tone} label={pill.label} />
-    </span>
-  );
-}
-
-/** The artist's fiche and contract, two short pills, each opening the
- * person's démarche in the Juridique. Nothing to say: « — ». */
-export function LegalFacts({
-  fiche,
-  contract,
-  inline = false,
-}: {
-  fiche: RecapFiche | null;
-  contract: { state: RecapContract; href: string | null } | null;
-  inline?: boolean;
-}) {
-  const pill = contract ? contractPill(contract.state) : null;
-  if (!fiche && !pill) return <span className={muted}>{EMPTY_CELL}</span>;
-  return (
-    <span className={factsClass(inline)}>
-      {fiche && <FichePill fiche={fiche} />}
-      {pill && contract && (
-        <LinkedPill
-          href={contract.href}
-          tone={pill.tone}
-          label={pill.label}
-          full={pill.full}
-        />
-      )}
+      <LinkedPill href={contract.href} tone={pill.tone} label={pill.words} />
     </span>
   );
 }
@@ -327,25 +284,20 @@ export function MixPill({
   );
 }
 
-/** A fiche's pill in three words (« Fiche · Envoyée »; `bare`, under a
- * « Fiche de renseignement » column: « Envoyée »), opening the fiche
- * itself, filled or not. A fiche received and not yet validated says so on
- * hover and to a screen reader; `name`: whose fiche, for a screen reader.
- * No démarche yet (a guest not credited in the Catalogue): no link, and the
- * hover says when there will be one. */
+/** A fiche's pill in three words, under a « Fiche » column (« Pas
+ * envoyée », « Envoyée », « Renseignée »), opening the fiche itself, filled
+ * or not. A fiche received and not yet validated says so on hover and to a
+ * screen reader; `name`: whose fiche, for a screen reader. No démarche yet
+ * (a guest not credited in the Catalogue): no link, and the hover says when
+ * there will be one. */
 export function FichePill({
   fiche,
-  bare = false,
   name,
 }: {
   fiche: RecapFiche;
-  bare?: boolean;
   name?: string;
 }) {
   const r = fr.projectTitles.recap.legal;
-  const label = bare
-    ? r.ficheStates[fiche.state]
-    : r.fiche(r.ficheStates[fiche.state]);
   const state =
     fiche.status === "toValidate"
       ? r.ficheToValidate
@@ -354,14 +306,12 @@ export function FichePill({
     ? r.ficheLater
     : name
       ? r.openFiche(name, state)
-      : bare
-        ? state
-        : r.fiche(state);
+      : state;
   return (
     <LinkedPill
       href={fiche.href}
       tone={RECAP_FICHE_TONE[fiche.state]}
-      label={label}
+      label={r.ficheStates[fiche.state]}
       full={full}
     />
   );

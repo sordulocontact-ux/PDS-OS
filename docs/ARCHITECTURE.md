@@ -5583,7 +5583,9 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   SECURITY DEFINER ne lit `network_contacts`). `personKeyOf` s'aligne sur `formPeople`. Contrat de la personne et « En
   attente de l'accord » (dès qu'une participation de l'artiste est sans accord, règle de la base) ; taux = terme
   `master_split` du deal. Collectif accepté : récap compact (`TitlesRecapCompact`) en bas de la Vue d'ensemble,
-  sans les notes (23/11/2026 : long, il cachait le reste) ; collectif non accepté : tableau complet en bas
+  sans les notes (23/11/2026 : long, il cachait le reste) ; depuis le 25/11/2026 ses colonnes sont celles du tableau
+  en mots courts — Statut en tag, Accord, Fiche, Contrat (deux colonnes, plus de « Juridique »), Mix — et, sous
+  1280 px, seules celles qui ont une valeur passent sous le nom ; collectif non accepté : tableau complet en bas
   d'`UnlaunchedOverview` (après le bloc de transmission), `TitlesBoard notes={false}`, la page Titres y est 404.
 - **Actions** (`lib/projects/participation-actions.ts`, `title-actions.ts`) : `setParticipationContact`,
   `createParticipationContact`, `setContactPhone` (change le numéro dans le Réseau ; contact privé : propriétaire ou

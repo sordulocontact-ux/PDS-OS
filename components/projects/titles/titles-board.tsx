@@ -1142,7 +1142,7 @@ function ArtistRow({
             label: r.columns.fiche,
             column: COLUMN.fiche,
             node: facts.fiche ? (
-              <FichePill fiche={facts.fiche} bare name={artist} />
+              <FichePill fiche={facts.fiche} name={artist} />
             ) : (
               <Empty />
             ),

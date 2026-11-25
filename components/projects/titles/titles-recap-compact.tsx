@@ -1,9 +1,11 @@
 import {
   AccordFacts,
   ContactStatePill,
-  LegalFacts,
+  ContractFacts,
+  FichePill,
   MixPill,
   caption,
+  muted,
 } from "@/components/projects/titles/recap-facts";
 import { EmptyNote } from "@/components/shell/empty-state";
 import {
@@ -14,23 +16,30 @@ import {
   DataTableHeader,
   DataTableLink,
   DataTableRow,
+  EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { ViewLink } from "@/components/ui/view-link";
 import type { DealStage } from "@/lib/deals/types";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { ParticipationStatus } from "@/lib/projects/participation-rules";
-import type { RecapAccord, TitleRecap } from "@/lib/projects/recap-rules";
+import {
+  recapContractWords,
+  type RecapAccord,
+  type TitleRecap,
+} from "@/lib/projects/recap-rules";
 import { titleMixFact } from "@/lib/projects/title-board-rules";
 
 const fr = { projectTitles };
 
-// The columns besides the artist, shown from 1280 px; under it, said under
-// the name.
+// The columns besides the artist, shown from 1280 px (under it, said under
+// the name): each one short word on one line, the board's (Maël
+// 25/11/2026), so that the artist keeps the rest of the width.
 const COLUMN = {
-  status: "w-28",
-  accord: "w-48 whitespace-normal",
-  legal: "w-48 whitespace-normal",
-  mix: "w-40 whitespace-normal",
+  status: "w-32",
+  accord: "w-36",
+  fiche: "w-32",
+  contract: "w-36",
+  mix: "w-36 whitespace-normal",
 } as const;
 
 // The stages before the accord: the call is still to come.
@@ -49,7 +58,10 @@ const awaitsCall = (status: ParticipationStatus, accord: RecapAccord) =>
   !accord.nextCallAt &&
   BEFORE_ACCORD.has(accord.stage);
 
-/** Under 1280 px, a hidden column under the name. */
+const Empty = () => <span className={muted}>{EMPTY_CELL}</span>;
+
+/** Under 1280 px, a hidden column under the name: its label, then its
+ * word; an empty one is not said there. */
 function StackedFact({
   label,
   children,
@@ -58,7 +70,7 @@ function StackedFact({
   children: React.ReactNode;
 }) {
   return (
-    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+    <span className="flex min-w-0 items-center gap-1.5">
       <span className={caption}>{label}</span>
       {children}
     </span>
@@ -70,11 +82,13 @@ function StackedFact({
  * 18/11/2026, lot 2: « une vue récap sur tous les titres qui éviterait
  * d'aller dans chaque module »): one row per artist in play (a
  * participation neither declined nor withdrawn, on a title not abandoned),
- * the title's label under the name (no note: too much here, Maël
- * 23/11/2026); Statut, Accord (its stage alone, same day; when the reader
- * sees deals), Juridique (manage_legal), the title's Mix. Read only: the row
- * opens « Titres et artistes » (`href`), each pill its module. Rendered on
- * the server. `oneTitle`: a title's page, no label under the name.
+ * the title's label under the name. Read as « Titres et artistes », lighter
+ * (Maël 25/11/2026: two lines a cell, its short words): Statut in its tag,
+ * the row's main state; Accord (the deal's stage in short, when the reader
+ * sees deals); Fiche and Contrat, each its own column (manage_legal); the
+ * title's Mix. Read only: the name opens « Titres et artistes » (`href`),
+ * each state its module. Rendered on the server. `oneTitle`: a title's
+ * page, no label under the name.
  */
 export function TitlesRecapCompact({
   recap,
@@ -116,9 +130,14 @@ export function TitlesRecapCompact({
           </DataTableHead>
         )}
         {legal && (
-          <DataTableHead hideBelow="xl" className={COLUMN.legal}>
-            {r.columns.legal}
-          </DataTableHead>
+          <>
+            <DataTableHead hideBelow="xl" className={COLUMN.fiche}>
+              {r.columns.ficheShort}
+            </DataTableHead>
+            <DataTableHead hideBelow="xl" className={COLUMN.contract}>
+              {r.columns.contract}
+            </DataTableHead>
+          </>
         )}
         <DataTableHead hideBelow="xl" className={COLUMN.mix}>
           {r.columns.mix}
@@ -129,6 +148,7 @@ export function TitlesRecapCompact({
           const facts = participation.recap;
           const artist = participation.artist.name;
           const mixFact = titleMixFact(title.masterState);
+          const status = <ContactStatePill status={participation.status} tag />;
           const mix = (
             <MixPill
               label={mixFact?.label ?? null}
@@ -140,15 +160,20 @@ export function TitlesRecapCompact({
               }
             />
           );
+          const planCall =
+            facts.accord !== null &&
+            awaitsCall(participation.status, facts.accord);
+          // Under the name, its stage and « Call à caler » side by side.
           const accordFacts = (inline: boolean) =>
-            facts.accord && (
+            facts.accord ? (
               <AccordFacts
                 accord={facts.accord}
                 artist={artist}
                 inline={inline}
                 brief
+                board
                 planCall={
-                  awaitsCall(participation.status, facts.accord) ? (
+                  planCall ? (
                     <ViewLink
                       href={href}
                       className="relative z-10 rounded-sm text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)] outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
@@ -159,14 +184,34 @@ export function TitlesRecapCompact({
                   ) : undefined
                 }
               />
+            ) : (
+              <Empty />
             );
-          const legalFacts = (inline: boolean) => (
-            <LegalFacts
-              fiche={facts.fiche}
-              contract={facts.contract}
-              inline={inline}
-            />
+          const fiche = facts.fiche ? (
+            <FichePill fiche={facts.fiche} name={artist} />
+          ) : (
+            <Empty />
           );
+          const contract = facts.contract ? (
+            <ContractFacts contract={facts.contract} />
+          ) : (
+            <Empty />
+          );
+          // Under the name, only what has a value: no « — » there.
+          const stacked = [
+            accord && (facts.accord?.stage || planCall)
+              ? { label: r.columns.accord, node: accordFacts(true) }
+              : null,
+            legal && facts.fiche
+              ? { label: r.columns.ficheShort, node: fiche }
+              : null,
+            legal &&
+            facts.contract &&
+            recapContractWords(facts.contract.state, true) !== null
+              ? { label: r.columns.contract, node: contract }
+              : null,
+            mixFact ? { label: r.columns.mix, node: mix } : null,
+          ].filter((fact) => fact !== null);
           return (
             <DataTableRow key={participation.id}>
               <DataTableCell fill className="whitespace-normal">
@@ -179,26 +224,21 @@ export function TitlesRecapCompact({
                       {title.recap.label}
                     </span>
                   )}
-                  <span className="sm:hidden">
-                    <ContactStatePill status={participation.status} />
-                  </span>
-                  <span className="mt-1.5 flex flex-col gap-1.5 xl:hidden">
-                    {accord && (
-                      <StackedFact label={r.columns.accord}>
-                        {accordFacts(true)}
-                      </StackedFact>
-                    )}
-                    {legal && (
-                      <StackedFact label={r.columns.legal}>
-                        {legalFacts(true)}
-                      </StackedFact>
-                    )}
-                    <StackedFact label={r.columns.mix}>{mix}</StackedFact>
-                  </span>
+                  <span className="sm:hidden">{status}</span>
+                  {/* The other columns, side by side, wrapping. */}
+                  {stacked.length > 0 && (
+                    <span className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1.5 xl:hidden">
+                      {stacked.map((fact) => (
+                        <StackedFact key={fact.label} label={fact.label}>
+                          {fact.node}
+                        </StackedFact>
+                      ))}
+                    </span>
+                  )}
                 </span>
               </DataTableCell>
               <DataTableCell hideBelow="sm" className={COLUMN.status}>
-                <ContactStatePill status={participation.status} />
+                {status}
               </DataTableCell>
               {accord && (
                 <DataTableCell hideBelow="xl" className={COLUMN.accord}>
@@ -206,9 +246,14 @@ export function TitlesRecapCompact({
                 </DataTableCell>
               )}
               {legal && (
-                <DataTableCell hideBelow="xl" className={COLUMN.legal}>
-                  {legalFacts(false)}
-                </DataTableCell>
+                <>
+                  <DataTableCell hideBelow="xl" className={COLUMN.fiche}>
+                    {fiche}
+                  </DataTableCell>
+                  <DataTableCell hideBelow="xl" className={COLUMN.contract}>
+                    {contract}
+                  </DataTableCell>
+                </>
               )}
               <DataTableCell hideBelow="xl" className={COLUMN.mix}>
                 {mix}
