@@ -51,6 +51,9 @@ export type TitleProgress = {
   // The artists it invites, still in play.
   guests: string[];
   abandoned: boolean;
+  // Its Distribution is the compilation's (no release of its own): what is
+  // done there is done for every title of the compilation.
+  withCompilation: boolean;
   journeys: ProjectJourneys;
   // One per workflow of the project worked by title; none for an abandoned
   // title (out of every workflow, lot 9).
@@ -85,7 +88,11 @@ export const loadTitleProgress = trackedCache(
     const guests = titleGuestNames(title.participations);
     const label = labelOf(title);
     const abandoned = title.status === "abandoned";
-    const base = { title, label, guests, abandoned };
+    const deposit = ctx.deposits[title.id];
+    const withCompilation =
+      ctx.workflows.includes("distribution") &&
+      Boolean(deposit?.withCompilation);
+    const base = { title, label, guests, abandoned, withCompilation };
     if (abandoned)
       return {
         ...base,
@@ -94,7 +101,6 @@ export const loadTitleProgress = trackedCache(
       };
 
     const names = fr.shell.project.sidebar;
-    const deposit = ctx.deposits[title.id];
     const [master, distribution] = await Promise.all([
       ctx.workflows.includes("master") && title.master
         ? masterTitleJourney(projectId, title.master.id)
@@ -146,14 +152,23 @@ export const loadTitleProgress = trackedCache(
       journeys: gathered,
       // A card opens the workflow at the top of its step, not scrolled down
       // to the viewer's gesture (`#a-vous`, kept for « Maintenant »'s « Ouvrir
-      // l'étape »): Maël 25/11/2026.
+      // l'étape »): Maël 25/11/2026. The Distribution of a title going out
+      // with the compilation says it is the compilation's.
       cards: workflowCards({
         projectId,
         workflows: ctx.workflows,
         states,
         journeys: gathered,
       }).map((card) =>
-        card.restricted ? card : { ...card, href: card.href.split("#")[0] },
+        card.restricted
+          ? card
+          : {
+              ...card,
+              href: card.href.split("#")[0],
+              ...(card.workflow === "distribution" && withCompilation
+                ? { scope: fr.titleTracks.page.withCompilation }
+                : {}),
+            },
       ),
     };
   },

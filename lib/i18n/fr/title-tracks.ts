@@ -13,6 +13,10 @@ export const titleTracks = {
     groups: { abandoned: "Abandonnés" },
     // Under a workflow's step when its next action is the viewer's.
     mine: "À vous",
+    // Under the Distribution's step of a title going out with the
+    // compilation: its journey is the compilation's. After « À vous · ».
+    withCompilation: "Avec la compilation",
+    compilation: "compilation",
     empty: {
       title: "Aucun titre pour l'instant",
       body: "Les titres s'ajoutent dans « Titres et artistes ».",
@@ -23,5 +27,7 @@ export const titleTracks = {
     artists: "Artistes",
     abandoned: "Ce titre est abandonné.",
     seeAll: "Tout voir",
+    // After « Distribution » in its « Progression »: the compilation's.
+    withCompilation: "avec la compilation",
   },
 } as const;

@@ -26,13 +26,17 @@ function Ring({ card }: { card: OpenCard }) {
 /**
  * One workflow of a title in « Titres » (Maël 25/11/2026: two lines at
  * most, no more detail than needed): its ring, the step it is at
- * (« Terminé » once done), and « À vous » under it when the next action is
- * the viewer's. The figures are the ring's; the action itself is on the
- * title's page. Nothing when the workflow is closed to the viewer.
+ * (« Terminé » once done), and under it « À vous » when the next action is
+ * the viewer's, « Avec la compilation » when the journey is the
+ * compilation's (« À vous · compilation » for both). The figures are the
+ * ring's; the action itself is on the title's page. Nothing when the
+ * workflow is closed to the viewer.
  */
 export function WorkflowProgress({ card }: { card: WorkflowCard | undefined }) {
   if (!card || card.restricted) return null;
+  const t = fr.titleTracks.list;
   const mine = Boolean(card.next?.mine);
+  const shared = Boolean(card.scope);
   const step =
     card.status === "done"
       ? fr.projectShell.overview.progress.done
@@ -41,20 +45,29 @@ export function WorkflowProgress({ card }: { card: WorkflowCard | undefined }) {
     <span className="flex min-w-0 items-center gap-2.5">
       <Ring card={card} />
       {/* The column's 192 px less the ring: a longer step wraps once, or is
-          cut when « À vous » takes the second line. */}
+          cut when a second line is said under it. */}
       <span className="flex max-w-32 min-w-0 flex-col">
         <span
           title={step}
           className={cn(
             "font-normal text-[color:var(--text-secondary)]",
-            mine ? "truncate" : "line-clamp-2 whitespace-normal",
+            mine || shared ? "truncate" : "line-clamp-2 whitespace-normal",
           )}
         >
           {step}
         </span>
-        {mine && (
-          <span className={cn(caption, "text-[color:var(--selection)]")}>
-            {fr.titleTracks.list.mine}
+        {(mine || shared) && (
+          <span
+            className={cn(
+              caption,
+              "truncate text-[color:var(--text-tertiary)]",
+            )}
+          >
+            {mine && (
+              <span className="text-[color:var(--selection)]">{t.mine}</span>
+            )}
+            {mine && shared && ` · ${t.compilation}`}
+            {!mine && shared && t.withCompilation}
           </span>
         )}
       </span>
@@ -65,7 +78,7 @@ export function WorkflowProgress({ card }: { card: WorkflowCard | undefined }) {
 /**
  * The same, on one line under the title's name on a narrow screen: the
  * ring and the workflow's name, in the selection colour when the next
- * action is the viewer's.
+ * action is the viewer's (the compilation's, said to a screen reader).
  */
 export function WorkflowRing({
   card,
@@ -87,6 +100,7 @@ export function WorkflowRing({
             {fr.titleTracks.list.mine}
           </span>
         )}
+        {card.scope && <span className="sr-only">{` · ${card.scope}`}</span>}
       </span>
     </span>
   );

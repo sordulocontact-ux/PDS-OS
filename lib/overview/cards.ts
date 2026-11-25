@@ -27,6 +27,10 @@ export type WorkflowCard =
       done: number;
       // The viewer's first action here, else whom it waits for.
       next: { mine: boolean; who: string; todo: string } | null;
+      // Said after the workflow's name when its journey is not the page's
+      // own: a title's Distribution held by the compilation it goes out
+      // with (« avec la compilation », Maël 25/11/2026).
+      scope?: string;
     };
 
 // « Confirmer la source » → « confirmer la source » after « À vous · ».

@@ -166,7 +166,14 @@ function WorkflowRows({ cards }: { cards: WorkflowCard[] }) {
                 label={t.steps(card.done, card.total)}
               />
               <span className="min-w-0">
-                <span className="block">{name}</span>
+                <span className="block">
+                  {name}
+                  {card.scope && (
+                    <span className="text-[color:var(--text-tertiary)]">
+                      {` · ${card.scope}`}
+                    </span>
+                  )}
+                </span>
                 <span
                   className={cn(
                     caption,
