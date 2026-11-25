@@ -5259,6 +5259,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           fields: string[]
+          font: string | null
           id: string
           name: string
           organization_id: string
@@ -5285,6 +5286,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fields?: string[]
+          font?: string | null
           id?: string
           name: string
           organization_id: string
@@ -5311,6 +5313,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fields?: string[]
+          font?: string | null
           id?: string
           name?: string
           organization_id?: string
@@ -25018,6 +25021,7 @@ export type Database = {
           p_name: string
           p_organization_id: string
           p_roles: string[]
+          p_font?: string
           p_language?: string
           p_series_id: string | null
           p_source_name?: string

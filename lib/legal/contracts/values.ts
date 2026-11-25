@@ -29,6 +29,8 @@ export type ValueContext = {
   // (« Sans objet », status, roles, amount) is written in it. French when
   // unknown.
   language?: ContractLanguage;
+  // « Date du contrat »: the day the document is written; now when absent.
+  now?: Date;
 };
 
 export type FieldValue = {
@@ -55,6 +57,15 @@ const feeIn = (cents: number, language: ContractLanguage) =>
         currency: "EUR",
       }).format(cents / 100)} excl. VAT`
     : formatFee(cents);
+
+// « 25 novembre 2026 », « 25 November 2026 »: the day in Paris.
+const longDay = (when: Date, language: ContractLanguage) =>
+  new Intl.DateTimeFormat(language === "en" ? "en-GB" : "fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Paris",
+  }).format(when);
 
 const text = (value: string | null | undefined) => {
   const clean = value?.trim();
@@ -89,6 +100,15 @@ function read(id: ContractFieldId, ctx: ValueContext): FieldValue {
       return from(d.phone, "fiche") ?? from(ctx.contact.phone, "network");
     case "personne.adresse":
       return from(d.address, "fiche");
+    // A company is not born (JUR-16: « Sans objet »).
+    case "personne.date_naissance":
+      return d.entity_type === "company"
+        ? notApplicable
+        : from(d.birth_date, "fiche");
+    case "personne.lieu_naissance":
+      return d.entity_type === "company"
+        ? notApplicable
+        : from(d.birth_place, "fiche");
     case "personne.statut":
       return from(
         en
@@ -133,6 +153,8 @@ function read(id: ContractFieldId, ctx: ValueContext): FieldValue {
         : null;
     case "organisation.nom":
       return from(ctx.organizationName, "organization");
+    case "contrat.date":
+      return from(longDay(ctx.now ?? new Date(), language), "document");
     default:
       return null;
   }

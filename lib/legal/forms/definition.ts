@@ -9,7 +9,8 @@
 // alimentent Contribution »).
 
 // v2 (10/10/2026): « Featuring » among the categories of a performer.
-export const LEGAL_FORM_VERSION = 2;
+// v3 (25/11/2026): date and place of birth, for « né(e) le … à … ».
+export const LEGAL_FORM_VERSION = 3;
 
 // « Quel est votre rôle sur ce projet ? », multi-selection with « Autre ».
 export const FORM_ROLES = [
@@ -91,6 +92,8 @@ export const FORM_FIELDS: readonly FormField[] = [
   },
   { id: "phone", block: "common", type: "tel", target: "person" },
   { id: "address", block: "common", type: "textarea", target: "person" },
+  { id: "birth_date", block: "common", type: "text", target: "person" },
+  { id: "birth_place", block: "common", type: "text", target: "person" },
   {
     id: "entity_type",
     block: "common",

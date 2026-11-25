@@ -6,14 +6,14 @@ import { toast } from "@/components/ui/toast";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import {
-  TemplateBodyEditor,
-  type TemplateEditorHandle,
-} from "@/components/contracts/templates/template-body-editor";
-import { TemplateSourceField } from "@/components/contracts/templates/template-source-field";
+  DocumentEditor,
+  type DocumentEditorHandle,
+} from "@/components/contracts/document-editor";
 import {
-  ValueSuggestions,
-  type ValueSuggestionsHandle,
-} from "@/components/contracts/templates/value-suggestions";
+  TemplateSourceField,
+  type TemplateSourceHandle,
+} from "@/components/contracts/templates/template-source-field";
+import { useValueFinder } from "@/components/contracts/templates/use-value-finder";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
@@ -23,15 +23,16 @@ import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import type { DocumentFont } from "@/lib/legal/contracts/document-fonts";
 import {
   CONTRACT_LANGUAGES,
   type ContractLanguage,
 } from "@/lib/legal/contracts/language";
 import { createContractTemplate } from "@/lib/legal/contracts/template-actions";
+import { aboutFromText } from "@/lib/legal/contracts/template-about";
 import type { TemplateAbout } from "@/lib/legal/contracts/template-values";
 import type { TemplateSource } from "@/lib/legal/contracts/upload-source";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
-import { cn } from "@/lib/utils";
 import { jsonListOf } from "@/lib/utils/form-data";
 
 const fr = { contracts, legalContracts, legalDocuments, legalForms };
@@ -42,6 +43,8 @@ export type TemplateDraft = {
   type: ContractType;
   // French when not given (Ibé, 18/11/2026: the contract's language).
   language?: ContractLanguage;
+  // Its Word file's typeface; the default look when not given.
+  font?: DocumentFont | null;
   roles: FormRole[];
   usage: string;
   body: string;
@@ -50,11 +53,12 @@ export type TemplateDraft = {
 
 /**
  * A template pasted by a human (« aucun modèle juridique nouveau ni aucune
- * clause n'est inventé »), its values inserted as chips (saved as {{id}}),
- * or found in a contract already filled in, or imported from a source
- * file kept with it: PO reads an imported contract at once and its text
- * stays folded behind what he found. A new version starts from the current text and file;
- * the original is never touched.
+ * clause n'est inventé »), written on the page of the contract as its PDF
+ * (`DocumentEditor`), its values inserted from « Insérer une information »
+ * (saved as {{id}}), or found in a contract already filled in, or imported
+ * from a source file kept with it: PO reads an imported contract at once and
+ * the contract stays in sight. A new version starts from the current text
+ * and file; the original is never touched.
  */
 export function TemplateForm({
   organizationId,
@@ -75,13 +79,9 @@ export function TemplateForm({
   const t = fr.legalContracts.templates;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const editor = useRef<TemplateEditorHandle>(null);
-  const suggestions = useRef<ValueSuggestionsHandle>(null);
-  // An imported contract shows what PO found, not its raw text.
-  const [textOpen, setTextOpen] = useState(true);
+  const editor = useRef<DocumentEditorHandle>(null);
+  const source = useRef<TemplateSourceHandle>(null);
   const [body, setBody] = useState(initial?.body ?? "");
-  // Values found by « Repérer les valeurs », still to replace or ignore.
-  const [toDecide, setToDecide] = useState<string[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   // Name, type, roles and usage: typed, or proposed by PO from the contract.
   const [about, setAbout] = useState<TemplateAbout>({
@@ -96,6 +96,8 @@ export function TemplateForm({
   const [language, setLanguage] = useState<ContractLanguage>(
     initial?.language ?? "fr",
   );
+  // The typeface of the imported or pasted contract (Sacha 25/11/2026).
+  const [font, setFont] = useState<DocumentFont | null>(initial?.font ?? null);
   const [proposed, setProposed] = useState(false);
 
   // Only what is still empty: what the person chose is kept.
@@ -115,6 +117,24 @@ export function TemplateForm({
     setProposed(true);
   }
 
+  const finder = useValueFinder(editor, fillAbout);
+
+  // A contract imported or pasted whole: what it says of itself, at once
+  // and without PO (its title, the type it names, its roles, its language),
+  // then its values found by the code and PO.
+  function readContract(text: string, typeface: DocumentFont | null) {
+    setFont(typeface);
+    const read = aboutFromText(text);
+    setLanguage(read.language);
+    fillAbout({
+      name: read.name ?? "",
+      type: read.type ?? "other",
+      roles: read.roles,
+      usage: "",
+    });
+    finder.find(text);
+  }
+
   function submit(form: FormData) {
     startTransition(async () => {
       const result = await createContractTemplate({
@@ -122,6 +142,7 @@ export function TemplateForm({
         name: String(form.get("name") ?? ""),
         type: String(form.get("type") ?? "") as ContractType,
         language,
+        font,
         roles: jsonListOf(form.get("roles")) as FormRole[],
         usage: String(form.get("usage") ?? ""),
         body: String(form.get("body") ?? ""),
@@ -142,22 +163,22 @@ export function TemplateForm({
   return (
     <form ref={formRef} action={submit} className="flex flex-col gap-4">
       <TemplateSourceField
+        ref={source}
         organizationId={organizationId}
         initial={initial?.source ?? null}
-        onText={(text, name) => {
-          // The text it replaces stays one click away.
+        onText={(text, name, typeface) => {
+          // The text it replaces stays one click away, in its typeface.
           const before = body;
+          const fontBefore = font;
           editor.current?.load(text);
-          setTextOpen(false);
-          suggestions.current?.analyze(text, name);
+          readContract(text, typeface);
           if (before.trim())
             toast.success(t.source.imported(name), {
               action: {
                 label: t.source.undo,
                 onClick: () => {
                   editor.current?.load(before);
-                  suggestions.current?.clear();
-                  setTextOpen(true);
+                  setFont(fontBefore);
                 },
               },
             });
@@ -215,38 +236,18 @@ export function TemplateForm({
           </ToneCallout>
         )}
       </Fragment>
-      {!textOpen && (
-        <div className="flex flex-col gap-3 rounded-lg bg-[var(--surface-soft)] p-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <h3 className="text-sm font-medium">{t.editor.label}</h3>
-            <p className="text-sm text-muted-foreground">{t.source.folded}</p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => setTextOpen(true)}
-          >
-            {t.source.showText}
-          </Button>
-        </div>
-      )}
-      <div className={cn(!textOpen && "hidden")}>
-        <TemplateBodyEditor
-          ref={editor}
-          name="body"
-          defaultValue={initial?.body}
-          highlight={toDecide}
-          onChange={setBody}
-        />
-      </div>
-      <ValueSuggestions
-        ref={suggestions}
-        editor={editor}
-        body={body}
-        onPending={setToDecide}
-        onAbout={fillAbout}
+      <DocumentEditor
+        ref={editor}
+        name="body"
+        label={t.editor.label}
+        placeholder={t.editor.placeholder}
+        fields
+        defaultValue={initial?.body}
+        busy={finder.pending ? t.values.finding : null}
+        font={font}
+        onChange={setBody}
+        onFile={(file) => source.current?.read(file)}
+        onPasteContract={readContract}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

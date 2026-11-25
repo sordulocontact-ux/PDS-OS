@@ -2619,10 +2619,10 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
   chaque étape).
 - Migration `20261120150101_deal_memo_mail.sql` **à pousser en prod** (crée le bucket `deal-files`) ; test
   `supabase/tests/deal-memo-mail.test.sql` (42 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
-- Reste : le contenu du deal memo (exemple attendu d'Ibé, rien n'en est lu ni présumé) ; un vrai `Cc` dans
-  `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; dépôt à la main d'un memo reçu ailleurs
-  (WhatsApp) : aujourd'hui, le transférer par e-mail à l'adresse du deal. Fait le 23/11 : les 5 notifications du
-  deal memo ont leur texte et leur lien (la page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
+- Fait depuis : l'exemple de memo d'Ibé (Wagram, « Projet Dioo », reçu le 21/11) donne sa forme au PDF du memo de
+  PDS (`lib/deals/memo-pdf.ts`, 22/11) ; vrai `Cc` / `Cci` dans `lib/email/send.ts` (22/11) ; « Déposer le memo
+  reçu » pour un memo arrivé ailleurs (23/11) ; les 5 notifications du deal memo ont leur texte et leur lien (la
+  page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
 
 
 ## Retours d'Ibé du 18/11 : parcours PDS Mic (21/11/2026, branche `pre-prod`)
@@ -3117,3 +3117,53 @@ avec la compilation se lisait comme la sienne. Sans migration.
 - Vérifié dans Chrome sur « Assurance 30 » : une entrée « Titres », passage d'une vue à l'autre, en-tête identique,
   390 px ; la compilation forcée le temps d'une capture (aucun projet de la base de dev n'en a) ; aucune erreur dans
   la console.
+
+## Contrats : écrire le contrat sur sa page, comme son PDF (25/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « là actuellement on crée avec un text field avec des variables, ça fait trop développeur, je voudrais
+qu'on voie directement le contrat en PDF avec les variables » (suite du retour d'Ibé du 18/11 : « recevoir le modèle en
+PDF, pas un truc avec les écritures »).
+
+- **Une seule mise en page** : `lib/legal/contracts/document-layout.ts` (client-safe : `bodyHtml`, `templateBodyHtml`,
+  `documentCss`, `sheetCss`, `fieldLabelOf`, `escapeHtml`) sert le PDF, l'aperçu d'un modèle et l'éditeur ; le gras ajouté
+  seul (titres d'articles, lignes en capitales) porte `data-auto` et est relu comme du texte simple.
+- **`DocumentEditor` + `DocumentEditorToolbar`** : le contrat s'écrit sur sa page A4 (Arial 10 pt justifié, articles),
+  valeurs en blancs libellés comme dans le PDF, gras et souligné réels ; barre Gras, Souligné, « Insérer une information »
+  (menu groupé, seulement pour un modèle) ; Entrée = paragraphe, Maj+Entrée = ligne ; collage Word garde gras et
+  souligné ; pas d'italique.
+- Utilisé par `TemplateForm` (nouveau modèle, nouvelle version) et par « Modifier une clause » (`ReviseDocumentButton`) ;
+  le texte d'un fichier importé n'est plus replié derrière « Afficher le texte », valeurs repérées surlignées.
+- Supprimés : `TemplateBodyEditor`, `field-chip.tsx` ; `DropdownMenuGroup` ajouté à `ui/dropdown-menu.tsx`.
+- **Aucune migration** : le texte stocké ne change pas (`**gras**`, `__souligné__`, `{{champ}}`).
+- **Suite du même jour, après un essai de Sacha** :
+  - **Un Word importé garde sa mise en page** (`source-text.ts`, `docxText`) : chaque paragraphe Word = un paragraphe
+    du contrat (sauf si l'auteur sépare déjà ses blocs par des paragraphes vides : une adresse reste groupée), gras et
+    souligné des runs repris en marques ; avant, tout devenait un seul bloc collé.
+  - **Un fichier déposé sur la page** est importé comme par « Importer un fichier » (`DocumentEditor onFile`,
+    `TemplateSourceHandle.read`) ; avant, le dépôt ne faisait rien.
+  - **Trois informations** : « Date de naissance », « Lieu de naissance » (`personne.date_naissance` /
+    `lieu_naissance`, lues dans la fiche, « Sans objet » pour une société) et « Date du contrat » (`contrat.date`, le
+    jour où le contrat est préparé, en toutes lettres, source `document`). La fiche de renseignements demande la date et
+    le lieu de naissance (v3, facultatifs).
+  - **Lignes à remplir repérées par leur place** (`value-patterns.ts`, `blanksByPlace`) : « né(e) le ____ », « à ____ »
+    juste après, « Fait à …, le ____ » ; une suggestion porte un `context` (motif du texte qui précède, `ExcerptAt`)
+    respecté par le comptage, le surlignage, Remplacer et Annuler ; « Ligne à remplir » dans la liste.
+  - **Nom, type, rôles et langue pré-remplis par le code** (`template-about.ts`) : le titre du contrat (première ligne
+    en capitales ou en gras) donne le nom et le type, le type les rôles, les mots les plus courants la langue ; PO ne
+    complète que ce qui reste vide. Ce que PO a repéré passe au-dessus de la page (son avertissement était invisible
+    sous le contrat).
+  - Constaté en local : la clé Mistral n'a plus d'abonnement (« You need a subscription to access this API »), PO ne lit
+    plus les contrats en local ; Claude en prod.
+  - **Liste « Ce que PO a repéré » supprimée** (Sacha, même jour) : les valeurs repérées sont remplacées et
+    surlignées dans la page ; un clic sur l'une ouvre un petit menu (changer d'information, « Remettre « … » »,
+    « Retirer », `DocumentFieldPopover`) ; un contrat collé en entier est lu comme un import ; PO en échec = un toast.
+  - **Un modèle s'ouvre en modale depuis la liste** (Sacha, même jour : « je veux pas que ça ouvre une page ») :
+    `TemplateDialog` (état, « Valider », le document) ; la page du modèle reste pour les liens de PO et de la demande.
+  - **La typo du contrat reprise** (Sacha, même jour) : la police la plus utilisée d'un Word (`docxFont`, styles et
+    thème compris) ou d'un texte collé (`pastedFontOf`) devient celle du modèle (`contract_templates.font`, migration
+    `20261125200101`), dans la page, l'aperçu et les PDF de tous les contrats faits avec lui. Une police Microsoft passe
+    par sa jumelle libre aux mêmes métriques (Calibri → Carlito, Cambria → Caladea, Times New Roman → Tinos, Arial →
+    Arimo…, `document-fonts.ts`), chargée depuis Google Fonts ; une police inconnue garde l'Arial par défaut. Le pied de
+    page du PDF reste en Arial. Vérifié : PDF imprimé en Tinos, détection sur trois Word de test.
+- Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
+  (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

@@ -28,9 +28,25 @@ export function bodySegments(body: string): BodySegment[] {
 
 const WORD = /[\p{L}\p{N}]/u;
 
+/** Where an excerpt is, when its text alone is not enough (« ____ » after
+ * « née le » is a date of birth, after « Fait à Paris, le » the contract's
+ * date): what is written just before it, as a pattern (RegExp source,
+ * case-insensitive) matched at the end of the text before it in its
+ * paragraph, values written {{id}}. */
+export type ExcerptAt = { excerpt: string; context?: string };
+
+export const contextMatches = (before: string, context?: string) =>
+  !context || new RegExp(`(?:${context})$`, "iu").test(before);
+
 /** Where `excerpt` starts in `text`, whole words only (« Paul » is not in
- * « Paulette »), without overlaps. */
-export function excerptStarts(text: string, excerpt: string): number[] {
+ * « Paulette »), without overlaps; with `context`, only where the text
+ * before it (`lead` then `text`) ends as it says. */
+export function excerptStarts(
+  text: string,
+  excerpt: string,
+  context?: string,
+  lead = "",
+): number[] {
   const starts: number[] = [];
   if (!excerpt) return starts;
   const openWord = WORD.test(excerpt[0]);
@@ -43,7 +59,11 @@ export function excerptStarts(text: string, excerpt: string): number[] {
     const after = text[at + excerpt.length];
     const whole =
       (!openWord || !before || !WORD.test(before)) &&
-      (!closeWord || !after || !WORD.test(after));
+      (!closeWord || !after || !WORD.test(after)) &&
+      contextMatches(
+        (lead + text.slice(0, at)).split("\n\n").at(-1) ?? "",
+        context,
+      );
     if (whole) {
       starts.push(at);
       from = at + excerpt.length;
@@ -51,11 +71,29 @@ export function excerptStarts(text: string, excerpt: string): number[] {
   }
 }
 
-/** How many times `excerpt` is in the text of a template, fields left out. */
-export function countExcerpt(body: string, excerpt: string): number {
-  return bodySegments(body).reduce(
-    (sum, s) =>
-      s.kind === "text" ? sum + excerptStarts(s.text, excerpt).length : sum,
-    0,
-  );
+/** Where `excerpt` is in the text of a template, fields left out. */
+export function excerptPositions(
+  body: string,
+  excerpt: string,
+  context?: string,
+): number[] {
+  const positions: number[] = [];
+  let offset = 0;
+  for (const s of bodySegments(body)) {
+    const length = s.kind === "text" ? s.text.length : `{{${s.id}}}`.length;
+    if (s.kind === "text")
+      for (const at of excerptStarts(
+        s.text,
+        excerpt,
+        context,
+        body.slice(Math.max(0, offset - 400), offset),
+      ))
+        positions.push(offset + at);
+    offset += length;
+  }
+  return positions;
 }
+
+/** How many times `excerpt` is in the text of a template, fields left out. */
+export const countExcerpt = (body: string, excerpt: string, context?: string) =>
+  excerptPositions(body, excerpt, context).length;

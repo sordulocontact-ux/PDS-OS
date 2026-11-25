@@ -871,16 +871,6 @@
   }
 }
 
-/* Valeurs repérées dans un contrat à transformer en modèle, encore à
-   remplacer ou ignorer (« Repérer les valeurs », editor-dom.ts). Le build
-   avertit « 'highlight' is not recognized » (lightningcss ne connaît pas
-   encore ce pseudo-élément) : la règle est gardée telle quelle, sans effet
-   sur le reste. */
-::highlight(template-value) {
-  background-color: var(--tone-warning-bg);
-  color: var(--tone-warning-fg);
-}
-
 /* Un bouton dont l'écriture est en cours (components/ui/navigation-progress.tsx) :
    lui seul reste net, ses voisins désactivés pâlissent, et un anneau qui tourne
    prend la place de son icône, après 120 ms pour ne pas clignoter sur une

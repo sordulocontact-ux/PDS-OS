@@ -11,8 +11,11 @@ import type { ContractType } from "@/lib/contracts/types";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
-import { countExcerpt } from "@/lib/legal/contracts/template-text";
-import { valuesByShape } from "@/lib/legal/contracts/value-patterns";
+import { excerptPositions } from "@/lib/legal/contracts/template-text";
+import {
+  blanksByPlace,
+  valuesByShape,
+} from "@/lib/legal/contracts/value-patterns";
 import type { FormRole } from "@/lib/legal/forms/definition";
 
 // « Repérer les valeurs »: a contract already filled in for someone becomes
@@ -32,6 +35,8 @@ export type TemplateAbout = {
 
 export type ValueSuggestion = {
   excerpt: string;
+  // A blank to fill (« ____ »): the text before it that says which one.
+  context?: string;
   field: ContractFieldId;
   count: number;
 };
@@ -65,7 +70,11 @@ export async function suggestTemplateValues(body: string): Promise<
     return { ok: false, error: t.empty };
   const text = input.data;
 
-  const candidates = valuesByShape(text);
+  const candidates: Array<{
+    excerpt: string;
+    context?: string;
+    field: ContractFieldId;
+  }> = [...blanksByPlace(text), ...valuesByShape(text)];
   let partial = false;
   let quota: string | null = null;
   let about: TemplateAbout | null = null;
@@ -96,15 +105,23 @@ export async function suggestTemplateValues(body: string): Promise<
 
   const seen = new Set<string>();
   const suggestions: Array<ValueSuggestion & { at: number }> = [];
-  for (const { excerpt, field } of candidates) {
-    if (seen.has(excerpt) || excerpt.length < 2 || excerpt.length > 200)
-      continue;
+  for (const { excerpt, context, field } of candidates) {
+    const key = `${context ?? ""}\u0000${excerpt}`;
+    if (seen.has(key) || excerpt.length < 2 || excerpt.length > 200) continue;
     if (excerpt.includes("\n") || excerpt.includes("{{")) continue;
     if (field === "remuneration" && !/\d/.test(excerpt)) continue;
-    const count = countExcerpt(text, excerpt);
-    if (count === 0) continue;
-    seen.add(excerpt);
-    suggestions.push({ excerpt, field, count, at: text.indexOf(excerpt) });
+    // A line to fill in by hand is a value only where its place says so.
+    if (!context && /^[_.…\s]+$/.test(excerpt)) continue;
+    const positions = excerptPositions(text, excerpt, context);
+    if (positions.length === 0) continue;
+    seen.add(key);
+    suggestions.push({
+      excerpt,
+      ...(context ? { context } : {}),
+      field,
+      count: positions.length,
+      at: positions[0],
+    });
   }
   return {
     ok: true,
@@ -114,6 +131,11 @@ export async function suggestTemplateValues(body: string): Promise<
     suggestions: suggestions
       .sort((a, b) => a.at - b.at)
       .slice(0, MAX_SUGGESTIONS)
-      .map(({ excerpt, field, count }) => ({ excerpt, field, count })),
+      .map(({ excerpt, context, field, count }) => ({
+        excerpt,
+        ...(context ? { context } : {}),
+        field,
+        count,
+      })),
   };
 }

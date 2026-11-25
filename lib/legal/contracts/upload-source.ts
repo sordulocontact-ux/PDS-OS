@@ -1,4 +1,5 @@
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import type { DocumentFont } from "@/lib/legal/contracts/document-fonts";
 import {
   MAX_SOURCE_BYTES,
   sourceExtensionOf,
@@ -20,7 +21,12 @@ export async function uploadTemplateSource(
   organizationId: string,
   file: File,
 ): Promise<
-  | { ok: true; source: TemplateSource; text: string }
+  | {
+      ok: true;
+      source: TemplateSource;
+      text: string;
+      font: DocumentFont | null;
+    }
   | { ok: false; error: string }
 > {
   const t = fr.legalContracts.templates.source;
@@ -42,5 +48,10 @@ export async function uploadTemplateSource(
   }
   const read = await readTemplateSource(path);
   if (!read.ok) return read;
-  return { ok: true, source: { path, name: file.name }, text: read.text };
+  return {
+    ok: true,
+    source: { path, name: file.name },
+    text: read.text,
+    font: read.font,
+  };
 }

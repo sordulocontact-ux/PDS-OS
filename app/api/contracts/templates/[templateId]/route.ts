@@ -2,6 +2,7 @@ import { getAccess } from "@/lib/auth/dal";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { templateHtml } from "@/lib/legal/contracts/document-pdf";
+import { isDocumentFont } from "@/lib/legal/contracts/document-fonts";
 import { asContractLanguage } from "@/lib/legal/contracts/language";
 import { htmlToPdf } from "@/lib/pdf/render";
 import { createClient } from "@/lib/supabase/server";
@@ -32,7 +33,7 @@ export async function GET(
   const supabase = await createClient();
   const { data: template } = await supabase
     .from("contract_templates")
-    .select("name, version, body, language")
+    .select("name, version, body, language, font")
     .eq("id", id.data)
     .maybeSingle();
   if (!template) {
@@ -44,6 +45,7 @@ export async function GET(
     title,
     body: template.body,
     language: asContractLanguage(template.language),
+    font: isDocumentFont(template.font) ? template.font : null,
   });
   const url = new URL(request.url);
   if (url.searchParams.get("format") === "html") {
