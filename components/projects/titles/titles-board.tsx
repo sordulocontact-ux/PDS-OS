@@ -113,6 +113,9 @@ export type TitleDepositLink = { href: string; label: string; tone: Tone };
 export type BoardLinks = {
   master: string | null;
   distribution: Record<string, TitleDepositLink> | null;
+  // A launched collective: a title's name opens its page (« Titres »,
+  // Maël 25/11/2026); else its Master.
+  tracks?: boolean;
 };
 
 /** Which columns the table has besides those always there (Artiste,
@@ -668,7 +671,14 @@ function TitleRows(props: TitleRowsProps) {
       ? () => setDialog("name")
       : undefined;
   const titleLine = (
-    <TitleLine title={title} label={label} href={masterHref} onName={onName} />
+    <TitleLine
+      title={title}
+      label={label}
+      href={
+        links.tracks ? routes.projectTrack(projectId, title.id) : masterHref
+      }
+      onName={onName}
+    />
   );
   // Once per title, in its first row's « ⋯ » cell (a dialog shows in a
   // portal, wherever it is written).

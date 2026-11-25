@@ -2994,3 +2994,28 @@ pour qui peut caler un call sans écrire les titres (un business manager), avec 
   d'un deal.
 - Vérifié dans Chrome sur « Assurance 30 » (vu comme Claire Morel) : « Call à caler » sur Joss Barelle, « ⋯ » →
   « Caler le call » ouvre le formulaire avec les créneaux.
+
+## PDS Mic : entrer par le titre, page « Titres » et page d'un titre (25/11/2026)
+
+Maël : le sélecteur de titre du fil d'Ariane (« Master ▸ titre ▸ étape », « Juridique ▸ portée ▸ étape », « Distribution
+▸ sortie ») reste un raccourci, mais il faut une vraie entrée par titre, avec le même parcours qu'un projet non MIC.
+Sans migration.
+
+- **« Titres »** (`/app/projects/[id]/tracks`, entrée de navigation d'un collectif, avant « Titres et artistes ») : une
+  ligne par titre, son Master, son Juridique et sa Distribution comme la « Progression » d'une Vue d'ensemble (anneau,
+  « Étape n sur N · … », « À vous : … », mot pour mot comme la page du titre), les abandonnés à la fin. La ligne ouvre la page du titre.
+- **Page d'un titre** (`/tracks/[titleId]`) : la Vue d'ensemble d'un projet pour ce seul titre (« Maintenant » et
+  « Progression », mêmes composants), puis ses artistes (le récap compact filtré au titre). Les autres titres dans le
+  fil. Chaque carte ouvre le module déjà sur ce titre (`?titre=`, `?sortie=`).
+- Le nom d'un titre dans « Titres et artistes » ouvre sa page (avant : le Master) ; la pastille Mix mène toujours au
+  Master.
+- Le Cadrage et le Marketing restent ceux du projet (ils ne se travaillent pas par titre) : pas de carte Marketing sur
+  la page d'un titre.
+- **Pour Sacha** : `lib/ui/project-sections.ts` reçoit l'entrée « Titres » (collectif seulement), rien d'autre ne change
+  pour les autres projets.
+- Vérifié dans Chrome sur « Assurance 30 » (vu comme Lina Haddad) : « Titres » (7 titres, Master / Juridique /
+  Distribution), page de « Néons » (« Maintenant », « Progression », artistes), cartes Juridique et Master qui
+  ouvrent le module sur ce titre, sélecteur de titre du fil d'Ariane, titre à nommer. Aucune erreur dans la console.
+  Corrigé après coup : la liste disait « À venir » là où la page du titre dit « Étape 1 sur 5 · Source » (même mot
+  partout maintenant) ; sur la page d'un titre, le nom du titre n'est plus répété sous chaque artiste.
+  Pas de titre abandonné dans ce projet : le groupe « Abandonnés » n'a pas été vu.

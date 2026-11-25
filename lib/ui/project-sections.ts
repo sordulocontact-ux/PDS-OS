@@ -116,6 +116,13 @@ export function projectSections(
     // titles, their artists and where each one stands.
     ...(collective
       ? [
+          // Its titles, the way into each one's journeys (Maël 25/11/2026).
+          {
+            key: "tracks",
+            label: t.tracks,
+            href: routes.projectTracks(projectId),
+            match: below(routes.projectTracks(projectId)),
+          },
           {
             key: "titles",
             label: t.titles,

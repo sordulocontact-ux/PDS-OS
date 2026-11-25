@@ -243,6 +243,11 @@ export const routes = {
   projectsNewFromSelection: (selectionId: string) =>
     `/app/projects/new?selection=${selectionId}`,
   project: (id: string) => `/app/projects/${id}`,
+  // A collective's titles, each with its journeys (Maël 25/11/2026), and
+  // one title's page.
+  projectTracks: (id: string) => `/app/projects/${id}/tracks`,
+  projectTrack: (id: string, titleId: string) =>
+    `/app/projects/${id}/tracks/${titleId}`,
   // « Titres et artistes » of a collective (lot 6 of docs/pds-mic-plan.md).
   projectTitles: (id: string) => `/app/projects/${id}/titles`,
   // A collective's releases (lot 13 of docs/pds-mic-plan.md).

@@ -84,6 +84,7 @@ import { masterFileRequests } from "./master-file-requests";
 import { participationWaivers } from "./participation-waivers";
 import { collectiveReleases } from "./collective-releases";
 import { titleReleasePlans } from "./title-release-plans";
+import { titleTracks } from "./title-tracks";
 import { legalParticipations } from "./legal-participations";
 import { masterJourney } from "./master-journey";
 import { reviewJourney } from "./review-journey";
@@ -315,6 +316,7 @@ export const fr = {
   participationWaivers,
   collectiveReleases,
   titleReleasePlans,
+  titleTracks,
   legalParticipations,
   masterSource,
   masterPage,

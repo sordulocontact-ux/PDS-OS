@@ -114,6 +114,7 @@ export default async function ProjectTitlesPage({
         artists={artists}
         masterOptions={masterOptions}
         links={{
+          tracks: true,
           master: workflows.includes("master")
             ? routes.projectMaster(project.id)
             : null,

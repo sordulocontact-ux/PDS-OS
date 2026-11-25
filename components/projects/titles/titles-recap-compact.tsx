@@ -74,18 +74,21 @@ function StackedFact({
  * 23/11/2026); Statut, Accord (its stage alone, same day; when the reader
  * sees deals), Juridique (manage_legal), the title's Mix. Read only: the row
  * opens « Titres et artistes » (`href`), each pill its module. Rendered on
- * the server.
+ * the server. `oneTitle`: a title's page, no label under the name.
  */
 export function TitlesRecapCompact({
   recap,
   href,
   masterHref,
+  oneTitle = false,
 }: {
   recap: TitleRecap;
   // « Titres et artistes », where everything is edited.
   href: string;
   // The project's Master, when it has one (a title opens on itself).
   masterHref: string | null;
+  // A title's page: its label under each artist would only repeat it.
+  oneTitle?: boolean;
 }) {
   const r = fr.projectTitles.recap;
   const accord = recap.dealReach !== "none";
@@ -171,9 +174,11 @@ export function TitlesRecapCompact({
                   <span className="flex min-w-0">
                     <DataTableLink href={href}>{artist}</DataTableLink>
                   </span>
-                  <span className={`${caption} truncate`}>
-                    {title.recap.label}
-                  </span>
+                  {!oneTitle && (
+                    <span className={`${caption} truncate`}>
+                      {title.recap.label}
+                    </span>
+                  )}
                   <span className="sm:hidden">
                     <ContactStatePill status={participation.status} />
                   </span>

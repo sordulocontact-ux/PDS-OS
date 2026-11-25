@@ -5542,6 +5542,15 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   première non faite. `LegalStepFrame titre` : colonne = la portée seule, fil « Juridique ▸ portée ▸ étape » avec les
   autres portées en options (coche si tout est fait, compte « À vous »). Routes `/legal/attach/<titleId>` et
   `/legal/title-contracts/<titleId>` (404 si inconnues), étapes propres à la colonne, sans outils de blocage ni note.
+- **Entrer par le titre** (Maël 25/11/2026, sans migration) : `lib/projects/title-journeys.ts` (`loadTitleProgress`,
+  `loadTitlesProgress`, `loadTitleChoices`, collectif lancé) rassemble les parcours d'un titre déjà calculés par chaque
+  module : Master = `masterTitleJourney` (étapes gardant `?titre=<master>`), Juridique = la portée du titre dans
+  `legalTitleLayout` (`manage_legal`, sinon carte réservée), Distribution = `distributionContext(projet, sortie)` de la
+  sortie du titre ou de la compilation (`loadTitleDeposits`, étapes gardant `?sortie=`). Puis `workflowCards` (les cartes
+  de la « Progression » d'une Vue d'ensemble ; état « fait » quand toutes les étapes du titre le sont, « pas commencé »
+  sans étape) et les actions du titre pour « Maintenant ». Un titre abandonné n'a aucun parcours. Pages
+  `/app/projects/[id]/tracks` (« Titres », entrée `tracks` de `projectSections` pour un collectif) et
+  `/tracks/[titleId]` (404 hors collectif ou titre inconnu). Cadrage et Marketing restent ceux du projet.
 - **Artiste principal une fois** (`lib/legal/main-artist.ts`) : à l'État des lieux, à la Confirmation et au Cadrage
   (« PDS · Artiste principal · tous les titres »).
 - **Noms de titre** : `withProjectTitleNames` (`journey-context.ts`) donne aux titres d'un collectif le libellé du projet
