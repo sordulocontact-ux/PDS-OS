@@ -13,6 +13,7 @@ import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
+import { routes } from "@/lib/auth/redirects";
 import { legalJourney } from "@/lib/i18n/fr/legal-journey";
 import { legalParticipations } from "@/lib/i18n/fr/legal-participations";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
@@ -106,7 +107,9 @@ export async function LegalStepFrame({
               ) : undefined
             }
             extraCrumbs={
-              layout && scope ? [scopeCrumb(layout, scope)] : undefined
+              layout && scope
+                ? [scopeCrumb(projectId, layout, scope)]
+                : undefined
             }
             // A collective (Ibé and Maël did not find it at the foot of the
             // spine, 21/11/2026): each participation's contract and deal
@@ -158,12 +161,20 @@ export async function LegalStepFrame({
  * (« Projet », then each title): each opens where it waits for the viewer;
  * done when all its steps are, the viewer's steps counted. */
 function scopeCrumb(
+  projectId: string,
   layout: TitleLayout,
   scope: LegalScope,
-): { label: string; options?: CrumbOption[] } {
-  if (layout.scopes.length < 2) return { label: scope.label };
-  return {
+): { label: string; href?: string; options?: CrumbOption[] } {
+  // A title's name opens its page (« Titres », Maël 25/11/2026).
+  const crumb = {
     label: scope.label,
+    href: scope.titleId
+      ? routes.projectTrack(projectId, scope.titleId)
+      : undefined,
+  };
+  if (layout.scopes.length < 2) return crumb;
+  return {
+    ...crumb,
     options: layout.scopes.flatMap((s) => {
       const entry = scopeEntry(s);
       if (!entry) return [];

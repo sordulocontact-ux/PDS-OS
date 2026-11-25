@@ -5549,8 +5549,13 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   sortie du titre ou de la compilation (`loadTitleDeposits`, étapes gardant `?sortie=`). Puis `workflowCards` (les cartes
   de la « Progression » d'une Vue d'ensemble ; état « fait » quand toutes les étapes du titre le sont, « pas commencé »
   sans étape) et les actions du titre pour « Maintenant ». Un titre abandonné n'a aucun parcours. Pages
-  `/app/projects/[id]/tracks` (« Titres », entrée `tracks` de `projectSections` pour un collectif) et
-  `/tracks/[titleId]` (404 hors collectif ou titre inconnu). Cadrage et Marketing restent ceux du projet.
+  `/app/projects/[id]/tracks` (« Titres », entrée `tracks` de `projectSections` pour un collectif ; une case = l'anneau
+  et l'étape de la carte, « À vous » si `next.mine`, deux lignes au plus) et
+  `/tracks/[titleId]` (404 hors collectif ou titre inconnu). Cadrage et Marketing restent ceux du projet. Une carte de
+  la page d'un titre ouvre l'étape en haut de page (son `href` sans `#a-vous`, que « Ouvrir l'étape » garde). Dans le
+  fil de Master, Juridique et Distribution, le nom du titre (`titleCrumb`, `scopeCrumb`, `releaseCrumb` d'une sortie de
+  titre) mène à sa page, le chevron change de titre ; `ProjectHeaderView` reconnaît l'étape ouverte à son chemin seul,
+  sans `?titre=` / `?sortie=`, pour que le fil finisse sur elle (« Master / Néons / Source »).
 - **Artiste principal une fois** (`lib/legal/main-artist.ts`) : à l'État des lieux, à la Confirmation et au Cadrage
   (« PDS · Artiste principal · tous les titres »).
 - **Noms de titre** : `withProjectTitleNames` (`journey-context.ts`) donne aux titres d'un collectif le libellé du projet

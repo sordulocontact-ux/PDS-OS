@@ -110,7 +110,12 @@ export function ProjectHeaderView({
       opens[s.key] ? [[s.href, opens[s.key]] as const] : [],
     ),
   );
-  const step = (steps ?? data.steps).find((s) => s.href === pathname);
+  // By its path: a collective's step keeps its title or release in its
+  // address (`?titre=`, `?sortie=`), and the trail still ends on it
+  // (« Master / Néons / Source »).
+  const step = (steps ?? data.steps).find(
+    (s) => s.href.split(/[?#]/)[0] === pathname,
+  );
   const shown: StepHead | undefined = head === "path" ? step : head;
   const sub = data.subModules.find((s) => isSubModuleAt(s, pathname));
   // The Marketing's sub-modules, to switch to from the trail (Sacha

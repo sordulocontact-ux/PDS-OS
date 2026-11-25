@@ -3060,3 +3060,18 @@ migration.
 - Vérifié dans Chrome sur « Assurance 30 » (vu comme Lina Haddad) : tags gris, orange et vert ; Contact sans
   icônes d'appel ; Accord « Validé » sans nom ; Contrat « Attend l'accord », « Envoyé », « À contresigner »,
   « Signé » ; Beatmaker en un nom.
+
+## PDS Mic : du module à la page du titre, et sans descendre (25/11/2026)
+
+- Retours de Maël : une carte de « Progression » ouvrait le module déjà descendu (l'ancre `#a-vous`), et rien ne
+  ramenait à la page du titre depuis le module.
+- Une carte de la page d'un titre ouvre l'étape en haut de page. « Ouvrir l'étape » de « Maintenant » garde l'ancre
+  (retour d'Ibé, lot 4). Sur la Vue d'ensemble d'un projet, les cartes gardent l'ancre.
+- Dans le fil de Master, Juridique et Distribution, le nom du titre mène à sa page (« Master / Néons ⌄ / Source »), le
+  chevron change toujours de titre. Une compilation n'a pas de page : son nom reste un sélecteur.
+- **Pour Sacha** : `components/projects/project-header-view.tsx` reconnaît l'étape ouverte à son chemin seul (sans
+  `?titre=` ni `?sortie=`) : le fil d'un collectif finit de nouveau sur l'étape, comme le voulait `titleCrumb`
+  (« Master ▸ titre ▸ étape »). Rien ne change pour les autres projets. `distribution-frame.tsx` : lien du titre dans
+  `releaseCrumb`.
+- Vérifié dans Chrome sur « Assurance 30 » : carte Master, Juridique, Distribution puis retour par le nom du titre, à
+  chaque fois en haut de page ; aucune erreur dans la console.

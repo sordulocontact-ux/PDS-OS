@@ -144,12 +144,17 @@ export const loadTitleProgress = trackedCache(
     return {
       ...base,
       journeys: gathered,
+      // A card opens the workflow at the top of its step, not scrolled down
+      // to the viewer's gesture (`#a-vous`, kept for « Maintenant »'s « Ouvrir
+      // l'étape »): Maël 25/11/2026.
       cards: workflowCards({
         projectId,
         workflows: ctx.workflows,
         states,
         journeys: gathered,
-      }),
+      }).map((card) =>
+        card.restricted ? card : { ...card, href: card.href.split("#")[0] },
+      ),
     };
   },
 );

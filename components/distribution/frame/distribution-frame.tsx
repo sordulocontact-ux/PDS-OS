@@ -231,19 +231,25 @@ export async function DistributionFrame({
 
 /** The release shown, with the collective's other live releases to choose
  * from: each opens on the step that waits there (/release?sortie=), with
- * where its deposit stands. */
+ * where its deposit stands. A title's release: its name opens the title's
+ * page (« Titres », Maël 25/11/2026); the compilation has no page. */
 async function releaseCrumb(
   project: ProjectDetail,
   releaseId: string,
   label: string,
-): Promise<{ label: string; options?: CrumbOption[] }> {
+): Promise<{ label: string; href?: string; options?: CrumbOption[] }> {
   const access = await requireApproved();
   const { releases } = await loadCollectiveReleases(project, access);
+  const titleId = releases.find((r) => r.id === releaseId)?.titleId;
+  const crumb = {
+    label,
+    href: titleId ? routes.projectTrack(project.id, titleId) : undefined,
+  };
   const live = releases.filter((r) => !r.abandoned || r.id === releaseId);
-  if (live.length < 2) return { label };
+  if (live.length < 2) return crumb;
   const words = collectiveReleases.distribution;
   return {
-    label,
+    ...crumb,
     options: live.map((r) => ({
       key: r.id,
       label: r.label,

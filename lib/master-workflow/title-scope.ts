@@ -1,5 +1,6 @@
 import "server-only";
 
+import { routes } from "@/lib/auth/redirects";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import type { JourneyFileRequest } from "@/lib/master-workflow/journey-facts";
 import {
@@ -139,16 +140,21 @@ export const loadMasterTitleScope = trackedCache(
 );
 
 /** The trail's segment of the active title (Master ▸ titre ▸ étape): its
- * siblings to switch to, on the same step; none when there is one title. */
+ * name opens the title's page (« Titres », Maël 25/11/2026), its siblings
+ * to switch to on the same step; none when there is one title. */
 export function titleCrumb(
   projectId: string,
   step: MasterStepKey,
   scope: MasterTitleScope,
-): { label: string; options?: CrumbOption[] } {
-  if (scope.choices.length < 2) return { label: scope.active.label };
+): { label: string; href: string; options?: CrumbOption[] } {
+  const crumb = {
+    label: scope.active.label,
+    href: routes.projectTrack(projectId, scope.active.titleId),
+  };
+  if (scope.choices.length < 2) return crumb;
   const href = masterStepHref(projectId, step);
   return {
-    label: scope.active.label,
+    ...crumb,
     options: scope.choices.map((choice) => ({
       key: choice.masterId,
       label: choice.label,

@@ -283,12 +283,14 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Tests : `collective-recap` (42), `collective-title-contracts` (39). Données de démo « Assurance 30 » :
   `supabase/preprod/showcase-assurance-30.sql`, à jouer à la main en pré-prod après `showcase-business.sql`.
 - **Entrer par le titre** (Maël 25/11/2026, sans migration) : « Titres » (`/tracks`, entrée de navigation avant « Titres
-  et artistes ») liste les titres avec leur Master, Juridique et Distribution comme la « Progression » d'une Vue
-  d'ensemble ; la page d'un titre (`/tracks/[titleId]`) est la Vue d'ensemble d'un projet pour ce seul titre
-  (« Maintenant », « Progression », puis ses artistes en récap compact), les autres titres dans le fil. Les sélecteurs
-  des modules restent des raccourcis. Le nom d'un titre dans « Titres et artistes » ouvre sa page. Calcul :
-  `lib/projects/title-journeys.ts` (`masterTitleJourney`, portée de `legalTitleLayout`, `distributionContext` de la
-  sortie du titre ou de la compilation, puis `workflowCards`). Cadrage et Marketing restent ceux du projet.
+  et artistes ») liste les titres avec leur Master, Juridique et Distribution (un anneau, le nom de l'étape, « À vous »
+  quand c'est au lecteur : deux lignes par case au plus) ; la page d'un titre (`/tracks/[titleId]`) est la Vue
+  d'ensemble d'un projet pour ce seul titre (« Maintenant », « Progression », puis ses artistes en récap compact), les
+  autres titres dans le fil. Dans le fil d'un module, le nom du titre ramène à sa page (« Master / Néons ⌄ / Source ») ;
+  les sélecteurs des modules restent des raccourcis. Le nom d'un titre dans « Titres et
+  artistes » ouvre sa page. Calcul : `lib/projects/title-journeys.ts` (`masterTitleJourney`, portée de
+  `legalTitleLayout`, `distributionContext` de la sortie du titre ou de la compilation, puis `workflowCards`). Cadrage
+  et Marketing restent ceux du projet.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
