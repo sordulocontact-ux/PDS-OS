@@ -6,7 +6,7 @@ import { useState, type FormEvent } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
+import { NegotiationCallDialog } from "@/components/deals/negotiation-call-button";
 import { IconUserPlus } from "@/components/icons";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { caption } from "@/components/projects/titles/recap-facts";
@@ -56,7 +56,7 @@ import { cn } from "@/lib/utils";
 // What the collective's recap edits in place (retours d'Ibé du 18/11/2026,
 // lot 2: « contact, sortie oui / non, notes », nothing that has a module):
 // the release of a title, the note and the manager's contact of an artist,
-// and « Caler le call » (Sacha's NegotiationCallButton). `relative z-10`:
+// and « Caler le call » (Sacha's dialog, from the row's « ⋯ »). `relative z-10`:
 // above a row's DataTableLink, where one covers the row.
 
 const fr = { dialogs, projectTitles };
@@ -703,27 +703,34 @@ function CreateForm({
 // ------------------------------------------------------------ Caler le call
 
 /** « Caler le call » of a row (Ibé 18/11, 1:00:28): the artist agreed and
- * no call is planned. The shared data (negotiators' slots, contacts) is
+ * no call is planned. Opened from the row's « ⋯ » (Maël 25/11/2026: no
+ * button in the table). The shared data (negotiators' slots, contacts) is
  * given once to the board, the row's target computed here. */
-export function PlanCallButton({
+export function PlanCallDialog({
   shared,
   accord,
+  open,
+  onOpenChange,
 }: {
   shared: SharedNegotiationCall | null;
   accord: RecapAccord;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   if (!shared || !accord.call || !accord.showPlanCall) return null;
   const data = negotiationCallData(shared, accord.call);
   if (!data) return null;
   return (
-    <span className="relative z-10">
-      <NegotiationCallButton data={data} variant="outline" size="sm" />
-    </span>
+    <NegotiationCallDialog
+      data={data}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
   );
 }
 
-/** Whether a row shows « Caler le call » (so that its cell does not say
- * « — » in its place). */
+/** Whether a row may « Caler le call » (its « ⋯ » offers it, its Accord
+ * cell says « Call à caler »). */
 export const plansCall = (
   shared: SharedNegotiationCall | null,
   accord: RecapAccord,

@@ -7,6 +7,7 @@ import {
   IconMicrophone,
   IconMinus,
   IconPenWriting2,
+  IconPhone,
   IconTriangleWarning,
 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
@@ -23,7 +24,7 @@ import { IconArrowUpRight, IconDisc, IconUserPlus } from "@/components/icons";
 import {
   ContactFacts,
   NoteLine,
-  PlanCallButton,
+  PlanCallDialog,
   ReleaseChoice,
   plansCall,
   releaseValueOf,
@@ -79,6 +80,7 @@ import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { todayInParis } from "@/lib/contracts/types";
 import type { SharedNegotiationCall } from "@/lib/deals/negotiation-call-rules";
+import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import { setTitleParticipationStatus } from "@/lib/projects/participation-actions";
@@ -102,7 +104,7 @@ import type { Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 
-const fr = { dialogs, projectTitles };
+const fr = { dealCalls, dialogs, projectTitles };
 
 /** Where a row leads: the project's Master (a title with a master), its
  * release's deposit in the Distribution (lot 15, by title: its own release,
@@ -117,9 +119,10 @@ export type BoardLinks = {
  * Statut, Contact, Mix, Sortie, Beatmaker): Accord and Taux when the
  * reader sees deals (dealReach, lot 6); Fiche de renseignement and Contrat
  * with manage_legal; Distribution once the project has the workflow; « ⋯ »
- * for whoever writes the titles (none for a reader: no empty column on the
- * right). `notes`: the artists' notes in a « Note » column of their own
- * (Maël 23/11/2026), none on an overview (too much there). */
+ * for whoever writes the titles or may « Caler le call » on a row (none for
+ * a reader: no empty column on the right). `notes`: the artists' notes in a
+ * « Note » column of their own (Maël 23/11/2026), none on an overview (too
+ * much there). */
 type Columns = {
   accord: boolean;
   legal: boolean;
@@ -253,9 +256,9 @@ const Empty = () => <span className={muted}>{EMPTY_CELL}</span>;
  * title without an artist has its own row. « Le tableau lit, les modules
  * font »: each name and pill leads to its module. Counters on top filter
  * the artists by status; the abandoned titles come last, under
- * « Abandonnés ». The « ⋯ » of a row: the artist's gestures, then its
- * title's. Wider than the page: it scrolls inside its frame, Artiste kept
- * on the left.
+ * « Abandonnés ». The « ⋯ » of a row: « Caler le call » and the artist's
+ * gestures, then its title's (no button in a cell, Maël 25/11/2026). Wider
+ * than the page: it scrolls inside its frame, Artiste kept on the left.
  */
 export function TitlesBoard({
   projectId,
@@ -296,7 +299,17 @@ export function TitlesBoard({
     accord: recap.dealReach !== "none",
     legal: recap.canReadLegal,
     distribution: links.distribution !== null,
-    actions: canManage,
+    // « Caler le call » is in the row's « ⋯ » (Maël 25/11/2026): a
+    // negotiator who does not write the titles has the column too.
+    actions:
+      canManage ||
+      recap.titles.some(
+        (title) =>
+          title.status !== "abandoned" &&
+          title.participations.some(
+            (p) => p.recap.accord && plansCall(recap.call, p.recap.accord),
+          ),
+      ),
     notes,
   };
 
@@ -1013,6 +1026,8 @@ function ArtistRow({
   // reads the Juridique; under the name for the others.
   const missing =
     !canReadLegal && contractGap(title, participation, today) !== null;
+  const plansCallHere =
+    !dimmed && facts.accord !== null && plansCall(call, facts.accord);
 
   const status = <ContactStatePill status={participation.status} />;
   // The alerts in words: a tooltip beside the name in the table (two lines
@@ -1097,9 +1112,12 @@ function ArtistRow({
                 accord={facts.accord}
                 artist={artist}
                 rate={false}
+                // The gesture is in the row's « ⋯ »; the cell says it.
                 planCall={
-                  !dimmed && plansCall(call, facts.accord) ? (
-                    <PlanCallButton shared={call} accord={facts.accord} />
+                  plansCallHere ? (
+                    <span className={cn(caption, "max-w-full truncate")}>
+                      {r.accord.callToPlan}
+                    </span>
                   ) : undefined
                 }
               />
@@ -1176,6 +1194,7 @@ function ArtistRow({
       label={label}
       credit={credit}
       canManage={canManage}
+      call={plansCallHere ? call : null}
       titleActions={titleActions}
     />
   );
@@ -1444,16 +1463,18 @@ function TitleDialogs({
   );
 }
 
-/** « ⋯ » of an artist's row: the artist's gestures — change its status
- * (modal), withdraw it from the title (détacher, confirmed) or bring a
- * declined or withdrawn one back (rattacher, at once, « À contacter »
- * again) — then its title's (`titleActions`). */
+/** « ⋯ » of an artist's row: « Caler le call » when the row may plan it
+ * (`call`, Maël 25/11/2026: no button in the table), the artist's gestures
+ * — change its status (modal), withdraw it from the title (détacher,
+ * confirmed) or bring a declined or withdrawn one back (rattacher, at once,
+ * « À contacter » again) — then its title's (`titleActions`). */
 function RowMenu({
   projectId,
   participation,
   label,
   credit,
   canManage,
+  call,
   titleActions,
 }: {
   projectId: string;
@@ -1462,10 +1483,12 @@ function RowMenu({
   credit: Credit;
   // The artist's own gestures (not on a title abandoned).
   canManage: boolean;
+  // « Caler le call »'s shared data, when the row may plan it.
+  call: SharedNegotiationCall | null;
   titleActions: RowAction[];
 }) {
   const t = fr.projectTitles.participations;
-  const [open, setOpen] = useState<"status" | "withdraw" | null>(null);
+  const [open, setOpen] = useState<"status" | "withdraw" | "call" | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const close = () => {
@@ -1489,6 +1512,18 @@ function RowMenu({
       close();
     });
   const active = isActiveParticipation(participation.status);
+  const accord = participation.recap.accord;
+  const planCall: RowAction[] =
+    call && accord
+      ? [
+          {
+            key: "call",
+            label: fr.dealCalls.negotiation.button,
+            icon: IconPhone,
+            onSelect: () => setOpen("call"),
+          },
+        ]
+      : [];
   const own: RowAction[] = canManage
     ? [
         {
@@ -1517,8 +1552,16 @@ function RowMenu({
     <>
       <RowActions
         label={t.menu(participation.artist.name, label)}
-        actions={[...own, ...titleActions]}
+        actions={[...planCall, ...own, ...titleActions]}
       />
+      {call && accord && (
+        <PlanCallDialog
+          shared={call}
+          accord={accord}
+          open={open === "call"}
+          onOpenChange={(next) => !next && close()}
+        />
+      )}
       {canManage && (
         <>
           <FormDialog

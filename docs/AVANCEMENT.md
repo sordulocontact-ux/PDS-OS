@@ -2982,3 +2982,15 @@ power user (`ux-tests/2026-11-24-deals-profils/rapport.md`, SUS 46). Corrigés d
   changé (`ui/dialog-guard.ts`), Échap et ✕ ferment toujours.
 - Reste (rapport, gravité 3 et 2) : libellés des termes de marque en français (Fee, Livrables, Droits d'usage), un état
   « Notre proposition » par défaut, prochaine action en tête d'une fiche en négociation, « À enregistrer » d'un call passé.
+
+## PDS Mic : « Caler le call » quitte le tableau « Titres et artistes » (25/11/2026)
+
+Maël : un bouton dans le tableau, c'est bizarre. « Caler le call » est maintenant dans le « ⋯ » de la ligne (en tête) ;
+la case Accord dit « Call à caler » sous l'étape, comme le récap de la Vue d'ensemble. La colonne « ⋯ » s'affiche aussi
+pour qui peut caler un call sans écrire les titres (un business manager), avec le seul geste du call. Sans migration.
+
+- **Pour Sacha** : `components/deals/negotiation-call-button.tsx` touché. Sa modale est sortie telle quelle dans
+  `NegotiationCallDialog` (`open`, `onOpenChange`) ; `NegotiationCallButton` s'en sert, rien ne change sur la page
+  d'un deal.
+- Vérifié dans Chrome sur « Assurance 30 » (vu comme Claire Morel) : « Call à caler » sur Joss Barelle, « ⋯ » →
+  « Caler le call » ouvre le formulaire avec les créneaux.

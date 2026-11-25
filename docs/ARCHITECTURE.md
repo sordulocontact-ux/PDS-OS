@@ -8441,7 +8441,9 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   dernier abandonné, sinon aucun (`deal_id` nul). Lecture TS : `loadParticipationDealStates(projectId)`
   (`lib/deals/participation-states.ts`, `Map` par participation). Bouton : `<NegotiationCallButton
   data={await loadParticipationNegotiationCall(participationId, artistName)} />` quand `canPlanCall` sans `dealId`,
-  sinon `loadDealNegotiationCall(deal)`. Test : `supabase/tests/deal-negotiation-call.test.sql`.
+  sinon `loadDealNegotiationCall(deal)`. La modale seule : `NegotiationCallDialog` (`open`, `onOpenChange`), ouverte
+  depuis le « ⋯ » d'une ligne du récap des titres (`PlanCallDialog`, 25/11/2026 : plus de bouton dans le tableau ; la
+  case Accord dit « Call à caler »). Test : `supabase/tests/deal-negotiation-call.test.sql`.
 - **Le business manager est prévenu d'un call calé pour lui** (retours d'Ibé du 18/11, fait le 23/11 ;
   `20261124140101_deal_call_notice_and_contract_guard.sql`) : type `deal_call_planned`, écrit par le trigger
   `z_notify_deal_negotiator` (`after insert on calls`, `deal_id` non nul) quel que soit le chemin

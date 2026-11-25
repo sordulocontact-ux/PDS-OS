@@ -109,7 +109,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   n'existent plus : c'est le **récap** (`loadTitleRecap`). Depuis le 22/11/2026, **une ligne par
   artiste** avec les colonnes de l'Excel d'Ibé : Artiste (titre dessous), Statut (À contacter,
   Contacté, D'accord, A refusé, Retiré), Contact, Accord (étape du deal, jour du call,
-  négociateur), Taux, Fiche de renseignement (ouvre la fiche), Contrat, puis Mix, Sortie,
+  négociateur ; « Call à caler », le geste « Caler le call » étant dans le « ⋯ » de la ligne
+  depuis le 25/11/2026, plus aucun bouton dans le tableau), Taux, Fiche de renseignement (ouvre la fiche), Contrat, puis Mix, Sortie,
   Distribution, Beatmaker, Note ; le tableau défile dans son cadre, Artiste fixe à gauche. Un deal est toujours
   lu sous la RLS : jamais « Pas de dossier » à tort. La ligne
   d'un titre porte (récap : Mix, fiche beatmaker, Sortie, Distribution) son **Master** (calculé sur `master_mix_versions` du projet et

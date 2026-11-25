@@ -35,13 +35,35 @@ export function NegotiationCallButton({
   variant?: "default" | "outline";
   size?: "default" | "sm";
 }) {
-  const t = fr.dealCalls.negotiation;
   const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button variant={variant} size={size} onClick={() => setOpen(true)}>
+        {fr.dealCalls.negotiation.button}
+      </Button>
+      <NegotiationCallDialog data={data} open={open} onOpenChange={setOpen} />
+    </>
+  );
+}
+
+/** The dialog of « Caler le call », alone: opened by its button, or by a
+ * row's « ⋯ » (the « Titres et artistes » board, Maël 25/11/2026: no button
+ * in the table). */
+export function NegotiationCallDialog({
+  data,
+  open,
+  onOpenChange,
+}: {
+  data: NegotiationCallData;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const t = fr.dealCalls.negotiation;
   const [who, setWho] = useState<string | null>(
     data.negotiators.length === 1 ? data.negotiators[0].id : null,
   );
   const negotiator = data.negotiators.find((n) => n.id === who) ?? null;
-  const close = () => setOpen(false);
+  const close = () => onOpenChange(false);
   const hidden: Record<string, string> = {
     ...("dealId" in data.target
       ? { dealId: data.target.dealId }
@@ -50,74 +72,69 @@ export function NegotiationCallButton({
   };
 
   return (
-    <>
-      <Button variant={variant} size={size} onClick={() => setOpen(true)}>
-        {t.button}
-      </Button>
-      <FormDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t.dialogTitle}
-        description={t.description(negotiator?.name ?? null)}
-        closeLabel={fr.dialogs.close}
-        size="wide"
-      >
-        {open &&
-          (data.negotiators.length === 0 ? (
-            <EmptyNote>{t.noNegotiator}</EmptyNote>
-          ) : (
-            <div className="flex flex-col gap-6">
-              {!data.fixed && data.negotiators.length > 1 && (
-                <ChipChoice
-                  name="negotiator"
-                  legend={t.who}
-                  required
-                  options={data.negotiators.map((n) => ({
-                    value: n.id,
-                    label: n.name,
-                  }))}
-                  value={who}
-                  onChange={setWho}
-                />
-              )}
-              {negotiator && (
-                <CallPlanForm
-                  // A business manager chosen: his slots and his name.
-                  key={negotiator.id}
-                  action={planNegotiationCall}
-                  hidden={hidden}
-                  defaultTitle={data.title}
-                  titlePlaceholder={t.titlePlaceholder}
-                  defaultOccurredAt=""
-                  members={[{ personId: negotiator.id, name: negotiator.name }]}
-                  memberDetail={t.who}
-                  defaultMemberIds={[negotiator.id]}
-                  defaultContactIds={data.guests}
-                  contacts={data.contacts}
-                  googleMeet={data.googleMeet}
-                  submitLabel={t.submit}
-                  pendingLabel={t.pending}
-                  cancelLabel={fr.dealCalls.prepare.cancel}
-                  onCancel={close}
-                  onSaved={(_id, meetFailed) => {
-                    if (meetFailed) toast.warning(t.meetFailed);
-                    else toast.success(t.done);
-                    close();
-                  }}
-                  slotField={(field) => (
-                    <DealSlotField {...field} negotiator={negotiator} />
-                  )}
-                  extra={
-                    <DealCallAgendaPreview
-                      id="negotiation-call-agenda"
-                      topics={data.topics}
-                    />
-                  }
-                />
-              )}
-            </div>
-          ))}
-      </FormDialog>
-    </>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.dialogTitle}
+      description={t.description(negotiator?.name ?? null)}
+      closeLabel={fr.dialogs.close}
+      size="wide"
+    >
+      {open &&
+        (data.negotiators.length === 0 ? (
+          <EmptyNote>{t.noNegotiator}</EmptyNote>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {!data.fixed && data.negotiators.length > 1 && (
+              <ChipChoice
+                name="negotiator"
+                legend={t.who}
+                required
+                options={data.negotiators.map((n) => ({
+                  value: n.id,
+                  label: n.name,
+                }))}
+                value={who}
+                onChange={setWho}
+              />
+            )}
+            {negotiator && (
+              <CallPlanForm
+                // A business manager chosen: his slots and his name.
+                key={negotiator.id}
+                action={planNegotiationCall}
+                hidden={hidden}
+                defaultTitle={data.title}
+                titlePlaceholder={t.titlePlaceholder}
+                defaultOccurredAt=""
+                members={[{ personId: negotiator.id, name: negotiator.name }]}
+                memberDetail={t.who}
+                defaultMemberIds={[negotiator.id]}
+                defaultContactIds={data.guests}
+                contacts={data.contacts}
+                googleMeet={data.googleMeet}
+                submitLabel={t.submit}
+                pendingLabel={t.pending}
+                cancelLabel={fr.dealCalls.prepare.cancel}
+                onCancel={close}
+                onSaved={(_id, meetFailed) => {
+                  if (meetFailed) toast.warning(t.meetFailed);
+                  else toast.success(t.done);
+                  close();
+                }}
+                slotField={(field) => (
+                  <DealSlotField {...field} negotiator={negotiator} />
+                )}
+                extra={
+                  <DealCallAgendaPreview
+                    id="negotiation-call-agenda"
+                    topics={data.topics}
+                  />
+                }
+              />
+            )}
+          </div>
+        ))}
+    </FormDialog>
   );
 }
