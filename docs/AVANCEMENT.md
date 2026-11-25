@@ -3019,4 +3019,7 @@ PDF, pas un truc avec les écritures »).
     sous le contrat).
   - Constaté en local : la clé Mistral n'a plus d'abonnement (« You need a subscription to access this API »), PO ne lit
     plus les contrats en local ; Claude en prod.
+  - **Liste « Ce que PO a repéré » supprimée** (Sacha, même jour) : les valeurs repérées sont remplacées et
+    surlignées dans la page ; un clic sur l'une ouvre un petit menu (changer d'information, « Remettre « … » »,
+    « Retirer », `DocumentFieldPopover`) ; un contrat collé en entier est lu comme un import ; PO en échec = un toast.
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word ; une clé d'IA locale valide.

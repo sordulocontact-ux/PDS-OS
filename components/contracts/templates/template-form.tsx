@@ -13,10 +13,7 @@ import {
   TemplateSourceField,
   type TemplateSourceHandle,
 } from "@/components/contracts/templates/template-source-field";
-import {
-  ValueSuggestions,
-  type ValueSuggestionsHandle,
-} from "@/components/contracts/templates/value-suggestions";
+import { useValueFinder } from "@/components/contracts/templates/use-value-finder";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
@@ -35,7 +32,6 @@ import { aboutFromText } from "@/lib/legal/contracts/template-about";
 import type { TemplateAbout } from "@/lib/legal/contracts/template-values";
 import type { TemplateSource } from "@/lib/legal/contracts/upload-source";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
-import type { ExcerptAt } from "@/lib/legal/contracts/template-text";
 import { jsonListOf } from "@/lib/utils/form-data";
 
 const fr = { contracts, legalContracts, legalDocuments, legalForms };
@@ -81,11 +77,8 @@ export function TemplateForm({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const editor = useRef<DocumentEditorHandle>(null);
-  const suggestions = useRef<ValueSuggestionsHandle>(null);
   const source = useRef<TemplateSourceHandle>(null);
   const [body, setBody] = useState(initial?.body ?? "");
-  // Values found by « Repérer les valeurs », still to replace or ignore.
-  const [toDecide, setToDecide] = useState<ExcerptAt[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   // Name, type, roles and usage: typed, or proposed by PO from the contract.
   const [about, setAbout] = useState<TemplateAbout>({
@@ -117,6 +110,23 @@ export function TemplateForm({
     });
     setAboutKey((key) => key + 1);
     setProposed(true);
+  }
+
+  const finder = useValueFinder(editor, fillAbout);
+
+  // A contract imported or pasted whole: what it says of itself, at once
+  // and without PO (its title, the type it names, its roles, its language),
+  // then its values found by the code and PO.
+  function readContract(text: string) {
+    const read = aboutFromText(text);
+    setLanguage(read.language);
+    fillAbout({
+      name: read.name ?? "",
+      type: read.type ?? "other",
+      roles: read.roles,
+      usage: "",
+    });
+    finder.find(text);
   }
 
   function submit(form: FormData) {
@@ -153,24 +163,13 @@ export function TemplateForm({
           // The text it replaces stays one click away.
           const before = body;
           editor.current?.load(text);
-          // What the contract says of itself, at once and without PO: its
-          // title, the type it names, its roles and its language.
-          const read = aboutFromText(text);
-          setLanguage(read.language);
-          fillAbout({
-            name: read.name ?? "",
-            type: read.type ?? "other",
-            roles: read.roles,
-            usage: "",
-          });
-          suggestions.current?.analyze(text, name);
+          readContract(text);
           if (before.trim())
             toast.success(t.source.imported(name), {
               action: {
                 label: t.source.undo,
                 onClick: () => {
                   editor.current?.load(before);
-                  suggestions.current?.clear();
                 },
               },
             });
@@ -228,14 +227,6 @@ export function TemplateForm({
           </ToneCallout>
         )}
       </Fragment>
-      {/* Above the page: what PO found is read before the contract. */}
-      <ValueSuggestions
-        ref={suggestions}
-        editor={editor}
-        body={body}
-        onPending={setToDecide}
-        onAbout={fillAbout}
-      />
       <DocumentEditor
         ref={editor}
         name="body"
@@ -243,9 +234,10 @@ export function TemplateForm({
         placeholder={t.editor.placeholder}
         fields
         defaultValue={initial?.body}
-        highlight={toDecide}
+        busy={finder.pending ? t.values.finding : null}
         onChange={setBody}
         onFile={(file) => source.current?.read(file)}
+        onPasteContract={readContract}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

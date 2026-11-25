@@ -4791,14 +4791,16 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     titres, la somme et la structure (`lib/ai/instructions/contract-template-values.ts`, le
     contrat en donnée, 40 000 premiers caractères). Un extrait n'est gardé que s'il est écrit
     **tel quel**, mot entier, hors pastille (`countExcerpt`) ; à qui il appartient (personne
-    ou label) n'est jamais décidé par la machine. Les valeurs restantes sont surlignées dans
-    le texte (CSS Custom Highlight, `::highlight(template-value)`), chacune avec son champ
-    (modifiable), « Remplacer » (toutes ses occurrences, annulable) ou « Ignorer » ; un texte
-    collé n'est remplacé qu'au clic. **Un contrat importé** (Word, PDF, texte) est lu par PO
-    dès l'import et ce qu'il repère est **remplacé aussitôt** (demande de Sacha, 07/10/2026 :
-    pas de transcription à relire, l'analyse directe) : « Ce que PO a repéré dans « … » »,
-    chaque valeur avec son champ encore modifiable (la pastille suit) et « Annuler » ; le
-    contrat s'affiche dans `DocumentEditor` (un fichier déposé sur la page aussi), un Word gardant ses paragraphes, son gras et son souligné (`docxText`), le nom, le type, les rôles et la langue lus par le code dans son titre (`template-about.ts`), les lignes à remplir « né(e) le ____ à ____ » et « Fait à …, le ____ » repérées par leur place (`blanksByPlace`, `ExcerptAt.context`) vers `personne.date_naissance`, `personne.lieu_naissance` (fiche v3) et `contrat.date` (jour de préparation, source `document`), valeurs repérées surlignées (plus de texte replié derrière « Afficher le texte »), `DocumentEditorHandle` (`replace`, `restore`, `load`) servant à « Remplacer » / « Annuler ». Dans la même lecture, PO décrit le
+    ou label) n'est jamais décidé par la machine. **Depuis le 25/11/2026** (Sacha : la liste « Ce que PO a
+    repéré » supprimée, la correction se fait sur la page) : un contrat **importé** (Word, PDF, texte, ou fichier déposé
+    sur la page) ou **collé en entier** sur une page vide est lu aussitôt (`use-value-finder.ts`) et chaque valeur
+    repérée est **remplacée** dans `DocumentEditor`, surlignée (`data-original`, le texte remplacé) ; un **clic** sur
+    une valeur ouvre `DocumentFieldPopover` : changer d'information, « Remettre « … » » (le texte d'origine) ou
+    « Retirer ». PO en échec (quota, clé) = un toast ; « PO lit le contrat… » à côté de la barre pendant la lecture.
+    Un Word garde ses paragraphes, son gras et son souligné (`docxText`) ; le nom, le type, les rôles et la langue sont
+    lus par le code dans son titre (`template-about.ts`) ; les lignes à remplir « né(e) le ____ à ____ » et « Fait à …,
+    le ____ » sont repérées par leur place (`blanksByPlace`, `ExcerptAt.context`) vers `personne.date_naissance`,
+    `personne.lieu_naissance` (fiche v3) et `contrat.date` (jour de préparation, source `document`), `DocumentEditorHandle` (`replace`, `load`). Dans la même lecture, PO décrit le
     modèle (nom sans nom propre, type de contrat, rôles de la personne, usage) : seuls les
     champs encore vides sont pré-remplis, avec un encart qui le dit, et tout se corrige.
     L'import est en tête du formulaire. Rien n'est enregistré avant

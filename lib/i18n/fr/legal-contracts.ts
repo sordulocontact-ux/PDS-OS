@@ -198,6 +198,12 @@ export const legalContracts = {
       underline: "Souligné",
       underlineKey: "S",
       insert: "Insérer une information",
+      // A value clicked on the page (DocumentFieldPopover).
+      field: {
+        title: "Information",
+        restore: (text: string) => `Remettre « ${text} »`,
+        remove: "Retirer",
+      },
       groups: {
         person: "La personne",
         project: "Le projet",
@@ -228,31 +234,13 @@ export const legalContracts = {
       unreadable: "Aucun texte n'a pu être lu dans ce fichier.",
       failed: "Le fichier n'a pas pu être importé. Réessayez.",
     },
+    // A contract imported or pasted whole: its values found at once, on
+    // the page (use-value-finder.ts).
     values: {
-      title: "Vous partez d'un contrat déjà rempli ?",
-      description:
-        "Collez-le tel quel. PO repère les noms, l'adresse, les titres et la somme, le code les e-mails, téléphones et numéros : vous choisissez ce qui devient une valeur à remplir.",
-      fromFile: (name: string) => `Ce que PO a repéré dans « ${name} »`,
-      fromFileDescription:
-        "Déjà remplacé dans le modèle. Changez le champ si PO s'est trompé, ou « Annuler » pour garder le texte d'origine.",
-      find: "Repérer les valeurs",
       finding: "PO lit le contrat…",
-      findAgain: "Repérer à nouveau",
       empty: "Collez d'abord le texte du contrat.",
-      none: "Aucune valeur repérée : insérez-les avec les boutons au-dessus du texte.",
       partial:
-        "PO n'a pas pu lire le contrat : seuls les e-mails, téléphones et numéros sont proposés.",
-      times: (n: number) => (n === 1 ? "1 fois" : `${n} fois`),
-      gone: "Plus dans le texte",
-      fieldLabel: (excerpt: string) => `Valeur pour « ${excerpt} »`,
-      // A blank found by its place (« née le ____ »).
-      blank: "Ligne à remplir",
-      replace: "Remplacer",
-      ignore: "Ignorer",
-      undo: "Annuler",
-      replaced: (n: number) =>
-        n === 1 ? "Remplacé 1 fois" : `Remplacé ${n} fois`,
-      replaceAll: (n: number) => `Tout remplacer (${n})`,
+        "PO n'a pas pu lire le contrat : seuls les e-mails, téléphones, numéros et lignes à remplir sont repérés.",
       failed: "La lecture du contrat a échoué. Réessayez.",
     },
     versions: "Versions",

@@ -6,36 +6,40 @@ import {
   DocumentEditorToolbar,
   type DocumentMarks,
 } from "@/components/contracts/document-editor-toolbar";
+import { DocumentFieldPopover } from "@/components/contracts/document-field-popover";
+import { usePageCaret } from "@/components/contracts/use-page-caret";
 import {
   dropCaretHolders,
-  highlightExcerpts,
-  HIGHLIGHT,
   insertChip,
   pasteText,
   placeCaret,
   renderBody,
   replaceExcerpt,
-  restoreChips,
   serialize,
 } from "@/components/contracts/templates/editor-dom";
 import { Label } from "@/components/ui/label";
-import { documentCss, sheetCss } from "@/lib/legal/contracts/document-layout";
+import {
+  documentCss,
+  fieldLabelOf,
+  sheetCss,
+} from "@/lib/legal/contracts/document-layout";
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
 import type { ExcerptAt } from "@/lib/legal/contracts/template-text";
 import { markedTextOf } from "@/lib/legal/contracts/pasted-marks";
 
 export type DocumentEditorHandle = {
-  /** Every `excerpt` (where its context says) becomes the value; the
-   * blanks are returned for undo. */
-  replace(at: ExcerptAt, id: ContractFieldId): HTMLElement[];
-  restore(chips: HTMLElement[], excerpt: string): void;
+  /** Every `excerpt` (where its context says) becomes the value, shown
+   * found on the page; how many places. */
+  replace(at: ExcerptAt, id: ContractFieldId): number;
   /** Replaces the whole text (an imported file). */
   load(body: string): void;
 };
 
 const PAGE = "contract-page";
 // The page's own look: the PDF's, from the one source (document-layout.ts).
-const PAGE_CSS = `${documentCss(`.${PAGE}`)}${sheetCss(`.${PAGE}`)}`;
+const PAGE_CSS = `${documentCss(`.${PAGE}`)}${sheetCss(`.${PAGE}`)}
+  .${PAGE} .field { cursor: pointer; }
+  .${PAGE} .field[data-original] { background: #fff1c2; border-bottom-color: #b98900; color: #5c4400; }`;
 
 /**
  * A contract written on its page, as its PDF shows it (Sacha 25/11/2026:
@@ -54,9 +58,10 @@ export function DocumentEditor({
   defaultValue = "",
   placeholder,
   fields = false,
-  highlight,
+  busy,
   onChange,
   onFile,
+  onPasteContract,
 }: {
   ref?: React.Ref<DocumentEditorHandle>;
   name: string;
@@ -65,19 +70,20 @@ export function DocumentEditor({
   placeholder?: string;
   // A template: « Insérer une information » in the toolbar.
   fields?: boolean;
-  highlight?: ExcerptAt[];
+  // What is being done to the page (« PO lit le contrat… »).
+  busy?: string | null;
   onChange?: (body: string) => void;
   // A file dropped on the page (a template's source file); else a drop does
   // nothing.
   onFile?: (file: File) => void;
+  // A whole contract pasted on an empty page: read like an imported file.
+  onPasteContract?: (body: string) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const caret = useRef<Range | null>(null);
+  const { caret, marks } = usePageCaret(rootRef);
   const [body, setBody] = useState(defaultValue);
-  const [marks, setMarks] = useState<DocumentMarks>({
-    bold: false,
-    underline: false,
-  });
+  // The value clicked on the page, corrected in its popover.
+  const [chip, setChip] = useState<HTMLElement | null>(null);
 
   const sync = () => {
     const next = serialize(rootRef.current!);
@@ -91,37 +97,11 @@ export function DocumentEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Where a value goes and which marks the caret is in.
-  useEffect(() => {
-    const remember = () => {
-      const selection = window.getSelection();
-      const root = rootRef.current;
-      if (!selection?.rangeCount || !root?.contains(selection.anchorNode))
-        return;
-      caret.current = selection.getRangeAt(0).cloneRange();
-      setMarks({
-        bold: document.queryCommandState("bold"),
-        underline: document.queryCommandState("underline"),
-      });
-    };
-    document.addEventListener("selectionchange", remember);
-    return () => document.removeEventListener("selectionchange", remember);
-  }, []);
-
-  useEffect(() => {
-    highlightExcerpts(rootRef.current!, highlight ?? []);
-  }, [highlight, body]);
-  useEffect(() => () => void globalThis.CSS?.highlights?.delete(HIGHLIGHT), []);
-
   useImperativeHandle(ref, () => ({
     replace(at, id) {
-      const chips = replaceExcerpt(rootRef.current!, at, id);
+      const count = replaceExcerpt(rootRef.current!, at, id).length;
       sync();
-      return chips;
-    },
-    restore(chips, excerpt) {
-      restoreChips(rootRef.current!, chips, excerpt);
-      sync();
+      return count;
     },
     load(next) {
       renderBody(rootRef.current!, next);
@@ -168,7 +148,16 @@ export function DocumentEditor({
     const text =
       markedTextOf(event.clipboardData.getData("text/html")) ??
       event.clipboardData.getData("text/plain");
+    const wasEmpty = !body.trim();
     pasteText(rootRef.current!, text.replace(/\r\n?/g, "\n"));
+    sync();
+    if (wasEmpty) onPasteContract?.(serialize(rootRef.current!));
+  };
+
+  // The clicked value: another field, its text back, or taken out.
+  const change = (edit: (el: HTMLElement) => void) => {
+    if (chip?.isConnected) edit(chip);
+    setChip(null);
     sync();
   };
 
@@ -180,12 +169,17 @@ export function DocumentEditor({
       <Label id={`${name}-label`} required>
         {label}
       </Label>
-      <DocumentEditorToolbar
-        page={rootRef}
-        marks={marks}
-        onMark={mark}
-        onInsert={fields ? insert : undefined}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <DocumentEditorToolbar
+          page={rootRef}
+          marks={marks}
+          onMark={mark}
+          onInsert={fields ? insert : undefined}
+        />
+        <p role="status" className="text-sm text-muted-foreground empty:hidden">
+          {busy}
+        </p>
+      </div>
       <div className="max-h-[70vh] overflow-y-auto overscroll-contain rounded-lg bg-muted p-2 sm:p-6">
         <div
           ref={rootRef}
@@ -204,6 +198,12 @@ export function DocumentEditor({
           }}
           onKeyDown={onKeyDown}
           onPaste={onPaste}
+          onClick={(event) => {
+            const el = (event.target as HTMLElement).closest<HTMLElement>(
+              "[data-field]",
+            );
+            if (fields && el) setChip(el);
+          }}
           onDragOver={(event) => {
             if (onFile && event.dataTransfer.types.includes("Files"))
               event.preventDefault();
@@ -216,6 +216,22 @@ export function DocumentEditor({
           className={`${PAGE} outline-none focus-visible:ring-3 focus-visible:ring-ring/50`}
         />
       </div>
+      <DocumentFieldPopover
+        chip={chip}
+        onField={(id) =>
+          change((el) => {
+            el.dataset.field = id;
+            el.textContent = fieldLabelOf(id);
+          })
+        }
+        onRestore={() =>
+          change((el) =>
+            el.replaceWith(document.createTextNode(el.dataset.original ?? "")),
+          )
+        }
+        onRemove={() => change((el) => el.remove())}
+        onClose={() => setChip(null)}
+      />
       <input type="hidden" name={name} value={body} />
     </div>
   );

@@ -140,8 +140,7 @@ export function excerptRanges(
   );
 }
 
-/** Puts a blank in place of every `excerpt`; returns the blanks, so the
- * replacement can be undone. */
+/** Puts a blank in place of every `excerpt`; returns the blanks. */
 export function replaceExcerpt(
   root: HTMLElement,
   at: ExcerptAt,
@@ -152,22 +151,13 @@ export function replaceExcerpt(
     .reverse()
     .map((range) => {
       const chip = createChip(id);
+      // What it replaced, to put it back from the page (« Remettre … »).
+      chip.dataset.original = range.toString();
       range.deleteContents();
       range.insertNode(chip);
       return chip;
     })
     .reverse();
-}
-
-/** Undoes `replaceExcerpt`: the blanks still there go back to the text. */
-export function restoreChips(
-  root: HTMLElement,
-  chips: HTMLElement[],
-  excerpt: string,
-) {
-  for (const chip of chips)
-    if (chip.isConnected) chip.replaceWith(document.createTextNode(excerpt));
-  root.normalize();
 }
 
 /** Puts the caret in the page at `range`, or at its end. */
@@ -266,13 +256,3 @@ export function dropCaretHolders(root: HTMLElement) {
       );
   }
 }
-
-/** Marks the excerpts still to decide on, where the browser can. */
-export function highlightExcerpts(root: HTMLElement, excerpts: ExcerptAt[]) {
-  if (typeof CSS === "undefined" || !("highlights" in CSS)) return;
-  const ranges = excerpts.flatMap((e) => excerptRanges(root, e));
-  if (ranges.length === 0) CSS.highlights.delete(HIGHLIGHT);
-  else CSS.highlights.set(HIGHLIGHT, new Highlight(...ranges));
-}
-
-export const HIGHLIGHT = "template-value";
