@@ -3029,6 +3029,17 @@ Sans migration.
 - **Pour Sacha** : une ligne dans `components/shell/module/module-crumbs.tsx`, rien d'autre ne bouge.
 - Vérifié dans Chrome sur « Assurance 30 » : page d'un titre et Cadrage juridique.
 
+## PDS Mic : « Titres », deux lignes par case au plus (25/11/2026)
+
+- Retour de Maël : trop d'information dans les cases, « max 2 lignes par case, jamais plus », pas besoin de toutes
+  ces précisions. Une case de module = l'anneau, puis le nom de l'étape seul (« Source », « Contrats du titre »,
+  « Terminé ») et « À vous » en bleu dessous quand c'est au lecteur. « Étape n sur N · » (l'anneau le dit) et la phrase
+  de l'action (« importer la version de départ du mix », sur la page du titre) sont retirés. Une étape longue passe sur
+  deux lignes, ou se coupe quand « À vous » est dessous ; colonnes de 192 px.
+- Le titre : nom puis invités (`DataTableMedia`). Sous 1280 px, une ligne d'anneaux avec le nom du module sous le nom
+  du titre, à la place des invités.
+- Vérifié dans Chrome sur « Assurance 30 » à 1280 px, 1000 px et 390 px.
+
 ## PDS Mic : « Titres et artistes » allégé (25/11/2026)
 
 Maël : trop d'états en point + mot côte à côte, des textes trop longs, des boutons d'appel dans les cases. Sans

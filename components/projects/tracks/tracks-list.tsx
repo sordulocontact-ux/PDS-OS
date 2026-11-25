@@ -1,7 +1,10 @@
 import Link from "next/link";
 
 import { IconDisc } from "@/components/icons";
-import { WorkflowProgress } from "@/components/projects/tracks/workflow-progress";
+import {
+  WorkflowProgress,
+  WorkflowRing,
+} from "@/components/projects/tracks/workflow-progress";
 import { EmptyState } from "@/components/shell/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -12,6 +15,7 @@ import {
   DataTableHead,
   DataTableHeader,
   DataTableLink,
+  DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
@@ -25,20 +29,18 @@ import { cn } from "@/lib/utils";
 const fr = { titleTracks };
 const t = fr.titleTracks.list;
 
-const caption =
-  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
-
-// Three workflows beside the title fit from 1280 px with the sidebar.
-const COLUMN = "w-56 whitespace-normal";
+// Three workflows of 192 px beside the title fit from 1280 px with the
+// sidebars.
 
 /**
  * « Titres » of a collective (Maël 25/11/2026: the title as the way in):
- * one row per title, its Master, Juridique and Distribution as a project's
- * « Progression » says them (a ring, then « Étape n sur N · … » or « À
- * vous : … »); the row opens the title's page. The live titles, then the
- * abandoned ones (out of every workflow, lot 9). `workflows`: the columns,
- * the workflows of the project worked by title that the viewer may open.
- * Under 1280 px, the workflows under the title's name.
+ * one row per title, its Master, Juridique and Distribution each as a ring
+ * and the step it is at, « À vous » under it when it is the viewer's — two
+ * lines a cell, never more (Maël, same day); the row opens the title's
+ * page, where the rest is. The live titles, then the abandoned ones (out
+ * of every workflow, lot 9). `workflows`: the columns, the workflows of the
+ * project worked by title that the viewer may open. Under 1280 px, the
+ * rings on one line under the title's name, in place of its guests.
  */
 export function TracksList({
   projectId,
@@ -81,7 +83,7 @@ export function TracksList({
       <DataTableHeader>
         <DataTableHead fill>{t.columns.title}</DataTableHead>
         {workflows.map((workflow) => (
-          <DataTableHead key={workflow} hideBelow="xl" className={COLUMN}>
+          <DataTableHead key={workflow} hideBelow="xl">
             {t.columns[workflow as keyof typeof t.columns]}
           </DataTableHead>
         ))}
@@ -118,39 +120,42 @@ function TrackRow({
     named && row.guests.length > 0 ? joinArtistNames(row.guests) : null;
   return (
     <DataTableRow>
-      <DataTableCell fill className="whitespace-normal">
-        <span className="flex min-w-0 flex-col gap-1">
-          <DataTableLink href={routes.projectTrack(projectId, row.title.id)}>
-            <span
-              className={cn(
-                "font-medium break-words",
-                row.abandoned && "text-[color:var(--text-secondary)]",
-              )}
-            >
-              {row.label}
-            </span>
-          </DataTableLink>
-          {guests && <span className={caption}>{guests}</span>}
-          {/* Under 1280 px, the workflows under the name. */}
-          {!row.abandoned && (
-            <span className="flex flex-col gap-1.5 pt-1 xl:hidden">
-              {workflows.map((workflow) => (
-                <span
-                  key={workflow}
-                  className="flex flex-wrap items-center gap-x-2"
-                >
-                  <span className={cn(caption, "w-24 shrink-0")}>
-                    {t.columns[workflow as keyof typeof t.columns]}
-                  </span>
-                  <WorkflowProgress card={cardOf(workflow)} />
+      <DataTableCell fill>
+        <DataTableMedia
+          title={
+            <DataTableLink href={routes.projectTrack(projectId, row.title.id)}>
+              <span
+                className={cn(
+                  row.abandoned && "text-[color:var(--text-secondary)]",
+                )}
+              >
+                {row.label}
+              </span>
+            </DataTableLink>
+          }
+          subtitle={
+            row.abandoned ? (
+              guests
+            ) : (
+              <>
+                {guests && <span className="max-xl:hidden">{guests}</span>}
+                {/* Under 1280 px, the workflows in its place. */}
+                <span className="flex gap-3 pt-1 xl:hidden">
+                  {workflows.map((workflow) => (
+                    <WorkflowRing
+                      key={workflow}
+                      card={cardOf(workflow)}
+                      label={t.columns[workflow as keyof typeof t.columns]}
+                    />
+                  ))}
                 </span>
-              ))}
-            </span>
-          )}
-        </span>
+              </>
+            )
+          }
+        />
       </DataTableCell>
       {workflows.map((workflow) => (
-        <DataTableCell key={workflow} hideBelow="xl" className={COLUMN}>
+        <DataTableCell key={workflow} hideBelow="xl">
           <WorkflowProgress card={cardOf(workflow)} />
         </DataTableCell>
       ))}

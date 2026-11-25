@@ -11,6 +11,8 @@ export const titleTracks = {
       distribution: "Distribution",
     },
     groups: { abandoned: "Abandonnés" },
+    // Under a workflow's step when its next action is the viewer's.
+    mine: "À vous",
     empty: {
       title: "Aucun titre pour l'instant",
       body: "Les titres s'ajoutent dans « Titres et artistes ».",
