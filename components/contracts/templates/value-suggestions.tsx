@@ -2,7 +2,7 @@
 
 import { useEffect, useImperativeHandle, useState, useTransition } from "react";
 
-import type { TemplateEditorHandle } from "@/components/contracts/templates/template-body-editor";
+import type { DocumentEditorHandle } from "@/components/contracts/document-editor";
 import { ValueSuggestionRow } from "@/components/contracts/templates/value-suggestion-row";
 import { Button } from "@/components/ui/button";
 import { LoadingRegion, SkeletonRows } from "@/components/ui/skeleton";
@@ -41,7 +41,7 @@ export function ValueSuggestions({
   onAbout,
 }: {
   ref?: React.Ref<ValueSuggestionsHandle>;
-  editor: React.RefObject<TemplateEditorHandle | null>;
+  editor: React.RefObject<DocumentEditorHandle | null>;
   body: string;
   onPending: (excerpts: string[]) => void;
   /** What PO says the template is (name, type, roles, usage). */

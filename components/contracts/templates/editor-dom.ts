@@ -1,60 +1,100 @@
-// The template editor's DOM: plain text, <br> line breaks and one
-// non-editable chip per field. The text a template is saved with is read
-// back from it (`serialize`), never kept apart.
+// The DOM of the contract editor (DocumentEditor): the contract's page as
+// its PDF lays it out (document-layout.ts) — paragraphs, real bold and
+// underline, each value a blank labeled « Nom civil » the caret never
+// enters. The text a contract is saved with (paragraphs split by an empty
+// line, **bold**, __underline__, {{id}}) is read back from it (`serialize`),
+// never kept apart.
 
 import {
-  fieldChipClass,
-  fieldLabel,
-} from "@/components/contracts/templates/field-chip";
-import {
-  bodySegments,
-  excerptStarts,
-} from "@/lib/legal/contracts/template-text";
+  fieldLabelOf,
+  templateBodyHtml,
+} from "@/lib/legal/contracts/document-layout";
+import { isBold, isUnderline } from "@/lib/legal/contracts/pasted-marks";
+import { excerptStarts } from "@/lib/legal/contracts/template-text";
 
-// Typed after a chip so the caret can sit there; never saved.
-const CARET_HOLDER = "​";
+// Typed after a blank so the caret can sit there; never saved.
+const CARET_HOLDER = "\u200b";
+// Where the caret goes back after a paste lays the page out again.
+const CARET_MARK = "\ue000";
+// A pasted line break while it is written: Chrome would make each one a
+// paragraph.
+const LINE_MARK = "\ue001";
 const BLOCKS = new Set(["DIV", "P", "LI", "H1", "H2", "H3", "BLOCKQUOTE"]);
+
+const EMPTY_PAGE = "<p><br></p>";
+
+const isText = (node: Node | null): node is Text =>
+  node?.nodeType === Node.TEXT_NODE;
 
 export function createChip(id: string): HTMLSpanElement {
   const chip = document.createElement("span");
   chip.contentEditable = "false";
   chip.dataset.field = id;
-  chip.className = fieldChipClass;
-  chip.textContent = fieldLabel(id);
+  chip.className = "field";
+  chip.textContent = fieldLabelOf(id);
   return chip;
 }
 
-/** Fills the editor with a template's text, its fields as chips. */
+/** Fills the page with a contract's text, laid out as its PDF. */
 export function renderBody(root: HTMLElement, body: string) {
-  root.replaceChildren(
-    ...bodySegments(body).map((s) =>
-      s.kind === "text" ? document.createTextNode(s.text) : createChip(s.id),
-    ),
-  );
+  root.innerHTML = templateBodyHtml(body, { editable: true }) || EMPTY_PAGE;
+  // The layout joins its paragraphs with a line break: not a place to type.
+  for (const node of [...root.childNodes])
+    if (isText(node) && !node.data.trim()) node.remove();
 }
 
-/** The template's text: each chip back to {{id}}, line breaks to \n. */
-export function serialize(root: HTMLElement): string {
-  let out = "";
-  const walk = (node: Node) => {
-    for (const child of node.childNodes) {
-      if (child instanceof Text) out += child.data;
-      else if (child instanceof HTMLElement) {
-        if (child.dataset.field) out += `{{${child.dataset.field}}}`;
-        else if (child.tagName === "BR") out += "\n";
-        else {
-          if (BLOCKS.has(child.tagName) && out && !out.endsWith("\n"))
-            out += "\n";
-          walk(child);
-        }
-      }
-    }
-  };
-  walk(root);
-  return out.replaceAll(CARET_HOLDER, "");
+/** One line of a mark: its spaces stay outside (« **NOVA** »). */
+function wrapMark(inner: string, mark: string): string {
+  return inner
+    .split("\n")
+    .map((line) => {
+      const core = line.trim();
+      if (!core) return line;
+      const at = line.indexOf(core);
+      return `${line.slice(0, at)}${mark}${core}${mark}${line.slice(at + core.length)}`;
+    })
+    .join("\n");
 }
 
-/** The editable text nodes, a chip's own label left out. */
+/** A paragraph's content as text: blanks back to {{id}}, line breaks to
+ * \n, the bold and underline people chose as marks — what the layout makes
+ * bold by itself (`data-auto`) as plain text. */
+function inlineText(node: Node): string {
+  if (isText(node)) return node.data;
+  if (!(node instanceof HTMLElement)) return "";
+  if (node.dataset.field) return `{{${node.dataset.field}}}`;
+  if (node.tagName === "BR") return "\n";
+  const inner = [...node.childNodes].map(inlineText).join("");
+  // An article's number and its heading: « 1. » then a space.
+  if (node.classList.contains("tab")) return ` ${inner}`;
+  if (BLOCKS.has(node.tagName)) return `${inner}\n`;
+  if (node.hasAttribute("data-auto")) return inner;
+  let out = inner;
+  if (isUnderline(node)) out = wrapMark(out, "__");
+  if (isBold(node)) out = wrapMark(out, "**");
+  return out;
+}
+
+/** The contract's text, as it is saved. */
+export function serialize(root: HTMLElement, keepCaretMark = false): string {
+  const paragraphs: string[] = [];
+  let loose = "";
+  for (const child of root.childNodes) {
+    if (child instanceof HTMLElement && BLOCKS.has(child.tagName)) {
+      paragraphs.push(loose);
+      loose = "";
+      paragraphs.push(inlineText(child));
+    } else loose += inlineText(child);
+  }
+  paragraphs.push(loose);
+  const text = paragraphs
+    .map((p) => p.replaceAll(CARET_HOLDER, "").replace(/\n+$/, ""))
+    .filter((p) => p.replaceAll(CARET_MARK, "").trim() !== "")
+    .join("\n\n");
+  return keepCaretMark ? text : text.replaceAll(CARET_MARK, "");
+}
+
+/** The editable text nodes, a blank's own label left out. */
 function textNodes(root: HTMLElement): Text[] {
   root.normalize();
   const nodes: Text[] = [];
@@ -76,7 +116,7 @@ export function excerptRanges(root: HTMLElement, excerpt: string): Range[] {
   );
 }
 
-/** Puts a chip in place of every `excerpt`; returns the chips, so the
+/** Puts a blank in place of every `excerpt`; returns the blanks, so the
  * replacement can be undone. */
 export function replaceExcerpt(
   root: HTMLElement,
@@ -95,7 +135,7 @@ export function replaceExcerpt(
     .reverse();
 }
 
-/** Undoes `replaceExcerpt`: the chips still there go back to the text. */
+/** Undoes `replaceExcerpt`: the blanks still there go back to the text. */
 export function restoreChips(
   root: HTMLElement,
   chips: HTMLElement[],
@@ -106,27 +146,31 @@ export function restoreChips(
   root.normalize();
 }
 
-/** {{id}} typed or pasted as text becomes a chip. */
-export function chipify(root: HTMLElement) {
-  for (const node of textNodes(root)) {
-    const segments = bodySegments(node.data);
-    if (!segments.some((s) => s.kind === "field")) continue;
-    node.replaceWith(
-      ...segments.map((s) =>
-        s.kind === "text" ? document.createTextNode(s.text) : createChip(s.id),
-      ),
-    );
+/** Puts the caret in the page at `range`, or at its end. */
+export function placeCaret(root: HTMLElement, range: Range | null) {
+  const at = range && root.contains(range.startContainer) ? range : null;
+  const caret = at ?? document.createRange();
+  if (!at) {
+    caret.selectNodeContents(root.lastElementChild ?? root);
+    caret.collapse(false);
   }
+  root.focus({ preventScroll: true });
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(caret);
 }
 
-/** Inserts a chip at `range` (or at the end) and puts the caret after it. */
+/** Inserts a blank at `range` (or at the end) and puts the caret after it. */
 export function insertChip(root: HTMLElement, id: string, range: Range | null) {
-  const at = range ?? document.createRange();
-  if (!range) {
-    at.selectNodeContents(root);
+  const at =
+    range && root.contains(range.startContainer)
+      ? range
+      : document.createRange();
+  if (at !== range) {
+    at.selectNodeContents(root.lastElementChild ?? root);
     at.collapse(false);
   }
-  // Never inside another chip.
+  // Never inside another blank.
   const inside = at.startContainer.parentElement?.closest("[data-field]");
   if (inside) {
     at.setStartAfter(inside);
@@ -136,19 +180,50 @@ export function insertChip(root: HTMLElement, id: string, range: Range | null) {
   const chip = createChip(id);
   at.insertNode(chip);
   let next: Text;
-  if (chip.nextSibling instanceof Text) next = chip.nextSibling;
+  if (isText(chip.nextSibling)) next = chip.nextSibling;
   else {
     next = document.createTextNode(CARET_HOLDER);
     chip.after(next);
   }
+  // A <br> kept the empty paragraph open: the blank does now.
+  if (
+    next.nextSibling instanceof HTMLBRElement &&
+    !next.nextSibling.nextSibling
+  )
+    next.nextSibling.remove();
   const caret = document.createRange();
   caret.setStart(next, next.data.startsWith(CARET_HOLDER) ? 1 : 0);
   caret.collapse(true);
-  root.focus({ preventScroll: true });
-  const selection = window.getSelection();
-  selection?.removeAllRanges();
-  selection?.addRange(caret);
+  placeCaret(root, caret);
   chip.scrollIntoView({ block: "nearest" });
+}
+
+/**
+ * A pasted text (from Word, its bold and underline as marks): written at
+ * the caret, then the page laid out again so its paragraphs, articles and
+ * {{id}} take the contract's look; the caret goes back after it.
+ */
+export function pasteText(root: HTMLElement, text: string) {
+  const selection = window.getSelection();
+  if (!selection?.rangeCount || !root.contains(selection.anchorNode))
+    placeCaret(root, null);
+  document.execCommand(
+    "insertText",
+    false,
+    `${text.replaceAll("\n", LINE_MARK)}${CARET_MARK}`,
+  );
+  renderBody(root, serialize(root, true).replaceAll(LINE_MARK, "\n"));
+  for (const node of textNodes(root)) {
+    const at = node.data.indexOf(CARET_MARK);
+    if (at === -1) continue;
+    node.deleteData(at, 1);
+    const caret = document.createRange();
+    caret.setStart(node, at);
+    caret.collapse(true);
+    placeCaret(root, caret);
+    return;
+  }
+  placeCaret(root, null);
 }
 
 /** Once something is typed next to it, the caret holder goes (or it would

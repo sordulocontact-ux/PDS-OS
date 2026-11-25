@@ -2,12 +2,12 @@
 // bold and underline as the template's marks (Sacha 22/11/2026): « **…** »
 // bold, « __…__ » underlined, the rest plain text. Client-side (DOMParser).
 
-const isBold = (el: HTMLElement) =>
+export const isBold = (el: HTMLElement) =>
   el.tagName === "B" ||
   el.tagName === "STRONG" ||
   /font-weight:\s*(bold|[6-9]00)/i.test(el.getAttribute("style") ?? "");
 
-const isUnderline = (el: HTMLElement) =>
+export const isUnderline = (el: HTMLElement) =>
   el.tagName === "U" ||
   /text-decoration[^;]*underline/i.test(el.getAttribute("style") ?? "");
 

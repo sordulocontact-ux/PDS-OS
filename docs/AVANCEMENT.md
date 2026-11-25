@@ -2619,10 +2619,10 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
   chaque étape).
 - Migration `20261120150101_deal_memo_mail.sql` **à pousser en prod** (crée le bucket `deal-files`) ; test
   `supabase/tests/deal-memo-mail.test.sql` (42 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
-- Reste : le contenu du deal memo (exemple attendu d'Ibé, rien n'en est lu ni présumé) ; un vrai `Cc` dans
-  `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; dépôt à la main d'un memo reçu ailleurs
-  (WhatsApp) : aujourd'hui, le transférer par e-mail à l'adresse du deal. Fait le 23/11 : les 5 notifications du
-  deal memo ont leur texte et leur lien (la page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
+- Fait depuis : l'exemple de memo d'Ibé (Wagram, « Projet Dioo », reçu le 21/11) donne sa forme au PDF du memo de
+  PDS (`lib/deals/memo-pdf.ts`, 22/11) ; vrai `Cc` / `Cci` dans `lib/email/send.ts` (22/11) ; « Déposer le memo
+  reçu » pour un memo arrivé ailleurs (23/11) ; les 5 notifications du deal memo ont leur texte et leur lien (la
+  page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
 
 
 ## Retours d'Ibé du 18/11 : parcours PDS Mic (21/11/2026, branche `pre-prod`)
@@ -2982,3 +2982,22 @@ power user (`ux-tests/2026-11-24-deals-profils/rapport.md`, SUS 46). Corrigés d
   changé (`ui/dialog-guard.ts`), Échap et ✕ ferment toujours.
 - Reste (rapport, gravité 3 et 2) : libellés des termes de marque en français (Fee, Livrables, Droits d'usage), un état
   « Notre proposition » par défaut, prochaine action en tête d'une fiche en négociation, « À enregistrer » d'un call passé.
+
+## Contrats : écrire le contrat sur sa page, comme son PDF (25/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « là actuellement on crée avec un text field avec des variables, ça fait trop développeur, je voudrais
+qu'on voie directement le contrat en PDF avec les variables » (suite du retour d'Ibé du 18/11 : « recevoir le modèle en
+PDF, pas un truc avec les écritures »).
+
+- **Une seule mise en page** : `lib/legal/contracts/document-layout.ts` (client-safe : `bodyHtml`, `templateBodyHtml`,
+  `documentCss`, `sheetCss`, `fieldLabelOf`, `escapeHtml`) sert le PDF, l'aperçu d'un modèle et l'éditeur ; le gras ajouté
+  seul (titres d'articles, lignes en capitales) porte `data-auto` et est relu comme du texte simple.
+- **`DocumentEditor` + `DocumentEditorToolbar`** : le contrat s'écrit sur sa page A4 (Arial 10 pt justifié, articles),
+  valeurs en blancs libellés comme dans le PDF, gras et souligné réels ; barre Gras, Souligné, « Insérer une information »
+  (menu groupé, seulement pour un modèle) ; Entrée = paragraphe, Maj+Entrée = ligne ; collage Word garde gras et
+  souligné ; pas d'italique.
+- Utilisé par `TemplateForm` (nouveau modèle, nouvelle version) et par « Modifier une clause » (`ReviseDocumentButton`) ;
+  le texte d'un fichier importé n'est plus replié derrière « Afficher le texte », valeurs repérées surlignées.
+- Supprimés : `TemplateBodyEditor`, `field-chip.tsx` ; `DropdownMenuGroup` ajouté à `ui/dropdown-menu.tsx`.
+- **Aucune migration** : le texte stocké ne change pas (`**gras**`, `__souligné__`, `{{champ}}`).
+- Reste : vérifier dans un vrai Chrome la frappe, le collage depuis Word et la nouvelle version d'un modèle.

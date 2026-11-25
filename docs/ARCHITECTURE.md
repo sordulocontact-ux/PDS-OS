@@ -4783,12 +4783,7 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     main au moment de générer : une valeur manquante se complète à sa source, ce qui la rend
     traçable.
   - **Éditeur du texte** (demande de Sacha, 07/10/2026 : « super compliqué s'il faut mettre
-    des variables ») : personne ne tape `{{…}}`. `TemplateBodyEditor` est un `contenteditable`
-    en texte brut où chaque champ est une **pastille** non modifiable (« Nom civil »),
-    insérée au curseur par les boutons groupés au-dessus (La personne / Le projet / L'accord,
-    `CONTRACT_FIELD_GROUPS`) ; le texte enregistré est relu du DOM (`serialize`, pastille →
-    `{{id}}`, `<br>` → `\n`), le format en base ne change pas. Collage en texte brut, `{{id}}`
-    collés convertis en pastilles, pas de gras. En lecture, plus de texte à pastilles depuis le
+    des variables ») : personne ne tape `{{…}}`. **Depuis le 25/11/2026** (demande de Sacha : « là actuellement on crée avec un text field avec des variables, ça fait trop développeur, je voudrais qu'on voie directement le contrat en PDF avec les variables »), `DocumentEditor` (`components/contracts/document-editor.tsx`, barre `document-editor-toolbar.tsx`) remplace `TemplateBodyEditor` et les pastilles (`field-chip.tsx` supprimé) : un `contenteditable` qui écrit le contrat sur sa page A4 comme son PDF, chaque champ en **blanc libellé** (« Nom civil ») identique au PDF, gras et souligné réels. Barre : Gras, Souligné, « Insérer une information » (La personne / Le projet / L'accord / Les termes du deal, `CONTRACT_FIELD_GROUPS`, seulement pour un modèle). Entrée = paragraphe, Maj+Entrée = ligne, collage Word garde gras et souligné, pas d'italique. `editor-dom.ts` rend la page par `templateBodyHtml` et relit le texte (`serialize`) ; le format en base ne change pas (paragraphes séparés par une ligne vide, `**gras**`, `__souligné__`, `{{id}}`), aucune migration. Utilisé par `TemplateForm` (nouveau modèle, nouvelle version) et `ReviseDocumentButton` (sans menu d'informations). En lecture, plus de texte à pastilles depuis le
     18/11/2026 : le modèle se lit comme un document (voir « Modèles en document »).
   - **Partir d'un contrat déjà rempli** (« Repérer les valeurs », `suggestTemplateValues`) :
     on colle le contrat d'une vraie personne ; le **code** repère ce qui a une forme
@@ -4803,7 +4798,7 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     dès l'import et ce qu'il repère est **remplacé aussitôt** (demande de Sacha, 07/10/2026 :
     pas de transcription à relire, l'analyse directe) : « Ce que PO a repéré dans « … » »,
     chaque valeur avec son champ encore modifiable (la pastille suit) et « Annuler » ; le
-    texte reste replié derrière « Afficher le texte ». Dans la même lecture, PO décrit le
+    contrat s'affiche dans `DocumentEditor`, valeurs repérées surlignées (plus de texte replié derrière « Afficher le texte »), `DocumentEditorHandle` (`replace`, `restore`, `load`) servant à « Remplacer » / « Annuler ». Dans la même lecture, PO décrit le
     modèle (nom sans nom propre, type de contrat, rôles de la personne, usage) : seuls les
     champs encore vides sont pré-remplis, avec un encart qui le dit, et tout se corrige.
     L'import est en tête du formulaire. Rien n'est enregistré avant
@@ -5297,7 +5292,7 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   - **Modèle en document** (« recevoir le modèle en PDF, pas un truc avec les écritures ») :
     `TemplateView` = une `DocumentCard` (nom · version, type · langue, « Voir le PDF » et
     « Modifier » en contour) avec l'aperçu en `iframe` sandbox ; `templateHtml`
-    (`lib/legal/contracts/document-pdf.ts`) écrit le texte tel quel, chaque valeur en **blanc
+    (`lib/legal/contracts/document-pdf.ts`, mise en page de `document-layout.ts`) écrit le texte tel quel, chaque valeur en **blanc
     libellé** (« Nom civil ») ; la route `/api/contracts/templates/[templateId]` sert le PDF
     (`?view=1` dans l'onglet, Playwright) et la même page en HTML (`?format=html`, en-tête CSP
     `sandbox`) ; liens dans `lib/contracts/template-links.ts`. « Champs injectés » et le texte à
@@ -8229,8 +8224,9 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `20261120150101_deal_memo_mail.sql`). Après l'accord sur les termes, le label ou la marque envoie son deal memo par
   e-mail ; PDS OS le range dans le deal « comme les masters », la personne qui négocie le montre à la direction, qui
   le valide ou demande des modifications (motif écrit : les retours d'appel sont notés), puis l'accord validé repart
-  par e-mail depuis po@ ; le contrat long vient ensuite. **Le contenu d'un memo n'est ni lu ni présumé** (Ibé doit en
-  envoyer un exemple) : le PDF est le memo. La partie juridique d'un deal reste sur la page du deal (décidé le 18/11).
+  par e-mail depuis po@ ; le contrat long vient ensuite. **Le contenu d'un memo reçu n'est ni lu ni présumé** : le PDF
+  est le memo. L'exemple d'Ibé (memo Wagram « Projet Dioo », 21/11) sert de modèle au memo écrit par PDS
+  (`lib/deals/memo-pdf.ts`). La partie juridique d'un deal reste sur la page du deal (décidé le 18/11).
   - **Réception** (`lib/email/deal-memo-inbox.ts`, appelé par `/api/cron/inbox` après les justificatifs, échec
     seulement journalisé ; même mécanisme que les réponses aux autorisations) : adresse de PO propre au deal
     `po+deal-<id>@…` (`lib/email/deal-memo-address.ts`, montrée sous le deal memo avec « Copier » pour qui écrit le
@@ -8300,13 +8296,12 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `generate_deal_contract` (copie remplie v1 dans `contract_documents`, contrat créé et lié au deal, ou v1 du contrat
     déjà lié sans document ; jamais pour une participation). Les modèles ont un groupe « Les termes du deal »
     (`CONTRACT_FIELD_GROUPS.deal`, `deal.*` de `lib/legal/contracts/fields.ts`, jamais remplis dans le Juridique).
-    **Mise en page des contrats** (tous les contrats générés, Juridique compris ; `lib/legal/contracts/document-pdf.ts`,
-    `contractPdf`) = le contrat type envoyé par Ibé le 22/11/2026 : Arial 10 pt justifié, A4 aux marges du modèle,
+    **Mise en page des contrats** (tous les contrats générés, Juridique compris ; seule source : `lib/legal/contracts/document-layout.ts`, module client-safe — `bodyHtml`, `templateBodyHtml`, `documentCss`, `sheetCss`, `fieldLabelOf`, `escapeHtml` — utilisée par le PDF (`document-pdf.ts`, `contractPdf`), l'aperçu d'un modèle et `DocumentEditor` ; le gras ajouté seul par la mise en page porte `data-auto` et n'est jamais relu comme une marque) = le contrat type envoyé par Ibé le 22/11/2026 : Arial 10 pt justifié, A4 aux marges du modèle,
     blocs séparés par une ligne vide = paragraphes (retours à la ligne et tabulations gardés : adresses, signatures),
     « 2. Avance. … » = numéro, tabulation, intitulé en gras souligné, ligne « Article 3 — Durée » seule en gras
     souligné, ligne courte en capitales en gras ; pied de page centré : numéro de page puis titre du contrat
     (`htmlToPdf` option `footer`). Le texte n'est jamais réécrit, seule sa présentation change.
-    **Marques dans un modèle** : `**texte**` en gras, `__texte__` souligné (⌘B / ⌘U dans l'éditeur ; un texte collé depuis
+    **Marques dans un modèle** : `**texte**` en gras, `__texte__` souligné (Gras / Souligné de la barre de `DocumentEditor`, ⌘B / ⌘U ; un texte collé depuis
     Word garde son gras et son souligné, `markedTextOf`). **En-tête** de première page : les coordonnées de la structure
     (Réglages › « Coordonnées de PDS » = `organization_billing` : raison sociale, adresse, téléphone, e-mail, site ;
     `20261122150101`), lues par `contract_letterhead` (membre qui voit le contrat, ou la personne par son lien privé) ;

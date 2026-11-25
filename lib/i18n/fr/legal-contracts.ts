@@ -188,12 +188,13 @@ export const legalContracts = {
     },
     editor: {
       label: "Texte du modèle",
-      insert: "Insérer une valeur",
-      insertHint:
-        "Placez le curseur dans le texte, puis cliquez sur la valeur à insérer. Elle sera remplie pour chaque contrat.",
-      // The marks the contract prints (document-pdf.ts, Sacha 22/11/2026).
-      marksHint:
-        "**texte** en gras (⌘B), __texte__ souligné (⌘U) ; un texte collé depuis Word garde son gras et son souligné.",
+      // The page's toolbar (DocumentEditor, Sacha 25/11/2026).
+      toolbar: "Mise en forme",
+      bold: "Gras",
+      boldKey: "G",
+      underline: "Souligné",
+      underlineKey: "S",
+      insert: "Insérer une information",
       groups: {
         person: "La personne",
         project: "Le projet",
@@ -214,9 +215,6 @@ export const legalContracts = {
       current: (name: string) => `Fichier source : ${name}`,
       drop: "Déposez le fichier ici",
       imported: (name: string) => `Contrat importé de « ${name} »`,
-      folded:
-        "Le texte du contrat est repris tel quel, chaque valeur repérée remplacée par sa pastille.",
-      showText: "Afficher le texte",
       undo: "Annuler",
       pdfNote: "Lu dans un PDF : la mise en page n'est pas gardée.",
       open: "Télécharger le fichier source",

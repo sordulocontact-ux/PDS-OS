@@ -68,6 +68,8 @@ function DropdownMenuItem({ className, ...props }: MenuPrimitive.Item.Props) {
 // One choice among a few, kept open on click so the change is seen (theme of
 // the account menu): label in grey, check on the right as in SelectItem.
 const DropdownMenuRadioGroup = MenuPrimitive.RadioGroup;
+// Items under a label (DropdownMenuGroupLabel), without a choice.
+const DropdownMenuGroup = MenuPrimitive.Group;
 
 function DropdownMenuGroupLabel({
   className,
@@ -152,6 +154,7 @@ export {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuGroupLabel,
   DropdownMenuItem,
   DropdownMenuRadioGroup,

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { DocumentEditor } from "@/components/contracts/document-editor";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
@@ -54,12 +55,9 @@ export function ReviseDocumentButton({
         size="wide"
       >
         <form action={submit} className="flex flex-col gap-4">
-          <TextareaField
+          <DocumentEditor
             name="body"
             label={t.reviseText}
-            required
-            rows={14}
-            maxLength={200_000}
             defaultValue={body}
           />
           <TextareaField

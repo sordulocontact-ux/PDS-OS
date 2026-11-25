@@ -1,6 +1,5 @@
 "use client";
 
-import { fieldLabel } from "@/components/contracts/templates/field-chip";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,11 +13,12 @@ import {
   CONTRACT_FIELD_IDS,
   type ContractFieldId,
 } from "@/lib/legal/contracts/fields";
+import { fieldLabelOf } from "@/lib/legal/contracts/document-layout";
 
 const fr = { legalContracts };
 
 const FIELD_ITEMS = Object.fromEntries(
-  CONTRACT_FIELD_IDS.map((id) => [id, fieldLabel(id)]),
+  CONTRACT_FIELD_IDS.map((id) => [id, fieldLabelOf(id)]),
 );
 
 /** One value found in the contract: the excerpt, how often it is written,

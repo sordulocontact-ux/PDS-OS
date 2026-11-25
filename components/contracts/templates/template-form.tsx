@@ -6,9 +6,9 @@ import { toast } from "@/components/ui/toast";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import {
-  TemplateBodyEditor,
-  type TemplateEditorHandle,
-} from "@/components/contracts/templates/template-body-editor";
+  DocumentEditor,
+  type DocumentEditorHandle,
+} from "@/components/contracts/document-editor";
 import { TemplateSourceField } from "@/components/contracts/templates/template-source-field";
 import {
   ValueSuggestions,
@@ -31,7 +31,6 @@ import { createContractTemplate } from "@/lib/legal/contracts/template-actions";
 import type { TemplateAbout } from "@/lib/legal/contracts/template-values";
 import type { TemplateSource } from "@/lib/legal/contracts/upload-source";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
-import { cn } from "@/lib/utils";
 import { jsonListOf } from "@/lib/utils/form-data";
 
 const fr = { contracts, legalContracts, legalDocuments, legalForms };
@@ -50,11 +49,12 @@ export type TemplateDraft = {
 
 /**
  * A template pasted by a human (« aucun modèle juridique nouveau ni aucune
- * clause n'est inventé »), its values inserted as chips (saved as {{id}}),
- * or found in a contract already filled in, or imported from a source
- * file kept with it: PO reads an imported contract at once and its text
- * stays folded behind what he found. A new version starts from the current text and file;
- * the original is never touched.
+ * clause n'est inventé »), written on the page of the contract as its PDF
+ * (`DocumentEditor`), its values inserted from « Insérer une information »
+ * (saved as {{id}}), or found in a contract already filled in, or imported
+ * from a source file kept with it: PO reads an imported contract at once and
+ * the contract stays in sight. A new version starts from the current text
+ * and file; the original is never touched.
  */
 export function TemplateForm({
   organizationId,
@@ -75,10 +75,8 @@ export function TemplateForm({
   const t = fr.legalContracts.templates;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const editor = useRef<TemplateEditorHandle>(null);
+  const editor = useRef<DocumentEditorHandle>(null);
   const suggestions = useRef<ValueSuggestionsHandle>(null);
-  // An imported contract shows what PO found, not its raw text.
-  const [textOpen, setTextOpen] = useState(true);
   const [body, setBody] = useState(initial?.body ?? "");
   // Values found by « Repérer les valeurs », still to replace or ignore.
   const [toDecide, setToDecide] = useState<string[]>([]);
@@ -148,7 +146,6 @@ export function TemplateForm({
           // The text it replaces stays one click away.
           const before = body;
           editor.current?.load(text);
-          setTextOpen(false);
           suggestions.current?.analyze(text, name);
           if (before.trim())
             toast.success(t.source.imported(name), {
@@ -157,7 +154,6 @@ export function TemplateForm({
                 onClick: () => {
                   editor.current?.load(before);
                   suggestions.current?.clear();
-                  setTextOpen(true);
                 },
               },
             });
@@ -215,32 +211,16 @@ export function TemplateForm({
           </ToneCallout>
         )}
       </Fragment>
-      {!textOpen && (
-        <div className="flex flex-col gap-3 rounded-lg bg-[var(--surface-soft)] p-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <h3 className="text-sm font-medium">{t.editor.label}</h3>
-            <p className="text-sm text-muted-foreground">{t.source.folded}</p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => setTextOpen(true)}
-          >
-            {t.source.showText}
-          </Button>
-        </div>
-      )}
-      <div className={cn(!textOpen && "hidden")}>
-        <TemplateBodyEditor
-          ref={editor}
-          name="body"
-          defaultValue={initial?.body}
-          highlight={toDecide}
-          onChange={setBody}
-        />
-      </div>
+      <DocumentEditor
+        ref={editor}
+        name="body"
+        label={t.editor.label}
+        placeholder={t.editor.placeholder}
+        fields
+        defaultValue={initial?.body}
+        highlight={toDecide}
+        onChange={setBody}
+      />
       <ValueSuggestions
         ref={suggestions}
         editor={editor}
