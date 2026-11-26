@@ -10,6 +10,36 @@ pour changer de design system et miroir Figma (variables, composants, écrans cl
 
 ---
 
+## 0. Regarder l'écran et le parcours à chaque modification (Sacha, 26/11/2026)
+
+Un écran n'est pas fini quand le build passe. Il est fini quand on l'a vu, avec le parcours autour.
+Cela vaut pour chaque modification, même petite.
+
+1. **Voir chaque état rendu.** Faire une capture dans le navigateur à chaque étape du geste : avant,
+   pendant, après, vide, erreur. Si le serveur de Sacha est éteint, en lancer un (worktree et
+   `next start`, Docker si besoin) plutôt que de livrer sans avoir regardé.
+2. **Critiquer la capture comme une capture de Sacha.** Vérifier :
+   - qu'aucun élément ne contredit l'état de l'écran (texte, zone vide, bouton) ;
+   - le texte (§ « Texte à l'écran ») ;
+   - les alignements de la grille ;
+   - qu'il ne faut pas défiler jusqu'à l'action ;
+   - les champs inutiles dans ce cas précis.
+3. **Rejouer le parcours entier, pas seulement l'écran touché.** Vérifier ce qui vient avant, ce qui
+   vient après, le retour en arrière, et les autres écrans qui utilisent le même composant (règle 7
+   de `CLAUDE.md`). Le reste doit rester fluide.
+4. **Un composant réutilisé se relit dans son nouveau contexte.** Ce qui convenait ailleurs peut
+   devenir absurde ici. Exemple : une zone de dépôt qui reste vide alors que le fichier est déjà
+   déposé.
+5. **Un résultat retombé sur la valeur par défaut est un échec.** Exemple : un titre pris du nom du
+   fichier, ou « Aucun » partout dans un pré-remplissage. Il se signale, il ne se compte pas comme
+   réussi.
+6. **Ce qui n'a pas pu être vu se dit en tête du bilan**, comme un risque, jamais en fin de liste.
+
+Origine : « Nouveau contrat » du 26/11/2026, livré sans avoir regardé l'écran après le dépôt du
+fichier (`docs/bonnes-pratiques/retours-design.md`).
+
+---
+
 ## 1. Icônes
 
 ### Famille

@@ -30,8 +30,9 @@ export function ContractCreation({
   options: ContractFormOptions;
   projectId?: string;
   onClose: () => void;
-  // The project's contracts are a table: the modal widens for them.
-  onWide?: (wide: boolean) => void;
+  // The modal widens for a project's contracts (a table), and more for a
+  // dropped contract read beside its form.
+  onWide?: (size: "default" | "wide" | "document") => void;
 }) {
   const t = fr.contracts.creation;
   const [scenario, setScenario] = useState<Scenario | null>(
@@ -40,9 +41,15 @@ export function ContractCreation({
   const [dropping, setDropping] = useState(true);
 
   useEffect(() => {
-    onWide?.(scenario === "generate");
-    return () => onWide?.(false);
-  }, [scenario, onWide]);
+    onWide?.(
+      scenario === "generate"
+        ? "wide"
+        : scenario === "import" && !dropping
+          ? "document"
+          : "default",
+    );
+    return () => onWide?.("default");
+  }, [scenario, dropping, onWide]);
 
   const importing = scenario === "import" && (
     <ContractImport

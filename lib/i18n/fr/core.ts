@@ -10,6 +10,10 @@ export const core = {
     close: "Fermer",
     saving: "Enregistrement…",
   },
+  // A file chosen for a form (components/ui/file-pick-field.tsx).
+  filePick: {
+    replace: "Remplacer",
+  },
   // An awaited due day said in words (components/ui/due-date.tsx).
   dueDate: {
     late: (days: number) => `${days} jour${days > 1 ? "s" : ""} de retard`,

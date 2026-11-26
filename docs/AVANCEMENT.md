@@ -3180,5 +3180,18 @@ PDF, pas un truc avec les écritures »).
     personne et repris pour elle une fois validé ; le tableau se relit après chaque changement (`onChange`). Le choix
     « Créer un modèle réutilisable » est retiré (Contrats › Modèles le garde) ; la fenêtre ne s'élargit que pour le
     tableau ; sans `manage_legal`, on arrive directement au dépôt du fichier.
+  - **Le contrat déposé à côté de ses champs** (retour de Sacha du 26/11, `docs/bonnes-pratiques/retours-design.md`) :
+    - fenêtre `document` (1280 px) ;
+    - le PDF dans le lecteur du navigateur, le Word en son texte sur la feuille du contrat et dans sa police
+      (`ContractFilePreview`) ;
+    - à droite, `ContractForm existing`, sans Échéance ni Notes ;
+    - sur téléphone, les champs d'abord, le contrat dessous ;
+    - `FilePickField`, dans toute l'app : le fichier choisi remplace la zone de dépôt par une ligne avec « Remplacer » ;
+    - plus de phrase sous « Nouveau contrat » ;
+    - dates du formulaire de contrat sur toute leur colonne ;
+    - « PDS Records » n'est plus pris pour l'artiste « PDS ».
+
+    Vérifié dans le navigateur : Word, PDF, remplacement, Annuler, téléphone (cadre de 390 px), enregistrement jusqu'à la
+    page du contrat, « Importer un contrat » d'un deal.
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

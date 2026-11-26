@@ -21,7 +21,9 @@ const fr = { contracts };
 /**
  * A contract, created or edited in the modal: what it is, who follows it,
  * what it is about (project, artist), its dates. Parties and files are added
- * on its page.
+ * on its page. Each field takes its column's width (docs/DESIGN.md « Largeur
+ * d'un champ »); two side by side only when the form has room (a container
+ * query: beside a document, one column).
  */
 export function ContractForm({
   contract,
@@ -31,6 +33,7 @@ export function ContractForm({
   onSaved,
   onCancel,
   document,
+  existing = false,
 }: {
   // Absent: a new contract.
   contract?: ContractValues;
@@ -46,8 +49,18 @@ export function ContractForm({
   // A document to import with the new contract, required (Sacha
   // 23/11/2026: « importer des docs », the form kept): kept in the browser,
   // uploaded by the caller once the contract exists (`onSaved`).
-  // `file`: already dropped (« Nouveau contrat » reads it first).
-  document?: { label: string; hint: string; accept: string; file?: File };
+  // `file`: already dropped (« Nouveau contrat » reads it first);
+  // `onFile`: another file chosen in its place.
+  document?: {
+    label: string;
+    hint: string;
+    accept: string;
+    file?: File;
+    onFile?: (file: File) => void;
+  };
+  // A contract that already exists, its file beside the form (« Déposer un
+  // contrat existant »): no due day nor notes, those are for one to write.
+  existing?: boolean;
 }) {
   const t = fr.contracts.form;
   const [state, formAction, pending] = useActionState(saveContract, null);
@@ -65,7 +78,7 @@ export function ContractForm({
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-5"
+      className="@container flex flex-col gap-5"
       onSubmit={(event) => {
         if (document && !file) {
           event.preventDefault();
@@ -85,6 +98,7 @@ export function ContractForm({
           onFile={(chosen) => {
             setFile(chosen);
             setFileMissing(false);
+            document.onFile?.(chosen);
           }}
         />
       )}
@@ -113,7 +127,8 @@ export function ContractForm({
         <OptionSelect
           name="ownerPersonId"
           label={t.owner}
-          hint={t.ownerHint}
+          // « Jusqu'à sa signature »: not for one already signed.
+          hint={existing ? undefined : t.ownerHint}
           items={Object.fromEntries(
             options.owners.map((owner) => [owner.personId, owner.name]),
           )}
@@ -124,7 +139,7 @@ export function ContractForm({
           }
         />
       )}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 @md:grid-cols-2">
         <OptionSelect
           name="projectId"
           label={t.project}
@@ -144,21 +159,25 @@ export function ContractForm({
           defaultValue={contract?.artistId ?? initial?.artistId ?? "none"}
         />
       </div>
-      <Field
-        name="dueOn"
-        type="date"
-        label={t.dueOn}
-        hint={t.dueOnHint}
-        defaultValue={contract?.dueOn ?? initial?.dueOn ?? ""}
-        className="h-10 w-fit text-base md:text-sm"
-      />
-      <div className="grid gap-5 sm:grid-cols-2">
+      {!existing && (
+        <Field
+          name="dueOn"
+          type="date"
+          label={t.dueOn}
+          hint={t.dueOnHint}
+          defaultValue={contract?.dueOn ?? initial?.dueOn ?? ""}
+          className="h-10 text-base md:text-sm"
+        />
+      )}
+      {/* Side by side from 21rem: the column beside a document (22rem)
+          keeps both, a phone stacks them (a date needs ~150 px). */}
+      <div className="grid gap-5 @[21rem]:grid-cols-2">
         <Field
           name="startsOn"
           type="date"
           label={t.startsOn}
           defaultValue={contract?.startsOn ?? initial?.startsOn ?? ""}
-          className="h-10 w-fit text-base md:text-sm"
+          className="h-10 text-base md:text-sm"
         />
         <Field
           name="endsOn"
@@ -166,17 +185,19 @@ export function ContractForm({
           label={t.endsOn}
           defaultValue={contract?.endsOn ?? initial?.endsOn ?? ""}
           error={error?.field === "endsOn" ? error.error : undefined}
-          className="h-10 w-fit text-base md:text-sm"
+          className="h-10 text-base md:text-sm"
         />
       </div>
-      <TextareaField
-        name="notes"
-        label={t.notes}
-        maxLength={4000}
-        rows={3}
-        placeholder={t.notesPlaceholder}
-        defaultValue={contract?.notes ?? initial?.notes ?? ""}
-      />
+      {!existing && (
+        <TextareaField
+          name="notes"
+          label={t.notes}
+          maxLength={4000}
+          rows={3}
+          placeholder={t.notesPlaceholder}
+          defaultValue={contract?.notes ?? initial?.notes ?? ""}
+        />
+      )}
       {error && !error.field && (
         <FormMessage kind="error">{error.error}</FormMessage>
       )}

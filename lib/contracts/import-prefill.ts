@@ -37,7 +37,6 @@ const KINDS: Array<[ContractType, RegExp]> = [
 // the middle of a sentence (« … d'un contrat que … »).
 const TITLE_LINE =
   /^(?:le |la |l['’]|the )?(?:contrat|convention|accord|licence|license|cession|avenant|agreement|amendment|deal memo)\b/i;
-/\b(?:contrat|convention|accord|licence|cession|avenant)\b/i;
 
 const plain = (text: string) =>
   text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -70,6 +69,11 @@ function titleOf(text: string, fileName: string): string {
   return (title.charAt(0).toUpperCase() + title.slice(1)).slice(0, 200);
 }
 
+// « PDS Records », « Wagram Music », « Nova Sound SAS »: a name followed by
+// one of these is a company, not the artist (a memo addressed to the label).
+const COMPANY_AFTER =
+  "(?!\\s+(?:records|music|musique|label|editions|publishing|productions?|entertainment|sas|sarl|sa|inc|ltd|llc|gmbh)\\b)";
+
 /** The one option whose name the text contains, else null (none, or
  * several: nothing is guessed). */
 function namedIn<T extends { id: string }>(
@@ -81,7 +85,9 @@ function namedIn<T extends { id: string }>(
     const name = plain(nameOf(item)).trim();
     if (name.length < 3) return false;
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`).test(text);
+    return new RegExp(
+      `(?:^|[^a-z0-9])${escaped}${COMPANY_AFTER}(?:$|[^a-z0-9])`,
+    ).test(text);
   });
   return found.length === 1 ? found[0]!.id : null;
 }

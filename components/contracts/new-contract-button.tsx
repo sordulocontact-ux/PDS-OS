@@ -17,18 +17,17 @@ const fr = { contracts };
  * small as the section's other buttons. */
 export function NewContractButton({ projectId }: { projectId?: string } = {}) {
   const t = fr.contracts.form;
-  // Wide only for a project's contracts (a table); the choice and the
-  // contract's form stay at the usual width.
-  const [wide, setWide] = useState(false);
+  // Wide for a project's contracts (a table), wider for a dropped contract
+  // read beside its form; the choice stays at the usual width.
+  const [size, setSize] = useState<"default" | "wide" | "document">("default");
   return (
     <LoadedFormButton
       label={fr.contracts.new}
       icon={IconPlus}
       variant={projectId ? "outline" : "default"}
       size={projectId ? "sm" : "lg"}
-      dialogSize={wide ? "wide" : "default"}
+      dialogSize={size}
       title={t.createTitle}
-      description={t.createDescription}
       closeLabel={t.close}
       load={loadContractOptions}
     >
@@ -37,7 +36,7 @@ export function NewContractButton({ projectId }: { projectId?: string } = {}) {
           options={options}
           projectId={projectId}
           onClose={close}
-          onWide={setWide}
+          onWide={setSize}
         />
       )}
     </LoadedFormButton>

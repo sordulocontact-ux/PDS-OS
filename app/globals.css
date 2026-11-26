@@ -194,7 +194,8 @@
   --dialog-width-wide: 900px;
   /* Un formulaire d'une colonne qui garde de l'air (contact du Réseau). */
   --dialog-width-medium: 640px;
-  /* Une image vue en grand (captures d'un retour, ImageGallery). */
+  /* Une image vue en grand (captures d'un retour, ImageGallery), un contrat lu à côté
+     de son formulaire (« Déposer un contrat existant »). */
   --dialog-width-viewer: 1280px;
   --surface-glass: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 

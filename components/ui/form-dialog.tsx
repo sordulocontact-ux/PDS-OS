@@ -31,8 +31,8 @@ export function FormDialog({
   trigger?: React.ReactNode;
   // `wide`: a longer form laid out wider rather than taller.
   // `medium`: one column with room to breathe (a contact of the Réseau, a
-  // feedback).
-  size?: "default" | "medium" | "wide";
+  // feedback). `document`: a document read beside its form.
+  size?: "default" | "medium" | "wide" | "document";
   children: React.ReactNode;
 }) {
   return (
@@ -46,7 +46,9 @@ export function FormDialog({
             ? "sm:max-w-[var(--dialog-width-wide)]"
             : size === "medium"
               ? "sm:max-w-[var(--dialog-width-medium)]"
-              : undefined
+              : size === "document"
+                ? "sm:max-w-[var(--dialog-width-viewer)]"
+                : undefined
         }
       >
         <DialogHeader>

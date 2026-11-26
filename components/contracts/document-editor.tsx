@@ -7,6 +7,7 @@ import {
   type DocumentMarks,
 } from "@/components/contracts/document-editor-toolbar";
 import { DocumentFieldPopover } from "@/components/contracts/document-field-popover";
+import { DocumentSheetStyle } from "@/components/contracts/document-sheet-style";
 import { usePageCaret } from "@/components/contracts/use-page-caret";
 import {
   dropCaretHolders,
@@ -26,7 +27,6 @@ import {
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
 import type { ExcerptAt } from "@/lib/legal/contracts/template-text";
 import {
-  documentFontHref,
   documentFontOf,
   type DocumentFont,
 } from "@/lib/legal/contracts/document-fonts";
@@ -176,16 +176,7 @@ export function DocumentEditor({
 
   return (
     <div className="flex flex-col gap-2">
-      <style href={PAGE} precedence="default">
-        {PAGE_CSS}
-      </style>
-      {font && (
-        <link
-          rel="stylesheet"
-          href={documentFontHref(font)}
-          precedence="default"
-        />
-      )}
+      <DocumentSheetStyle scope={PAGE} css={PAGE_CSS} font={font ?? null} />
       <Label id={`${name}-label`} required>
         {label}
       </Label>

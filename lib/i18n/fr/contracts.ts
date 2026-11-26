@@ -88,8 +88,6 @@ export const contracts = {
     documentChosen: (name: string) => `Document choisi : ${name}`,
     documentMissing: "Choisissez le document du contrat.",
     createTitle: "Nouveau contrat",
-    createDescription:
-      "Il commence en préparation : vous ajouterez ensuite ses parties et ses fichiers.",
     editTitle: "Modifier le contrat",
     editDescription: "Modifiable tant qu'il n'est ni en relecture ni résilié.",
     title: "Titre",
@@ -131,6 +129,8 @@ export const contracts = {
     project: "Projet",
     projectPlaceholder: "Choisir le projet",
     loading: "Chargement des contrats du projet…",
+    preview: (name: string) => `Contrat déposé : ${name}`,
+    previewUnavailable: "Aperçu indisponible pour ce fichier.",
     loadFailed: "Les contrats de ce projet n'ont pas pu être chargés.",
     unavailable:
       "Ce projet n'est pas encore lancé : il n'a pas de contrats à prévoir.",
