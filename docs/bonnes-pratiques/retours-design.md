@@ -76,8 +76,8 @@ qui a été fait.
     « Confirmer les contrats nécessaires », la colonne Rémunération et les lignes « Signé » ne
     sont plus là ;
   - la phrase en double est retirée, « Fermer » passe en contour.
-- **Reste** : la liste d'un menu se pose par-dessus son champ (le comportement du menu dans toute
-  l'app). C'était les « deux cadres décalés » : question posée à Sacha avant d'y toucher.
+- **Les « deux cadres décalés »** : la liste d'un menu se posait par-dessus son champ, dans toute
+  l'app. Question posée, réponse de Sacha : « sous le champ, partout ». Fait (`SelectContent`).
 - **Ce que Claude a trouvé** (confirmé par Sacha) : le tableau « Contrats à prévoir » du Plan d'action a été
   mis tel quel dans la fenêtre. Il sert à décider des contrats d'un projet, pas à en créer un. La même
   erreur qu'au dépôt : un composant réutilisé sans relire son rendu dans le nouveau parcours.
@@ -111,6 +111,9 @@ qui a été fait.
     gauche, les informations à droite, « Enregistrer » sous elles, en fenêtre `document` ;
   - le fichier source : la même zone de dépôt, puis la même ligne « Remplacer » que tout fichier
     choisi (`ChosenFileRow`), « Retirer » à côté.
-- **Questions posées** (doute sur le périmètre) :
-  - la fenêtre de lecture d'un modèle (« Voir ») ;
-  - « Importer un contrat » d'un deal.
+- **Questions posées** (doute sur le périmètre), réponses de Sacha : oui aux deux. Fait et vérifié
+  dans le navigateur :
+  - la fenêtre « Voir » d'un modèle (et sa page) : le contrat à gauche ; à droite l'état, « Valider »,
+    le type, « Voir le PDF », « Modifier » et les versions ;
+  - « Importer un contrat » d'un deal : le même écran que « Déposer un contrat ». Le deal fixe le
+    type, l'artiste et le projet ; le titre vient du document s'il en a un.

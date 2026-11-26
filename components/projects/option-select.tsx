@@ -206,9 +206,7 @@ function MultipleSelect({
             }
           </SelectValue>
         </SelectTrigger>
-        {/* Under the trigger rather than over it: the list is ticked
-            several times, the trigger keeps showing the choices. */}
-        <SelectContent alignItemWithTrigger={false}>
+        <SelectContent>
           {Object.entries(items).map(([value, itemLabel]) => (
             <SelectItem
               key={value}

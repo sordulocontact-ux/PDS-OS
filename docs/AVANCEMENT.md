@@ -3202,5 +3202,8 @@ PDF, pas un truc avec les écritures »).
     - formulaire d'un modèle : le contrat à gauche, les informations à droite ;
     - fichier source en `ChosenFileRow` ;
     - guide de PO : « Nouveau contrat », et « Générer un contrat, c'est l'envoyer ? ».
+    - réponses de Sacha à trois doutes : la vue d'un modèle passe aussi en deux colonnes (`TemplateView head`) ;
+      « Importer un contrat » d'un deal prend l'écran du dépôt (`ContractImport known onSaved`) ; la liste de
+      tout menu s'ouvre sous son champ (`SelectContent`).
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

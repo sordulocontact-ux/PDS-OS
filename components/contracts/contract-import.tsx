@@ -15,7 +15,7 @@ import {
   contractPrefill,
   type ContractPrefill,
 } from "@/lib/contracts/import-prefill";
-import type { ContractFormOptions } from "@/lib/contracts/types";
+import type { ContractFormOptions, ContractType } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import {
   isDocumentFont,
@@ -61,12 +61,26 @@ async function readFile(file: File): Promise<Read> {
 export function ContractImport({
   options,
   projectId,
+  known,
+  onSaved,
   onDropped,
   onCancel,
   onClose,
 }: {
   options: ContractFormOptions;
   projectId?: string;
+  // What the caller already knows (« Importer un contrat » of a deal): its
+  // type, artist and project win over the file's; its title only over the
+  // file's name, never over the document's own title line.
+  known?: {
+    title: string;
+    type: ContractType;
+    artistId: string | null;
+    projectId: string | null;
+  };
+  // Saved elsewhere than Contrats (a deal links it and stays on its page);
+  // by default the file is filed as its draft and its page opens.
+  onSaved?: (id: string, file: File | null) => void;
   // The file is read: the document and its form follow.
   onDropped?: () => void;
   onCancel: () => void;
@@ -140,13 +154,17 @@ export function ContractImport({
             onFile: (chosen) => void drop(chosen),
           }}
           initial={{
-            title: prefill.title,
-            type: prefill.type,
-            artistId: prefill.artistId,
-            projectId: projectId ?? prefill.projectId,
+            title:
+              known && !prefill.titleFromText ? known.title : prefill.title,
+            type: known?.type ?? prefill.type,
+            // What the deal says wins; the file fills what it does not.
+            artistId: known?.artistId ?? prefill.artistId,
+            projectId: projectId ?? known?.projectId ?? prefill.projectId,
           }}
           onCancel={onCancel}
-          onSaved={(id, chosen) => void saved(id, chosen)}
+          onSaved={(id, chosen) =>
+            onSaved ? onSaved(id, chosen) : void saved(id, chosen)
+          }
         />
       </div>
       <ContractFilePreview

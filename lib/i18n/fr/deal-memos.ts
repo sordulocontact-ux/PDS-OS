@@ -213,8 +213,6 @@ export const dealMemos = {
     import: "Importer un contrat",
     importTitle: "Importer un contrat",
     importDescription: "Rempli depuis le deal ; il lui est lié dès l'import.",
-    document: "Document du contrat",
-    documentHint: "PDF ou Word",
     imported: "Contrat importé et lié au deal",
     openPdf: "Ouvrir le PDF",
     // The contracting's gesture in « Maintenant » (DealContractNow).

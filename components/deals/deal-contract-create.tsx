@@ -2,12 +2,12 @@
 
 import { IconPlus } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
-import { ContractForm } from "@/components/contracts/contract-form";
+import { ContractImport } from "@/components/contracts/contract-import";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { toast } from "@/components/ui/toast";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { CONTRACT_FILE_ACCEPT } from "@/lib/contracts/import-prefill";
 import { loadContractOptions } from "@/lib/contracts/actions";
 import type { ContractType } from "@/lib/contracts/types";
 import { linkDealContract } from "@/lib/deals/memo-actions";
@@ -27,12 +27,13 @@ export type DealContractDefaults = {
 };
 
 /**
- * « Importer un contrat » (Sacha 23/11/2026: « importer des docs », « pourquoi
- * j'ai pas le formulaire »): the contract form of Contrats, filled from the
- * deal (its name, a licence or a partnership, its artist and project), with
- * the label's document on top (PDF or Word, required). Saved: the contract
- * is the deal's at once and the document its draft (category « draft »),
- * ready to be sent to validate. For whoever creates contracts.
+ * « Importer un contrat » (Sacha 23/11/2026: « importer des docs »): the same
+ * screen as « Déposer un contrat » of Contrats (Sacha 26/11/2026): the
+ * label's document first (PDF or Word), then the contract beside its form,
+ * filled from the deal (its name, a licence or a partnership, its artist and
+ * project) and from the document for what the deal does not say. Saved: the
+ * contract is the deal's at once and the document its draft (category
+ * « draft »), ready to be sent to validate. For whoever creates contracts.
  */
 export function DealContractCreate({
   dealId,
@@ -49,6 +50,8 @@ export function DealContractCreate({
   label?: string;
 }) {
   const router = useRouter();
+  // The document read: the modal widens for it.
+  const [dropped, setDropped] = useState(false);
   const filed = async (id: string, file: File | null) => {
     const linked = await linkDealContract(dealId, id);
     if (!linked.ok) return void toast.error(linked.error);
@@ -71,27 +74,25 @@ export function DealContractCreate({
       icon={IconPlus}
       variant={variant}
       size={size}
+      dialogSize={dropped ? "document" : "default"}
       title={t.importTitle}
       description={t.importDescription}
       closeLabel={dialogs.close}
       load={loadContractOptions}
     >
       {(options, close) => (
-        <ContractForm
+        <DealContractImport
+          onGone={() => setDropped(false)}
           options={options}
-          stay
-          document={{
-            label: t.document,
-            hint: t.documentHint,
-            accept: CONTRACT_FILE_ACCEPT,
-          }}
-          initial={{
+          known={{
             title: defaults.title,
             type: defaults.type,
             artistId: defaults.artistId,
             projectId: defaults.projectId,
           }}
+          onDropped={() => setDropped(true)}
           onCancel={close}
+          onClose={close}
           onSaved={(id, file) => {
             close();
             void filed(id, file);
@@ -100,4 +101,19 @@ export function DealContractCreate({
       )}
     </LoadedFormButton>
   );
+}
+
+/** The import, which gives the modal its usual width back once closed (the
+ * ✕ included). */
+function DealContractImport({
+  onGone,
+  ...props
+}: React.ComponentProps<typeof ContractImport> & { onGone: () => void }) {
+  // Only once it goes: the parent's callback changes with every render.
+  const gone = useRef(onGone);
+  useEffect(() => {
+    gone.current = onGone;
+  });
+  useEffect(() => () => gone.current(), []);
+  return <ContractImport {...props} />;
 }

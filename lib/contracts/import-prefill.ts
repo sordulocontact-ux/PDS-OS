@@ -11,6 +11,8 @@ export const CONTRACT_FILE_ACCEPT =
 
 export type ContractPrefill = {
   title: string;
+  // The title is the document's own line, not its file's name.
+  titleFromText: boolean;
   type: ContractType;
   artistId: string | null;
   projectId: string | null;
@@ -50,7 +52,10 @@ function sentenceCase(line: string): string {
 
 /** Its title: the first of its first lines that names a contract, else the
  * file's name without its extension. */
-function titleOf(text: string, fileName: string): string {
+function titleOf(
+  text: string,
+  fileName: string,
+): { title: string; fromText: boolean } {
   const line = text
     .split("\n")
     .slice(0, 15)
@@ -66,7 +71,10 @@ function titleOf(text: string, fileName: string): string {
     .replace(/[_-]+/g, " ")
     .trim();
   const title = line ? sentenceCase(line) : fromFile;
-  return (title.charAt(0).toUpperCase() + title.slice(1)).slice(0, 200);
+  return {
+    title: (title.charAt(0).toUpperCase() + title.slice(1)).slice(0, 200),
+    fromText: Boolean(line),
+  };
 }
 
 // « PDS Records », « Wagram Music », « Nova Sound SAS »: a name followed by
@@ -101,7 +109,7 @@ export function contractPrefill(
   },
 ): ContractPrefill {
   const body = text ?? "";
-  const title = titleOf(body, fileName);
+  const { title, fromText } = titleOf(body, fileName);
   const words = plain(`${title}\n${body.slice(0, 4000)}`);
   // The title decides first; the opening of the text otherwise.
   const kind =
@@ -110,6 +118,7 @@ export function contractPrefill(
   const all = plain(body);
   return {
     title,
+    titleFromText: fromText,
     type: kind?.[0] ?? "other",
     artistId: namedIn(all, options.artists, (a) => a.name),
     projectId: namedIn(all, options.projects, (p) => p.title),

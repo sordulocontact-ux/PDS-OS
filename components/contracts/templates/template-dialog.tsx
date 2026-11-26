@@ -14,7 +14,8 @@ const fr = { legalContracts };
 /**
  * A template opened from the list, in a modal rather than its page (Sacha
  * 25/11/2026: « je veux pas que ça ouvre une page »): its state, « Valider »
- * for whoever validates a draft, the document itself.
+ * for whoever validates a draft, the document itself; the document on the
+ * left, the rest on the right (TemplateView).
  */
 export function TemplateDialog({
   template,
@@ -33,23 +34,27 @@ export function TemplateDialog({
         template ? `${template.name} · ${t.version(template.version)}` : ""
       }
       closeLabel={t.close}
-      size="wide"
+      size="document"
     >
       {template && (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <StatusBadge tone={templateStatusTone[template.status]}>
-              {t.states[template.status]}
-            </StatusBadge>
-            {template.can.validate && (
-              <TemplateValidateButton templateId={template.id} />
-            )}
-          </div>
-          {template.status === "draft" && !template.can.validate && (
-            <ToneCallout tone="info">{t.whoValidates}</ToneCallout>
-          )}
-          <TemplateView template={template} />
-        </>
+        <TemplateView
+          template={template}
+          head={
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <StatusBadge tone={templateStatusTone[template.status]}>
+                  {t.states[template.status]}
+                </StatusBadge>
+                {template.can.validate && (
+                  <TemplateValidateButton templateId={template.id} />
+                )}
+              </div>
+              {template.status === "draft" && !template.can.validate && (
+                <ToneCallout tone="info">{t.whoValidates}</ToneCallout>
+              )}
+            </>
+          }
+        />
       )}
     </FormDialog>
   );

@@ -839,7 +839,9 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
 - **Livrables engagés** (Sacha, 07/11/2026, « on se perd ») : chaque levier et le formulaire « Nouveau
   livrable » sont séparés par un **filet** (`--border-hairline`), jamais encadrés (« pas une card
   complète, juste un contour qui le sépare »). Un menu (`OptionSelect`) ne dépasse jamais sa
-  colonne : libellé long coupé par « … ».
+  colonne : libellé long coupé par « … ». Sa liste s'ouvre **sous le champ**, jamais posée par-dessus
+  (Sacha, 26/11/2026 : la liste sur le champ se lisait « deux cadres décalés ») : `SelectContent`
+  par défaut, dans toute l'app.
 - **Largeur d'un champ** (Sacha, 07/11/2026) : dans un formulaire, **chaque champ prend toute la largeur
   de sa colonne** (texte, nombre, date, menu `OptionSelect fill`) ; seul un menu hors formulaire (une
   ligne, un filtre) garde la largeur de sa valeur. Appliqué d'abord à « Nouveau livrable » ; à reprendre

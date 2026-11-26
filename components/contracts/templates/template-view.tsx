@@ -1,6 +1,5 @@
 import { TemplateSourceLink } from "@/components/contracts/templates/template-source-link";
 import { Button } from "@/components/ui/button";
-import { DocumentCard } from "@/components/ui/document-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   templatePdfHref,
@@ -22,34 +21,33 @@ export const templateKind = (
 
 /**
  * A template as the one who validates it reads it (Ibé, 18/11/2026:
- * « recevoir le modèle en PDF, pas un truc avec les écritures ») : the
- * document itself, each value it fills shown as a blank labeled with what
- * goes there, « Voir le PDF » and, for whoever writes templates, « Modifier »
- * which opens the source document: a template is changed there, then
- * imported again as a new version, never edited in PDS OS. Then who
- * validated it, and its versions.
+ * « recevoir le modèle en PDF, pas un truc avec les écritures »): the
+ * document itself on the left, each value it fills shown as a blank labeled
+ * with what goes there; on the right what it is (Sacha 26/11/2026: the
+ * contract on the left, its information on the right, as a dropped contract
+ * and a template's form): `head` (its state, « Valider » in the modal), its
+ * kind, « Voir le PDF » and, for whoever writes templates, « Modifier »
+ * which opens the source document — a template is changed there, then
+ * imported again as a new version, never edited in PDS OS —, who validated
+ * it and its versions. One column when narrower (a container query), the
+ * information first.
  */
-export function TemplateView({ template }: { template: TemplateSeries }) {
+export function TemplateView({
+  template,
+  head,
+}: {
+  template: TemplateSeries;
+  head?: React.ReactNode;
+}) {
   const t = fr.legalContracts.templates;
   return (
-    <div className="flex flex-col gap-5">
-      {template.validatedBy && template.validatedAt && (
-        <p className="text-sm text-muted-foreground">
-          {t.validatedBy(
-            template.validatedBy,
-            formatInstant(template.validatedAt),
-          )}
-        </p>
-      )}
-      {template.status === "retired" && template.retiredReason && (
-        <p className="text-sm text-muted-foreground">
-          {t.retiredBecause(template.retiredReason)}
-        </p>
-      )}
-      <DocumentCard
-        name={t.document.name(template.name, t.version(template.version))}
-        line={templateKind(template)}
-        action={
+    <div className="@container">
+      <div className="grid gap-5 @5xl:grid-cols-[minmax(0,1fr)_22rem] @5xl:items-start">
+        <aside className="flex min-w-0 flex-col gap-4 @5xl:col-start-2 @5xl:row-start-1">
+          {head}
+          <p className="text-sm text-muted-foreground">
+            {templateKind(template)}
+          </p>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
@@ -73,28 +71,40 @@ export function TemplateView({ template }: { template: TemplateSeries }) {
               />
             )}
           </div>
-        }
-      >
+          {template.validatedBy && template.validatedAt && (
+            <p className="text-sm text-muted-foreground">
+              {t.validatedBy(
+                template.validatedBy,
+                formatInstant(template.validatedAt),
+              )}
+            </p>
+          )}
+          {template.status === "retired" && template.retiredReason && (
+            <p className="text-sm text-muted-foreground">
+              {t.retiredBecause(template.retiredReason)}
+            </p>
+          )}
+          <section className="flex flex-col gap-2">
+            <h3 className="text-sm font-medium">{t.versions}</h3>
+            <ul className="flex flex-wrap gap-2">
+              {template.versions.map((v) => (
+                <li key={v.id} className="flex items-center gap-1.5 text-sm">
+                  {t.version(v.version)}
+                  <StatusBadge tone={templateStatusTone[v.status]} size="sm">
+                    {t.states[v.status]}
+                  </StatusBadge>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </aside>
         <iframe
           title={t.document.frameTitle(template.name)}
           src={templatePreviewHref(template.id)}
           sandbox=""
-          className="block h-[70vh] w-full bg-muted"
+          className="block h-[75vh] w-full min-w-0 rounded-[var(--radius-lg)] bg-muted @5xl:col-start-1 @5xl:row-start-1"
         />
-      </DocumentCard>
-      <section className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium">{t.versions}</h3>
-        <ul className="flex flex-wrap gap-2">
-          {template.versions.map((v) => (
-            <li key={v.id} className="flex items-center gap-1.5 text-sm">
-              {t.version(v.version)}
-              <StatusBadge tone={templateStatusTone[v.status]} size="sm">
-                {t.states[v.status]}
-              </StatusBadge>
-            </li>
-          ))}
-        </ul>
-      </section>
+      </div>
     </div>
   );
 }

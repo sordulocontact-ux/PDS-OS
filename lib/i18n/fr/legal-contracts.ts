@@ -247,7 +247,6 @@ export const legalContracts = {
     // PDF, pas un truc avec les écritures »): its values as blanks to fill,
     // « Modifier » opening the source document, where it is changed.
     document: {
-      name: (name: string, version: string) => `${name} · ${version}`,
       pdf: "Voir le PDF",
       edit: "Modifier",
       editLabel: (name: string) => `Modifier le document source : ${name}`,

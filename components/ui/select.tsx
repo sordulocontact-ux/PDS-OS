@@ -74,7 +74,9 @@ function SelectContent({
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  // Under its field, never laid over it (Sacha 26/11/2026: the list over
+  // the field read as « deux cadres décalés »), in every menu of the app.
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<
