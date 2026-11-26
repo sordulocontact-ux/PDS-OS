@@ -117,3 +117,23 @@ qui a été fait.
     le type, « Voir le PDF », « Modifier » et les versions ;
   - « Importer un contrat » d'un deal : le même écran que « Déposer un contrat ». Le deal fixe le
     type, l'artiste et le projet ; le titre vient du document s'il en a un.
+
+---
+
+## 26/11/2026 : « Déposer un contrat », date et lieu du contrat
+
+- **Ce que Sacha a dit** : « il y a pas de date de contrat et lieu ? dans les inputs ? si ça ne sert à
+  rien ne mets pas », puis « fais les retours qu'on a dit ».
+- **Décision** :
+  - pas de lieu : rien ne s'en sert dans PDS OS ;
+  - pas de « Date du contrat » à part pour un contrat non signé ;
+  - les dates que le document dit sont lues par le code : Début, Fin (aussi depuis une durée en ans
+    ou en mois) et le jour de signature (« Fait à …, le … ») ;
+  - « Déjà signé », jamais coché d'office, fait apparaître « Signé le » et fait entrer le contrat
+    directement en « Signé ».
+- **Fait** (vérifié dans le navigateur avec `contrat_licence_mona_lys.docx`) :
+  - le contrat est créé « Signé le 26 novembre 2026 », du 1er décembre 2026 au 30 novembre 2031,
+    avec son fichier rangé comme signé ;
+  - trouvé en vérifiant et corrigé : les dates coupées à deux par ligne dans la colonne étroite
+    (« Mar. 01/12/2… »), et « Créer le contrat » qu'il fallait aller chercher en faisant défiler la
+    colonne.

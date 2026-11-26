@@ -1,15 +1,19 @@
 // What a dropped contract says of itself (Sacha 26/11/2026: the file first,
 // the form filled from it): its title, its kind, the artist and the project
-// it names. Read by code from the file's text, never by a model (rule 6),
+// it names, its dates (import-dates.ts). Read by code from the file's text, never by a model (rule 6),
 // each value corrigible in the form. Client-safe and pure.
 
+import {
+  contractDates,
+  type ContractDates,
+} from "@/lib/contracts/import-dates";
 import type { ContractType } from "@/lib/contracts/types";
 
 // A PDF or a Word document (Sacha 23/11/2026: « importer des docs »).
 export const CONTRACT_FILE_ACCEPT =
   "application/pdf,.pdf,application/msword,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx";
 
-export type ContractPrefill = {
+export type ContractPrefill = ContractDates & {
   title: string;
   // The title is the document's own line, not its file's name.
   titleFromText: boolean;
@@ -122,5 +126,6 @@ export function contractPrefill(
     type: kind?.[0] ?? "other",
     artistId: namedIn(all, options.artists, (a) => a.name),
     projectId: namedIn(all, options.projects, (p) => p.title),
+    ...contractDates(all),
   };
 }

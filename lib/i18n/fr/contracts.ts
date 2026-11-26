@@ -124,6 +124,11 @@ export const contracts = {
     document: "Contrat",
     documentHint: "PDF ou Word",
     preview: (name: string) => `Contrat déposé : ${name}`,
+    // A dropped contract already signed: it enters as signed.
+    alreadySigned: "Déjà signé",
+    signedOn: "Signé le",
+    signedOnMissing: "Indiquez le jour de la signature.",
+    importedSigned: "Contrat enregistré comme signé, avec son fichier.",
     previewUnavailable: "Aperçu indisponible pour ce fichier.",
     imported: "Contrat enregistré avec son fichier.",
     project: "Projet",

@@ -23214,6 +23214,10 @@ export type Database = {
         Args: { p_memo_id: string; p_sent_to: string }
         Returns: undefined
       }
+      record_signed_contract: {
+        Args: { p_contract_id: string; p_signed_on: string }
+        Returns: undefined
+      }
       remove_deal_loop: {
         Args: { p_loop_id: string }
         Returns: undefined

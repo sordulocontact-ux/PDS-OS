@@ -3205,5 +3205,9 @@ PDF, pas un truc avec les écritures »).
     - réponses de Sacha à trois doutes : la vue d'un modèle passe aussi en deux colonnes (`TemplateView head`) ;
       « Importer un contrat » d'un deal prend l'écran du dépôt (`ContractImport known onSaved`) ; la liste de
       tout menu s'ouvre sous son champ (`SelectContent`).
+    - dates d'un contrat déposé lues par le code (`lib/contracts/import-dates.ts`) : début, fin (ou durée), jour de
+      signature ; « Déjà signé » (`AlreadySignedField`) le fait entrer en « Signé » (SQL `record_signed_contract`,
+      migration `20261126170101`, appliquée en local seulement) avec son fichier rangé comme signé
+      (`fileImportedContract`).
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

@@ -229,6 +229,12 @@ anglais. Décisions prises sans Ibé, à confirmer :
 
 - **Les deux sont prévenus** quand un contrat est soumis ou qu'un modèle est demandé : le business
   manager et la DG (elle supervise) ; chacun peut valider.
+- **Un contrat déposé déjà signé entre en « Signé »** (Sacha, 26/11/2026) : dans « Déposer un contrat »
+  ou « Importer un contrat » d'un deal, « Déjà signé » et sa date (lue dans « Fait à …, le … »). Il ne
+  passe ni par la validation ni par l'envoi, faits pour un contrat encore à signer ; son fichier est
+  rangé comme signé. Jamais pour un contrat généré depuis un modèle, qui garde son parcours (lien de la
+  personne, contre-signature, vérification : JUR-11). À confirmer avec Ibé : sa validation par le
+  business manager ne s'applique plus à un contrat déjà signé ailleurs.
 - **Signer pour PDS** (contre-signature après le retour signé de la personne) **reste la direction** :
   Ibé a parlé de valider, pas de qui signe pour la société (représentant légal). À trancher si le
   business manager doit aussi signer.

@@ -6,10 +6,10 @@ import { useState } from "react";
 
 import { ContractFilePreview } from "@/components/contracts/contract-file-preview";
 import { ContractForm } from "@/components/contracts/contract-form";
+import { fileImportedContract } from "@/components/contracts/file-imported-contract";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { toast } from "@/components/ui/toast";
 import { routes } from "@/lib/auth/redirects";
-import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import {
   CONTRACT_FILE_ACCEPT,
   contractPrefill,
@@ -79,8 +79,8 @@ export function ContractImport({
     projectId: string | null;
   };
   // Saved elsewhere than Contrats (a deal links it and stays on its page);
-  // by default the file is filed as its draft and its page opens.
-  onSaved?: (id: string, file: File | null) => void;
+  // by default the file is filed (fileImportedContract) and its page opens.
+  onSaved?: (id: string, file: File | null, signedOn: string | null) => void;
   // The file is read: the document and its form follow.
   onDropped?: () => void;
   onCancel: () => void;
@@ -106,17 +106,21 @@ export function ContractImport({
     onDropped?.();
   };
 
-  const saved = async (id: string, file: File | null) => {
+  const saved = async (
+    id: string,
+    file: File | null,
+    signedOn: string | null,
+  ) => {
     if (file && options.organizationId) {
-      const upload = await uploadCatalogFile({
+      const error = await fileImportedContract({
         organizationId: options.organizationId,
-        owner: { kind: "contract", id },
-        category: "draft",
+        contractId: id,
         file,
+        signedOn,
       });
-      // Created: its page takes the file again.
-      if (!upload.ok) toast.error(upload.error);
-      else toast.success(t.imported);
+      // Created: its page takes the file again, or is signed there.
+      if (error) toast.error(error);
+      else toast.success(signedOn ? t.importedSigned : t.imported);
     }
     onClose();
     router.push(routes.contract(id));
@@ -160,10 +164,16 @@ export function ContractImport({
             // What the deal says wins; the file fills what it does not.
             artistId: known?.artistId ?? prefill.artistId,
             projectId: projectId ?? known?.projectId ?? prefill.projectId,
+            startsOn: prefill.startsOn,
+            endsOn: prefill.endsOn,
           }}
+          // The dates the document states (import-dates.ts), corrigible.
+          signedOn={prefill.signedOn}
           onCancel={onCancel}
-          onSaved={(id, chosen) =>
-            onSaved ? onSaved(id, chosen) : void saved(id, chosen)
+          onSaved={(id, chosen, signedOn) =>
+            onSaved
+              ? onSaved(id, chosen, signedOn)
+              : void saved(id, chosen, signedOn)
           }
         />
       </div>

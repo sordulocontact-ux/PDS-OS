@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { ContractImport } from "@/components/contracts/contract-import";
+import { fileImportedContract } from "@/components/contracts/file-imported-contract";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { toast } from "@/components/ui/toast";
-import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { loadContractOptions } from "@/lib/contracts/actions";
 import type { ContractType } from "@/lib/contracts/types";
 import { linkDealContract } from "@/lib/deals/memo-actions";
@@ -52,18 +52,22 @@ export function DealContractCreate({
   const router = useRouter();
   // The document read: the modal widens for it.
   const [dropped, setDropped] = useState(false);
-  const filed = async (id: string, file: File | null) => {
+  const filed = async (
+    id: string,
+    file: File | null,
+    signedOn: string | null,
+  ) => {
     const linked = await linkDealContract(dealId, id);
     if (!linked.ok) return void toast.error(linked.error);
     if (file && defaults.organizationId) {
-      const upload = await uploadCatalogFile({
+      const error = await fileImportedContract({
         organizationId: defaults.organizationId,
-        owner: { kind: "contract", id },
-        category: "draft",
+        contractId: id,
         file,
+        signedOn,
       });
       // Created and linked: its page in Contrats takes the document again.
-      if (!upload.ok) toast.error(upload.error);
+      if (error) toast.error(error);
       else toast.success(t.imported);
     }
     router.refresh();
@@ -93,9 +97,9 @@ export function DealContractCreate({
           onDropped={() => setDropped(true)}
           onCancel={close}
           onClose={close}
-          onSaved={(id, file) => {
+          onSaved={(id, file, signedOn) => {
             close();
-            void filed(id, file);
+            void filed(id, file, signedOn);
           }}
         />
       )}
