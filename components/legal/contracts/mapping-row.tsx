@@ -66,6 +66,7 @@ export function MappingEditor({
   projectId,
   request,
   direction,
+  onRequested,
 }: {
   row: AgreementRow;
   value: MappingChoice;
@@ -76,6 +77,8 @@ export function MappingEditor({
   request: RequestState | null;
   // « Claire Morel », else « la direction ».
   direction: string;
+  // A template asked for this person.
+  onRequested?: () => void;
 }) {
   const d = fr.legalDocuments.template;
   const t = fr.legalContracts.agreements;
@@ -152,6 +155,7 @@ export function MappingEditor({
           organizationId={organizationId}
           roles={row.formRoles}
           request={{ projectId, key: row.key, name: row.name }}
+          onDone={onRequested}
         />
       )}
     </div>

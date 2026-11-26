@@ -7,6 +7,7 @@ import { ContractForm } from "@/components/contracts/contract-form";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { toast } from "@/components/ui/toast";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
+import { CONTRACT_FILE_ACCEPT } from "@/lib/contracts/import-prefill";
 import { loadContractOptions } from "@/lib/contracts/actions";
 import type { ContractType } from "@/lib/contracts/types";
 import { linkDealContract } from "@/lib/deals/memo-actions";
@@ -14,10 +15,6 @@ import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 
 const t = dealMemos.contract;
-
-// A PDF or a Word document (Sacha 23/11/2026: « importer des docs »).
-const ACCEPT =
-  "application/pdf,.pdf,application/msword,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx";
 
 /** What the new contract already knows from the deal. */
 export type DealContractDefaults = {
@@ -83,7 +80,11 @@ export function DealContractCreate({
         <ContractForm
           options={options}
           stay
-          document={{ label: t.document, hint: t.documentHint, accept: ACCEPT }}
+          document={{
+            label: t.document,
+            hint: t.documentHint,
+            accept: CONTRACT_FILE_ACCEPT,
+          }}
           initial={{
             title: defaults.title,
             type: defaults.type,

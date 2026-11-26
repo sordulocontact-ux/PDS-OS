@@ -114,26 +114,29 @@ export const contracts = {
     close: "Fermer",
     saved: "Contrat enregistré.",
   },
-  // « Nouveau contrat » asks what is being made first (JUR-18).
+  // « Nouveau contrat » asks what is being made first (JUR-18), two ways,
+  // both done in the modal (Sacha 26/11/2026).
   creation: {
     legend: "Que voulez-vous faire ?",
-    import: "Enregistrer un contrat qui existe déjà",
-    importHint:
-      "Un contrat signé ou en cours, rédigé hors de PDS OS : vous l'enregistrez, puis vous ajoutez ses parties et son fichier.",
-    importSteps: [
-      "Remplissez ce qui le décrit : titre, type, projet, dates.",
-      "Sur sa page, ajoutez ses parties depuis le Réseau.",
-      "Déposez son fichier, puis envoyez-le à valider.",
-    ],
-    generate: "Le générer depuis un modèle",
-    generateHint:
-      "Un contrat rempli d'après un modèle validé : il se prépare dans le Juridique d'un projet, d'après les contrats nécessaires et les fiches de renseignements.",
-    template: "Créer un modèle réutilisable",
-    templateHint:
-      "Un texte type, avec ses champs à remplir, que la direction valide avant qu'il serve à générer des contrats.",
-    openProjectContracts: "Ouvrir les contrats du projet",
-    chooseProject: "Choisir le projet",
-    openTemplates: "Ouvrir les modèles de contrat",
+    import: "Déposer un contrat existant",
+    importHint: "Signé ou reçu, en PDF ou Word.",
+    generate: "Partir d'un modèle",
+    generateHint: "Pour une personne d'un projet, avec un modèle validé.",
+    drop: "Déposez le contrat",
+    dropHint: "PDF ou Word : le formulaire se remplit d'après lui.",
+    reading: "Lecture du contrat…",
+    document: "Contrat",
+    documentHint: "PDF ou Word",
+    imported: "Contrat enregistré avec son fichier.",
+    project: "Projet",
+    projectPlaceholder: "Choisir le projet",
+    loading: "Chargement des contrats du projet…",
+    loadFailed: "Les contrats de ce projet n'ont pas pu être chargés.",
+    unavailable:
+      "Ce projet n'est pas encore lancé : il n'a pas de contrats à prévoir.",
+    unplanned:
+      "Ses contrats se prévoient une fois son État des lieux confirmé, dans son Juridique.",
+    openLegal: "Ouvrir le Juridique du projet",
   },
   // The side sheet of a contract, from the list (the Réseau's model,
   // docs/STYLE-FINANCE-PARTOUT.md § 6.7 bis, Sacha 24/11/2026).

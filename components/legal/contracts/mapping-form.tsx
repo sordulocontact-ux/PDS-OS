@@ -64,6 +64,7 @@ export function MappingForm({
   direction,
   onDone,
   onCancel,
+  onRequested,
 }: {
   projectId: string;
   rows: AgreementRow[];
@@ -72,6 +73,8 @@ export function MappingForm({
   direction: string;
   onDone: () => void;
   onCancel?: () => void;
+  // A template asked for a person (« Nouveau modèle de contrat »).
+  onRequested?: () => void;
 }) {
   const t = fr.legalContracts.agreements;
   const open = rows.filter((r) => r.contactId && !r.contract);
@@ -248,6 +251,7 @@ export function MappingForm({
                     projectId={projectId}
                     request={request}
                     direction={direction}
+                    onRequested={onRequested}
                   />
                   <Button
                     type="button"

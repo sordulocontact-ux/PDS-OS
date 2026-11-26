@@ -23,6 +23,7 @@ export function MappingPanel({
   organizationId,
   requests,
   direction,
+  onChange,
 }: {
   projectId: string;
   rows: AgreementRow[];
@@ -30,6 +31,9 @@ export function MappingPanel({
   organizationId: string | null;
   requests: Record<string, RequestState>;
   direction: string;
+  // Read the rows again after a change: in « Nouveau contrat », where no
+  // page refresh brings them (the project's page refreshes by itself).
+  onChange?: () => void;
 }) {
   const t = fr.legalContracts.agreements;
   const undecided = rows.some(
@@ -48,7 +52,9 @@ export function MappingPanel({
         onCancel={approval && !undecided ? () => setEditing(false) : undefined}
         onDone={() => {
           setEditing(false);
+          onChange?.();
         }}
+        onRequested={onChange}
       />
     );
   // Who confirmed and when is in the history, not repeated here (Sacha,

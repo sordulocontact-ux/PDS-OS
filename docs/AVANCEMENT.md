@@ -3168,5 +3168,17 @@ PDF, pas un truc avec les écritures »).
   - **Plus d'icône devant les modèles** dans la liste ; **« Nouveau contrat › Créer un modèle réutilisable »** ouvre le
     formulaire du modèle dans la même fenêtre (plus de renvoi vers la page des modèles), proposé seulement à qui écrit
     les modèles (`manage_legal`) ; enregistré, il rejoint Contrats › Modèles, à valider (Sacha, même jour).
+  - **« Nouveau contrat » refait, tout dans la fenêtre** (Sacha 26/11 : « la création d'un contrat est bizarre ») :
+    deux choix au lieu de trois. **« Déposer un contrat existant »** : le fichier d'abord (PDF ou Word, lu par
+    `/api/contracts/import-text`, une route car un PDF dépasse la limite d'1 Mo d'une server action), puis le formulaire
+    rempli par le code (`lib/contracts/import-prefill.ts` : titre = première ligne qui commence par « Contrat »,
+    « Licence », « Agreement »…, sinon le nom du fichier ; type par mots-clés ; artiste et projet seulement si un seul
+    nom connu apparaît), le fichier rangé en brouillon du contrat, puis sa page s'ouvre (`ContractImport`).
+    **« Partir d'un modèle »** (`manage_legal`) : le projet (déjà connu depuis son Juridique), puis ses « Contrats à
+    prévoir », le tableau même du Plan d'action (`ProjectContractsPick` → `MappingPanel`, lu par
+    `loadProjectContracts`) : « Générer » ou, sans modèle adapté, « Nouveau modèle de contrat » demandé pour la
+    personne et repris pour elle une fois validé ; le tableau se relit après chaque changement (`onChange`). Le choix
+    « Créer un modèle réutilisable » est retiré (Contrats › Modèles le garde) ; la fenêtre ne s'élargit que pour le
+    tableau ; sans `manage_legal`, on arrive directement au dépôt du fichier.
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

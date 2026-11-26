@@ -21,11 +21,14 @@ export function NewTemplateButton({
   organizationId,
   roles,
   request,
+  onDone,
 }: {
   organizationId: string;
   roles: FormRole[];
   // The project and the person it is made for: asked of the direction.
   request: { projectId: string; key: string; name: string };
+  // Sent: the caller reads the person's line again (« Nouveau contrat »).
+  onDone?: () => void;
 }) {
   const t = fr.legalContracts;
   const [open, setOpen] = useState(false);
@@ -64,6 +67,7 @@ export function NewTemplateButton({
           onCancel={() => setOpen(false)}
           onDone={() => {
             setOpen(false);
+            onDone?.();
           }}
         />
       </FormDialog>

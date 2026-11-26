@@ -46,11 +46,12 @@ export function ContractForm({
   // A document to import with the new contract, required (Sacha
   // 23/11/2026: « importer des docs », the form kept): kept in the browser,
   // uploaded by the caller once the contract exists (`onSaved`).
-  document?: { label: string; hint: string; accept: string };
+  // `file`: already dropped (« Nouveau contrat » reads it first).
+  document?: { label: string; hint: string; accept: string; file?: File };
 }) {
   const t = fr.contracts.form;
   const [state, formAction, pending] = useActionState(saveContract, null);
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(document?.file ?? null);
   const [fileMissing, setFileMissing] = useState(false);
 
   useEffect(() => {

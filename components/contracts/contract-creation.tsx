@@ -1,110 +1,86 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { ContractForm } from "@/components/contracts/contract-form";
-import { TemplateForm } from "@/components/contracts/templates/template-form";
-import { Button } from "@/components/ui/button";
+import { ContractImport } from "@/components/contracts/contract-import";
+import { ProjectContractsPick } from "@/components/contracts/project-contracts-pick";
 import { ChoiceCards } from "@/components/ui/choice-cards";
-import { toast } from "@/components/ui/toast";
-import { routes } from "@/lib/auth/redirects";
 import type { ContractFormOptions } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
-import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 
-const fr = { contracts, legalContracts };
+const fr = { contracts };
 
-type Scenario = "import" | "generate" | "template";
+type Scenario = "import" | "generate";
 
 /**
- * « Nouveau contrat » asks first what is being made (JUR-18): a contract
- * that already exists (recorded here, its parties and its file added on
- * its page, as the steps say), one generated from a template (done from
- * the project's Juridique, where its values are read), or a reusable
- * template, written right here (Sacha 25/11/2026: not sent to the templates
- * page), then added to Contrats › Modèles, to be validated.
+ * « Nouveau contrat » asks first what is being made (JUR-18), and both ways
+ * are done in the modal (Sacha 26/11/2026: « la création d'un contrat est
+ * bizarre »): a contract that already exists, its file dropped first and
+ * the form filled from it; or one generated from a template, from a
+ * project's « Contrats à prévoir », where a template is also written for a
+ * person who has none. Who cannot prepare a project's contracts
+ * (manage_legal) goes straight to the file.
  */
 export function ContractCreation({
   options,
   projectId,
   onClose,
+  onWide,
 }: {
   options: ContractFormOptions;
   projectId?: string;
   onClose: () => void;
+  // The project's contracts are a table: the modal widens for them.
+  onWide?: (wide: boolean) => void;
 }) {
   const t = fr.contracts.creation;
-  const [scenario, setScenario] = useState<Scenario | null>(null);
+  const [scenario, setScenario] = useState<Scenario | null>(
+    options.generates ? null : "import",
+  );
+  const [dropping, setDropping] = useState(true);
 
-  if (scenario === "template" && options.templateOrganizationId)
-    return (
-      <TemplateForm
-        organizationId={options.templateOrganizationId}
-        onCancel={() => setScenario(null)}
-        onDone={() => {
-          toast.success(fr.legalContracts.templates.saved);
-          onClose();
-        }}
-      />
-    );
+  useEffect(() => {
+    onWide?.(scenario === "generate");
+    return () => onWide?.(false);
+  }, [scenario, onWide]);
 
-  if (scenario === "import")
-    return (
-      <div className="flex flex-col gap-4">
-        <ol className="flex list-decimal flex-col gap-0.5 pl-5 text-sm text-muted-foreground">
-          {t.importSteps.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
-        <ContractForm
-          options={options}
-          initial={projectId ? { projectId } : undefined}
-          onCancel={() => setScenario(null)}
-          // The server action opens the new page itself.
-          onSaved={onClose}
-        />
-      </div>
-    );
+  const importing = scenario === "import" && (
+    <ContractImport
+      options={options}
+      projectId={projectId}
+      onDropped={() => setDropping(false)}
+      onCancel={() => {
+        setDropping(true);
+        if (options.generates) setScenario(null);
+        else onClose();
+      }}
+      onClose={onClose}
+    />
+  );
+  // The form, once the file is read, takes the whole modal. One tree for
+  // every case, so the import keeps its file when the choice goes away.
+  const choosing = options.generates && !(scenario === "import" && !dropping);
 
   return (
     <div className="flex flex-col gap-5">
-      <ChoiceCards
-        name="contract-scenario"
-        legend={t.legend}
-        value={scenario}
-        onChange={setScenario}
-        choices={[
-          { value: "import", label: t.import, hint: t.importHint },
-          { value: "generate", label: t.generate, hint: t.generateHint },
-          ...(options.templateOrganizationId
-            ? [
-                {
-                  value: "template" as const,
-                  label: t.template,
-                  hint: t.templateHint,
-                },
-              ]
-            : []),
-        ]}
-      />
+      {choosing && (
+        <ChoiceCards
+          name="contract-scenario"
+          legend={t.legend}
+          value={scenario}
+          onChange={setScenario}
+          choices={[
+            { value: "import", label: t.import, hint: t.importHint },
+            { value: "generate", label: t.generate, hint: t.generateHint },
+          ]}
+        />
+      )}
+      {importing}
       {scenario === "generate" && (
-        <Button
-          size="lg"
-          className="self-end"
-          nativeButton={false}
-          render={
-            <Link
-              href={
-                projectId
-                  ? routes.projectLegalStep(projectId, "contracts")
-                  : routes.projects
-              }
-            />
-          }
-        >
-          {projectId ? t.openProjectContracts : t.chooseProject}
-        </Button>
+        <ProjectContractsPick
+          projects={options.projects}
+          projectId={projectId}
+        />
       )}
     </div>
   );
