@@ -3193,5 +3193,14 @@ PDF, pas un truc avec les écritures »).
 
     Vérifié dans le navigateur : Word, PDF, remplacement, Annuler, téléphone (cadre de 390 px), enregistrement jusqu'à la
     page du contrat, « Importer un contrat » d'un deal.
+  - **« Partir d'un modèle » et la fenêtre d'un modèle** (retours de Sacha du 26/11, `docs/bonnes-pratiques/retours-design.md`) :
+    - le choix en `SegmentedControl`, le dépôt choisi d'office ;
+    - « Partir d'un modèle » : les seules personnes qui ont encore besoin d'un contrat, chacune avec son modèle et
+      « Créer le contrat » (`ProjectContractsToCreate`). Le tableau du Plan d'action n'y est plus ;
+    - le menu « Contrat » : « Aucun modèle pour ce rôle », « + Nouveau modèle de contrat » en bout de liste
+      (`OptionSelect action`, `NewTemplateDialog`) ;
+    - formulaire d'un modèle : le contrat à gauche, les informations à droite ;
+    - fichier source en `ChosenFileRow` ;
+    - guide de PO : « Nouveau contrat », et « Générer un contrat, c'est l'envoyer ? ».
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.

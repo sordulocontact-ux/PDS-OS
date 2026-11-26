@@ -112,7 +112,7 @@ export function TemplateRowActions({
         title={t.form.versionTitle(template.name)}
         description={t.description}
         closeLabel={t.close}
-        size="wide"
+        size="document"
       >
         <TemplateForm
           organizationId={organizationId}

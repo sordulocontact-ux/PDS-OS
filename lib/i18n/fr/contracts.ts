@@ -115,28 +115,35 @@ export const contracts = {
   // « Nouveau contrat » asks what is being made first (JUR-18), two ways,
   // both done in the modal (Sacha 26/11/2026).
   creation: {
-    legend: "Que voulez-vous faire ?",
-    import: "Déposer un contrat existant",
-    importHint: "Signé ou reçu, en PDF ou Word.",
+    legend: "Nouveau contrat",
+    import: "Déposer un contrat",
     generate: "Partir d'un modèle",
-    generateHint: "Pour une personne d'un projet, avec un modèle validé.",
     drop: "Déposez le contrat",
     dropHint: "PDF ou Word : le formulaire se remplit d'après lui.",
     reading: "Lecture du contrat…",
     document: "Contrat",
     documentHint: "PDF ou Word",
+    preview: (name: string) => `Contrat déposé : ${name}`,
+    previewUnavailable: "Aperçu indisponible pour ce fichier.",
     imported: "Contrat enregistré avec son fichier.",
     project: "Projet",
     projectPlaceholder: "Choisir le projet",
     loading: "Chargement des contrats du projet…",
-    preview: (name: string) => `Contrat déposé : ${name}`,
-    previewUnavailable: "Aperçu indisponible pour ce fichier.",
     loadFailed: "Les contrats de ce projet n'ont pas pu être chargés.",
     unavailable:
       "Ce projet n'est pas encore lancé : il n'a pas de contrats à prévoir.",
     unplanned:
       "Ses contrats se prévoient une fois son État des lieux confirmé, dans son Juridique.",
     openLegal: "Ouvrir le Juridique du projet",
+    // « Partir d'un modèle »: the people who still need a contract.
+    allCreated: "Tous les contrats de ce projet sont créés.",
+    templateOf: (name: string) => `Modèle du contrat de ${name}`,
+    chooseTemplateShort: "Choisir un modèle",
+    chooseTemplate: "Choisissez un modèle.",
+    create: "Créer le contrat",
+    creating: "Création…",
+    missingAfter: (name: string) =>
+      `Il manque des informations pour le contrat de ${name} : complétez-les pour le créer.`,
   },
   // The side sheet of a contract, from the list (the Réseau's model,
   // docs/STYLE-FINANCE-PARTOUT.md § 6.7 bis, Sacha 24/11/2026).

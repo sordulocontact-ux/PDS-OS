@@ -45,9 +45,10 @@ export function FilePickField({
   return (
     <div className="flex flex-col gap-1.5">
       {file ? (
-        <ChosenFile
+        <ChosenFileRow
           label={label}
-          file={file}
+          name={file.name}
+          size={file.size}
           accept={accept}
           disabled={disabled}
           describedBy={describedBy}
@@ -77,22 +78,29 @@ const sizeOf = (bytes: number) =>
     : `${Math.max(1, Math.round(bytes / 1000))} Ko`;
 
 /** The chosen file, on one line: its name and size, « Remplacer » to pick
- * another; a file dropped on the line replaces it too. */
-function ChosenFile({
+ * another; a file dropped on the line replaces it too. Every file chosen
+ * for a form shows so (FilePickField, a template's source file). `extra`: a
+ * gesture beside « Remplacer » (« Retirer »). */
+export function ChosenFileRow({
   label,
-  file,
+  name,
+  size,
   accept,
   disabled = false,
   describedBy,
   spoken,
+  extra,
   onFile,
 }: {
   label: string;
-  file: File;
+  name: string;
+  // Unknown for a file already kept (its name only).
+  size?: number;
   accept?: string;
   disabled?: boolean;
   describedBy?: string;
-  spoken: string;
+  spoken?: string;
+  extra?: React.ReactNode;
   onFile: (file: File) => void;
 }) {
   const inputId = useId();
@@ -113,17 +121,20 @@ function ChosenFile({
           className="size-5 shrink-0 text-muted-foreground"
         />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="sr-only">{spoken}</span>
-          <span aria-hidden className="truncate text-sm">
-            {file.name}
+          {spoken && <span className="sr-only">{spoken}</span>}
+          <span aria-hidden={spoken ? true : undefined} className="truncate text-sm">
+            {name}
           </span>
-          <span
-            aria-hidden
-            className="text-[length:var(--type-caption)] text-muted-foreground"
-          >
-            {sizeOf(file.size)}
-          </span>
+          {size !== undefined && (
+            <span
+              aria-hidden
+              className="text-[length:var(--type-caption)] text-muted-foreground"
+            >
+              {sizeOf(size)}
+            </span>
+          )}
         </span>
+        {extra}
         <label
           htmlFor={inputId}
           className={cn(

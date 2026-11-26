@@ -161,107 +161,124 @@ export function TemplateForm({
   }
 
   return (
-    <form ref={formRef} action={submit} className="flex flex-col gap-4">
-      <TemplateSourceField
-        ref={source}
-        organizationId={organizationId}
-        initial={initial?.source ?? null}
-        onText={(text, name, typeface) => {
-          // The text it replaces stays one click away, in its typeface.
-          const before = body;
-          const fontBefore = font;
-          editor.current?.load(text);
-          readContract(text, typeface);
-          if (before.trim())
-            toast.success(t.source.imported(name), {
-              action: {
-                label: t.source.undo,
-                onClick: () => {
-                  editor.current?.load(before);
-                  setFont(fontBefore);
-                },
-              },
-            });
-        }}
-      />
-      <Fragment key={aboutKey}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            name="name"
-            label={t.form.name}
-            required
-            maxLength={200}
-            defaultValue={about.name}
+    // The contract on the left, what it is on the right, as a dropped
+    // contract (Sacha 26/11/2026); one column when the modal is narrower (a
+    // container query: PO's panel too), the contract then under its
+    // information and above « Enregistrer ».
+    <form ref={formRef} action={submit} className="@container">
+      {/* The grid inside the container: a container query never applies to
+          the container itself. */}
+      <div className="grid gap-5 @5xl:grid-cols-[minmax(0,1fr)_22rem] @5xl:grid-rows-[auto_1fr]">
+        <div className="@container flex min-w-0 flex-col gap-4 @5xl:col-start-2 @5xl:row-start-1">
+          <TemplateSourceField
+            ref={source}
+            organizationId={organizationId}
+            initial={initial?.source ?? null}
+            onText={(text, name, typeface) => {
+              // The text it replaces stays one click away, in its typeface.
+              const before = body;
+              const fontBefore = font;
+              editor.current?.load(text);
+              readContract(text, typeface);
+              if (before.trim())
+                toast.success(t.source.imported(name), {
+                  action: {
+                    label: t.source.undo,
+                    onClick: () => {
+                      editor.current?.load(before);
+                      setFont(fontBefore);
+                    },
+                  },
+                });
+            }}
           />
-          <OptionSelect
-            name="type"
-            label={t.form.type}
-            required
-            items={Object.fromEntries(
-              CONTRACT_TYPES.map((type) => [type, fr.contracts.types[type]]),
+          <Fragment key={aboutKey}>
+            <div className="grid gap-4 @md:grid-cols-2">
+              <Field
+                name="name"
+                label={t.form.name}
+                required
+                maxLength={200}
+                defaultValue={about.name}
+              />
+              <OptionSelect
+                name="type"
+                label={t.form.type}
+                required
+                items={Object.fromEntries(
+                  CONTRACT_TYPES.map((type) => [
+                    type,
+                    fr.contracts.types[type],
+                  ]),
+                )}
+                defaultValue={about.type}
+              />
+            </div>
+            <OptionSelect
+              multiple
+              name="roles"
+              label={t.form.roles}
+              required
+              items={Object.fromEntries(
+                FORM_ROLES.map((role) => [role, fr.legalForms.roles[role]]),
+              )}
+              defaultValue={about.roles}
+            />
+            <ChipChoice
+              name="language"
+              legend={t.form.language}
+              required
+              options={CONTRACT_LANGUAGES.map((value) => ({
+                value,
+                label: fr.legalContracts.languages[value],
+              }))}
+              value={language}
+              onChange={(next) => next && setLanguage(next)}
+            />
+            <Field
+              name="usage"
+              label={t.form.usage}
+              maxLength={500}
+              defaultValue={about.usage}
+            />
+            {proposed && (
+              <ToneCallout tone="info" role="status">
+                {t.form.proposed}
+              </ToneCallout>
             )}
-            defaultValue={about.type}
+          </Fragment>
+        </div>
+        <div className="min-w-0 @5xl:col-start-1 @5xl:row-span-2 @5xl:row-start-1">
+          <DocumentEditor
+            ref={editor}
+            name="body"
+            label={t.editor.label}
+            placeholder={t.editor.placeholder}
+            fields
+            defaultValue={initial?.body}
+            busy={finder.pending ? t.values.finding : null}
+            font={font}
+            onChange={setBody}
+            onFile={(file) => source.current?.read(file)}
+            onPasteContract={readContract}
           />
         </div>
-        <OptionSelect
-          multiple
-          name="roles"
-          label={t.form.roles}
-          required
-          items={Object.fromEntries(
-            FORM_ROLES.map((role) => [role, fr.legalForms.roles[role]]),
-          )}
-          defaultValue={about.roles}
-        />
-        <ChipChoice
-          name="language"
-          legend={t.form.language}
-          required
-          options={CONTRACT_LANGUAGES.map((value) => ({
-            value,
-            label: fr.legalContracts.languages[value],
-          }))}
-          value={language}
-          onChange={(next) => next && setLanguage(next)}
-        />
-        <Field
-          name="usage"
-          label={t.form.usage}
-          maxLength={500}
-          defaultValue={about.usage}
-        />
-        {proposed && (
-          <ToneCallout tone="info" role="status">
-            {t.form.proposed}
-          </ToneCallout>
-        )}
-      </Fragment>
-      <DocumentEditor
-        ref={editor}
-        name="body"
-        label={t.editor.label}
-        placeholder={t.editor.placeholder}
-        fields
-        defaultValue={initial?.body}
-        busy={finder.pending ? t.values.finding : null}
-        font={font}
-        onChange={setBody}
-        onFile={(file) => source.current?.read(file)}
-        onPasteContract={readContract}
-      />
-      {error && <FormMessage kind="error">{error}</FormMessage>}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {t.cancel}
-        </Button>
-        <Button
-          type="submit"
-          size="lg"
-          disabled={pending}
-          aria-busy={pending || undefined}
-        >
-          {pending ? t.form.submitting : (submitLabel ?? t.form.submit)}
-        </Button>
+        <div className="flex flex-col gap-3 @5xl:col-start-2 @5xl:row-start-2 @5xl:self-start">
+          {error && <FormMessage kind="error">{error}</FormMessage>}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
+              {t.cancel}
+            </Button>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={pending}
+              aria-busy={pending || undefined}
+            >
+              {pending ? t.form.submitting : (submitLabel ?? t.form.submit)}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );

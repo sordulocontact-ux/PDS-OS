@@ -21,7 +21,9 @@
 3. Rejouer le parcours autour :
    - ce qui vient avant et ce qui vient après ;
    - le retour en arrière ;
-   - les autres écrans qui utilisent le même composant.
+   - les autres écrans qui utilisent le même composant ;
+   - les écrans qui font la même chose avec un autre composant, à aligner (une question à Sacha en
+     cas de doute).
 4. Compter comme un échec tout résultat retombé sur la valeur par défaut.
 5. Dire en tête du bilan ce qui n'a pas pu être vu.
 

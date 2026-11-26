@@ -1,5 +1,6 @@
 "use client";
 
+import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
@@ -9,6 +10,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -35,7 +37,14 @@ type SingleProps = CommonProps & {
   defaultValue?: string | null;
   // Optional: lets the form react to the choice; the value is still submitted.
   onValueChange?: (value: string) => void;
+  // A gesture at the end of the list, after a rule (« + Nouveau modèle de
+  // contrat », Sacha 26/11/2026: what is missing is made from the menu
+  // itself): it opens what makes the missing choice, it is never a value.
+  action?: { label: string; onSelect: () => void };
 };
+
+// The value of the action's line, never submitted.
+const ACTION = "__action__";
 
 // Several choices in one menu (a contact's roles): submitted as a JSON array
 // under `name`, like ChipMultiChoice, so the server reads either the same way.
@@ -85,27 +94,12 @@ export function OptionSelect(props: SingleProps | MultipleProps) {
       {props.multiple ? (
         <MultipleSelect {...props} trigger={trigger} />
       ) : (
-        <Select
+        <SingleSelect
           // Same reason as Field: remount when the server sends another default.
           key={props.defaultValue ?? ""}
-          name={name}
-          items={props.items}
-          defaultValue={props.defaultValue ?? null}
-          onValueChange={(next) =>
-            typeof next === "string" && props.onValueChange?.(next)
-          }
-        >
-          <SelectTrigger {...trigger}>
-            <SelectValue placeholder={props.placeholder} />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(props.items).map(([value, itemLabel]) => (
-              <SelectItem key={value} value={value}>
-                {itemLabel}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {...props}
+          trigger={trigger}
+        />
       )}
       {error ? (
         <FieldError id={`${id}-error`}>{error}</FieldError>
@@ -115,6 +109,54 @@ export function OptionSelect(props: SingleProps | MultipleProps) {
         </p>
       ) : null}
     </div>
+  );
+}
+
+function SingleSelect({
+  name,
+  items,
+  defaultValue,
+  onValueChange,
+  placeholder,
+  action,
+  trigger,
+}: SingleProps & {
+  trigger: React.ComponentProps<typeof SelectTrigger>;
+}) {
+  // Held here so the action's line never becomes the value.
+  const [value, setValue] = useState<string | null>(defaultValue ?? null);
+  return (
+    <Select
+      name={name}
+      items={action ? { ...items, [ACTION]: action.label } : items}
+      value={value}
+      onValueChange={(next) => {
+        if (typeof next !== "string") return;
+        if (next === ACTION) return action?.onSelect();
+        setValue(next);
+        onValueChange?.(next);
+      }}
+    >
+      <SelectTrigger {...trigger}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(items).map(([itemValue, itemLabel]) => (
+          <SelectItem key={itemValue} value={itemValue}>
+            {itemLabel}
+          </SelectItem>
+        ))}
+        {action && (
+          <>
+            {Object.keys(items).length > 0 && <SelectSeparator />}
+            <SelectItem value={ACTION}>
+              <IconPlus aria-hidden className="size-3.5 shrink-0" />
+              {action.label}
+            </SelectItem>
+          </>
+        )}
+      </SelectContent>
+    </Select>
   );
 }
 

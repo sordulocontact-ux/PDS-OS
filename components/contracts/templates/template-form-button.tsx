@@ -30,7 +30,7 @@ export function TemplateFormButton({
         title={t.form.title}
         description={t.description}
         closeLabel={t.close}
-        size="wide"
+        size="document"
       >
         <TemplateForm
           organizationId={organizationId}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { MappingPanel } from "@/components/legal/contracts/mapping-panel";
+import { ProjectContractsToCreate } from "@/components/contracts/project-contracts-to-create";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { Loaded } from "@/components/ui/loaded";
@@ -15,18 +15,20 @@ const fr = { contracts };
 
 /**
  * « Partir d'un modèle » (Sacha 26/11/2026): the project (already known
- * from its Juridique), then its « Contrats à prévoir », the same table as
- * its Plan d'action: generate a person's contract from its validated
- * template, or, without a fitting one, write it (« Nouveau modèle de
- * contrat »), asked of the direction and taken for that person once
- * validated.
+ * from its Juridique), then the people who still need a contract, each
+ * with its template and « Créer le contrat »; without a fitting template,
+ * « + Nouveau modèle de contrat » from the menu, asked of the direction and
+ * taken for that person once validated.
  */
 export function ProjectContractsPick({
   projects,
   projectId: fixed,
+  onCreated,
 }: {
   projects: Array<{ id: string; title: string }>;
   projectId?: string;
+  // A contract made: the modal closes on its page.
+  onCreated: (contractId: string) => void;
 }) {
   const t = fr.contracts.creation;
   const [projectId, setProjectId] = useState<string | null>(fixed ?? null);
@@ -54,14 +56,14 @@ export function ProjectContractsPick({
         >
           {(data) =>
             data.state === "ready" ? (
-              <MappingPanel
+              <ProjectContractsToCreate
                 projectId={projectId}
                 rows={data.rows}
-                approval={data.approval}
                 organizationId={data.organizationId}
                 requests={data.requests}
                 direction={data.direction}
                 onChange={() => setRound((r) => r + 1)}
+                onCreated={onCreated}
               />
             ) : (
               <div className="flex flex-col items-start gap-3">

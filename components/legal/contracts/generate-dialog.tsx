@@ -25,9 +25,15 @@ const fr = { legalContracts };
 export function GenerateDialog({
   projectId,
   row,
+  label,
+  size = "xs",
 }: {
   projectId: string;
   row: AgreementRow;
+  // « Créer le contrat » in « Nouveau contrat », beside its import.
+  label?: string;
+  // « sm » beside a field (« Nouveau contrat »), « xs » in a table row.
+  size?: "xs" | "sm";
 }) {
   const t = fr.legalContracts;
   const router = useRouter();
@@ -50,10 +56,12 @@ export function GenerateDialog({
       <Button
         type="button"
         variant={ready ? "default" : "outline"}
-        size="xs"
+        size={size}
         onClick={() => setOpen(true)}
       >
-        {ready ? t.agreements.generate : t.agreements.missingCount(missing)}
+        {ready
+          ? (label ?? t.agreements.generate)
+          : t.agreements.missingCount(missing)}
       </Button>
       <FormDialog
         open={open}
@@ -80,7 +88,9 @@ export function GenerateDialog({
               aria-busy={pending || undefined}
               onClick={generate}
             >
-              {pending ? t.agreements.generating : t.agreements.generate}
+              {pending
+                ? t.agreements.generating
+                : (label ?? t.agreements.generate)}
             </Button>
           )}
         </div>

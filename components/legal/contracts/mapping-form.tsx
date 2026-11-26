@@ -253,9 +253,11 @@ export function MappingForm({
                     direction={direction}
                     onRequested={onRequested}
                   />
+                  {/* Alone: in outline, never a lone ghost (docs/DESIGN.md
+                      « Bouton secondaire »). */}
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="self-start"
                     onClick={() => setOpenKey(null)}

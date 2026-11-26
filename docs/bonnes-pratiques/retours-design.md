@@ -53,8 +53,32 @@ qui a été fait.
 - **Capture** : `docs/bonnes-pratiques/captures/2026-11-26-nouveau-contrat-modele.png` (projet
   Assurance 30, une ligne ouverte).
 - **Ce que Sacha a dit** : « dis-moi ce qui ne va pas ici ».
-- **Son explication** : à venir.
-- **Ce que Claude a trouvé** (à confirmer) : le tableau « Contrats à prévoir » du Plan d'action a été
+- **Son explication** :
+  - Le choix en grandes cartes n'est pas le bon composant. Il préfère « le composant qui glisse »
+    (`SegmentedControl`) : « moins de place et plus facile à lire ».
+  - « Ce qui me choque sur l'UX » : à l'ouverture du menu « Contrat », la valeur proposée est « Pas
+    d'accord nécessaire ». Ce n'est pas la bonne réponse : la vraie situation est « aucun modèle de
+    contrat ».
+  - Il veut pouvoir créer un nouveau modèle depuis le menu lui-même.
+- **Cause trouvée** : sans modèle validé pour son rôle, le menu « Contrat » n'a qu'une option,
+  « Pas d'accord nécessaire ». À l'ouverture, la liste se pose par-dessus le champ (d'où les « deux
+  cadres décalés ») et c'est la seule réponse offerte. La vraie situation (aucun modèle) et le geste
+  utile (en créer un) sont absents du menu. (Claude avait d'abord accusé à tort `initialOf` : sa
+  ligne disait « Choisir un contrat », rien n'était choisi.)
+- **Fait** (26/11/2026) :
+  - le choix en `SegmentedControl`, « Déposer un contrat » choisi d'office ;
+  - le menu « Contrat » : « Aucun modèle pour ce rôle » en attente quand aucun modèle n'existe,
+    « + Nouveau modèle de contrat » en bout de liste (le bouton sous le menu est retiré) ;
+    « Pas d'accord nécessaire » reste un choix, jamais la seule réponse affichée ; partout où ce menu
+    sert (Plan d'action compris) ;
+  - « Partir d'un modèle » ne montre plus le tableau du Plan d'action. Il montre les seules
+    personnes qui ont encore besoin d'un contrat, chacune avec son modèle et « Créer le contrat ».
+    « Confirmer les contrats nécessaires », la colonne Rémunération et les lignes « Signé » ne
+    sont plus là ;
+  - la phrase en double est retirée, « Fermer » passe en contour.
+- **Reste** : la liste d'un menu se pose par-dessus son champ (le comportement du menu dans toute
+  l'app). C'était les « deux cadres décalés » : question posée à Sacha avant d'y toucher.
+- **Ce que Claude a trouvé** (confirmé par Sacha) : le tableau « Contrats à prévoir » du Plan d'action a été
   mis tel quel dans la fenêtre. Il sert à décider des contrats d'un projet, pas à en créer un. La même
   erreur qu'au dépôt : un composant réutilisé sans relire son rendu dans le nouveau parcours.
   1. Rien ne se crée : aucune ligne n'a de « Générer ». Deux personnes sur trois sont déjà « Signé »,
@@ -71,3 +95,22 @@ qui a été fait.
   8. La colonne Rémunération est vide partout (« – »).
   9. Un tableau pour modifier, ce qu'Ibé trouve « algorithmique » (22/11).
 - **Fait** : rien encore.
+
+---
+
+## 26/11/2026 : fenêtre d'un modèle de contrat, et son fichier source
+
+- **Ce que Sacha a dit** : « il faudrait aussi mettre le design similaire de contrat dans modèle,
+  contrat à gauche et information à droite. Pareil pour le fichier source, c'est pas le même
+  composant. Tu dois à chaque fois vérifier les patterns similaires et corriger ceux qui n'ont pas le
+  même ; si tu as des doutes, tu poses une question. »
+- **Leçon** : un pattern changé sur un écran se cherche aussi là où il est fait autrement, pas
+  seulement là où le même composant est utilisé (`DESIGN.md` § 0, point 3).
+- **Fait** (26/11/2026, vérifié dans le navigateur) :
+  - le formulaire d'un modèle (nouveau, nouvelle version, demandé pour une personne) : le contrat à
+    gauche, les informations à droite, « Enregistrer » sous elles, en fenêtre `document` ;
+  - le fichier source : la même zone de dépôt, puis la même ligne « Remplacer » que tout fichier
+    choisi (`ChosenFileRow`), « Retirer » à côté.
+- **Questions posées** (doute sur le périmètre) :
+  - la fenêtre de lecture d'un modèle (« Voir ») ;
+  - « Importer un contrat » d'un deal.

@@ -216,14 +216,10 @@ export const legalContracts = {
     },
     source: {
       title: "Fichier source",
-      description:
-        "Word, PDF ou texte, 10 Mo au plus. PO lit le contrat et repère ses valeurs ; le fichier est gardé avec le modèle.",
-      import: "Importer un fichier",
-      replace: "Remplacer",
+      hint: "Word, PDF ou texte",
       remove: "Retirer",
       reading: "Lecture du fichier…",
       current: (name: string) => `Fichier source : ${name}`,
-      drop: "Déposez le fichier ici",
       imported: (name: string) => `Contrat importé de « ${name} »`,
       undo: "Annuler",
       pdfNote: "Lu dans un PDF : la mise en page n'est pas gardée.",
@@ -304,6 +300,8 @@ export const legalContracts = {
       close: "Fermer",
       contract: "Contrat",
       choose: "Choisir un contrat",
+      // The contract menu of a person without a validated template.
+      noTemplate: "Aucun modèle pour ce rôle",
       noDeal: "Pas d'accord nécessaire",
       noDealWhy: "Pourquoi aucun accord n'est nécessaire",
       // « Déjà payé » ne suffit pas (JUR-12).

@@ -27,6 +27,10 @@ Cela vaut pour chaque modification, même petite.
 3. **Rejouer le parcours entier, pas seulement l'écran touché.** Vérifier ce qui vient avant, ce qui
    vient après, le retour en arrière, et les autres écrans qui utilisent le même composant (règle 7
    de `CLAUDE.md`). Le reste doit rester fluide.
+   **Chercher aussi les patterns semblables qui n'utilisent pas le même composant** (Sacha, 26/11/2026)
+   et les aligner. Exemple : le dépôt d'un contrat montre le contrat à gauche et les informations à
+   droite, donc le modèle aussi ; un fichier choisi s'affiche partout de la même façon. **En cas de
+   doute sur un écran à modifier, poser la question** avant de le changer.
 4. **Un composant réutilisé se relit dans son nouveau contexte.** Ce qui convenait ailleurs peut
    devenir absurde ici. Exemple : une zone de dépôt qui reste vide alors que le fichier est déjà
    déposé.

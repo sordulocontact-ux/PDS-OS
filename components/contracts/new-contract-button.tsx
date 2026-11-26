@@ -3,7 +3,10 @@
 import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { ContractCreation } from "@/components/contracts/contract-creation";
+import {
+  ContractCreation,
+  type CreationSize,
+} from "@/components/contracts/contract-creation";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { loadContractOptions } from "@/lib/contracts/actions";
 import { contracts } from "@/lib/i18n/fr/contracts";
@@ -19,7 +22,7 @@ export function NewContractButton({ projectId }: { projectId?: string } = {}) {
   const t = fr.contracts.form;
   // Wide for a project's contracts (a table), wider for a dropped contract
   // read beside its form; the choice stays at the usual width.
-  const [size, setSize] = useState<"default" | "wide" | "document">("default");
+  const [size, setSize] = useState<CreationSize>("default");
   return (
     <LoadedFormButton
       label={fr.contracts.new}
@@ -36,7 +39,7 @@ export function NewContractButton({ projectId }: { projectId?: string } = {}) {
           options={options}
           projectId={projectId}
           onClose={close}
-          onWide={setSize}
+          onSize={setSize}
         />
       )}
     </LoadedFormButton>
