@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# The docs never stop a pull (Sacha 26/11/2026): both sides' lines are kept
+# (git's built-in « union » merge), for a merge and a rebase alike. Read the
+# merged file once after: two versions of the same line both stay.
+CLAUDE.md merge=union
+AGENTS.md merge=union
+docs/**/*.md merge=union

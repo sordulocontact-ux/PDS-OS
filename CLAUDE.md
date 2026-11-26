@@ -301,6 +301,7 @@ partout :
   `docs/ARCHITECTURE.md` § 3 ter). Le geste du lecteur passe en tête (`StepPanel lead`, `#a-vous`, sans
   ligne « À vous · … ») et tout lien vers une action suit `actionHref(step)`, jamais `step.href` seul.
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. Côté client, importer le domaine lu et faire un `fr` local (`const fr = { calls };`), jamais tout `@/lib/i18n/fr` (921 Ko, règle ESLint, § 3 bis). `cn()` : `lib/utils/index.ts`.
+- **Conflits au pull** (26/11/2026) : la doc (`CLAUDE.md`, `AGENTS.md`, `docs/**/*.md`) ne bloque jamais, `.gitattributes` `merge=union` garde les lignes des deux côtés (relire le fichier : une ligne changée des deux côtés reste en double, surtout après un `pull --rebase`) ; un conflit dans le code, après un pull fait par Claude, est signalé par le hook local `.claude/hooks/pull-conflicts.sh` qui lance `/fusion`.
 - **Branches** : `main` (prod) et `pre-prod` seulement (26/10/2026). On travaille sur `pre-prod`, puis on la
   fusionne dans `main`. **Pré-prod** (`docs/PREPROD.md`) : base Supabase dédiée ; `PREPROD_TOOLS=1` affiche la barre « Voir comme /
   Aller à » (`lib/preprod/`). Un moment de plus = un bloc de `supabase/preprod/seed.sql` joué par les vrais gestes.
