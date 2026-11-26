@@ -18,6 +18,7 @@ import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { DistributionRolesButton } from "@/components/distribution/frame/distribution-roles";
+import { defaultCollectiveRelease } from "@/lib/distribution/default-release";
 import { distributionStatus } from "@/lib/distribution/journey";
 import {
   distributionContext,
@@ -28,7 +29,12 @@ import { isOpen } from "@/lib/distribution/anomalies";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { projectFormatLabel } from "@/lib/projects/labels";
 import { withRelease } from "@/lib/distribution/scope";
-import { distributionViewHref } from "@/lib/ui/distribution-steps";
+import {
+  DISTRIBUTION_STEPS,
+  distributionStepHref,
+  distributionViewHref,
+  type DistributionStep,
+} from "@/lib/ui/distribution-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { stepChoiceKey } from "@/lib/step-tools/model";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
@@ -104,7 +110,7 @@ function factsOf(ctx: DistributionContext): ModuleFact[] {
  */
 export async function DistributionFrame({
   projectId,
-  releaseId = null,
+  releaseId: named = null,
   shownKey,
   children,
 }: {
@@ -115,9 +121,15 @@ export async function DistributionFrame({
   shownKey?: string;
   children: (ctx: DistributionContext) => React.ReactNode;
 }) {
-  // A collective's Distribution is a release's (lot 15): without one, the
-  // choice is made in « Sorties »; a release not of the project is not found.
+  // A collective's Distribution is a release's (lot 15): without one named,
+  // its default release, the others chosen in the trail (Maël 26/11/2026);
+  // « Sorties » only when it has none. A release not of the project is not
+  // found.
   const read = await getProject(projectId);
+  const releaseId =
+    read?.collective && !named
+      ? await defaultCollectiveRelease(projectId)
+      : named;
   if (read?.collective && !releaseId)
     redirect(routes.projectReleases(projectId));
   const ctx = await distributionContext(
@@ -133,7 +145,14 @@ export async function DistributionFrame({
   // (Maël 23/11/2026, « 1 par son », as the Master's titles).
   const crumbs =
     read?.collective && ctx.release
-      ? [await releaseCrumb(read, ctx.release.id, ctx.release.label)]
+      ? [
+          await releaseCrumb(
+            read,
+            ctx.release.id,
+            ctx.release.label,
+            DISTRIBUTION_STEPS.find((key) => key === shownKey),
+          ),
+        ]
       : undefined;
   const open = ctx.anomalies.filter(isOpen).length;
   const stepRef = {
@@ -230,13 +249,14 @@ export async function DistributionFrame({
 }
 
 /** The release shown, with the collective's other live releases to choose
- * from: each opens on the step that waits there (/release?sortie=), with
- * where its deposit stands. A title's release: its name opens the title's
+ * from, with where its deposit stands: each opens on the step shown here,
+ * else on the step that waits there (/release?sortie=). A title's release: its name opens the title's
  * page (« Titres », Maël 25/11/2026); the compilation has no page. */
 async function releaseCrumb(
   project: ProjectDetail,
   releaseId: string,
   label: string,
+  shownKey?: DistributionStep,
 ): Promise<{ label: string; href?: string; options?: CrumbOption[] }> {
   const access = await requireApproved();
   const { releases } = await loadCollectiveReleases(project, access);
@@ -253,7 +273,9 @@ async function releaseCrumb(
     options: live.map((r) => ({
       key: r.id,
       label: r.label,
-      href: withRelease(routes.projectRelease(project.id), r.id),
+      href: shownKey
+        ? distributionStepHref(project.id, shownKey, r.id)
+        : withRelease(routes.projectRelease(project.id), r.id),
       detail: words[r.distribution.key](r.distribution.number),
       current: r.id === releaseId,
       done: r.distribution.key === "closed",
