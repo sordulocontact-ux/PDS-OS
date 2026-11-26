@@ -53,6 +53,9 @@ export type MasterTitleWaiting = (typeof MASTER_TITLE_WAITINGS)[number];
 export type MasterTitleScope = {
   choices: MasterTitleChoice[];
   active: MasterTitleChoice;
+  // Its live titles still without any audio (no master yet, « Titre de Jay
+  // (à nommer) »): out of the switcher, counted as waiting for their source.
+  withoutAudio: Array<{ titleId: string; label: string }>;
 };
 
 /**
@@ -135,7 +138,22 @@ export const loadMasterTitleScope = trackedCache(
       choices.find((choice) => choice.masterId === titre) ??
       (round ? choices.find((choice) => choice.pending) : undefined) ??
       choices[0];
-    return { choices, active };
+    const withoutAudio = titles.flatMap((title) =>
+      title.master || title.status === "abandoned"
+        ? []
+        : [
+            {
+              titleId: title.id,
+              label: projectTitleLabel({
+                position: title.position,
+                workingTitle: title.workingTitle,
+                masterTitle: null,
+                artists: titleGuestNames(title.participations),
+              }),
+            },
+          ],
+    );
+    return { choices, active, withoutAudio };
   },
 );
 
@@ -195,6 +213,9 @@ function waitingOf(
 export function titleWaitings(projectId: string, scope: MasterTitleScope) {
   return MASTER_TITLE_WAITINGS.map((kind) => {
     const titles = scope.choices.filter((c) => c.waiting?.kind === kind);
+    // A title without any audio waits for its source too; it has no step of
+    // the Master to open yet, its page says where it stands.
+    const silent = kind === "source" ? scope.withoutAudio : [];
     const first = titles[0];
     const step: MasterStepKey =
       kind === "source"
@@ -204,13 +225,15 @@ export function titleWaitings(projectId: string, scope: MasterTitleScope) {
           : kind;
     return {
       kind,
-      count: titles.length,
+      count: titles.length + silent.length,
       // Among them, the titles whose files are asked for (lot 9 bis).
       requested: titles.filter((c) => c.request).length,
-      names: titles.map((c) => c.label),
+      names: [...titles.map((c) => c.label), ...silent.map((s) => s.label)],
       href: first
         ? `${masterStepHref(projectId, step)}?titre=${first.masterId}`
-        : null,
+        : silent[0]
+          ? routes.projectTrack(projectId, silent[0].titleId)
+          : null,
     };
   });
 }

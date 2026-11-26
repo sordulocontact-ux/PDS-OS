@@ -132,6 +132,9 @@ export const workflowStatus = {
     noTitle: "Aucun titre rattaché au projet",
     sources: (n: number) =>
       `Source du mix à confirmer pour ${plural(n, "titre", "titres")}`,
+    // A collective's live titles still without any audio (lot 9).
+    withoutAudio: (n: number) =>
+      `${plural(n, "titre", "titres")} encore sans audio`,
     brief: "Brief Mix/Master et ingénieur à compléter",
     send: "Dossier à envoyer au mixeur",
     sendMastering: "Dossier de mastering à envoyer",
@@ -205,5 +208,8 @@ export const workflowStatus = {
     closedReserves: (date: string, n: number) =>
       `Clôturée avec réserves le ${date} (${n} réserve${n > 1 ? "s" : ""} non vérifiée${n > 1 ? "s" : ""})`,
     progress: (done: number) => `Étapes déclarées : ${done} sur 3`,
+    // A collective's live titles without a release yet (lot 15).
+    withoutRelease: (n: number) =>
+      `${plural(n, "titre", "titres")} encore sans sortie`,
   },
 };

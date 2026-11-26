@@ -18,6 +18,7 @@ import { isWorkflowLaunched, planLaunchedAt } from "@/lib/plan/queries";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
 import { countedTitlesProject } from "@/lib/projects/counted-titles";
+import { loadProjectTitles } from "@/lib/projects/titles";
 import { byProjectVersion } from "@/lib/projects/version-cache";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
 import { releaseArg } from "@/lib/distribution/scope";
@@ -96,20 +97,29 @@ function openRound(
 async function masterFacts(project: Project, personId: string | null) {
   const access = await requireApproved();
   const supabase = await createClient();
-  const [launched, mixView, mixVersions, masteringVersions, sent, final] =
-    await Promise.all([
-      isWorkflowLaunched(project.id, "master"),
-      loadStepView(project, access, "mix"),
-      loadMixVersions(project, personId, "mix"),
-      loadMixVersions(project, personId, "mastering"),
-      supabase
-        .from("master_transmissions")
-        .select("acknowledged_at")
-        .eq("project_id", project.id)
-        .eq("role", "mastering")
-        .is("revoked_at", null),
-      loadFinalView(project, access),
-    ]);
+  const [
+    launched,
+    mixView,
+    mixVersions,
+    masteringVersions,
+    sent,
+    final,
+    titles,
+  ] = await Promise.all([
+    isWorkflowLaunched(project.id, "master"),
+    loadStepView(project, access, "mix"),
+    loadMixVersions(project, personId, "mix"),
+    loadMixVersions(project, personId, "mastering"),
+    supabase
+      .from("master_transmissions")
+      .select("acknowledged_at")
+      .eq("project_id", project.id)
+      .eq("role", "mastering")
+      .is("revoked_at", null),
+    loadFinalView(project, access),
+    // A collective's titles without any audio are not in its masters.
+    project.collective ? loadProjectTitles(project.id) : Promise.resolve([]),
+  ]);
   // The workflow's titles: those still without a master final, and those
   // that got theirs through it (an approved mastering version). A title
   // already at its master final before is left out, as the package does.
@@ -157,6 +167,9 @@ async function masterFacts(project: Project, personId: string | null) {
     validator: mixVersions.decider,
     mixEngineer: mixView.engineer?.name ?? null,
     masteringEngineer: final.engineer,
+    withoutAudio: titles.filter(
+      (title) => title.status !== "abandoned" && !title.master,
+    ).length,
   };
   return {
     state: masterState(facts),
@@ -241,30 +254,53 @@ type DistributionRows = {
 
 // A collective's Distribution is held release by release (lot 15): its
 // state is the least advanced of its live releases' (archived ones and
-// abandoned titles' left out).
+// abandoned titles' left out). In a mode with singles, a live title without
+// its release yet (no audio) keeps it from being done.
 async function distributionFacts(projectId: string) {
   const supabase = await createClient();
   const { data: project } = await supabase
     .from("projects")
-    .select("collective")
+    .select("collective, collective_release_mode")
     .eq("id", projectId)
     .maybeSingle();
   if (!project?.collective) return distributionFactsOf(projectId, null);
-  const { data: releases } = await supabase
-    .from("releases")
-    .select("id, project_titles(status)")
-    .eq("project_id", projectId)
-    .is("archived_at", null);
+  const [{ data: releases }, { data: titles }] = await Promise.all([
+    supabase
+      .from("releases")
+      .select("id, project_title_id, project_titles(status)")
+      .eq("project_id", projectId)
+      .is("archived_at", null),
+    supabase
+      .from("project_titles")
+      .select("id")
+      .eq("project_id", projectId)
+      .neq("status", "abandoned"),
+  ]);
   const live = (releases ?? []).filter(
     (r) => r.project_titles?.status !== "abandoned",
   );
+  const singles = project.collective_release_mode !== "compilation";
+  const released = new Set(live.map((r) => r.project_title_id));
+  const unreleased = singles
+    ? (titles ?? []).filter((t) => !released.has(t.id)).length
+    : 0;
   if (live.length === 0) return distributionFactsOf(projectId, null);
   const all = await Promise.all(
     live.map((r) => distributionFactsOf(projectId, r.id)),
   );
-  return all.reduce((least, facts) =>
+  const least = all.reduce((least, facts) =>
     facts.state.done.length < least.state.done.length ? facts : least,
   );
+  if (unreleased === 0 || least.state.status !== "done") return least;
+  return {
+    ...least,
+    state: {
+      ...least.state,
+      status: "in_progress" as const,
+      reason: fr.workflowStatus.distribution.withoutRelease(unreleased),
+      done: least.state.done.filter((step) => step !== "closure"),
+    },
+  };
 }
 
 async function distributionFactsOf(

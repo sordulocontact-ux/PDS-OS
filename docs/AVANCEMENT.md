@@ -3117,3 +3117,36 @@ avec la compilation se lisait comme la sienne. Sans migration.
 - Vérifié dans Chrome sur « Assurance 30 » : une entrée « Titres », passage d'une vue à l'autre, en-tête identique,
   390 px ; la compilation forcée le temps d'une capture (aucun projet de la base de dev n'en a) ; aucune erreur dans
   la console.
+
+## PDS Mic : « Prêt pour la sortie » sortie par sortie, et plus de « Terminé » à tort (26/11/2026)
+
+Suite du test de parcours du 26/11 (`docs/pds-mic-rapports/test-parcours-26-11.md`, points M1 et M5). Sans
+migration ; seuls les collectifs changent.
+
+- **M1, « Prêt pour la sortie » d'un collectif** : il lisait « la » sortie du projet, qu'un collectif n'a qu'en mode
+  compilation. En « Sorties individuelles », il restait bloqué sur « Sortie enregistrée » même avec la sortie du
+  titre datée et son dossier validé. Il lit maintenant chacune des sorties actives (archivées et titres abandonnés
+  à part) avec `scopeDistribution` + `loadDistributionSources`, comme la Distribution ; chaque contrôle garde sa
+  sortie dans sa clé (`dist:<sortie>:<clé>`) et la nomme quand il y en a plusieurs (« ISRC · Néons »). Sans aucune
+  sortie : « Sortie enregistrée » manquante, vers « Sorties ». `lib/legal/readiness/queries.ts`
+  (`collectiveDistribution`).
+- **M5, titres sans audio ou sans sortie** :
+  - Master : un titre actif sans master compte parmi « Attendent leur source » (`MasterTitleScope.withoutAudio`,
+    lien vers la page du titre), et le Master n'est plus « Terminé » tant qu'il en reste (« 2 titres encore sans
+    audio », `MasterFacts.withoutAudio`).
+  - Distribution : en mode avec sorties de titres, un titre actif sans sortie empêche « Terminé » (« 2 titres
+    encore sans sortie »).
+  - Vue d'ensemble et clôture du projet suivent, puisqu'elles lisent ces états.
+- **Pour Sacha** : `lib/workflow-status/load.ts` et `rules.ts` (champ facultatif `withoutAudio`, lecture des titres
+  et du mode de sortie dans `distributionFacts`), `lib/legal/readiness/queries.ts` (branche collectif seulement).
+  Rien ne change pour un projet simple.
+- Vérifié dans Chrome, avant et après, avec Lina Haddad :
+  - « Assurance 30 » (Contenu · PDS Mic, 3 sorties de titres) : « Attendent leur source » passe de 2 à 6 ;
+    « Prêt pour la sortie » passe de 13 blocages, dont un faux « Sortie enregistrée », à 18 contrôles propres à
+    chaque sortie. Une date forcée sur Néons le temps d'une capture ne lève que son contrôle de date.
+  - « Micro test » (Musical · Compilation, 1 sortie de titre) : Master et Distribution passent de « Terminé » à
+    « En cours » ; « Attendent leur source » passe de 0 à 2 ; plus besoin de la dérogation sur « Sortie
+    enregistrée ».
+  - « Lueur test » et « Minuit pile » : inchangés. Aucune erreur dans la console.
+- Attention en vérifiant : le cache des vues (`byProjectVersion`) sert encore 5 min un état calculé par l'ancien
+  code.

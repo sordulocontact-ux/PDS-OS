@@ -94,6 +94,9 @@ export type MasterFacts = {
   validator: string | null;
   mixEngineer: string | null;
   masteringEngineer: string | null;
+  // A collective's live titles still without any audio (« Titre de Jay (à
+  // nommer) »): the Master is not done while one is left.
+  withoutAudio?: number;
 };
 
 function roundState(
@@ -140,17 +143,19 @@ export function masterState(facts: MasterFacts): WorkflowState {
   const masterDone = mastersFinal(facts);
   const delivered =
     masterDone && facts.deliverables.received >= facts.deliverables.expected;
+  // A collective's titles without any audio: their source is still to come.
+  const silent = facts.withoutAudio ?? 0;
   // Nothing is done in a workflow not launched, or without titles: titles
   // already at their master final must not tick its chevrons beforehand.
   const started = facts.launched && facts.titles > 0;
   const done: MasterTab[] = !started
     ? []
     : [
-        ...(sourced ? (["source"] as const) : []),
+        ...(sourced && silent === 0 ? (["source"] as const) : []),
         ...(p.brief ? (["brief"] as const) : []),
         ...(prepared && mixDone(facts) ? (["mixing"] as const) : []),
         ...(masterDone ? (["mastering"] as const) : []),
-        ...(delivered ? (["final"] as const) : []),
+        ...(delivered && silent === 0 ? (["final"] as const) : []),
       ];
   const prepareCount = [sourced, p.brief, p.sent].filter(Boolean).length;
 
@@ -171,7 +176,7 @@ export function masterState(facts: MasterFacts): WorkflowState {
       ...base,
       status: "not_started",
       step: "source",
-      reason: t.noTitle,
+      reason: silent > 0 ? t.withoutAudio(silent) : t.noTitle,
       progress: t.progressPrepare(0),
       done,
     };
@@ -213,6 +218,23 @@ export function masterState(facts: MasterFacts): WorkflowState {
         facts.mastering.finals,
         facts.mastering.titles,
       ),
+      done,
+    };
+  // Every title with audio is at its master final, but a collective still
+  // has titles without any: not done, whatever the others say.
+  if (silent > 0 && (facts.mix.titles === 0 || delivered))
+    return {
+      ...base,
+      status: "in_progress",
+      step: "source",
+      reason: t.withoutAudio(silent),
+      progress:
+        facts.mix.titles === 0
+          ? t.progressAlreadyFinal(facts.titles)
+          : t.progressFinal(
+              facts.deliverables.received,
+              facts.deliverables.expected,
+            ),
       done,
     };
   // Every title had its master final before the workflow: nothing to mix,
