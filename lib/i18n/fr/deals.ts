@@ -44,6 +44,8 @@ export const deals = {
     assignee: "Négocié par",
     unassigned: "À affecter",
     contract: "Contrat",
+    // Its own column (Sacha 25/11/2026: one fact a column).
+    contractState: "État du contrat",
     followUpDue: (day: string) => `Relance due · ${day}`,
     followUpOn: (day: string) => `Relancer le ${day}`,
     on: (action: string, day: string) => `${action} · ${day}`,

@@ -44,6 +44,10 @@ export const contracts = {
   },
   columns: {
     title: "Contrat",
+    // One fact a column (Sacha 25/11/2026), no longer under the title.
+    type: "Type",
+    project: "Projet",
+    artist: "Artiste",
     parties: "Parties",
     state: "État",
     due: "Échéance",

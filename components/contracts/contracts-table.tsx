@@ -30,9 +30,10 @@ const fr = { contracts, records };
 
 // Contracts, newest first: the row opens the contract's side sheet
 // (ContractSheet, the Réseau's model, Sacha 24/11/2026), and from there
-// its page; its type and what it
-// is about read under the title; its state, its parties, its due date (said in words
-// while still awaited) and who follows it.
+// its page. One fact a column (Sacha 25/11/2026): its state, its type, its
+// due date (said in words while still awaited), its project, its artist,
+// its parties and who follows it; on a phone, the hidden ones under the
+// title.
 export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
   const t = fr.contracts;
   const withActions = contracts.some((c) => c.canEdit);
@@ -42,11 +43,26 @@ export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
     <TableSortProvider>
       <DataTable>
         <DataTableHeader>
-          <DataTableHead>{t.columns.title}</DataTableHead>
-          <DataTableHead hideBelow="sm">{t.columns.state}</DataTableHead>
-          <DataTableHead hideBelow="lg">{t.columns.parties}</DataTableHead>
-          <DataTableHead hideBelow="md">{t.columns.due}</DataTableHead>
-          <DataTableHead hideBelow="lg" fill>
+          <DataTableHead icon="contract">{t.columns.title}</DataTableHead>
+          <DataTableHead icon="status" hideBelow="sm">
+            {t.columns.state}
+          </DataTableHead>
+          <DataTableHead icon="kind" hideBelow="md">
+            {t.columns.type}
+          </DataTableHead>
+          <DataTableHead icon="date" hideBelow="md">
+            {t.columns.due}
+          </DataTableHead>
+          <DataTableHead icon="project" hideBelow="lg">
+            {t.columns.project}
+          </DataTableHead>
+          <DataTableHead icon="artist" hideBelow="xl">
+            {t.columns.artist}
+          </DataTableHead>
+          <DataTableHead icon="people" hideBelow="2xl">
+            {t.columns.parties}
+          </DataTableHead>
+          <DataTableHead icon="person" hideBelow="2xl" fill>
             {t.columns.owner}
           </DataTableHead>
           {withActions && (
@@ -66,9 +82,10 @@ export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
                       {contract.title}
                     </DataTableLink>
                   }
+                  // On a phone, what its hidden columns say.
                   subtitle={
-                    <>
-                      {/* The state column is hidden on phones. */}
+                    <span className="md:hidden">
+                      {/* The state column shows from 640 px. */}
                       <span className="sm:hidden">
                         {t.states[contract.state]} ·{" "}
                       </span>
@@ -79,17 +96,15 @@ export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
                       ]
                         .filter(Boolean)
                         .join(" · ")}
-                    </>
+                    </span>
                   }
                 />
               </DataTableCell>
               <DataTableCell hideBelow="sm">
                 <ContractStateBadge state={contract.state} />
               </DataTableCell>
-              <DataTableCell hideBelow="lg">
-                <DataTableText>
-                  {contract.parties.join(", ") || EMPTY_CELL}
-                </DataTableText>
+              <DataTableCell hideBelow="md">
+                <DataTableText>{t.types[contract.type]}</DataTableText>
               </DataTableCell>
               <DataTableCell hideBelow="md">
                 {contract.dueOn ? (
@@ -102,7 +117,22 @@ export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
                   EMPTY_CELL
                 )}
               </DataTableCell>
-              <DataTableCell hideBelow="lg" fill>
+              <DataTableCell hideBelow="lg">
+                <DataTableText>
+                  {contract.projectTitle || EMPTY_CELL}
+                </DataTableText>
+              </DataTableCell>
+              <DataTableCell hideBelow="xl">
+                <DataTableText>
+                  {contract.artistName || EMPTY_CELL}
+                </DataTableText>
+              </DataTableCell>
+              <DataTableCell hideBelow="2xl">
+                <DataTableText>
+                  {contract.parties.join(", ") || EMPTY_CELL}
+                </DataTableText>
+              </DataTableCell>
+              <DataTableCell hideBelow="2xl" fill>
                 {contract.ownerName || EMPTY_CELL}
               </DataTableCell>
               {withActions && (

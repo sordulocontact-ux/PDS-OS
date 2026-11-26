@@ -57,12 +57,18 @@ export function MastersTable({
     <DataTable>
       <DataTableHeader>
         {withSelection && <SelectAllHead label={selection.all} />}
-        <DataTableHead>{t.columns.title}</DataTableHead>
-        <DataTableHead>{t.columns.artists}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.audioState}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
-        <DataTableHead hideBelow="xl">{t.columns.lastChange}</DataTableHead>
-        <DataTableHead hideBelow="2xl" fill>
+        <DataTableHead icon="master">{t.columns.title}</DataTableHead>
+        <DataTableHead icon="artist">{t.columns.artists}</DataTableHead>
+        <DataTableHead icon="audio" hideBelow="sm">
+          {t.columns.audioState}
+        </DataTableHead>
+        <DataTableHead icon="project" hideBelow="md">
+          {t.columns.project}
+        </DataTableHead>
+        <DataTableHead icon="updated" hideBelow="xl">
+          {t.columns.lastChange}
+        </DataTableHead>
+        <DataTableHead icon="release" hideBelow="2xl" fill>
           {t.columns.release}
         </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}

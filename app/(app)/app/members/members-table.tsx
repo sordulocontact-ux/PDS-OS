@@ -9,6 +9,8 @@ import {
   DataTableHeader,
   DataTableMedia,
   DataTableRow,
+  DataTableText,
+  EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { signupUrl } from "@/lib/auth/site-url";
 import { fr } from "@/lib/i18n/fr";
@@ -35,11 +37,20 @@ export function MembersTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.columns.person}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>
-        <DataTableHead>{t.columns.status}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.decision}</DataTableHead>
-        <DataTableHead hideBelow="lg">{fr.aiUsage.team.column}</DataTableHead>
+        <DataTableHead icon="person">{t.columns.person}</DataTableHead>
+        <DataTableHead icon="role" hideBelow="sm">
+          {t.columns.role}
+        </DataTableHead>
+        <DataTableHead icon="status">{t.columns.status}</DataTableHead>
+        <DataTableHead icon="decision" hideBelow="md">
+          {t.columns.decision}
+        </DataTableHead>
+        <DataTableHead icon="note" hideBelow="xl">
+          {t.columns.note}
+        </DataTableHead>
+        <DataTableHead icon="ai" hideBelow="lg">
+          {fr.aiUsage.team.column}
+        </DataTableHead>
         <DataTableHead fill align="end">
           {t.columns.actions}
         </DataTableHead>
@@ -80,20 +91,14 @@ export function MembersTable({
                 </StatusBadge>
               </DataTableCell>
               <DataTableCell hideBelow="md">
-                <div className="flex flex-col">
-                  <span>
-                    {row.status === "invited" && row.decidedAt
-                      ? `${t.invitedAt} ${dateFormatter.format(new Date(row.decidedAt))}`
-                      : row.status !== "pending" && row.decidedAt
-                        ? dateFormatter.format(new Date(row.decidedAt))
-                        : `${t.requestedAt} ${dateFormatter.format(new Date(row.requestedAt))}`}
-                  </span>
-                  {row.decisionNote && (
-                    <span className="max-w-xs truncate text-xs text-muted-foreground">
-                      {row.decisionNote}
-                    </span>
-                  )}
-                </div>
+                {row.status === "invited" && row.decidedAt
+                  ? `${t.invitedAt} ${dateFormatter.format(new Date(row.decidedAt))}`
+                  : row.status !== "pending" && row.decidedAt
+                    ? dateFormatter.format(new Date(row.decidedAt))
+                    : `${t.requestedAt} ${dateFormatter.format(new Date(row.requestedAt))}`}
+              </DataTableCell>
+              <DataTableCell hideBelow="xl">
+                <DataTableText>{row.decisionNote || EMPTY_CELL}</DataTableText>
               </DataTableCell>
               <DataTableCell hideBelow="lg">
                 <div className="flex w-24 flex-col gap-1.5">

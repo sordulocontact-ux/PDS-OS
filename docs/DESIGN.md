@@ -100,6 +100,22 @@ Taille réglée par classe Tailwind, jamais par la prop `size` :
 Le trait est fixé à 2 dans la grille de 24 : il s'affine avec la taille (1,33 px à
 `size-4`). C'est voulu, ne pas le compenser.
 
+### En-têtes de tableau
+
+Essai de Sacha (25/11/2026) : chaque colonne d'un tableau de liste porte une icône `size-4` avant
+son nom, dans la couleur de l'en-tête (`DataTableHead icon`). L'icône dit **ce que contient la
+colonne**, pas son libellé : elle est choisie dans `lib/ui/column-icons.ts`, jamais au cas par cas,
+pour que « Responsable » ou « Échéance » aient la même icône partout ; la colonne d'un objet
+(Projet, Artiste, Contrat…) reprend son icône de la navigation. Pas d'icône sur la colonne « ⋯ ».
+
+**Texte coupé** (Sacha, 25/11/2026) : tout texte d'un tableau coupé par « … » se lit entier au survol,
+dans une bulle posée sur lui (`OverflowHintArea`, intégré à `DataTable`) ; plus de `title` natif.
+
+**Un fait par colonne** (Sacha, 25/11/2026) : une cellule ne superpose jamais deux informations
+(« Rattaché à » + son type, un contrat + son état, une date + son motif) ; chacune a sa colonne.
+Seule la cellule du nom garde une sous-ligne grise (`DataTableMedia`), pour ce qui précise le nom
+(version, variante, organisation) ou, sur téléphone, les colonnes masquées.
+
 ### Couleur
 
 Les icônes sont en `currentColor` : elles prennent la couleur du texte qui les porte.
@@ -271,8 +287,8 @@ Production orange, Livraison sarcelle, Défense jaune, Bilan ardoise) et son **t
 (Musical violet, Contenu vert tilleul, Événement sable), distincts des étapes puisqu'ils
 sont sur la même ligne. Jetons `--hue-<teinte>-bg` / `-fg` (`app/globals.css`), variantes
 de `StatusBadge`, correspondance dans `lib/ui/category-hues.ts` seulement.
-Le **type d'un fichier** est aussi une catégorie (`FileTypeIcon`, d'après Accordee, Sacha 24/11/2026) : disque
-teinté devant son nom, PDF rouge, tableur vert, texte bleu ciel, présentation orange, image violet, audio indigo,
+Le **type d'un fichier** est aussi une catégorie (`FileTypeIcon`, d'après Accordee, Sacha 24/11/2026) : icône
+seule dans la teinte de son type, sans disque autour (Sacha 25/11/2026), devant son nom, PDF rouge, tableur vert, texte bleu ciel, présentation orange, image violet, audio indigo,
 vidéo rose, archive sable, autre ardoise (`fileTypeHue`). Le rouge et le vert (`--hue-red-*`, `--hue-green-*`)
 sont réservés aux types de fichier : ailleurs ils se liraient comme un état.
 Le **titre d'une ligne** dans les tableaux du Juridique est aussi une catégorie : un tag dans

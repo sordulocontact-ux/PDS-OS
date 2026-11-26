@@ -209,7 +209,15 @@ export function SortedTableBody({
  * A column head's label: a button that sorts the table on that column when
  * the column holds values to sort, the plain label otherwise.
  */
-export function SortableHeadLabel({ children }: { children: React.ReactNode }) {
+// `icon`: drawn before the column's name, in its color (DataTableHead icon).
+export function SortableHeadLabel({
+  children,
+  icon: Icon,
+}: {
+  children: React.ReactNode;
+  icon?: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+}) {
+  const glyph = Icon && <Icon aria-hidden className="size-4 shrink-0" />;
   const context = useContext(SortContext);
   const ref = useRef<HTMLSpanElement>(null);
   const [column, setColumn] = useState<number | null>(null);
@@ -232,7 +240,14 @@ export function SortableHeadLabel({ children }: { children: React.ReactNode }) {
   if (!sortable)
     return (
       <span ref={ref} className="contents">
-        {children}
+        {glyph ? (
+          <span className="inline-flex max-w-full items-center gap-1.5">
+            {glyph}
+            <span className="truncate">{children}</span>
+          </span>
+        ) : (
+          children
+        )}
       </span>
     );
   const Arrow = direction === "descending" ? IconArrowDown : IconArrowUp;
@@ -242,10 +257,11 @@ export function SortableHeadLabel({ children }: { children: React.ReactNode }) {
         type="button"
         onClick={() => context.toggle(column)}
         className={cn(
-          "inline-flex max-w-full items-center gap-1 text-inherit outline-none after:absolute after:inset-0 hover:text-[color:var(--text-primary)] focus-visible:underline",
+          "inline-flex max-w-full items-center gap-1.5 text-inherit outline-none after:absolute after:inset-0 hover:text-[color:var(--text-primary)] focus-visible:underline",
           direction && "text-[color:var(--text-primary)]",
         )}
       >
+        {glyph}
         <span className="truncate">{children}</span>
         {direction && <Arrow aria-hidden className="size-3.5 shrink-0" />}
       </button>

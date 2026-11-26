@@ -8,11 +8,10 @@ import {
 } from "nucleo-sharp-essential";
 
 import { IconFileSheet } from "@/components/icons";
-import { DataTableIcon } from "@/components/ui/data-table";
 import { Thumbnail } from "@/components/ui/thumbnail";
 import { isShownImage } from "@/lib/catalog/file-rules";
 import { fileType, type FileType } from "@/lib/catalog/file-type";
-import { fileTypeHue, hueClass } from "@/lib/ui/category-hues";
+import { fileTypeHue, hueTextClass } from "@/lib/ui/category-hues";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<FileType, React.ComponentType<{ className?: string }>> = {
@@ -27,20 +26,23 @@ const ICONS: Record<FileType, React.ComponentType<{ className?: string }>> = {
   other: IconFile,
 };
 
+// `box`: the room it takes, a thumbnail's in a list, so the names line up
+// whether a row shows a picture or an icon; `icon`: the bare icon in it.
 const SIZES = {
   // A line of a list in a side sheet's fold.
-  sm: { disc: "size-6 [&>svg]:size-3.5" },
-  // A row of a table (DataTableIcon's own disc).
-  md: { disc: "" },
+  sm: { box: "size-6", icon: "size-4" },
+  // A row of a table (as large as DataTableIcon).
+  md: { box: "size-9", icon: "size-6" },
   // A file the preview cannot draw: its icon, large.
-  lg: { disc: "size-20 [&>svg]:size-9" },
+  lg: { box: "size-20", icon: "size-12" },
 } as const;
 
 /**
  * Visual of a file: an image the browser shows is its own picture, small
- * (retour de Sacha du 05/11), any other file the disc of its type in its
+ * (retour de Sacha du 05/11), any other file the icon of its type in its
  * hue (after Accordee, Sacha 24/11/2026): PDF red, spreadsheet green, text
- * blue, slides orange, then image, sound, video, archive, other.
+ * blue, slides orange, then image, sound, video, archive, other. The icon
+ * alone, without the disc around it (Sacha 25/11/2026).
  */
 export function FileTypeIcon({
   file,
@@ -56,12 +58,18 @@ export function FileTypeIcon({
   const Icon = ICONS[type];
   if (previewUrl && isShownImage(file.mime))
     return (
-      <Thumbnail src={previewUrl} icon={Icon} className={SIZES[size].disc} />
+      <Thumbnail src={previewUrl} icon={Icon} className={SIZES[size].box} />
     );
   return (
-    <DataTableIcon
-      icon={Icon}
-      className={cn(SIZES[size].disc, hueClass[fileTypeHue[type]])}
-    />
+    <span
+      aria-hidden
+      className={cn(
+        "flex shrink-0 items-center justify-center",
+        SIZES[size].box,
+        hueTextClass[fileTypeHue[type]],
+      )}
+    >
+      <Icon className={SIZES[size].icon} />
+    </span>
   );
 }

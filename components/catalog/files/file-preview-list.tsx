@@ -20,7 +20,16 @@ const FilePreview = dynamic(
 );
 const preload = () => void import("@/components/catalog/files/file-preview");
 
-const PreviewContext = createContext<((id: string) => void) | null>(null);
+// Opens the preview on a file; `only`: ← → go through these files alone
+// (the ticked ones, FileSelection), in the table's order.
+type ShowPreview = (id: string, only?: string[]) => void;
+
+const PreviewContext = createContext<ShowPreview | null>(null);
+
+/** Opens the preview of the files list around (FilePreviewList). */
+export function useFilePreview(): ShowPreview | null {
+  return useContext(PreviewContext);
+}
 
 /**
  * Around a table of files: a click on a file's name opens it large over
@@ -50,18 +59,27 @@ function PreviewState({
   children: React.ReactNode;
 }) {
   const order = useShownOrder();
-  const shown = useMemo(
+  const [only, setOnly] = useState<string[] | null>(null);
+  const sorted = useMemo(
     () =>
       order
         ? order.flatMap((index) => (files[index] ? [files[index]] : []))
         : files,
     [order, files],
   );
+  const shown = useMemo(
+    () => (only ? sorted.filter((file) => only.includes(file.id)) : sorted),
+    [sorted, only],
+  );
   // The file shown stays while the preview closes, so it leaves drawn.
   const [current, setCurrent] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const show = (id: string) => {
-    setCurrent(id);
+  const show: ShowPreview = (id, subset) => {
+    setOnly(subset ?? null);
+    // A selection opens on its first file as the table shows them.
+    setCurrent(
+      subset ? (sorted.find((file) => subset.includes(file.id))?.id ?? id) : id,
+    );
     setOpen(true);
   };
 
@@ -84,7 +102,7 @@ function PreviewState({
 /**
  * A file's name in its row: inside a `FilePreviewList` it opens the
  * preview, elsewhere the file in a new tab. A long name is cut, whole on
- * hover (Sacha 29/10).
+ * hover (Sacha 29/10, OverflowHintArea of the table).
  */
 export function FilePreviewLink({
   file,
@@ -94,7 +112,7 @@ export function FilePreviewLink({
   const show = useContext(PreviewContext);
   const t = fr.catalogFiles;
   const name = (
-    <span aria-hidden title={file.fileName} className="block max-w-80 truncate">
+    <span aria-hidden className="block max-w-80 truncate">
       {file.fileName}
     </span>
   );

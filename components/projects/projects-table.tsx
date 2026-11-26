@@ -76,16 +76,26 @@ export function ProjectsTable({
     <DataTable>
       <DataTableHeader>
         {withSelection && <SelectAllHead label={selection.all} />}
-        <DataTableHead>{t.columns.title}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.artist}</DataTableHead>
-        <DataTableHead hideBelow="xl">{t.columns.responsible}</DataTableHead>
-        <DataTableHead hideBelow="2xl">{t.columns.type}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
-        <DataTableHead>{t.columns.status}</DataTableHead>
+        <DataTableHead icon="project">{t.columns.title}</DataTableHead>
+        <DataTableHead icon="artist" hideBelow="md">
+          {t.columns.artist}
+        </DataTableHead>
+        <DataTableHead icon="person" hideBelow="xl">
+          {t.columns.responsible}
+        </DataTableHead>
+        <DataTableHead icon="kind" hideBelow="2xl">
+          {t.columns.type}
+        </DataTableHead>
+        <DataTableHead icon="date" hideBelow="sm">
+          {t.columns.due}
+        </DataTableHead>
+        <DataTableHead icon="status">{t.columns.status}</DataTableHead>
         {withStep && (
-          <DataTableHead hideBelow="lg">{t.columns.step}</DataTableHead>
+          <DataTableHead icon="step" hideBelow="lg">
+            {t.columns.step}
+          </DataTableHead>
         )}
-        <DataTableHead hideBelow="lg" fill>
+        <DataTableHead icon="priority" hideBelow="lg" fill>
           {t.columns.priority}
         </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}

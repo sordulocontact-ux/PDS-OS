@@ -84,12 +84,18 @@ export function CallsTable({
     <TableSortProvider>
       <DataTable>
         <DataTableHeader>
-          <DataTableHead fill>{t.columns.title}</DataTableHead>
+          <DataTableHead icon="call" fill>
+            {t.columns.title}
+          </DataTableHead>
           {withProject && (
-            <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
+            <DataTableHead icon="project" hideBelow="md">
+              {t.columns.project}
+            </DataTableHead>
           )}
-          <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-          <DataTableHead>{t.columns.status}</DataTableHead>
+          <DataTableHead icon="date" hideBelow="sm">
+            {t.columns.date}
+          </DataTableHead>
+          <DataTableHead icon="status">{t.columns.status}</DataTableHead>
           <DataTableHead className={ACTIONS_COLUMN}>
             <span className="sr-only">{t.columns.actions}</span>
           </DataTableHead>

@@ -21,6 +21,9 @@ export const library = {
   columns: {
     name: "Nom",
     owner: "Rattaché à",
+    // What the file belongs to (Artiste, Titre…), its own column (Sacha
+    // 25/11/2026: one fact a column).
+    source: "Rattachement",
     category: "Catégorie",
     // One fact a column (after Accordee, Sacha 24/11/2026).
     type: "Type",

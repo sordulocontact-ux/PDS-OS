@@ -10,7 +10,9 @@ import {
   SortedTableBody,
   TableSortProvider,
 } from "@/components/ui/table-sort";
+import { OverflowHintArea } from "@/components/ui/overflow-hint";
 import { ViewLink } from "@/components/ui/view-link";
+import { type ColumnIcon, columnIcons } from "@/lib/ui/column-icons";
 import { cn } from "@/lib/utils";
 
 // DataTable: every table of the app, as a card like the home's lists and the
@@ -64,7 +66,7 @@ export const EMPTY_CELL = "—";
  * A cell's text on one line, cut by « … » at the column's width (192 px):
  * a table grows a column to its longest text otherwise, cut or not (the
  * Réseau's « Métier ou activité », Sacha 24/11/2026). The whole text on
- * hover.
+ * hover, as every cut text of a table (OverflowHintArea).
  */
 export function DataTableText({
   children,
@@ -74,10 +76,7 @@ export function DataTableText({
   className?: string;
 }) {
   return (
-    <span
-      title={typeof children === "string" ? children : undefined}
-      className={cn("block max-w-48 truncate", className)}
-    >
+    <span className={cn("block max-w-48 truncate", className)}>
       {children}
     </span>
   );
@@ -95,7 +94,8 @@ export function DataTable({
   framed?: boolean;
 }) {
   return (
-    <div
+    // A text cut by « … » shows whole on hover (Sacha 25/11/2026).
+    <OverflowHintArea
       className={cn(
         "overflow-hidden rounded-xl border border-[color:var(--border-default)] bg-card",
         !framed &&
@@ -106,7 +106,7 @@ export function DataTable({
       <TableSortProvider>
         <Table>{children}</Table>
       </TableSortProvider>
-    </div>
+    </OverflowHintArea>
   );
 }
 
@@ -129,11 +129,18 @@ export function DataTableHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
+// `icon`: what the column holds (lib/ui/column-icons.ts), drawn before its
+// name; one kind of column, one icon in every table.
 export function DataTableHead({
   children,
   className,
+  icon,
   ...columnProps
-}: ColumnProps & { children: React.ReactNode; className?: string }) {
+}: ColumnProps & {
+  children: React.ReactNode;
+  className?: string;
+  icon?: ColumnIcon;
+}) {
   return (
     <TableHead
       className={cn(
@@ -142,7 +149,9 @@ export function DataTableHead({
         className,
       )}
     >
-      <SortableHeadLabel>{children}</SortableHeadLabel>
+      <SortableHeadLabel icon={icon && columnIcons[icon]}>
+        {children}
+      </SortableHeadLabel>
     </TableHead>
   );
 }
