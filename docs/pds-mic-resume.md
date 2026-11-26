@@ -268,6 +268,9 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Adresse `?sortie=` (`lib/distribution/scope.ts`), sortie et pistes `release-scope.ts`.
   « Sorties » et « Titres et artistes » lisent `release_distribution_states`. La Distribution
   s'applique à tout collectif (décision 9). Compte rendu : `docs/pds-mic-rapports/lot-15.md`.
+  Depuis le 26/11/2026, « Prêt pour la sortie » d'un collectif se calcule sur chacune de ses sorties actives
+  (`collectiveDistribution`, `lib/legal/readiness/queries.ts`), plus sur une sortie de projet absente en mode
+  « Sorties individuelles ».
 - **Retours d'Ibé du 18/11** (`20261121200101_collective_recap`, `20261121210101_collective_title_contracts`,
   **à pousser en prod par Sacha** ; détail : `docs/ARCHITECTURE.md` § 8 sexies). Récap : `project_titles.release_decision`
   (sortie oui / non / nul, par titre, sans conséquence) et `set_project_title_release` (journal `release_decided`) ;

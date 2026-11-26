@@ -6382,7 +6382,10 @@ Remplace les cinq onglets ci-dessus (leurs données et fonctions SQL restent). C
   externe de l'étape Dépôt lisent `loadLegalReadiness` (§ 8 sexies) — verdict et validation de la
   direction ; sans `manage_legal`, seule la validation se lit, d'où la fonction des emprunts gardée
   pour le blocage (la readiness juridique lit elle-même `loadDistributionSources`, donc pas
-  d'appel inverse dans les sources : il serait circulaire). `submit_distribution_version` refuse
+  d'appel inverse dans les sources : il serait circulaire). Pour un collectif, elle la lit sortie par
+  sortie (`collectiveDistribution`, chaque sortie active passée par `scopeDistribution`, clé
+  `dist:<sortie>:<clé>`), jamais sur une sortie de projet qu'il n'a pas en « Sorties individuelles ».
+  `submit_distribution_version` refuse
   désormais aussi en SQL un emprunt à sécuriser (`legal_blockers`) et des paramètres non confirmés.
 - **Dates** (`lib/projects/dates.ts`, `loadProjectDates`) : la **sortie** = `projects.due_date`
   (saisie au Lancement, confirmée au Cadrage, validée avec son Brief ; source « Projet · Lancement,
