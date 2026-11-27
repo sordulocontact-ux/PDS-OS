@@ -4,6 +4,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconLink,
+  IconXmark,
 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
@@ -36,13 +37,20 @@ const ROW =
  * Accordee): the kinds of record with how many the viewer reads and « › »
  * (greyed at 0); a kind opens its records with a search; choosing one links
  * the note to it and closes the menu. `choices`: null while they load.
+ * Linked, the same button names the record (its kind's icon) and changes it,
+ * « × » beside it unlinks: linking and the link sit at one place (Sacha,
+ * 27/11/2026).
  */
 export function NoteLinkMenu({
   choices,
+  current,
   onPick,
+  onRemove,
 }: {
   choices: NoteLinkChoices | null;
+  current: NoteLink | null;
   onPick: (link: NoteLink) => void;
+  onRemove: () => void;
 }) {
   const t = fr.notes.link;
   const [open, setOpen] = useState(false);
@@ -56,65 +64,80 @@ export function NoteLinkMenu({
     }
   };
 
+  const CurrentIcon = current ? columnIcons[current.kind] : IconLink;
+
   return (
-    <Popover open={open} onOpenChange={reset}>
-      <PopoverTrigger
-        render={<Button variant="secondary" size="sm" className="self-start" />}
-      >
-        <IconLink aria-hidden />
-        {t.add}
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-1" aria-label={t.menu}>
-        {kind === null ? (
-          <>
-            <p className="px-2 pt-1.5 pb-1 text-caption text-[color:var(--text-tertiary)]">
-              {t.menu}
-            </p>
-            {NOTE_LINK_KINDS.map((each) => {
-              const Icon = columnIcons[each];
-              const count = choices?.[each].length;
-              return (
-                <button
-                  key={each}
-                  type="button"
-                  className={ROW}
-                  disabled={!count}
-                  onClick={() => setKind(each)}
-                >
-                  <Icon
-                    aria-hidden
-                    className="size-4 shrink-0 text-[color:var(--text-secondary)]"
-                  />
-                  <span className="flex-1">{t.groups[each]}</span>
-                  <span className="text-[color:var(--text-tertiary)] tabular-nums">
-                    {count ?? t.loading}
-                  </span>
-                  <IconChevronRight
-                    aria-hidden
-                    className="size-3.5 shrink-0 text-[color:var(--text-tertiary)]"
-                  />
-                </button>
-              );
-            })}
-          </>
-        ) : (
-          <RecordList
-            kind={kind}
-            choices={choices}
-            query={query}
-            onQuery={setQuery}
-            onBack={() => {
-              setKind(null);
-              setQuery("");
-            }}
-            onPick={(link) => {
-              onPick(link);
-              reset(false);
-            }}
-          />
-        )}
-      </PopoverContent>
-    </Popover>
+    <div className="flex items-center gap-1 self-start">
+      <Popover open={open} onOpenChange={reset}>
+        <PopoverTrigger
+          render={<Button variant="secondary" size="sm" className="max-w-80" />}
+        >
+          <CurrentIcon aria-hidden />
+          <span className="truncate">{current ? current.label : t.add}</span>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-72 p-1" aria-label={t.menu}>
+          {kind === null ? (
+            <>
+              <p className="px-2 pt-1.5 pb-1 text-caption text-[color:var(--text-tertiary)]">
+                {t.menu}
+              </p>
+              {NOTE_LINK_KINDS.map((each) => {
+                const Icon = columnIcons[each];
+                const count = choices?.[each].length;
+                return (
+                  <button
+                    key={each}
+                    type="button"
+                    className={ROW}
+                    disabled={!count}
+                    onClick={() => setKind(each)}
+                  >
+                    <Icon
+                      aria-hidden
+                      className="size-4 shrink-0 text-[color:var(--text-secondary)]"
+                    />
+                    <span className="flex-1">{t.groups[each]}</span>
+                    <span className="text-[color:var(--text-tertiary)] tabular-nums">
+                      {count ?? t.loading}
+                    </span>
+                    <IconChevronRight
+                      aria-hidden
+                      className="size-3.5 shrink-0 text-[color:var(--text-tertiary)]"
+                    />
+                  </button>
+                );
+              })}
+            </>
+          ) : (
+            <RecordList
+              kind={kind}
+              choices={choices}
+              query={query}
+              onQuery={setQuery}
+              onBack={() => {
+                setKind(null);
+                setQuery("");
+              }}
+              onPick={(link) => {
+                onPick(link);
+                reset(false);
+              }}
+            />
+          )}
+        </PopoverContent>
+      </Popover>
+      {current && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t.remove(current.label)}
+          onClick={onRemove}
+        >
+          <IconXmark aria-hidden />
+        </Button>
+      )}
+    </div>
   );
 }
 

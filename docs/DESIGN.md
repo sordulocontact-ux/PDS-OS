@@ -118,6 +118,7 @@ Seule la cellule du nom garde une sous-ligne grise (`DataTableMedia`), pour ce q
 titre** : la date a sa colonne (Notes, rappel de Sacha du 27/11/2026). L'icône d'une ligne sans image
 (`DataTableIcon`) est **seule, sans rond**, grise, avant le nom (Sacha, 27/11/2026, d'après Accordee) ;
 parmi des photos (Réseau), elle garde leur largeur (`size-9 justify-center`) pour aligner les noms.
+Toutes les icônes de ligne font **18 px**, celle d'un fichier aussi (`FileTypeIcon md`, dans sa teinte).
 
 ### Couleur
 

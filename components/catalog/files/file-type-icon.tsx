@@ -31,8 +31,9 @@ const ICONS: Record<FileType, React.ComponentType<{ className?: string }>> = {
 const SIZES = {
   // A line of a list in a side sheet's fold.
   sm: { box: "size-6", icon: "size-4" },
-  // A row of a table (as large as DataTableIcon).
-  md: { box: "size-9", icon: "size-6" },
+  // A row of a table: the icon as large as DataTableIcon's (18 px), in the
+  // thumbnails' width (Sacha, 27/11/2026: one icon size in every table).
+  md: { box: "size-9", icon: "size-[18px]" },
   // A file the preview cannot draw: its icon, large.
   lg: { box: "size-20", icon: "size-12" },
 } as const;

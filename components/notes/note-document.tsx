@@ -13,9 +13,9 @@ import type { NotePerson } from "@/lib/notes/views";
 const fr = { notes };
 
 /**
- * A written note as a document (Sacha 27/11/2026, after Accordee): « Lier
- * à… » on top, the title large, its author and last change, the pill of
- * what it is linked to (« × » unlinks it), then its text. `onChange`: its
+ * A written note as a document (Sacha 27/11/2026, after Accordee): what it
+ * is linked to on top, where it is also linked or unlinked (one place), the
+ * title large, its author and last change, then its text. `onChange`: its
  * author writes in place (no border, no button: NoteSheet saves as he
  * types); without it, the note is read. `titleRef`: its title field (a new
  * note's sheet gives it the focus).
@@ -38,8 +38,17 @@ export function NoteDocument({
   const t = fr.notes.document;
   return (
     <div className="flex flex-col gap-5">
-      {onChange && (
-        <NoteLinkMenu choices={choices} onPick={(link) => onChange({ link })} />
+      {onChange ? (
+        <NoteLinkMenu
+          choices={choices}
+          current={draft.link}
+          onPick={(link) => onChange({ link })}
+          onRemove={() => onChange({ link: null })}
+        />
+      ) : (
+        <div className="flex">
+          <NoteLinkPill link={draft.link} open size="md" />
+        </div>
       )}
       <div className="flex flex-col gap-1.5">
         {onChange ? (
@@ -67,16 +76,6 @@ export function NoteDocument({
           )}
         </p>
       </div>
-      {(draft.link || !onChange) && (
-        <div className="flex">
-          <NoteLinkPill
-            link={draft.link}
-            open
-            size="md"
-            onRemove={onChange && (() => onChange({ link: null }))}
-          />
-        </div>
-      )}
       {onChange ? (
         <textarea
           aria-label={t.body}

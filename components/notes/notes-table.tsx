@@ -46,9 +46,9 @@ export const rowId = (row: NoteRow) =>
 /**
  * The rows of a door's Notes (calls with their content, notes written by
  * hand), in the order given: the note (icon of its kind and its title only),
- * its date in a column of its own (one fact per cell, Sacha 27/11/2026), what
- * it is linked to (Notes only), the beginning of its content, who is in it,
- * « ⋯ ». A call opens in CallSheet, a written note in NoteSheet, ↑ ↓
+ * what it is linked to (Notes only), the beginning of its content, its date
+ * in a column of its own after it (one fact per cell, Sacha 27/11/2026), who
+ * is in it, « ⋯ ». A call opens in CallSheet, a written note in NoteSheet, ↑ ↓
  * following the order shown (a sort of the head included). A past call
  * without report offers « Compléter », its page.
  */
@@ -83,9 +83,6 @@ export function NotesTable({
           <DataTableHead icon="notes" fill>
             {t.note}
           </DataTableHead>
-          <DataTableHead icon="date" hideBelow="sm">
-            {t.date}
-          </DataTableHead>
           {withProject && (
             <DataTableHead icon="relation" hideBelow="md">
               {t.link}
@@ -93,6 +90,9 @@ export function NotesTable({
           )}
           <DataTableHead icon="note" hideBelow="lg">
             {t.content}
+          </DataTableHead>
+          <DataTableHead icon="date" hideBelow="sm">
+            {t.date}
           </DataTableHead>
           <DataTableHead icon="people" hideBelow="sm">
             {t.by}
@@ -172,11 +172,6 @@ function NoteTableRow({
           }
         />
       </DataTableCell>
-      <DataTableCell hideBelow="sm" sort={at}>
-        <DataTableText>
-          <time dateTime={at}>{date}</time>
-        </DataTableText>
-      </DataTableCell>
       {withProject && (
         <DataTableCell hideBelow="md">
           {isCall ? (
@@ -203,6 +198,11 @@ function NoteTableRow({
             {row.excerpt || EMPTY_CELL}
           </DataTableText>
         )}
+      </DataTableCell>
+      <DataTableCell hideBelow="sm" sort={at}>
+        <DataTableText>
+          <time dateTime={at}>{date}</time>
+        </DataTableText>
       </DataTableCell>
       <DataTableCell hideBelow="sm" sort={people[0]?.name ?? ""}>
         <NotesPeople people={people} />

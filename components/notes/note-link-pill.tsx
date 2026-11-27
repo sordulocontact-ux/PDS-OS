@@ -1,4 +1,4 @@
-import { IconChevronRight, IconXmark } from "nucleo-sharp-essential";
+import { IconChevronRight } from "nucleo-sharp-essential";
 
 import { statusBadgeVariants } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -26,13 +26,11 @@ export function noteLinkHref(link: NoteLinkRef): string {
  * What a written note is linked to, as a call's (CallProjectPill): a project
  * in the hue it has everywhere, « Deal · Nadia » or a contract's title in
  * slate, « Note de l'équipe » without a link. `open`: a way to the record
- * (« › »), above a table row's own link; `onRemove`: « × » unlinks it (the
- * note's author, in its document).
+ * (« › »), above a table row's own link.
  */
 export function NoteLinkPill({
   link,
   open = false,
-  onRemove,
   size = "sm",
   emptyLabel,
 }: {
@@ -41,7 +39,6 @@ export function NoteLinkPill({
   // a call (the Notes' « Lié à » column, one pill for both).
   emptyLabel?: string;
   open?: boolean;
-  onRemove?: () => void;
   size?: "sm" | "md";
 }) {
   const t = fr.notes.link;
@@ -72,16 +69,6 @@ export function NoteLinkPill({
         </ViewLink>
       ) : (
         label
-      )}
-      {onRemove && (
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={t.remove(link.label)}
-          className="-mr-1 flex size-4 shrink-0 items-center justify-center rounded-sm opacity-70 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50"
-        >
-          <IconXmark aria-hidden className="size-3" />
-        </button>
       )}
     </span>
   );
