@@ -101,7 +101,9 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
   // Juridique and the Marketing always — the same rule as its navigation.
   const applies = applicableWorkflows({
     type: k.project.type,
-    masterCount: k.titles.length,
+    // The masters (a collective's titles without one count for the Master's
+    // work below, not for whether it applies).
+    masterCount: k.project.masters.length,
     collective: k.project.collective,
   });
   const music = applies.includes("distribution");

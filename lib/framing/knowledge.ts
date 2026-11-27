@@ -10,6 +10,12 @@ import { listProjectCreatives } from "@/lib/projects/creatives";
 import { getProject } from "@/lib/projects/queries";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { personName } from "@/lib/projects/types";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
+import { loadProjectTitles } from "@/lib/projects/titles";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -22,6 +28,8 @@ export type KnownTitle = {
   title: string;
   artists: string;
   audioState: AudioState | null;
+  // A collective's title not yet in the Catalogue (M4): no audio at all.
+  withoutMaster?: boolean;
 };
 export type KnownCredit = {
   masterId: string;
@@ -140,6 +148,7 @@ export async function loadFramingKnowledge(
     declarationsRes,
     briefsRes,
     callsRes,
+    collectiveTitles,
   ] = await Promise.all([
     loadFraming(projectId, access),
     supabase
@@ -227,6 +236,7 @@ export async function loadFramingKnowledge(
       .select("id, title, occurred_at, status, call_reports(id)")
       .eq("project_id", projectId)
       .order("occurred_at", { ascending: false }),
+    project.collective ? loadProjectTitles(projectId) : Promise.resolve([]),
   ]);
   if (!framing) return null;
 
@@ -317,12 +327,31 @@ export async function loadFramingKnowledge(
     project,
     framing,
     deadlines: deadlines.map((d) => ({ ...d, provenance: provenanceOf(d) })),
-    titles: project.masters.map((m) => ({
-      id: m.id,
-      title: m.title,
-      artists: m.artists,
-      audioState: audioOf.get(m.id) ?? null,
-    })),
+    // A collective: its titles, abandoned ones apart, with or without
+    // their master (M4, test de parcours du 26/11/2026: « 3 titres sans
+    // master final », not only the one in the Catalogue).
+    titles: project.collective
+      ? collectiveTitles
+          .filter((t) => t.status !== "abandoned")
+          .map((t) => ({
+            id: t.master?.id ?? t.id,
+            title: projectTitleLabel({
+              position: t.position,
+              workingTitle: t.workingTitle,
+              masterTitle: masterNameOf(t.master),
+              artists: titleGuestNames(t.participations),
+            }),
+            artists:
+              project.masters.find((m) => m.id === t.master?.id)?.artists ?? "",
+            audioState: t.master ? (audioOf.get(t.master.id) ?? null) : null,
+            withoutMaster: !t.master,
+          }))
+      : project.masters.map((m) => ({
+          id: m.id,
+          title: m.title,
+          artists: m.artists,
+          audioState: audioOf.get(m.id) ?? null,
+        })),
     credits,
     contracts: (contractsRes.data ?? []).map((c) => ({
       id: c.id,

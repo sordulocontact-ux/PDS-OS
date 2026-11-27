@@ -444,6 +444,8 @@ export const framingIntel = {
     rolesToFind: (roles: string[]) => `À trouver : ${roles.join(", ")}`,
     titleState: (title: string, state: string) => `${title} : ${state}`,
     noAudioState: "état audio non renseigné",
+    // A collective's title not yet in the Catalogue.
+    noAudio: "pas encore d'audio",
     // The Cadrage's words for a title's audio (PROJ-UX-05): a mix received
     // is not a finished mix.
     audioStates: {

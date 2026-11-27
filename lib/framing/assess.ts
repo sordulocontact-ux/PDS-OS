@@ -323,7 +323,9 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
               title.title,
               title.audioState
                 ? t.records.audioStates[title.audioState]
-                : t.records.noAudioState,
+                : title.withoutMaster
+                  ? t.records.noAudio
+                  : t.records.noAudioState,
             ),
           )
           .join(" · "),
@@ -605,11 +607,12 @@ function factsOf(dimension: Dimension, k: FramingKnowledge) {
   const p = k.project;
   switch (dimension) {
     case "objective":
-      return p.masters.length
+      // A collective's titles with or without their master (M4).
+      return k.titles.length
         ? [
             {
               label: t.titles,
-              value: p.masters.map((m) => m.title).join(" · "),
+              value: k.titles.map((title) => title.title).join(" · "),
             },
           ]
         : [];
