@@ -72,6 +72,9 @@ export const legalDemarches = {
     toConfirm: "À confirmer",
     none: "Aucun contrat nécessaire",
     done: "Contrats du titre confirmés",
+    // This title as ticked, and the other titles to confirm as proposed.
+    confirmAll: (titles: number) => `Confirmer pour les ${titles} titres`,
+    doneAll: "Contrats des titres confirmés",
     errors: {
       abandoned: "Ce titre est abandonné.",
       invalid: "Choisissez parmi les contrats proposés.",

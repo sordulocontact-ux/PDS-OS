@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
-import { confirmTitleContractNeeds } from "@/lib/legal/title-contracts-actions";
+import {
+  confirmAllTitleContractNeeds,
+  confirmTitleContractNeeds,
+} from "@/lib/legal/title-contracts-actions";
 import {
   TITLE_CONTRACT_KINDS,
   tickedKinds,
@@ -43,17 +46,21 @@ export function TitleContractKinds({ needs }: { needs: TitleContractNeeds }) {
  * confirmed; the Juridique confirms and it is recorded, then the pills and
  * « Modifier ». Whoever cannot confirm (the database decides again) only
  * reads. Drafting stays one contract per person: nothing is generated here.
+ * `others`: the other live titles not confirmed yet; with some, « Confirmer
+ * pour les N titres » records them too, as proposed (M8, 26/11/2026).
  */
 export function TitleContractNeedsForm({
   projectId,
   titleId,
   needs,
   canConfirm,
+  others = 0,
 }: {
   projectId: string;
   titleId: string;
   needs: TitleContractNeeds;
   canConfirm: boolean;
+  others?: number;
 }) {
   const t = fr.legalDemarches.titleContracts;
   const [editing, setEditing] = useState(!needs.confirmed);
@@ -120,6 +127,28 @@ export function TitleContractNeedsForm({
         >
           {pending ? t.confirming : t.confirm}
         </Button>
+        {!needs.confirmed && others > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            onClick={() =>
+              run(
+                () =>
+                  confirmAllTitleContractNeeds({
+                    projectId,
+                    titleId,
+                    kinds: TITLE_CONTRACT_KINDS.filter((kind) =>
+                      ticked.includes(kind),
+                    ),
+                  }),
+                () => setEditing(false),
+              )
+            }
+          >
+            {t.confirmAll(others + 1)}
+          </Button>
+        )}
         {needs.confirmed && (
           <Button
             type="button"

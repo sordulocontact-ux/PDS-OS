@@ -10,6 +10,7 @@ import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { scopeEntry } from "@/lib/legal/title-groups";
 import { legalTitleLayout } from "@/lib/legal/title-layout";
 import {
+  legalProjectTitles,
   loadAwaitingAgreements,
   loadTitleContractNeeds,
 } from "@/lib/legal/title-contracts";
@@ -48,10 +49,18 @@ export async function TitleContractsStep({
     const first = scope && scopeEntry(scope);
     redirect(first?.href ?? routes.projectLegal(projectId));
   }
-  const [needs, awaiting] = await Promise.all([
+  const [needs, awaiting, titles] = await Promise.all([
     loadTitleContractNeeds(projectId),
     loadAwaitingAgreements(projectId),
+    legalProjectTitles(projectId),
   ]);
+  // The other live titles still to confirm (« Confirmer pour les N titres »).
+  const others = titles.filter(
+    (title) =>
+      title.id !== titleId &&
+      title.status !== "abandoned" &&
+      !needs.get(title.id)?.confirmed,
+  ).length;
   const waiting = awaitingOnTitle(awaiting.guests, titleId);
   return (
     <LegalStepFrame projectId={projectId} stepKey={key} titre={titleId}>
@@ -65,6 +74,7 @@ export async function TitleContractsStep({
         titleId={titleId}
         needs={needs.get(titleId) ?? { confirmed: false, kinds: [] }}
         canConfirm={can(ctx.access, "manage_legal")}
+        others={others}
       />
     </LegalStepFrame>
   );

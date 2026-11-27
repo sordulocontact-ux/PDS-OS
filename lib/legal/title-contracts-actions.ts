@@ -9,6 +9,10 @@ import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { legalOutcome } from "@/lib/legal/outcome";
+import {
+  legalProjectTitles,
+  loadTitleContractNeeds,
+} from "@/lib/legal/title-contracts";
 import { TITLE_CONTRACT_KINDS } from "@/lib/legal/title-contracts-rules";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -55,6 +59,55 @@ export async function confirmTitleContractNeeds(
       if (error) {
         console.error("confirmTitleContractNeeds:", error.message);
         return { ok: false, error: errorOf(error.message) };
+      }
+      revalidatePath(routes.projectLegal(projectId), "layout");
+      return { ok: true };
+    },
+  );
+}
+
+/**
+ * « Confirmer pour les N titres » (test de parcours du 26/11/2026, M8): the
+ * title open with the kinds ticked there, and every other live title not
+ * confirmed yet with the kinds proposed (the four), each recorded as its own
+ * confirmation (its lines, its history, « Modifier » after). Read again here:
+ * a title confirmed meanwhile is left as it is. One title after the other: a
+ * refusal midway keeps those already done, and a second click goes on.
+ */
+export async function confirmAllTitleContractNeeds(
+  input: z.input<typeof confirmSchema>,
+): Promise<WriteResult> {
+  const parsed = confirmSchema.safeParse(input);
+  const access = await requireApproved();
+  if (!parsed.success || !can(access, "manage_legal"))
+    return { ok: false, error: fr.auth.errors.forbidden };
+  const { projectId, titleId, kinds } = parsed.data;
+  return legalOutcome(
+    projectId,
+    fr.legalDemarches.titleContracts.doneAll,
+    async (): Promise<WriteResult> => {
+      const [titles, needs] = await Promise.all([
+        legalProjectTitles(projectId),
+        loadTitleContractNeeds(projectId),
+      ]);
+      const open = titles.filter(
+        (title) =>
+          title.status !== "abandoned" && !needs.get(title.id)?.confirmed,
+      );
+      const supabase = await createClient();
+      for (const title of open) {
+        const { error } = await supabase.rpc("confirm_title_contract_needs", {
+          p_title_id: title.id,
+          p_kinds:
+            title.id === titleId
+              ? [...new Set(kinds)]
+              : [...TITLE_CONTRACT_KINDS],
+        });
+        if (error) {
+          console.error("confirmAllTitleContractNeeds:", error.message);
+          revalidatePath(routes.projectLegal(projectId), "layout");
+          return { ok: false, error: errorOf(error.message) };
+        }
       }
       revalidatePath(routes.projectLegal(projectId), "layout");
       return { ok: true };
