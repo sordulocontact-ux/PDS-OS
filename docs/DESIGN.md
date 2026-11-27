@@ -118,7 +118,10 @@ Seule la cellule du nom garde une sous-ligne grise (`DataTableMedia`), pour ce q
 titre** : la date a sa colonne (Notes, rappel de Sacha du 27/11/2026). L'icône d'une ligne sans image
 (`DataTableIcon`) est **seule, sans rond**, grise, avant le nom (Sacha, 27/11/2026, d'après Accordee) ;
 parmi des photos (Réseau), elle garde leur largeur (`size-9 justify-center`) pour aligner les noms.
-Toutes les icônes de ligne font **18 px**, celle d'un fichier aussi (`FileTypeIcon md`, dans sa teinte).
+Toutes les icônes de ligne font **18 px**, celle d'un fichier aussi (`FileTypeIcon md`), dans la **teinte vive**
+de son type (`--hue-*-icon`, `hueIconClass` : le `-fg` des pastilles était « trop sombre, désaturé », Sacha
+27/11/2026). Une **pastille de teinte** (`StatusBadge` avec une teinte : projet, deal…) a son texte en **13 px, sans
+gras** (22 px de haut en `sm`, 24 en `md`) : en 12 px semi-gras elle se lisait « très petite », Sacha 27/11/2026.
 
 ### Couleur
 
@@ -1116,7 +1119,7 @@ d'une ligne d'argent de Finance (grand titre, montant en tête, § 6.7) : là, l
 
 **Écart voulu** avec « Formulaires » (§ 4 : « * », manques en rouge, bouton d'enregistrement) : une note écrite
 (Notes) s'écrit comme un document, dans le panneau latéral de la note (`NewNoteSheet`, `NoteSheet`). En haut
-« Lier à un projet, un deal ou un contrat » (bouton `secondary` avec l'icône de lien, menu par sorte avec leur
+« Rattacher à un projet, un deal ou un contrat » (bouton `secondary` avec le trombone de « Rattaché à », comme Fichiers ; une fois rattachée, le même bouton nomme la fiche, « × » à côté ; menu par sorte avec leur
 nombre et « › », puis la liste avec recherche), le titre en grand sans bordure (« Sans titre » en attente, focus à
 l'ouverture), auteur · « Modifiée le … », la pastille du lien (« × » pour le retirer), puis le texte sans bordure qui
 grandit (« Commencez à écrire… »). **Pas de « * », pas de bouton de validation, pas de modèles ni d'IA** :

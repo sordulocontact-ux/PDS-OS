@@ -121,6 +121,23 @@ export const hueTextClass: Record<Hue, string> = {
   green: "text-[color:var(--hue-green-fg)]",
 };
 
+/** The vivid hue of an icon alone, without its pale ground (a file's type,
+ * FileTypeIcon: Sacha 27/11/2026, the -fg text hue read too dark). */
+export const hueIconClass: Record<Hue, string> = {
+  sky: "text-[color:var(--hue-sky-icon)]",
+  indigo: "text-[color:var(--hue-indigo-icon)]",
+  violet: "text-[color:var(--hue-violet-icon)]",
+  pink: "text-[color:var(--hue-pink-icon)]",
+  orange: "text-[color:var(--hue-orange-icon)]",
+  yellow: "text-[color:var(--hue-yellow-icon)]",
+  lime: "text-[color:var(--hue-lime-icon)]",
+  teal: "text-[color:var(--hue-teal-icon)]",
+  sand: "text-[color:var(--hue-sand-icon)]",
+  slate: "text-[color:var(--hue-slate-icon)]",
+  red: "text-[color:var(--hue-red-icon)]",
+  green: "text-[color:var(--hue-green-icon)]",
+};
+
 /** A file's type at a glance in every table of files (FileTypeIcon), as in
  * any file manager (Accordee, Sacha 24/11/2026): the PDF red, the
  * spreadsheet green, the text blue, the slides orange. */

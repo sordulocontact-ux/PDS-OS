@@ -3,7 +3,6 @@
 import {
   IconChevronLeft,
   IconChevronRight,
-  IconLink,
   IconXmark,
 } from "nucleo-sharp-essential";
 import { useState } from "react";
@@ -64,7 +63,8 @@ export function NoteLinkMenu({
     }
   };
 
-  const CurrentIcon = current ? columnIcons[current.kind] : IconLink;
+  // The paperclip of « Rattaché à » (the Fichiers' and the Notes' column).
+  const CurrentIcon = columnIcons[current ? current.kind : "attached"];
 
   return (
     <div className="flex items-center gap-1 self-start">

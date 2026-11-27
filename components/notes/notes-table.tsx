@@ -84,7 +84,7 @@ export function NotesTable({
             {t.note}
           </DataTableHead>
           {withProject && (
-            <DataTableHead icon="relation" hideBelow="md">
+            <DataTableHead icon="attached" hideBelow="md">
               {t.link}
             </DataTableHead>
           )}

@@ -13,7 +13,7 @@ export const notes = {
   columns: {
     note: "Note",
     date: "Date",
-    link: "Lié à",
+    link: "Rattaché à",
     content: "Contenu",
     by: "Par",
     actions: "Actions",
@@ -26,7 +26,7 @@ export const notes = {
     placeholder: "Rechercher dans les notes…",
   },
   filters: {
-    link: "Lié à",
+    link: "Rattaché à",
     person: "Personne",
     allLinks: "Tous",
     everyone: "Tout le monde",
@@ -53,8 +53,8 @@ export const notes = {
   untitled: "Sans titre",
   // What a written note is linked to (20261127210101): one record at most.
   link: {
-    add: "Lier à un projet, un deal ou un contrat",
-    menu: "Lier à",
+    add: "Rattacher à un projet, un deal ou un contrat",
+    menu: "Rattacher à",
     back: "Retour",
     groups: { project: "Projets", deal: "Deals", contract: "Contrats" },
     kinds: { project: "Projet", deal: "Deal", contract: "Contrat" },
@@ -67,7 +67,7 @@ export const notes = {
     loading: "Chargement…",
     deal: (name: string | null) => (name ? `Deal · ${name}` : "Deal"),
     open: (label: string) => `Ouvrir « ${label} »`,
-    remove: (label: string) => `Retirer le lien « ${label} »`,
+    remove: (label: string) => `Détacher de « ${label} »`,
   },
   // A note is a document saved as one types (Sacha 27/11/2026, after
   // Accordee): no button, its state in the panel's bar.

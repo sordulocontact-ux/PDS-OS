@@ -2914,7 +2914,7 @@ Demande de Sacha : « la page Calls [soit] un calendrier et les transcriptions /
 nouvelle page Notes ». La liste des calls devient **Notes** : les calls passés avec leur contenu et des
 **notes écrites** à la main. Deux portes (§ 4) : **Notes** (`/app/notes`) et **Notes du projet**
 (`/app/projects/<p>/notes`, section « Notes » du Pilotage ; seule différence : l'onglet « À venir », le
-projet n'ayant pas de calendrier à lui, et pas de filtre Lié à).
+projet n'ayant pas de calendrier à lui, et pas de filtre Rattaché à).
 
 - **Table `notes`** (migration `20261127180101_notes`) : titre, texte (20 000 caractères), `project_id`
   facultatif, `created_by` (toujours l'auteur, `set_created_by`), `search` (tsvector français généré).
@@ -2937,9 +2937,9 @@ projet n'ayant pas de calendrier à lui, et pas de filtre Lié à).
   Textes : `lib/i18n/fr/notes.ts`.
 - **Onglets** (`?tab=`, `DataTableViews`, nombres calculés après filtres) : **Toutes** (calls passés +
   notes), **Calls**, **Écrites**, **À compléter** (call passé sans compte rendu ni clôture) ; **À venir**
-  dans un projet. Filtres **Lié à** (`?link=` : `project:<id>`, `deal:<id>`, `contract:<id>`,
+  dans un projet. Filtres **Rattaché à** (`?link=` : `project:<id>`, `deal:<id>`, `contract:<id>`,
   `internal`, `team`, Notes seul ; un ancien `?project=<id>` est lu comme `project:<id>`) et **Personne**
-  (`?person=`). Colonnes Note / Date / Lié à / Contenu (extrait) / Par ; « Lié à » = `NoteLinkPill` (note
+  (`?person=`). Colonnes Note / Rattaché à / Contenu (extrait) / Date / Par (libellé et trombone de Fichiers) ; « Rattaché à » = `NoteLinkPill` (note
   écrite, lien vers le projet / deal / contrat) ou `CallProjectPill` (call) ; la ligne ouvre `CallSheet`
   (call) ou `NoteSheet` (note) ; « ⋯ » d'une note (`NoteMenu`, Supprimer) pour son auteur.
 - **Recherche dans le texte** : `SearchableList` garde sa recherche instantanée sur le titre ; `extraMatch`
@@ -2963,7 +2963,7 @@ projet n'ayant pas de calendrier à lui, et pas de filtre Lié à).
   devis se lie au projet. 37 tests pgTAP (`notes_rls`).
 - **Une note est un document** (Sacha 27/11/2026, d'après Accordee) : « Nouvelle note » (`NewNoteButton`
   de la page, `QuickNote` du « + » et du ⌘K, § 3) ouvre `NewNoteSheet`, le panneau latéral d'une note
-  vide : « Lier à un projet, un deal ou un contrat » (`NoteLinkMenu` : les trois sortes avec leur nombre,
+  vide : « Rattacher à un projet, un deal ou un contrat » (`NoteLinkMenu` : les trois sortes avec leur nombre,
   puis la liste de la sorte avec recherche), le titre en grand (focus, « Sans titre »), auteur et
   dernière modification, la pastille du lien (« × » le retire), le texte. **Enregistrement automatique**
   (`useNoteAutosave`) : créée au premier enregistrement utile (titre ou texte ; titre vide → « Sans

@@ -11,7 +11,7 @@ import { IconFileSheet } from "@/components/icons";
 import { Thumbnail } from "@/components/ui/thumbnail";
 import { isShownImage } from "@/lib/catalog/file-rules";
 import { fileType, type FileType } from "@/lib/catalog/file-type";
-import { fileTypeHue, hueTextClass } from "@/lib/ui/category-hues";
+import { fileTypeHue, hueIconClass } from "@/lib/ui/category-hues";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<FileType, React.ComponentType<{ className?: string }>> = {
@@ -67,7 +67,7 @@ export function FileTypeIcon({
       className={cn(
         "flex shrink-0 items-center justify-center",
         SIZES[size].box,
-        hueTextClass[fileTypeHue[type]],
+        hueIconClass[fileTypeHue[type]],
       )}
     >
       <Icon className={SIZES[size].icon} />
