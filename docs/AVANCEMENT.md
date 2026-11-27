@@ -3296,3 +3296,13 @@ finalement aussi renommé Notes), avec des notes qu'on peut écrire sur un proje
   Calendrier (planifier un call) et « + » (Nouvelle note) mis à jour.
 - **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; parcours à vérifier dans le
   navigateur par l'équipe.
+
+## Paramètres en pages, double barre (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « tout est dans un seul endroit, fais une double side bar et rajoute des pages », d'après les
+réglages d'Accordee.
+
+- Seconde colonne « Paramètres » (barre principale repliée), une page par sujet : Utilisation de PO, Apparence (thème
+  et style, nouvelle page), Notifications (navigateur, nouvelle page), Raccourcis clavier, Connexions ; pour la
+  direction : Coordonnées de PDS, Distribution. Onglets sur téléphone. `/app/settings` mène à la première page.
+- ⌘K : un filet entre les groupes de résultats (« Créer » / « Pages »…), dans le ⌘K de l'app et celui de Finance.

@@ -97,7 +97,7 @@ export function ShortcutRow({
   const error = editing ? (refused ?? serverError) : null;
 
   return (
-    <li className="grid gap-1.5 py-3">
+    <li className="grid gap-1.5 px-5 py-3">
       <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <span className="text-body-md font-medium">{label}</span>
         {editing ? (

@@ -81,7 +81,7 @@ export const adminTopics: GuideTopic[] = [
     key: "settings",
     title: "Paramètres",
     summary:
-      "Votre utilisation de PO, vos connexions Google, et pour la direction la facturation et les exigences de distribution.",
+      "Une page par sujet, dans une colonne à gauche : utilisation de PO, apparence, notifications, raccourcis clavier, connexions Google, et pour la direction les coordonnées de PDS et la distribution.",
     keywords: [
       "parametres",
       "reglages",
@@ -106,6 +106,8 @@ export const adminTopics: GuideTopic[] = [
     href: "/app/settings",
     where: "Dans le menu du compte, en bas de la barre latérale.",
     facts: [
+      "Paramètres a sa propre colonne à gauche (la barre principale se replie en icônes), comme Finance : Mes paramètres (Utilisation de PO, Apparence, Notifications, Raccourcis clavier, Connexions), puis Administration pour la direction (Coordonnées de PDS, Distribution). Sur téléphone, ces pages sont des onglets.",
+      "Apparence : le thème (Système, Clair, Sombre) et le style de l'interface. Notifications : activer les notifications du navigateur sur cet ordinateur.",
       "Utilisation de PO : le nombre de requêtes du jour utilisées sur votre limite. Chaque message, analyse ou lecture de document compte pour une requête.",
       "Le compteur repart à zéro à minuit, heure de Paris. La limite est fixée par la direction dans Équipe.",
       "La direction y règle aussi la facturation de PDS (raison sociale, adresse, SIRET, TVA), que les prestataires lisent sur leur lien privé.",

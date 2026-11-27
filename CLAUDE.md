@@ -166,7 +166,8 @@ qu'un composant commun, une variante, un token ou une icône change. Les briques
   `PdfExportButton`, `useWriteSubmit` (**toute** écriture : attente, erreur, toast ; résultat
   `WriteResult`), `QuickCreateProvider` (le « + » de la coquille et le groupe « Créer » du ⌘K : une
   action de plus = une entrée de `lib/shell/quick-actions.ts`, `docs/ARCHITECTURE.md` § 3), `useKeyShortcut` (**toute** écoute d'un raccourci clavier, choisi par chacun dans
-  Paramètres) et `ShortcutKeys` (**toute** touche affichée).
+  Paramètres) et `ShortcutKeys` (**toute** touche affichée). **Paramètres** : une page par sujet, `SettingsFrame` +
+  `SettingsRow` (`lib/ui/settings-sections.ts`).
 - **Formulaires** : `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError`
   (`components/auth/`), `RequiredMark`, `FormDialog`, `DialogFormActions`, `ReasonForm`,
   `FormSection`, `CheckboxField`, `Checkbox`, `ChoiceCards`, `ChipChoice`, `OptionSelect`,

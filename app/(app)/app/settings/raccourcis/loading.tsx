@@ -1,6 +1,6 @@
 import { PageLoading } from "@/components/shell/page-loading";
-import { shortcuts } from "@/lib/i18n/fr/shortcuts";
+import { settings } from "@/lib/i18n/fr/settings";
 
-export default function ShortcutsLoading() {
-  return <PageLoading title={shortcuts.title} section />;
+export default function Loading() {
+  return <PageLoading title={settings.pages.shortcuts} section />;
 }

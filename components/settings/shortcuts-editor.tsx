@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ShortcutRow } from "@/components/settings/shortcut-row";
 import { useShortcuts } from "@/components/shell/shortcuts/shortcuts-provider";
+import { Rows } from "@/components/ui/rows";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { shortcuts as shortcutsText } from "@/lib/i18n/fr/shortcuts";
 import { saveShortcut } from "@/lib/shortcuts/actions";
@@ -39,7 +40,7 @@ export function ShortcutsEditor() {
   }
 
   return (
-    <ul className="-my-1 divide-y divide-[var(--border-hairline)]">
+    <Rows>
       {SHORTCUT_ACTIONS.map((action) => (
         <ShortcutRow
           key={action}
@@ -59,6 +60,6 @@ export function ShortcutsEditor() {
           onReset={() => save(action, null)}
         />
       ))}
-    </ul>
+    </Rows>
   );
 }

@@ -188,8 +188,15 @@ export const routes = {
   members: "/app/members",
   // Each member's own settings: their requests to PO of the day.
   settings: "/app/settings",
-  // Their keyboard shortcuts (27/11/2026).
+  // Paramètres, one page per subject (27/11/2026); « settings » opens the
+  // first one.
+  settingsUsage: "/app/settings/utilisation",
+  settingsAppearance: "/app/settings/apparence",
+  settingsNotifications: "/app/settings/notifications",
   settingsShortcuts: "/app/settings/raccourcis",
+  settingsConnections: "/app/settings/connexions",
+  settingsBilling: "/app/settings/coordonnees",
+  settingsDistribution: "/app/settings/distribution",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",
   artist: (id: string) => `/app/catalog/artists/${id}`,

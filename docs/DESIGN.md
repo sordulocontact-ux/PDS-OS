@@ -401,6 +401,12 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   (jamais un geste d'étape, qui reste dans son étape), sept au plus ; chaque entrée ouvre le **vrai**
   formulaire et finit comme sur sa page. Pas de bouton flottant (geste de mobile, l'app est d'abord
   pour l'ordinateur). Références : Linear, Notion, Plain (le « nouveau » en tête de barre).
+- **Paramètres en double barre (Sacha, 27/11/2026, d'après Accordee)** : seconde colonne « Paramètres »
+  (Mes paramètres, puis Administration pour la direction), une page par sujet : bandeau, titre, puis des
+  groupes de lignes (`Rows` + `SettingsRow` : libellé et au besoin une phrase à gauche, réglage à droite)
+  ou une carte pour un formulaire. Onglets sur téléphone.
+- **⌘K, groupes séparés (Sacha, 27/11/2026)** : un filet au-dessus de chaque titre de groupe à partir du
+  deuxième (« Créer » puis « Pages »…), dans toute recherche ⌘K (`SearchGroupLabel`).
 - **Raccourcis clavier (Sacha, 27/11/2026)** : chacun change les siens dans Paramètres › Raccourcis
   clavier (`/app/settings/raccourcis`) : Rechercher (⌘K), Créer (N), Ouvrir PO (Espace Espace), Capturer
   une zone pour un retour (C). Une ligne par raccourci, ses touches en `Kbd`, « Modifier » (contour)

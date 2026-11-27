@@ -833,6 +833,14 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
   règle de droit, son texte (`shell.quickCreate.actions`), son icône (`quick-action-icons.ts`) et sa
   fenêtre ; le guide de PO (`quick-create`, `lib/assistant/guide/topics/daily.ts`) aussi.
   Action `note` (27/11/2026) : « Nouvelle note » ouvre `QuickNote` (`quick-create/quick-note.tsx`, le `NoteForm` des Notes, sur le projet de la page quand on en lit un, modifiable) ; la note créée s'ouvre dans sa fiche sur les Notes (`useOpenNote`).
+- **Paramètres** (27/11/2026, d'après Accordee) : une page par sujet sous `app/(app)/app/settings/`
+  (`utilisation`, `apparence`, `notifications`, `raccourcis`, `connexions`, et pour la direction
+  `coordonnees`, `distribution`, `requireAdmin`), liste et icônes dans `lib/ui/settings-sections.ts`
+  (`settingsPagesFor(admin)`), routes `routes.settings*`. Le layout pose la seconde colonne
+  (`SettingsSidebar` sur `ContextSidebar`, barre principale repliée par `use-collapsed-nav.tsx`) ;
+  chaque page = `SettingsFrame` (bandeau « Paramètres / page », titre, onglets sur téléphone) puis des
+  `Rows` de `SettingsRow` (libellé à gauche, réglage à droite) ou une carte. `/app/settings` redirige vers
+  la première page (le retour de Google, `?google=`, vers Connexions).
 - **Raccourcis clavier** (27/11/2026, Paramètres › Raccourcis clavier) : `lib/shortcuts/definitions.ts`
   (actions `search`, `create`, `assistant`, `capture`, défauts, règles : `shortcutProblem`,
   `shortcutOwner`, `mergeShortcuts`) ; table `account_shortcuts` (une ligne par compte, seulement ce qui
@@ -1761,7 +1769,7 @@ change dans Équipe, et voit son utilisation dans ses paramètres, comme dans Cl
   titre de PO d'un retour direct, suggestion entre homonymes, analyse du Cadrage, remplissages
   lancés après le compte rendu d'un call (le compte rendu est enregistré, seules les
   propositions de PO manquent).
-- **Écrans** : `/app/settings` (« Paramètres », menu du compte et panneau mobile) →
+- **Écrans** : `/app/settings/utilisation` (Paramètres › Utilisation de PO, menu du compte et panneau mobile) →
   `AiUsageMeter` : part utilisée, barre (`ProgressBar tone="error"` à la limite), « 74 sur
   200 », remise à zéro à minuit, qui fixe la limite ; avertissement à 80 %. Équipe : colonne
   « PO aujourd'hui » (`listMemberships` lit `ai_usage_today`) et champ « Requêtes à PO par

@@ -7,6 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
+import { routes } from "@/lib/auth/redirects";
 
 const t = fr.invoices.billing;
 
@@ -62,6 +63,6 @@ export async function saveBilling(
       error: error.code === "42501" ? fr.auth.errors.forbidden : t.failed,
     };
   }
-  revalidatePath("/app/settings");
+  revalidatePath(routes.settingsBilling);
   return { ok: true, done: t.saved };
 }

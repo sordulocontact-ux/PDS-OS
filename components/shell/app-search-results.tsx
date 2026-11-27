@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { shell } from "@/lib/i18n/fr/shell";
 import { QUICK_ACTION_ICONS } from "@/components/shell/quick-create/quick-action-icons";
+import { SearchGroupLabel } from "@/components/ui/search-group-label";
 import type { QuickAction } from "@/lib/shell/quick-actions";
 import type { SearchRow } from "@/lib/search/types";
 import { cn } from "@/lib/utils";
@@ -58,12 +59,9 @@ export function AppSearchResults({
       {rows.map((row, index) => (
         <li key={row.id} role="presentation" className="contents">
           {row.group !== rows[index - 1]?.group && (
-            <span
-              role="presentation"
-              className="px-2 pt-3 pb-1 text-caption text-[color:var(--text-tertiary)] first:pt-1"
-            >
+            <SearchGroupLabel first={index === 0}>
               {t.groups[row.group]}
-            </span>
+            </SearchGroupLabel>
           )}
           <span
             id={`${id}-${index}`}
