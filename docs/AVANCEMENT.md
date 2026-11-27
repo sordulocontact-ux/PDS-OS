@@ -3216,7 +3216,8 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
     master final », `project_plan_items.why`), Brief de sortie V2 ;
   - « Micro test » garde l'action « Faire signer un contrat à Elio Danvers » stockée « bloquée » au lancement (le
     « Pas d'accord nécessaire » datait d'avant) : le tableau du plan la range en « fait », mais une révision de la
-    Stratégie la lirait encore ; la retirer = confirmer de nouveau « Contrats des intervenants » dans l'app ;
+    Stratégie la lirait encore. Laissée en place (Maël, 27/11) : la retirer demanderait de reconfirmer « Contrats des
+    intervenants », qui bloque sur C9 bis du rapport (bug du formulaire, pour Sacha) ;
   - M9 : un dossier déjà transmis garde le nom du projet ; l'en-tête de la page de contact `/c/` nomme toujours le
     projet (« « Collectif test 27-11 » · Ingé test M9 », SQL `get_contact_page`) ;
   - le Mixage n'offre « Copier le lien » que pour un ingénieur sans adresse : avec une adresse et le SMTP actif, la

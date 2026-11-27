@@ -69,6 +69,7 @@ Ils touchent surtout les parties de Sacha. Sévérité : **B** = bloque le parco
 | C7 | M | Le lien privé de l'ingénieur n'est pas montré après « Envoyer » : il est dans le bloc replié « Lien de … », marqué « Pas encore envoyé ». | — | Sacha |
 | C8 | M | Un projet clos (bilan validé) reste « En cours » dans la liste des projets, avec des étapes Juridique et Marketing. | — | Sacha |
 | C9 | M | Plan juridique : aucun modèle de contrat pour compositeur·rice ou auteur·rice (« Modèle manquant »). | Bibliothèque de modèles. | Sacha |
+| C9 bis | M | (vu le 27/11, à transmettre avec C9) « Contrats des intervenants » (Plan d'action › « Modifier les contrats à prévoir ») ignore un « Non nécessaire · justifié » déjà enregistré : sur « Micro test », Karim Haddou et Bastien Coll y reviennent en « Choisir un contrat · Modèle manquant », et le formulaire refuse de s'enregistrer tant qu'on ne choisit pas pour eux. Aucune reconfirmation n'est possible sans changer leur choix. | Piste : `initialOf` dans `components/legal/contracts/mapping-form.tsx` part du modèle du besoin (`row.template?.id ?? null`) dès qu'un besoin existe (`needId`), avant de regarder s'il est enregistré « non nécessaire ». | Sacha |
 | C10 | m | Valideur des versions du master : Lina au formulaire de création, Chloé dans le Brief Master, sur les deux projets. | À vérifier en base (`projects.master_validator_person_id`). | Sacha |
 | C11 | m | Production : Lina voit « Valider la V1 » alors que l'étape revient à Nadia (vu sur le collectif). | — | Sacha |
 | C12 | m | La date « Livraison finale le » d'une fiche se perd à la 1re saisie. | Console : Base UI « uncontrolled FieldControl ». | Sacha |
@@ -194,7 +195,7 @@ Rien n'a été supprimé.
     (« Micro test » garde l'action stockée avant la correction) ; le Suivi liste les invités dans
     « Projet ».
 
-**À transmettre à Sacha** : C1 à C16.
+**À transmettre à Sacha** : C1 à C16, et C9 bis avec C9.
 
 **À refaire** : un passage avec un collectif Contenu · PDS Mic ; le Juridique jusqu'aux
 signatures (attention au SMTP) ; Activations et Suivi & bilan ; vérifier PO depuis le nouvel env.
