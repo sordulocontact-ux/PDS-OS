@@ -470,13 +470,19 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
      rond vert 16 px coché avant le libellé ; compteur « à vous » (rond bleu `--selection`) après ;
   3. **ligne de titre** : h1 à **28 px** (`text-display-module`, 30 px avant le 10/11/2026). **Sur une page à parcours, c'est
      le titre de l'étape ouverte** (retour d'Ibé du 07/11, Sacha 10/11/2026 : le fil nomme déjà le
-     module), son échéance en légende à droite (rouge en retard, `StepDue`), puis son pourquoi
-     dessous en 16 px `--text-secondary` (`why`, 68 caractères au plus) ; ailleurs le titre du
-     module. Pastille de statut facultative à côté (Distribution, hors étape), actions à droite
+     module), son échéance en légende à droite (rouge en retard, `StepDue`) ; ailleurs le titre du
+     module. **Rien sous le titre** (Sacha, 27/11/2026 : « les header sont toujours beaucoup trop
+     surchargés ») : ni le pourquoi de l'étape, qui devient la description de « Qui fait quoi »
+     (`StepWhyProvider`, PO sait aussi y répondre), ni une phrase qui explique la page (« Chaque
+     sortie a sa date, son UPC… »). Un sous-titre ne reste que s'il nomme l'objet (« Mona Lys ·
+     Single » de la Vue d'ensemble, les artistes d'un titre). Pastille de statut facultative à côté (Distribution, hors étape), actions à droite
      (« Qui fait quoi » en `ghost sm`, « Ajouter une dépense » du Budget) ; une page ouverte depuis
      une étape sans en être une (Plan de sortie) a la flèche de retour avant son titre, comme la
      page d'une activation ;
-  4. **ligne de faits** (`ModuleFacts`), seulement quand le module donne les siens (Master,
+  4. **ligne de faits** (`ModuleFacts`), seulement quand le module donne les siens, et **un fait n'y
+     est que s'il change ce qu'on fait sur la page et n'apparaît nulle part dessous** (Sacha,
+     27/11/2026) : un réglage devient le libellé de son bouton (le mode de sortie des Sorties), un
+     compte se lit dans sa liste, ce qui n'existe pas ne se dit pas (« Compilation Aucune ») (Master,
      Distribution, fiche de Production…) : 15 px `--text-secondary`, valeurs en semi-gras
      `--text-primary` (« Master final **Ven. 20/11/2026** », « Sortie **Sam. 05/12/2026** »), dates
      toujours par `formatDay`. La ligne du projet par défaut (« Néons · Mona Lys · Single »,

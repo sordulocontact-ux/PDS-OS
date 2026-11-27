@@ -9,7 +9,6 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { loadCollectiveReleases } from "@/lib/release/collective-releases";
-import { formatShortDate } from "@/lib/release/format";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -33,31 +32,16 @@ export default async function ProjectReleasesPage({
   if (!project.collective) notFound();
   const data = await loadCollectiveReleases(project, access);
   const t = fr.collectiveReleases;
-  const live = data.releases.filter((r) => !r.abandoned);
-  const compilation = live.find((r) => r.kind === "compilation");
-  const facts: ModuleFact[] = [
-    { key: "mode", label: t.facts.mode, value: t.modes[data.mode] },
-    {
-      key: "singles",
-      label: t.facts.singles,
-      value: String(live.filter((r) => r.kind === "title").length),
-    },
-    {
-      key: "compilation",
-      label: t.facts.compilation,
-      value: compilation
-        ? compilation.date
-          ? formatShortDate(compilation.date)
-          : t.noDate
-        : t.facts.noCompilation,
-    },
-  ];
+  // The mode is the button's label for who may change it; anyone else
+  // reads it as the only fact (the releases are counted by their list).
+  const facts: ModuleFact[] = data.canEdit
+    ? []
+    : [{ key: "mode", label: t.facts.mode, value: t.modes[data.mode] }];
   return (
     <div className="flex flex-col gap-6">
       <ProjectHeader
         projectId={projectId}
         title={t.title}
-        subtitle={t.description}
         facts={facts}
         actions={
           data.canEdit ? (

@@ -3,8 +3,6 @@
 // UPC.
 export const collectiveReleases = {
   title: "Sorties",
-  description:
-    "Chaque sortie a sa date, son UPC et son suivi. Une sortie de titre garde sa propre date ; la compilation suit l'échéance du projet.",
   modes: {
     singles: "Sorties individuelles",
     compilation: "Compilation finale",
@@ -17,12 +15,7 @@ export const collectiveReleases = {
     singles_then_compilation:
       "Une sortie par titre, puis la compilation des titres du projet.",
   } as Record<string, string>,
-  facts: {
-    mode: "Mode de sortie",
-    singles: "Sorties de titres",
-    compilation: "Compilation",
-    noCompilation: "Aucune",
-  },
+  facts: { mode: "Mode de sortie" },
   mode: {
     label: "Mode de sortie",
     edit: "Modifier le mode",

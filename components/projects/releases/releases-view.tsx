@@ -1,6 +1,10 @@
 "use client";
 
-import { IconCalendarDays, IconPenWriting2 } from "nucleo-sharp-essential";
+import {
+  IconCalendarDays,
+  IconChevronExpandY,
+  IconPenWriting2,
+} from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -70,7 +74,11 @@ const stateTone = {
   online: "success",
 } as const;
 
-/** « Mode de sortie · Modifier », for who writes the titles. */
+/**
+ * The release mode, for who writes the titles: the button says the mode in
+ * force and opens its change (Sacha, 27/11/2026: no « Mode de sortie » fact
+ * floating under the title).
+ */
 export function ReleaseModeButton({
   projectId,
   mode,
@@ -86,7 +94,8 @@ export function ReleaseModeButton({
         aria-label={t.mode.editLabel}
         onClick={() => setOpen(true)}
       >
-        {t.mode.edit}
+        {t.modes[mode]}
+        <IconChevronExpandY aria-hidden className="size-3.5 shrink-0" />
       </Button>
       <FormDialog
         open={open}

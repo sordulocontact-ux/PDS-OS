@@ -8,12 +8,17 @@ import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { roles } from "@/lib/i18n/fr/roles";
 
 import { RolesPanel, type RolesPanelProps } from "./roles-panel";
+import { useStepWhy } from "./step-why";
 
 const fr = { dialogs, roles };
 
 const t = fr.roles;
 
-/** « Qui fait quoi » in the large modal (proto rolesModal). */
+/**
+ * « Qui fait quoi » in the large modal (proto rolesModal), under its title
+ * the open step's why, which the module's head no longer writes (Sacha,
+ * 27/11/2026), else what the panel lists.
+ */
 export function RolesDialog({
   open,
   onOpenChange,
@@ -22,12 +27,13 @@ export function RolesDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const why = useStepWhy();
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
       title={t.title}
-      description={t.description}
+      description={why ?? t.description}
       closeLabel={fr.dialogs.close}
       size="wide"
     >

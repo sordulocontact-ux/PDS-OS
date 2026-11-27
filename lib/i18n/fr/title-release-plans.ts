@@ -7,13 +7,6 @@ const plural = (n: number, one: string, many: string) =>
 
 export const titleReleasePlans = {
   title: "Plans de sortie",
-  description:
-    "Un plan par titre, à partager avec l'artiste et son équipe. Il lit la date de la sortie du titre ; chaque version enregistrée reste telle quelle.",
-  facts: {
-    plans: "Plans",
-    shared: "Partagés ou actifs",
-    archived: "Archivés",
-  },
   statuses: {
     draft: "Brouillon",
     provisional: "Planning provisoire",

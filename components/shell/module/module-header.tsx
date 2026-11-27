@@ -2,6 +2,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 
 import { ModuleCrumbs, type ModuleCrumb } from "./module-crumbs";
+import { StepWhyProvider } from "./step-why";
 import { ModuleFacts, type ModuleFact } from "./module-facts";
 import { SubModuleTabs, type SubModuleTab } from "./sub-module-tabs";
 
@@ -20,8 +21,9 @@ export type ModuleHeaderProps = {
   media?: React.ReactNode;
   // On the right of the title, before its state: the open step's due date.
   meta?: React.ReactNode;
-  // Under the title: why the open step matters, when the title is the step's
-  // (a module page with a journey, docs/VISION-UX.md § 4).
+  // Why the open step matters, when the title is the step's: never written
+  // under the title (Sacha, 27/11/2026), said by « Qui fait quoi » among the
+  // actions (StepWhyProvider).
   why?: string;
   // The workflow's state, on the right of the title's line (Distribution:
   // « En attente »).
@@ -39,8 +41,9 @@ export type ModuleHeaderProps = {
  * header's trail in it, no positioned box between them), the Marketing's
  * pills, the 30 px title with its state and its actions, then the module's
  * own facts when it gives some. On a module page with a journey the title is
- * the open step's, with its due date (`meta`) and its why under it (proto
- * « Mise en page des modules », Sacha 10/11/2026). Server-safe and stateless. `data-module-header` lets the project layout drop its own
+ * the open step's, with its due date (`meta`) (proto « Mise en page des
+ * modules », Sacha 10/11/2026); its why is no longer under it but in « Qui
+ * fait quoi » (Sacha, 27/11/2026: the heads were too loaded). Server-safe and stateless. `data-module-header` lets the project layout drop its own
  * default header when a page renders one (docs/ARCHITECTURE.md § 3 ter).
  */
 export function ModuleHeader({
@@ -72,7 +75,7 @@ export function ModuleHeader({
       />
       {tabs && tabs.length > 0 && <SubModuleTabs tabs={tabs} />}
       {/* Proto `.headrow`: the title on the left, its state on the right of
-          the line, before the actions; a step's why right under it. */}
+          the line, before the actions. */}
       <div className="flex min-w-0 flex-col gap-1.5">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           {media || subtitle ? (
@@ -98,15 +101,10 @@ export function ModuleHeader({
               {status && (
                 <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
               )}
-              {actions}
+              <StepWhyProvider why={why ?? null}>{actions}</StepWhyProvider>
             </div>
           )}
         </div>
-        {why && (
-          <p className="max-w-[68ch] text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--text-secondary)]">
-            {why}
-          </p>
-        )}
       </div>
       {facts && <ModuleFacts facts={facts} />}
     </header>

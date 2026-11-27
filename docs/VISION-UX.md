@@ -27,8 +27,8 @@ où chacun voit ce qu'il doit faire maintenant.**
 Pour la personne connectée, sans qu'elle cherche :
 
 1. **Qu'est-ce que je dois faire maintenant ?** Une action, un verbe, un bouton.
-2. **Pourquoi ?** Une phrase, celle de l'étape (« La version de départ du mix, confirmée, jamais un
-   master final »).
+2. **Pourquoi ?** Une phrase, celle de l'étape, **dans « Qui fait quoi »**, plus sous le titre
+   (Sacha, 27/11/2026 : les en-têtes étaient trop chargés ; PO sait aussi répondre).
 3. **Qui d'autre ?** Qui est responsable, qui valide, et qui on attend si ce n'est pas moi.
 4. **De quoi ai-je besoin ?** Tout ce que PDS OS sait déjà est là, pré-rempli, avec sa source.
 5. **Que se passe-t-il ensuite ?** Ce que l'action débloque, et qui agit après.
@@ -96,8 +96,8 @@ Distribution, Clôture) ont la même forme. On l'apprend une fois.
                               Néons / Marketing / Master / Mixage   ← fil d'Ariane, barre du haut
 ┌ Parcours ────────┐  [chevrons des sous-modules, Marketing seul]
 │ ✓ Source         │  Mixage                        avant le …  [Qui fait quoi]
-│   Version confir.│  Pourquoi, en une phrase.
-│ ● Brief Mix…     │  Faits du module (Master final, Sortie…)
+│   Version confir.│  Faits du module (Master final, Sortie…), s'ils servent ici
+│ ● Brief Mix…     │
 │   À vous · …     │
 │ ◌ Mixage         │  En attente de Claire Morel : valider le Mix V1   ← si le geste est à un autre
 │   Après : Brief  │  [PO] ce que PO a pré-rempli et d'où
@@ -110,8 +110,8 @@ Distribution, Clôture) ont la même forme. On l'apprend une fois.
 - **Mise en page** *(retour d'Ibé du 07/11, proto « Mise en page des modules », Sacha 10/11/2026)*.
   Le Parcours tient **toute la hauteur à gauche** ; à sa droite, l'en-tête puis l'étape **sans
   carte**. **Le titre de la page est celui de l'étape** (h1), avec son échéance et « Qui fait
-  quoi » à droite, son pourquoi dessous : le module est déjà dit par le fil d'Ariane, qui reste
-  dans la barre du haut comme avant. Rien au-dessus du titre. Sur un téléphone : l'en-tête, le
+  quoi » à droite, rien dessous (le pourquoi est dans « Qui fait quoi », 27/11/2026) : le module
+  est déjà dit par le fil d'Ariane, qui reste dans la barre du haut comme avant. Rien au-dessus du titre. Sur un téléphone : l'en-tête, le
   Parcours, puis l'étape. Code : `JourneyLayout` + `ProjectHeader head` + `StepPanel`.
 - **Pas de « Maintenant » dans un module.** La carte « À vous » vers une autre étape du module,
   la ligne « À faire ailleurs » et « Rien à faire pour vous » ne sont plus affichées dans un module :

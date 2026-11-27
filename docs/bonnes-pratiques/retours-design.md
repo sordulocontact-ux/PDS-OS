@@ -182,3 +182,22 @@ qui a été fait.
   pourquoi de Source : « Le fichier sur lequel le mixeur va travailler. ».
 - **À retenir** : entre le titre d'une étape et son contenu, rien qui parle d'autre chose ; une attente se dit une
   fois ; un pourquoi s'écrit pour la personne, pas pour le code.
+---
+
+## 27/11/2026 : des en-têtes trop chargés (pourquoi, explications, faits qui flottent)
+
+- **Ce que Sacha a dit** : « je trouve que les header sont toujours beaucoup trop surchargés », exemples Nilo Sarrat
+  (fiche et contrat), Source, Sorties : « est-ce qu'on a besoin d'expliquer : Chaque sortie a sa date, son UPC et son
+  suivi… ? Il y a ça sur toutes les pages, ça crée du bruit. Le mode de sortie, etc. : des infos sous les textes qui
+  flottent, mal placées, est-ce qu'elles servent ici ? ». Puis, à la question posée : pourquoi « retiré de l'écran »,
+  faits « triés un par un ».
+- **Son explication** : les phrases sous les titres décrivent les règles et le modèle, pas ce qu'on fait ; quelqu'un
+  qui vient chaque jour ne les lit plus. Les faits sans rattachement (mode, comptes, « Aucune ») ne disent ni s'ils se
+  changent ni où.
+- **Fait (lot 1)** : le pourquoi de chaque étape n'est plus sous le titre, il devient la description de « Qui fait
+  quoi » (`StepWhyProvider`) ; Sorties et Plans de sortie perdent leur phrase et leurs comptes ; le mode de sortie est
+  le libellé de son bouton (« Sorties individuelles ⇕ »), un fait seulement pour qui ne peut pas le changer.
+- **Reste** : trier les autres lignes de faits (65 fichiers) ; les paragraphes avant un bouton (Source) ; les sources
+  des faits en icône avec infobulle ; les icônes devant les libellés de faits.
+- **À retenir** : rien sous le titre d'une page qui n'est pas l'objet lui-même ; un fait n'est en tête que s'il change
+  ce qu'on fait ici et n'apparaît pas dessous ; un réglage se montre dans son bouton.
