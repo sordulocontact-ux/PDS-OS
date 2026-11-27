@@ -3294,6 +3294,12 @@ finalement aussi renommé Notes), avec des notes qu'on peut écrire sur un proje
   fusion dans `main`).
 - **Guide de PO** : sujet `calls` devenu « Notes » (page, onglets, recherche, droits des notes écrites), sujets
   Calendrier (planifier un call) et « + » (Nouvelle note) mis à jour.
+- **Notes liées et note-document** (Sacha, 27/11, d'après Accordee) : colonne et filtre « Lié à » (`?link=`) ; une
+  note se lie à **un** projet, deal ou contrat (pas de devis : on lie au projet), lue selon ce lien (migration
+  `20261127210101_notes_links`, 37 tests pgTAP) ; « Nouvelle note » ouvre une note vide en panneau latéral
+  (« Lier à… », titre en grand, texte), **enregistrée seule** à chaque pause, modifiée sur place par son auteur ;
+  `NoteForm` et `NoteProjectPill` supprimés (`NoteLinkPill`, `NoteLinkMenu`, `NoteDocument`, `NoteEditor`,
+  `NewNoteSheet`, `useNoteAutosave`).
 - **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; parcours à vérifier dans le
   navigateur par l'équipe.
 

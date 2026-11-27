@@ -17,6 +17,17 @@ export type CallNoteRow = {
   hasReport: boolean;
 };
 
+/** What a written note can be linked to (20261127210101): one at most. */
+export const NOTE_LINK_KINDS = ["project", "deal", "contract"] as const;
+export type NoteLinkKind = (typeof NOTE_LINK_KINDS)[number];
+
+/** A link as saved: the record's kind and id. */
+export type NoteLinkRef = { kind: NoteLinkKind; id: string };
+
+/** A link as shown: its pill's text (a project's or contract's title,
+ * « Deal · Nadia »). */
+export type NoteLink = NoteLinkRef & { label: string };
+
 export type WrittenNoteRow = {
   kind: "written";
   id: string;
@@ -24,8 +35,7 @@ export type WrittenNoteRow = {
   // The beginning of its text, cut.
   excerpt: string;
   // Null: a note of the team.
-  projectId: string | null;
-  projectTitle: string | null;
+  link: NoteLink | null;
   author: NotePerson;
   createdAt: string;
   updatedAt: string;

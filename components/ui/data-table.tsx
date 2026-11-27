@@ -320,25 +320,26 @@ export function DataTableMedia({
   );
 }
 
-// Round sunken disc holding an icon, the visual of rows without a picture.
+// The icon of a row without a picture, alone, muted, before its name: no
+// disc (Sacha, 27/11/2026, after Accordee). `className`: its hue, or the
+// width of the pictures it stands among (Réseau: `size-9 justify-center`, so
+// the names stay aligned with the photos').
 export function DataTableIcon({
   icon: Icon,
   className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  // Its hue (a file's type, `hueClass`) or a larger disc
-  // (`size-20 [&>svg]:size-9`).
   className?: string;
 }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-sunken)] text-[color:var(--text-secondary)]",
+        "flex shrink-0 items-center text-[color:var(--text-tertiary)]",
         className,
       )}
     >
-      <Icon className="size-5" />
+      <Icon className="size-[18px]" />
     </span>
   );
 }

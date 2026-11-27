@@ -133,11 +133,11 @@ export const dailyTopics: GuideTopic[] = [
       "Aussi dans un projet lancé › Pilotage › Notes (les notes de ce projet seulement, avec en plus l'onglet « À venir »).",
     facts: [
       "La page Notes réunit les calls passés (compte rendu et transcription) et les notes écrites que vous pouvez voir, en liste, avec les onglets Toutes, Calls, Écrites et À compléter (un call passé sans compte rendu ni clôture), chacun avec son nombre.",
-      "La recherche fouille le texte : titre, compte rendu, transcription ou texte d'une note. Deux filtres : Projet et Personne.",
+      "La recherche fouille le texte : titre, compte rendu, transcription ou texte d'une note. Deux filtres : Lié à (le projet, le deal ou le contrat) et Personne.",
       "Cliquer un call ouvre sa fiche à droite, cliquer une note écrite ouvre la sienne ; « Compléter » mène à la page du call.",
       "La planification des calls n'est plus sur cette page mais dans le Calendrier ; « Nouveau call » existe aussi dans les Notes du projet, à côté de « Nouvelle note ».",
-      "Une note écrite a un titre, un texte et, si on veut, un projet. Sur un projet, elle est lue par tous ceux qui voient ce projet ; sans projet, c'est une note de l'équipe, lue par toute l'équipe. Tout membre qui voit le projet peut y écrire une note, même quand le projet est lancé (exception voulue à la règle « seul le responsable écrit dans un projet lancé »). Une note n'est modifiée et supprimée que par son auteur.",
-      "« Nouvelle note » est aussi dans le « + » de la barre de gauche. PO ne lit pas encore les notes écrites : il lit les calls et leurs comptes rendus.",
+      "Une note écrite a un titre, un texte et, si on veut, un lien vers un seul projet, deal ou contrat (« Lier à un projet, un deal ou un contrat » en haut de la note ; un devis n'a pas de page à lui : on lie la note à son projet). Elle est lue par ceux qui voient ce projet, ce deal ou ce contrat ; sans lien, c'est une note de l'équipe, lue par toute l'équipe. On ne lie une note qu'à ce qu'on voit. Tout membre qui voit le projet peut y écrire une note, même quand le projet est lancé (exception voulue à la règle « seul le responsable écrit dans un projet lancé »). Une note n'est modifiée et supprimée que par son auteur.",
+      "Une note s'écrit directement : « Nouvelle note » ouvre une note vide à droite, on tape le titre puis le texte, et elle s'enregistre seule à chaque pause (« Enregistré » en haut du panneau), sans bouton ; fermée vide, rien n'est créé. Son auteur la modifie de la même façon en l'ouvrant ; « ⋯ » la supprime. « Nouvelle note » est aussi dans le « + » de la barre de gauche. PO ne lit pas encore les notes écrites : il lit les calls et leurs comptes rendus.",
       "« Nouveau call » ou « Nouvelle réunion » planifie un échange, avec un lien de visio.",
       "Au moment de l'échange, on l'enregistre depuis l'étape du module qui l'a préparé (Cadrage, Stratégie, Conception, Production, Master) avec « Enregistrer l'échange » : PDS OS enregistre la visio et le micro sans changer de page. Un call hors module s'enregistre depuis sa page.",
       "L'enregistrement est ensuite transcrit puis résumé en compte rendu, qui alimente le Cadrage, la Stratégie ou les autres modules concernés.",
@@ -155,7 +155,7 @@ export const dailyTopics: GuideTopic[] = [
       },
       {
         q: "Qui peut modifier une note écrite ?",
-        a: "Son auteur seul, qui peut aussi la supprimer. Elle est lue par ceux qui voient son projet, ou par toute l'équipe si elle n'a pas de projet.",
+        a: "Son auteur seul, directement dans la note ouverte (elle s'enregistre seule), et lui seul la supprime. Elle est lue par ceux qui voient le projet, le deal ou le contrat auquel elle est liée, ou par toute l'équipe si elle n'est liée à rien.",
       },
       {
         q: "Où retrouver le compte rendu d'un call ?",
@@ -271,7 +271,7 @@ export const dailyTopics: GuideTopic[] = [
       "La touche N (par défaut, à changer dans Paramètres › Raccourcis clavier), hors d'un champ, ouvre ce menu. Les mêmes actions sont en tête de la recherche ⌘K, sous « Créer » : taper « dépense » propose « Ajouter une dépense ».",
       "Chaque action ouvre le même formulaire que sur sa page, et finit pareil : un contact ou un deal créé ouvre sa fiche, une réunion ouvre sa page.",
       "Sur la page d'un projet, « Ajouter une dépense » vise déjà ce projet ; on peut en choisir un autre.",
-      "« Nouvelle réunion » crée la même réunion que « Nouveau call » du Calendrier. « Nouvelle note » ouvre le formulaire d'une note écrite (sur la page d'un projet, elle vise déjà ce projet). Le call d'un projet se crée depuis les Notes du projet.",
+      "« Nouvelle réunion » crée la même réunion que « Nouveau call » du Calendrier. « Nouvelle note » ouvre une note vide qui s'enregistre seule (sur la page d'un projet, elle est déjà liée à ce projet, modifiable). Le call d'un projet se crée depuis les Notes du projet.",
       "Sur téléphone, le « + » est dans l'en-tête, à côté de la cloche.",
     ],
     faq: [

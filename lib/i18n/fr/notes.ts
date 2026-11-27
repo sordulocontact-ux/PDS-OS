@@ -1,8 +1,5 @@
 /** Notes page: the calls' content and the notes written by hand (27/11/2026). */
 
-const plural = (n: number, one: string, many: string) =>
-  `${n} ${n > 1 ? many : one}`;
-
 export const notes = {
   title: "Notes",
   tabs: {
@@ -15,7 +12,8 @@ export const notes = {
   },
   columns: {
     note: "Note",
-    project: "Projet",
+    date: "Date",
+    link: "Lié à",
     content: "Contenu",
     by: "Par",
     actions: "Actions",
@@ -23,15 +21,14 @@ export const notes = {
   // A past call still without report: the link to its page.
   complete: "Compléter",
   more: (title: string) => `Actions pour « ${title} »`,
-  others: (n: number) => `+${n}`,
   search: {
     label: "Rechercher dans les notes",
     placeholder: "Rechercher dans les notes…",
   },
   filters: {
-    project: "Projet",
+    link: "Lié à",
     person: "Personne",
-    allProjects: "Tous les projets",
+    allLinks: "Tous",
     everyone: "Tout le monde",
   },
   // Where a row belongs when it has no project.
@@ -52,30 +49,40 @@ export const notes = {
   },
   loadError: "Impossible de charger les notes. Réessayez.",
   newNote: "Nouvelle note",
-  form: {
-    createTitle: "Nouvelle note",
-    editTitle: "Modifier la note",
+  // A title left empty is saved so.
+  untitled: "Sans titre",
+  // What a written note is linked to (20261127210101): one record at most.
+  link: {
+    add: "Lier à un projet, un deal ou un contrat",
+    menu: "Lier à",
+    back: "Retour",
+    groups: { project: "Projets", deal: "Deals", contract: "Contrats" },
+    kinds: { project: "Projet", deal: "Deal", contract: "Contrat" },
+    search: {
+      project: "Rechercher un projet…",
+      deal: "Rechercher un deal…",
+      contract: "Rechercher un contrat…",
+    },
+    none: "Aucun résultat",
+    loading: "Chargement…",
+    deal: (name: string | null) => (name ? `Deal · ${name}` : "Deal"),
+    open: (label: string) => `Ouvrir « ${label} »`,
+    remove: (label: string) => `Retirer le lien « ${label} »`,
+  },
+  // A note is a document saved as one types (Sacha 27/11/2026, after
+  // Accordee): no button, its state in the panel's bar.
+  document: {
     title: "Titre",
-    titlePlaceholder: "Idées de décor",
-    project: "Projet",
-    noProject: "Aucun (note de l'équipe)",
     body: "Texte",
-    submit: "Créer la note",
-    save: "Enregistrer",
+    bodyPlaceholder: "Commencez à écrire…",
+    edited: "Modifiée le",
     saving: "Enregistrement…",
-    loading: "Chargement de la note…",
-    loadFailed: "Cette note n'a pas pu être chargée.",
-    close: "Fermer",
-    cancel: "Annuler",
-    created: "Note créée",
-    saved: "Note enregistrée",
+    saved: "Enregistré",
+    failed: "Non enregistré",
   },
   sheet: {
-    expand: "Ouvrir la note",
     loading: "Chargement de la note",
     loadFailed: "Cette note n'a pas pu être chargée.",
-    author: "Par",
-    edit: "Modifier",
     delete: "Supprimer",
   },
   remove: {
@@ -86,13 +93,10 @@ export const notes = {
     done: "Note supprimée",
   },
   errors: {
-    titleRequired: "Donnez un titre à la note.",
-    titleTooLong: "200 caractères au plus.",
-    bodyRequired: "Écrivez le texte de la note.",
-    bodyTooLong: "20 000 caractères au plus.",
-    missing: (n: number) => `${plural(n, "champ", "champs")} à corriger.`,
+    titleTooLong: "Le titre fait plus de 200 caractères.",
+    bodyTooLong: "Le texte fait plus de 20 000 caractères.",
     forbidden:
-      "Seul son auteur peut modifier cette note, sur un projet qu'il voit.",
+      "Seul son auteur peut modifier cette note, liée à ce qu'il voit.",
     notFound: "Cette note n'existe plus.",
     generic: "La note n'a pas pu être enregistrée. Réessayez.",
   },

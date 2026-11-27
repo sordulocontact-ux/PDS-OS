@@ -84,6 +84,7 @@ export function ListContacts({
                           icon={
                             contact.kind === "person" ? IconUser : IconOffice
                           }
+                          className="size-9 justify-center"
                         />
                       )
                     }

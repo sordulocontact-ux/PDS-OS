@@ -2,11 +2,10 @@
 
 import { IconPenWriting4, IconPhone } from "nucleo-sharp-essential";
 
-import { CallProjectPill } from "@/components/calls/call-project-pill";
 import { CallSheet } from "@/components/calls/call-sheet";
 import { CallSheetMenu } from "@/components/calls/call-sheet-menu";
+import { NoteLinkPill } from "@/components/notes/note-link-pill";
 import { NoteMenu } from "@/components/notes/note-menu";
-import { NoteProjectPill } from "@/components/notes/note-project-pill";
 import { NoteSheet } from "@/components/notes/note-sheet";
 import { NotesPeople } from "@/components/notes/notes-people";
 import {
@@ -31,8 +30,13 @@ import { canDeleteCall, type CallDeleter } from "@/lib/calls/delete-rule";
 import { callHref, type CallDoor } from "@/lib/calls/door";
 import { formatDateTime } from "@/lib/calls/format";
 import { notes } from "@/lib/i18n/fr/notes";
-import type { NoteProjectOption } from "@/lib/notes/options";
-import { noteViewOf, type NoteRow } from "@/lib/notes/views";
+import type { NoteLinkChoices } from "@/lib/notes/options";
+import {
+  noteViewOf,
+  type CallNoteRow,
+  type NoteLink,
+  type NoteRow,
+} from "@/lib/notes/views";
 
 const fr = { notes };
 
@@ -41,9 +45,10 @@ export const rowId = (row: NoteRow) =>
 
 /**
  * The rows of a door's Notes (calls with their content, notes written by
- * hand), in the order given: the note (icon of its kind, its date under its
- * name), its project (Notes only), the beginning of its content, who is in
- * it, « ⋯ ». A call opens in CallSheet, a written note in NoteSheet, ↑ ↓
+ * hand), in the order given: the note (icon of its kind and its title only),
+ * its date in a column of its own (one fact per cell, Sacha 27/11/2026), what
+ * it is linked to (Notes only), the beginning of its content, who is in it,
+ * « ⋯ ». A call opens in CallSheet, a written note in NoteSheet, ↑ ↓
  * following the order shown (a sort of the head included). A past call
  * without report offers « Compléter », its page.
  */
@@ -52,13 +57,13 @@ export function NotesTable({
   now,
   door,
   deleter,
-  projects,
+  choices,
 }: {
   rows: NoteRow[];
   now: Date;
   door: CallDoor;
   deleter: CallDeleter;
-  projects: NoteProjectOption[];
+  choices: NoteLinkChoices;
 }) {
   const t = fr.notes.columns;
   const withProject = door.kind === "calls";
@@ -75,12 +80,15 @@ export function NotesTable({
     <TableSortProvider>
       <DataTable>
         <DataTableHeader>
-          <DataTableHead icon="call" fill>
+          <DataTableHead icon="notes" fill>
             {t.note}
           </DataTableHead>
+          <DataTableHead icon="date" hideBelow="sm">
+            {t.date}
+          </DataTableHead>
           {withProject && (
-            <DataTableHead icon="project" hideBelow="md">
-              {t.project}
+            <DataTableHead icon="relation" hideBelow="md">
+              {t.link}
             </DataTableHead>
           )}
           <DataTableHead icon="note" hideBelow="lg">
@@ -100,7 +108,6 @@ export function NotesTable({
               door={door}
               withProject={withProject}
               deleter={deleter}
-              projects={projects}
               onOpen={() => setSheet(index)}
             />
           ))}
@@ -120,7 +127,7 @@ export function NotesTable({
       {open?.kind === "written" && sheet !== null && (
         <NoteSheet
           note={open}
-          projects={projects}
+          choices={choices}
           index={sheet}
           total={rows.length}
           onClose={() => setSheet(null)}
@@ -137,7 +144,6 @@ function NoteTableRow({
   door,
   withProject,
   deleter,
-  projects,
   onOpen,
 }: {
   row: NoteRow;
@@ -145,23 +151,18 @@ function NoteTableRow({
   door: CallDoor;
   withProject: boolean;
   deleter: CallDeleter;
-  projects: NoteProjectOption[];
   onOpen: () => void;
 }) {
   const t = fr.notes;
   const isCall = row.kind === "call";
   const title = isCall ? row.call.title : row.title;
-  const date = formatDateTime(isCall ? row.call.occurredAt : row.updatedAt);
-  const projectTitle = isCall
-    ? row.call.deal
-      ? row.call.deal.artistName
-      : row.call.projectTitle
-    : row.projectTitle;
+  const at = isCall ? row.call.occurredAt : row.updatedAt;
+  const date = formatDateTime(at);
   const people = isCall ? row.people : [row.author];
   const todo = noteViewOf(row, now) === "todo";
   return (
     <DataTableRow>
-      <DataTableCell fill className="sm:min-w-64">
+      <DataTableCell fill className="sm:min-w-52">
         <DataTableMedia
           visual={<DataTableIcon icon={isCall ? IconPhone : IconPenWriting4} />}
           title={
@@ -169,36 +170,23 @@ function NoteTableRow({
               {title}
             </DataTableLink>
           }
-          subtitle={
-            <>
-              <time dateTime={isCall ? row.call.occurredAt : row.updatedAt}>
-                {date}
-              </time>
-              {/* The project column is hidden under md. */}
-              {withProject && (
-                <span className="md:hidden">
-                  {" · "}
-                  {projectTitle ?? (isCall ? t.internalCall : t.teamNote)}
-                </span>
-              )}
-            </>
-          }
         />
+      </DataTableCell>
+      <DataTableCell hideBelow="sm" sort={at}>
+        <DataTableText>
+          <time dateTime={at}>{date}</time>
+        </DataTableText>
       </DataTableCell>
       {withProject && (
         <DataTableCell hideBelow="md">
           {isCall ? (
-            <CallProjectPill
-              projectId={row.call.projectId}
-              title={row.call.projectTitle}
-              deal={row.call.deal}
-              size="sm"
+            <NoteLinkPill
+              link={callLink(row.call)}
+              emptyLabel={t.internalCall}
+              open
             />
           ) : (
-            <NoteProjectPill
-              projectId={row.projectId}
-              title={row.projectTitle}
-            />
+            <NoteLinkPill link={row.link} open />
           )}
         </DataTableCell>
       )}
@@ -211,7 +199,7 @@ function NoteTableRow({
             {t.complete}
           </ViewLink>
         ) : (
-          <DataTableText className="max-w-xs">
+          <DataTableText className="max-w-64">
             {row.excerpt || EMPTY_CELL}
           </DataTableText>
         )}
@@ -228,11 +216,23 @@ function NoteTableRow({
             reveal
           />
         ) : (
-          row.mine && (
-            <NoteMenu note={row} projects={projects} size="icon-sm" reveal />
-          )
+          row.mine && <NoteMenu note={row} size="icon-sm" reveal />
         )}
       </DataTableActionsCell>
     </DataTableRow>
   );
+}
+
+// A call's « Lié à », as a written note's: its deal, else its project, else
+// none (« Réunion interne »).
+function callLink(call: CallNoteRow["call"]): NoteLink | null {
+  if (call.deal)
+    return {
+      kind: "deal",
+      id: call.deal.id,
+      label: fr.notes.link.deal(call.deal.artistName),
+    };
+  if (call.projectId && call.projectTitle)
+    return { kind: "project", id: call.projectId, label: call.projectTitle };
+  return null;
 }

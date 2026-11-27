@@ -17,6 +17,7 @@ import {
   IconNodes,
   IconPaperclip,
   IconPenWriting2,
+  IconPenWriting4,
   IconPhone,
   IconProgressBar,
   IconRoadmap,
@@ -47,6 +48,7 @@ export const columnIcons = {
   contract: IconHandshake,
   deal: IconScale,
   call: IconPhone,
+  notes: IconPenWriting4,
   file: IconFile,
   // People.
   person: IconUser,

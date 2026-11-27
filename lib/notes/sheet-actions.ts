@@ -3,8 +3,8 @@
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
+import { authorOf, noteLinkOf, WRITTEN_NOTE_SELECT } from "@/lib/notes/read";
 import type { NoteSheetData } from "@/lib/notes/views";
-import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 // A written note's side sheet (NoteSheet), read when it opens, with the
@@ -20,9 +20,7 @@ export async function loadNoteSheet(
   const supabase = await createClient();
   const { data: row } = await supabase
     .from("notes")
-    .select(
-      "id, title, body, project_id, created_by, created_at, updated_at, project:projects!notes_project_same_org(title), author:people!notes_created_by_fkey(first_name, last_name)",
-    )
+    .select(WRITTEN_NOTE_SELECT)
     .eq("id", noteId)
     .maybeSingle();
   if (!row) return null;
@@ -30,14 +28,8 @@ export async function loadNoteSheet(
     id: row.id,
     title: row.title,
     body: row.body,
-    projectId: row.project_id,
-    projectTitle: row.project?.title ?? null,
-    author: {
-      personId: row.created_by,
-      name: row.author
-        ? personName(row.author.first_name, row.author.last_name)
-        : "",
-    },
+    link: noteLinkOf(row),
+    author: authorOf(row),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     mine: access.personId === row.created_by,

@@ -36,6 +36,7 @@ export function SideSheet({
   total,
   onMove,
   bar,
+  initialFocus,
   children,
 }: {
   open: boolean;
@@ -53,6 +54,9 @@ export function SideSheet({
   index: number;
   total: number;
   onMove: (to: number) => void;
+  // What takes the focus as it opens (a new note: its title); by default
+  // its first control.
+  initialFocus?: DialogPrimitive.Popup.Props["initialFocus"];
   children: ReactNode;
 }) {
   // A sorted table: the row's place on screen, and the row at a place.
@@ -88,6 +92,7 @@ export function SideSheet({
         <DialogPrimitive.Backdrop className={sidePanelScrimClass} />
         <DialogPrimitive.Popup
           data-slot="side-sheet"
+          initialFocus={initialFocus}
           className={cn(sidePanelClass, theme)}
         >
           {bar ? (

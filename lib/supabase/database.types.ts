@@ -13851,8 +13851,10 @@ export type Database = {
       notes: {
         Row: {
           body: string
+          contract_id: string | null
           created_at: string
           created_by: string
+          deal_id: string | null
           id: string
           organization_id: string
           project_id: string | null
@@ -13861,9 +13863,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          body: string
+          body?: string
+          contract_id?: string | null
           created_at?: string
           created_by?: string
+          deal_id?: string | null
           id?: string
           organization_id: string
           project_id?: string | null
@@ -13873,8 +13877,10 @@ export type Database = {
         }
         Update: {
           body?: string
+          contract_id?: string | null
           created_at?: string
           created_by?: string
+          deal_id?: string | null
           id?: string
           organization_id?: string
           project_id?: string | null
@@ -13884,11 +13890,25 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "notes_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
             foreignKeyName: "notes_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "notes_organization_id_fkey"

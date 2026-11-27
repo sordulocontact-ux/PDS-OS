@@ -13,6 +13,7 @@ import {
   type NoteRow,
   type WrittenNoteRow,
 } from "@/lib/notes/views";
+import { authorOf, noteLinkOf, WRITTEN_NOTE_SELECT } from "@/lib/notes/read";
 import { trackedCache } from "@/lib/projects/live-deps";
 import { personName } from "@/lib/projects/types";
 import type { Database } from "@/lib/supabase/database.types";
@@ -59,11 +60,7 @@ async function listWrittenNotes(
   supabase: Client,
   projectId: string | undefined,
 ): Promise<WrittenNoteRow[]> {
-  let query = supabase
-    .from("notes")
-    .select(
-      "id, title, body, project_id, created_by, created_at, updated_at, project:projects!notes_project_same_org(title), author:people!notes_created_by_fkey(first_name, last_name)",
-    );
+  let query = supabase.from("notes").select(WRITTEN_NOTE_SELECT);
   if (projectId) query = query.eq("project_id", projectId);
   const [{ data, error }, access] = await Promise.all([
     query.order("updated_at", { ascending: false }).limit(NOTES_LIMIT),
@@ -75,14 +72,8 @@ async function listWrittenNotes(
     id: row.id,
     title: row.title,
     excerpt: excerptOf(row.body),
-    projectId: row.project_id,
-    projectTitle: row.project?.title ?? null,
-    author: {
-      personId: row.created_by,
-      name: row.author
-        ? personName(row.author.first_name, row.author.last_name)
-        : "",
-    },
+    link: noteLinkOf(row),
+    author: authorOf(row),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     mine: access.personId === row.created_by,

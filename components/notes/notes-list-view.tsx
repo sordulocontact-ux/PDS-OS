@@ -8,7 +8,7 @@ import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import type { CallDeleter } from "@/lib/calls/delete-rule";
 import type { CallDoor } from "@/lib/calls/door";
 import { notes } from "@/lib/i18n/fr/notes";
-import type { NoteProjectOption } from "@/lib/notes/options";
+import type { NoteLinkChoices } from "@/lib/notes/options";
 import { inNoteTab, type NoteRow, type NoteTab } from "@/lib/notes/views";
 import {
   filterParamOf,
@@ -20,14 +20,29 @@ import { viewHref } from "@/lib/ui/view-href";
 
 const fr = { notes };
 
-// The project filter's values for what belongs to no project.
+// The « Lié à » filter's values (?link=): « project:<id> », « deal:<id> »,
+// « contract:<id> », and for what is linked to nothing an internal call or
+// a note of the team.
 const INTERNAL = "internal";
 const TEAM = "team";
 
-const projectOf = (row: NoteRow) =>
-  row.kind === "call"
-    ? (row.call.projectId ?? INTERNAL)
-    : (row.projectId ?? TEAM);
+const linkValueOf = (row: NoteRow): string => {
+  if (row.kind === "written")
+    return row.link ? `${row.link.kind}:${row.link.id}` : TEAM;
+  if (row.call.deal) return `deal:${row.call.deal.id}`;
+  return row.call.projectId ? `project:${row.call.projectId}` : INTERNAL;
+};
+
+/** A row's link and its name in the filter; null for what has none. */
+function linkOptionOf(row: NoteRow): [string, string] | null {
+  if (row.kind === "written")
+    return row.link ? [linkValueOf(row), row.link.label] : null;
+  if (row.call.deal)
+    return [linkValueOf(row), fr.notes.link.deal(row.call.deal.artistName)];
+  return row.call.projectId && row.call.projectTitle
+    ? [linkValueOf(row), row.call.projectTitle]
+    : null;
+}
 
 const peopleOf = (row: NoteRow) =>
   (row.kind === "call" ? row.people : [row.author]).map((p) => p.personId);
@@ -36,7 +51,7 @@ const peopleOf = (row: NoteRow) =>
  * A door's Notes, the same from the main navigation and from a project (like
  * CallsListView): the tabs (?tab=) Toutes / Calls / Écrites / À compléter,
  * with « À venir » in a project (no calendar there) — each counting what
- * the filters keep — the search, the filters Projet (Notes only, ?project=)
+ * the filters keep — the search, the filters Lié à (Notes only, ?link=)
  * and Personne (?person=), the rows (NotesList) and the empty states.
  * `empty`: what stands for a door without any row.
  */
@@ -45,10 +60,10 @@ export function NotesListView({
   now,
   door,
   tab,
-  project,
+  link,
   person,
   deleter,
-  projects,
+  choices,
   empty,
   pageAction,
 }: {
@@ -57,13 +72,14 @@ export function NotesListView({
   door: CallDoor;
   // ?tab= (null: Toutes).
   tab: NoteTab | null;
-  // ?project= of Notes: projects' ids, « internal » or « team ».
-  project: string[];
+  // ?link= of Notes: « project:<id> », « deal:<id> », « contract:<id> »,
+  // « internal » or « team ».
+  link: string[];
   // ?person=: people's ids.
   person: string[];
   deleter: CallDeleter;
-  // The projects a note can be pinned to (its form).
-  projects: NoteProjectOption[];
+  // What a note can be linked to (its sheet).
+  choices: NoteLinkChoices;
   empty: React.ReactNode;
   // The page's own action, at the end of the tabs' line (SectionFrame
   // `toolsAction`).
@@ -78,11 +94,11 @@ export function NotesListView({
     : ["all", "upcoming", "calls", "written", "todo"];
   const current: NoteTab = tab && tabs.includes(tab) ? tab : "all";
   const kept = {
-    project: withProject ? filterParamOf(project) : null,
+    link: withProject ? filterParamOf(link) : null,
     person: filterParamOf(person),
   };
   const matches = (row: NoteRow) =>
-    (!withProject || matchesAny(project, projectOf(row))) &&
+    (!withProject || matchesAny(link, linkValueOf(row))) &&
     matchesSome(person, peopleOf(row));
 
   // The tabs count what the filters keep; the filters offer what the tab
@@ -99,7 +115,7 @@ export function NotesListView({
         ? a.call.occurredAt.localeCompare(b.call.occurredAt)
         : 0,
     );
-  const filtering = project.length > 0 || person.length > 0;
+  const filtering = link.length > 0 || person.length > 0;
   const tabHref = (value: NoteTab) =>
     viewHref(path, { ...kept, tab: value === "all" ? null : value });
 
@@ -119,12 +135,12 @@ export function NotesListView({
         now={now}
         door={door}
         deleter={deleter}
-        projects={projects}
+        choices={choices}
         filters={
           <UrlFilters
             path={path}
             params={{ tab: current === "all" ? null : current }}
-            groups={filterGroups(ofTab, project, person, withProject)}
+            groups={filterGroups(ofTab, link, person, withProject)}
           />
         }
         empty={
@@ -138,44 +154,37 @@ export function NotesListView({
   );
 }
 
-// The projects some row of the tab belongs to, what belongs to none last;
+// What some row of the tab is linked to, what is linked to nothing last;
 // the people in them (members of a call, authors of a note).
 function filterGroups(
   rows: NoteRow[],
-  project: string[],
+  link: string[],
   person: string[],
   withProject: boolean,
 ): UrlFilterGroup[] {
   const t = fr.notes;
-  const projects = new Map<string, string>();
+  const links = new Map<string, string>();
   const people = new Map<string, string>();
   for (const row of rows) {
-    if (row.kind === "call") {
-      if (row.call.projectId && row.call.projectTitle)
-        projects.set(row.call.projectId, row.call.projectTitle);
-      for (const p of row.people) people.set(p.personId, p.name);
-    } else {
-      if (row.projectId && row.projectTitle)
-        projects.set(row.projectId, row.projectTitle);
-      people.set(row.author.personId, row.author.name);
-    }
+    const option = linkOptionOf(row);
+    if (option) links.set(...option);
+    for (const p of row.kind === "call" ? row.people : [row.author])
+      people.set(p.personId, p.name);
   }
-  const hasInternal = rows.some(
-    (row) => row.kind === "call" && !row.call.projectId,
-  );
-  const hasTeam = rows.some((row) => row.kind === "written" && !row.projectId);
+  const hasInternal = rows.some((row) => linkValueOf(row) === INTERNAL);
+  const hasTeam = rows.some((row) => linkValueOf(row) === TEAM);
   const groups: UrlFilterGroup[] = [];
   if (withProject)
     groups.push({
-      key: "project",
-      label: t.filters.project,
-      allLabel: t.filters.allProjects,
+      key: "link",
+      label: t.filters.link,
+      allLabel: t.filters.allLinks,
       options: [
-        ...optionsByName(projects),
+        ...optionsByName(links),
         ...(hasInternal ? [{ value: INTERNAL, label: t.internalCall }] : []),
         ...(hasTeam ? [{ value: TEAM, label: t.teamNote }] : []),
       ],
-      current: project,
+      current: link,
     });
   groups.push({
     key: "person",

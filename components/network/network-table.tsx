@@ -116,6 +116,7 @@ export function NetworkTable({
                   ) : (
                     <DataTableIcon
                       icon={contact.kind === "person" ? IconUser : IconOffice}
+                      className="size-9 justify-center"
                     />
                   )
                 }

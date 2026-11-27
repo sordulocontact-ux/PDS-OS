@@ -2,9 +2,11 @@
 -- sees the project, or by every member without project; written by any member
 -- who sees the project (not only its owner, decision of Sacha 27/11/2026);
 -- changed and deleted by their author only; found by search_notes with the
--- calls. Run with `supabase test db`.
+-- calls. Linked to at most one project, deal or contract
+-- (20261127210101), read by whoever reads that record. Run with
+-- `supabase test db`.
 begin;
-select plan(24);
+select plan(37);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -71,6 +73,21 @@ insert into public.call_reports (organization_id, call_id, transcript_id, summar
 select organization_id, call_id, id, 'Le budget de la pochette est validé.', 'test', 'test' from t;
 insert into ids select 'call', id from public.calls where project_id = pg_temp.id_of('project');
 
+-- A deal of the second project (read by its owner, « other », and the
+-- director) and a contract of the first, owned by « owner » (as postgres).
+insert into public.artists (organization_id, name, relation)
+values (pg_temp.id_of('org'), 'NTS artiste ' || (select v from vars where k = 'tag'), 'collaboration');
+insert into ids select 'artist', id from public.artists
+ where name = 'NTS artiste ' || (select v from vars where k = 'tag');
+insert into public.deals (organization_id, kind, project_id, artist_id)
+values (pg_temp.id_of('org'), 'music', pg_temp.id_of('project2'), pg_temp.id_of('artist'));
+insert into ids select 'deal', id from public.deals where artist_id = pg_temp.id_of('artist');
+insert into public.contracts (organization_id, title, type, project_id, owner_person_id)
+values (pg_temp.id_of('org'), 'NTS contrat', 'license', pg_temp.id_of('project'),
+        pg_temp.id_of('owner_person'));
+insert into ids select 'contract', id from public.contracts
+ where project_id = pg_temp.id_of('project') and title = 'NTS contrat';
+
 -- Writing --------------------------------------------------------------------------------
 
 select pg_temp.act_as(pg_temp.id_of('creative'));
@@ -91,6 +108,9 @@ select throws_ok($$
   insert into public.notes (organization_id, project_id, title, body)
   values (pg_temp.id_of('org'), null, '   ', 'Texte')
 $$, '23514', null, 'a title is required');
+select lives_ok($$
+  insert into public.notes (organization_id, title) values (pg_temp.id_of('org'), 'Brouillon')
+$$, 'a note may be saved before its text is written');
 reset role;
 
 select pg_temp.act_as(pg_temp.id_of('other'));
@@ -153,6 +173,59 @@ select throws_ok($$
 $$, '42501', null, 'nor moves it to a project they do not see');
 reset role;
 
+-- Links to a deal or a contract -------------------------------------------------------------
+
+select pg_temp.act_as(pg_temp.id_of('other'));
+select lives_ok($$
+  insert into public.notes (organization_id, deal_id, title, body)
+  values (pg_temp.id_of('org'), pg_temp.id_of('deal'), 'Note du deal', 'Il veut 50/50.')
+$$, 'a note linked to a deal its writer reads');
+insert into ids select 'deal_note', id from public.notes where title = 'Note du deal';
+select throws_ok($$
+  insert into public.notes (organization_id, contract_id, title, body)
+  values (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'Intrus contrat', 'Texte')
+$$, '42501', null, 'never linked to a contract its writer does not see');
+reset role;
+
+select pg_temp.act_as(pg_temp.id_of('owner'));
+select throws_ok($$
+  insert into public.notes (organization_id, deal_id, title, body)
+  values (pg_temp.id_of('org'), pg_temp.id_of('deal'), 'Intrus deal', 'Texte')
+$$, '42501', null, 'never linked to a deal its writer does not read');
+select lives_ok($$
+  insert into public.notes (organization_id, contract_id, title, body)
+  values (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'Note du contrat', 'Clause 4 à revoir.')
+$$, 'a note linked to a contract its writer sees');
+insert into ids select 'contract_note', id from public.notes where title = 'Note du contrat';
+select throws_ok($$
+  insert into public.notes (organization_id, project_id, contract_id, title, body)
+  values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('contract'),
+          'Deux liens', 'Texte')
+$$, '23514', null, 'a note is linked to one record at most');
+select throws_ok($$
+  update public.notes set contract_id = null, deal_id = pg_temp.id_of('deal')
+   where id = pg_temp.id_of('contract_note')
+$$, '42501', null, 'nor moved to a deal its author does not read');
+select is((select count(*)::int from public.notes where id = pg_temp.id_of('deal_note')), 0,
+          'who does not read the deal does not read its notes');
+reset role;
+
+select pg_temp.act_as(pg_temp.id_of('other'));
+select is((select count(*)::int from public.notes where id = pg_temp.id_of('contract_note')), 0,
+          'who does not see the contract does not read its notes');
+reset role;
+
+select pg_temp.act_as(pg_temp.id_of('creative'));
+select is((select count(*)::int from public.notes where id = pg_temp.id_of('contract_note')), 0,
+          'seeing the project is not seeing its contract');
+reset role;
+
+select pg_temp.act_as(pg_temp.id_of('director'));
+select is((select count(*)::int from public.notes
+            where id in (pg_temp.id_of('deal_note'), pg_temp.id_of('contract_note'))),
+          2, 'the director reads the notes of every deal and contract');
+reset role;
+
 -- Search ---------------------------------------------------------------------------------
 
 select pg_temp.act_as(pg_temp.id_of('owner'));
@@ -184,6 +257,11 @@ reset role;
 select public.delete_project_row(pg_temp.id_of('project'));
 select is((select count(*)::int from public.notes where id = pg_temp.id_of('note')), 0,
           'deleting a project deletes its notes');
+select is((select count(*)::int from public.notes where id = pg_temp.id_of('contract_note')), 0,
+          'and the notes of its contracts');
+select public.delete_project_row(pg_temp.id_of('project2'));
+select is((select count(*)::int from public.notes where id = pg_temp.id_of('deal_note')), 0,
+          'and of its deals');
 
 select * from finish();
 rollback;

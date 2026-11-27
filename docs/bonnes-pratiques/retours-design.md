@@ -151,3 +151,17 @@ qui a été fait.
   l'`EmptyState` des Notes n'a que son titre (`body` facultatif), moins de texte à l'écran.
 - **À retenir** : sur une page de calendrier ou de liste, ne pas empiler une ligne de filtres, une ligne de
   vues et un bouton dans l'en-tête ; une seule ligne, le bouton principal en dernier à droite.
+
+---
+
+## 27/11/2026 : Notes, on ne pouvait pas lier une note ; une note est un document
+
+- **Ce que Sacha a dit** : « on veut lier une note à un projet mais aussi à un deal, un devis, etc. », puis « quand
+  je crée une note je ne peux pas la lier ; pour les parcours de création/interaction, inspire-toi d'Accordee ».
+- **Son explication** : une note s'écrit tout de suite, comme dans Accordee : pas de formulaire en fenêtre avec un
+  champ « Projet » caché dans une liste, mais la note ouverte à droite, « Lier à… » en haut, le titre, le texte.
+- **Fait** : colonne et filtre « Lié à » ; `NewNoteSheet` / `NoteSheet` = la note en document, enregistrée seule ;
+  `NoteLinkMenu` (Projets / Deals / Contrats avec leur nombre, puis recherche). Règle dans `docs/DESIGN.md`
+  (« Une note est un document »).
+- **À retenir** : pour un parcours de création ou d'interaction, partir d'Accordee (vault, `INSPIRATION/WEBDESIGN/
+  accordee/flows/`) avant de reprendre un formulaire existant ; un écrit libre (note) n'est pas un formulaire.

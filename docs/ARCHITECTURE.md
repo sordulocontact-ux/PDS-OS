@@ -832,7 +832,7 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
   et le groupe « Créer » du ⌘K (`AppSearch`). Ajouter une action = une entrée de `QUICK_ACTIONS`, sa
   règle de droit, son texte (`shell.quickCreate.actions`), son icône (`quick-action-icons.ts`) et sa
   fenêtre ; le guide de PO (`quick-create`, `lib/assistant/guide/topics/daily.ts`) aussi.
-  Action `note` (27/11/2026) : « Nouvelle note » ouvre `QuickNote` (`quick-create/quick-note.tsx`, le `NoteForm` des Notes, sur le projet de la page quand on en lit un, modifiable) ; la note créée s'ouvre dans sa fiche sur les Notes (`useOpenNote`).
+  Action `note` (27/11/2026) : « Nouvelle note » ouvre `QuickNote` (`quick-create/quick-note.tsx`) = `NewNoteSheet`, une note vide qui s'enregistre seule, liée d'avance au projet de la page quand on en lit un (modifiable) ; les choix de lien sont lus à l'ouverture (`loadNoteLinkOptions`).
 - **Paramètres** (27/11/2026, d'après Accordee) : une page par sujet sous `app/(app)/app/settings/`
   (`utilisation`, `apparence`, `notifications`, `raccourcis`, `connexions`, et pour la direction
   `coordonnees`, `distribution`, `requireAdmin`), liste et icônes dans `lib/ui/settings-sections.ts`
@@ -2914,7 +2914,7 @@ Demande de Sacha : « la page Calls [soit] un calendrier et les transcriptions /
 nouvelle page Notes ». La liste des calls devient **Notes** : les calls passés avec leur contenu et des
 **notes écrites** à la main. Deux portes (§ 4) : **Notes** (`/app/notes`) et **Notes du projet**
 (`/app/projects/<p>/notes`, section « Notes » du Pilotage ; seule différence : l'onglet « À venir », le
-projet n'ayant pas de calendrier à lui, et pas de filtre Projet).
+projet n'ayant pas de calendrier à lui, et pas de filtre Lié à).
 
 - **Table `notes`** (migration `20261127180101_notes`) : titre, texte (20 000 caractères), `project_id`
   facultatif, `created_by` (toujours l'auteur, `set_created_by`), `search` (tsvector français généré).
@@ -2930,14 +2930,18 @@ projet n'ayant pas de calendrier à lui, et pas de filtre Projet).
   `search_calls` (PO) reste tel quel : il ne lit que les calls de projets et rend des extraits.
 - **Lectures** (`lib/notes/`) : `queries.ts` (`listAllCalls` + notes, RLS, 500 lignes au plus),
   `views.ts` (`NoteRow` = `CallNoteRow` | `WrittenNoteRow`, onglet de chaque ligne `noteViewOf`, calculé
-  par le code), `search.ts` / `search-actions.ts` (`searchNotesText`), `options.ts` (projets du filtre et
-  du formulaire), `actions.ts` / `sheet-actions.ts` (création, modification, suppression, lecture du
-  texte d'une note). Textes : `lib/i18n/fr/notes.ts`.
+  par le code), `search.ts` / `search-actions.ts` (`searchNotesText`), `read.ts` (`WRITTEN_NOTE_SELECT`,
+  `noteLinkOf` : le lien d'une note lu dans la même requête, jamais une par note), `options.ts`
+  (`loadNoteLinkOptions` : projets, deals, contrats lisibles et le lecteur, en un appel),
+  `actions.ts` / `sheet-actions.ts` (création, modification, suppression, lecture du texte d'une note).
+  Textes : `lib/i18n/fr/notes.ts`.
 - **Onglets** (`?tab=`, `DataTableViews`, nombres calculés après filtres) : **Toutes** (calls passés +
   notes), **Calls**, **Écrites**, **À compléter** (call passé sans compte rendu ni clôture) ; **À venir**
-  dans un projet. Filtres **Projet** (`?project=`, Notes seul) et **Personne** (`?person=`).
-  Colonnes Note / Projet / Contenu (extrait) / Par ; la ligne ouvre `CallSheet` (call) ou `NoteSheet`
-  (note, modèle `ContactSheet`) ; « ⋯ » d'une note (`NoteMenu`) pour son auteur.
+  dans un projet. Filtres **Lié à** (`?link=` : `project:<id>`, `deal:<id>`, `contract:<id>`,
+  `internal`, `team`, Notes seul ; un ancien `?project=<id>` est lu comme `project:<id>`) et **Personne**
+  (`?person=`). Colonnes Note / Date / Lié à / Contenu (extrait) / Par ; « Lié à » = `NoteLinkPill` (note
+  écrite, lien vers le projet / deal / contrat) ou `CallProjectPill` (call) ; la ligne ouvre `CallSheet`
+  (call) ou `NoteSheet` (note) ; « ⋯ » d'une note (`NoteMenu`, Supprimer) pour son auteur.
 - **Recherche dans le texte** : `SearchableList` garde sa recherche instantanée sur le titre ; `extraMatch`
   y ajoute les lignes que le serveur a trouvées dans les textes, `onQueryChange` remonte la requête
   (`useTextSearch` : dès 3 caractères, après une pause, la réponse précédente reste affichée jusqu'à la
@@ -2947,11 +2951,30 @@ projet n'ayant pas de calendrier à lui, et pas de filtre Projet).
   `attach_project_live()`** : il remettrait aussi le déclencheur sur `personal_tasks` (laissé sans exprès,
   `20261112120101`) et sur les tables créées depuis sans lui (`finance_incomes`, `deal_call_proposals`).
   `delete_project_row` supprime les notes du projet.
-- **Formulaire** `NoteForm` (`initial` / `stay`, règle de PO, ouvert par `NewNoteButton`, `QuickNote` du
-  « + » et `NoteMenu`) ; « Nouvelle note » est une action du « + » et du ⌘K (§ 3). **Pas d'éditeur riche**
-  (zone de texte).
-- **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; ni notes liées à
-  autre chose qu'un projet, ni comptes rendus des sessions studio dans Notes.
+- **Lien d'une note** (Sacha, 27/11/2026, migration `20261127210101_notes_links`) : `deal_id`,
+  `contract_id` à côté de `project_id` (clés composites même organisation), **un lien au plus**
+  (`notes_one_link_check`, `num_nonnulls(...) <= 1`) ou aucun (note de l'équipe). **Lecture selon le
+  lien** : projet visible, deal lisible (sous-requête sur `deals` sous son RLS, `can_read_deal`), contrat
+  visible (`can_see_contract`), sinon membre actif ; **écriture** : son auteur, sur un enregistrement qu'il
+  lit. Un deal ou un contrat ne se supprime qu'avec son projet (`delete_project_row`, aucun grant
+  delete) : ses notes partent avec lui (`on delete cascade`, comme ses calls ; `set null` ferait d'une note
+  privée sur un deal une note lue par tous), et `delete_project_row` les supprime par leur nom. **Pas de
+  lien « devis »** : un devis (`production_quotes`) vit dans la Production d'un projet, une note sur un
+  devis se lie au projet. 37 tests pgTAP (`notes_rls`).
+- **Une note est un document** (Sacha 27/11/2026, d'après Accordee) : « Nouvelle note » (`NewNoteButton`
+  de la page, `QuickNote` du « + » et du ⌘K, § 3) ouvre `NewNoteSheet`, le panneau latéral d'une note
+  vide : « Lier à un projet, un deal ou un contrat » (`NoteLinkMenu` : les trois sortes avec leur nombre,
+  puis la liste de la sorte avec recherche), le titre en grand (focus, « Sans titre »), auteur et
+  dernière modification, la pastille du lien (« × » le retire), le texte. **Enregistrement automatique**
+  (`useNoteAutosave`) : créée au premier enregistrement utile (titre ou texte ; titre vide → « Sans
+  titre », texte vide accepté par la base), puis mise à jour après chaque pause de 800 ms et à la
+  fermeture (le démontage de `NoteEditor`), enregistrements à la file (jamais deux créations) ; état dans
+  la barre (`NoteSaveStatus`), échec = toast + « Non enregistré », le texte reste. Fermée vide : rien
+  n'est créé. Ouverte depuis sa ligne (`NoteSheet`), son auteur la modifie sur place de la même façon,
+  les autres la lisent (`NoteDocument` sans `onChange`). `initial` (pré-remplissage pour PO) passe à
+  `NewNoteSheet`. Plus de `NoteForm` ni de fenêtre. **Pas d'éditeur riche** (zone de texte).
+- **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; ni comptes rendus
+  des sessions studio dans Notes.
 
 ## 8 bis. Notifications et mise à jour en direct
 

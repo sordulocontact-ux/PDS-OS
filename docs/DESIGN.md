@@ -114,7 +114,10 @@ dans une bulle posée sur lui (`OverflowHintArea`, intégré à `DataTable`) ; p
 **Un fait par colonne** (Sacha, 25/11/2026) : une cellule ne superpose jamais deux informations
 (« Rattaché à » + son type, un contrat + son état, une date + son motif) ; chacune a sa colonne.
 Seule la cellule du nom garde une sous-ligne grise (`DataTableMedia`), pour ce qui précise le nom
-(version, variante, organisation) ou, sur téléphone, les colonnes masquées.
+(version, variante, organisation) ou, sur téléphone, les colonnes masquées. **Jamais une date sous un
+titre** : la date a sa colonne (Notes, rappel de Sacha du 27/11/2026). L'icône d'une ligne sans image
+(`DataTableIcon`) est **seule, sans rond**, grise, avant le nom (Sacha, 27/11/2026, d'après Accordee) ;
+parmi des photos (Réseau), elle garde leur largeur (`size-9 justify-center`) pour aligner les noms.
 
 ### Couleur
 
@@ -1107,6 +1110,18 @@ latérale de tout enregistrement qu'on lit (contact, artiste, titre, deal…) : 
 communication, une carte de synthèse, blocs titrés sans carte absents quand ils sont vides, chargement en deux temps,
 ↑ ↓ dans l'ordre affiché. Anatomie et règles : `docs/STYLE-FINANCE-PARTOUT.md` § 6.7 bis. Écart voulu avec la fiche
 d'une ligne d'argent de Finance (grand titre, montant en tête, § 6.7) : là, le montant est le premier fait.
+
+### Une note est un document (Sacha, 27/11/2026, d'après Accordee)
+
+**Écart voulu** avec « Formulaires » (§ 4 : « * », manques en rouge, bouton d'enregistrement) : une note écrite
+(Notes) s'écrit comme un document, dans le panneau latéral de la note (`NewNoteSheet`, `NoteSheet`). En haut
+« Lier à un projet, un deal ou un contrat » (bouton `secondary` avec l'icône de lien, menu par sorte avec leur
+nombre et « › », puis la liste avec recherche), le titre en grand sans bordure (« Sans titre » en attente, focus à
+l'ouverture), auteur · « Modifiée le … », la pastille du lien (« × » pour le retirer), puis le texte sans bordure qui
+grandit (« Commencez à écrire… »). **Pas de « * », pas de bouton de validation, pas de modèles ni d'IA** :
+**enregistrement automatique** après chaque pause et à la fermeture, état discret dans la barre du panneau
+(« Enregistrement… », « Enregistré », « Non enregistré » en rouge avec un toast). Fermée vide, la note n'existe pas.
+Son auteur la modifie sur place ; les autres la lisent. Le « ⋯ » ne garde que Supprimer.
 
 ### Pochette d'un projet (10/11/2026)
 

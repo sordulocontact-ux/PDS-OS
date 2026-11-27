@@ -6,25 +6,22 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { notes } from "@/lib/i18n/fr/notes";
+import { NOTE_LINK_KINDS } from "@/lib/notes/views";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteDone } from "@/lib/utils/write-result";
 
 /**
  * Writes of the written notes, with the user's session: the RLS of `notes`
- * (20261127180101) decides. Any approved member writes one, on a project he
- * sees; only its author changes or deletes it.
+ * (20261127180101, 20261127210101) decides. Any approved member writes one,
+ * linked to a project, a deal or a contract he reads (or to none); only its
+ * author changes or deletes it. A note is a document saved as one types
+ * (NoteDocument): a title left empty is saved « Sans titre », the text may
+ * be empty.
  */
 
-export type NoteField = "title" | "body";
-
-/** A WriteResult; on failure, the fields to show in red with their reason. */
+/** A WriteResult with the note's id. */
 export type NoteWriteResult =
-  | (WriteDone & { id: string })
-  | {
-      ok: false;
-      error: string;
-      fields?: Partial<Record<NoteField, string>>;
-    };
+  (WriteDone & { id: string }) | { ok: false; error: string };
 
 const TITLE_MAX = 200;
 const BODY_MAX = 20000;
@@ -32,26 +29,30 @@ const BODY_MAX = 20000;
 const fieldsSchema = z.object({
   title: z.string(),
   body: z.string(),
-  projectId: z.uuid().nullable(),
+  link: z.object({ kind: z.enum(NOTE_LINK_KINDS), id: z.uuid() }).nullable(),
 });
 
 export type NoteInput = z.input<typeof fieldsSchema>;
 
 const t = notes.errors;
 
-/** The missing or too long fields, each with its reason; null when none. */
-function checkFields(input: { title: string; body: string }) {
-  const fields: Partial<Record<NoteField, string>> = {};
-  const title = input.title.trim();
+/** The row's columns: the title (« Sans titre » when empty), the text, and
+ * the one link column set; null with the reason when too long. */
+function columnsOf(input: z.output<typeof fieldsSchema>) {
+  const title = input.title.trim() || notes.untitled;
   const body = input.body.trim();
-  if (!title) fields.title = t.titleRequired;
-  else if (title.length > TITLE_MAX) fields.title = t.titleTooLong;
-  if (!body) fields.body = t.bodyRequired;
-  else if (body.length > BODY_MAX) fields.body = t.bodyTooLong;
-  const count = Object.keys(fields).length;
-  return count > 0
-    ? { ok: false as const, error: t.missing(count), fields }
-    : null;
+  if (title.length > TITLE_MAX) return { error: t.titleTooLong };
+  if (body.length > BODY_MAX) return { error: t.bodyTooLong };
+  const { link } = input;
+  return {
+    columns: {
+      title,
+      body,
+      project_id: link?.kind === "project" ? link.id : null,
+      deal_id: link?.kind === "deal" ? link.id : null,
+      contract_id: link?.kind === "contract" ? link.id : null,
+    },
+  };
 }
 
 function failure(where: string, error: { code?: string; message: string }) {
@@ -66,61 +67,52 @@ function revalidateNotes(...projectIds: Array<string | null | undefined>) {
     if (id) revalidatePath(routes.projectNotes(id));
 }
 
-/** A new note, its author the viewer; on a project he sees, or the team's. */
+/** A new note, its author the viewer; linked to a record he reads, or the
+ * team's. */
 export async function createNote(input: NoteInput): Promise<NoteWriteResult> {
   const access = await requireApproved();
   const parsed = fieldsSchema.safeParse(input);
   if (!parsed.success || !access.organizationId)
     return { ok: false, error: t.generic };
-  const invalid = checkFields(parsed.data);
-  if (invalid) return invalid;
-  const v = parsed.data;
+  const row = columnsOf(parsed.data);
+  if (!row.columns) return { ok: false, error: row.error };
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("notes")
-    .insert({
-      organization_id: access.organizationId,
-      project_id: v.projectId,
-      title: v.title.trim(),
-      body: v.body.trim(),
-    })
+    .insert({ organization_id: access.organizationId, ...row.columns })
     .select("id")
     .single();
   if (error) return failure("createNote", error);
-  revalidateNotes(v.projectId);
-  return { ok: true, id: data.id, done: notes.form.created };
+  revalidateNotes(row.columns.project_id);
+  return { ok: true, id: data.id, done: notes.document.saved };
 }
 
-/** Its title, text or project; its author only (RLS). */
+/** Its title, text or link; its author only (RLS). */
 export async function updateNote(
   input: NoteInput & { id: string },
 ): Promise<NoteWriteResult> {
   await requireApproved();
   const parsed = fieldsSchema.extend({ id: z.uuid() }).safeParse(input);
   if (!parsed.success) return { ok: false, error: t.notFound };
-  const invalid = checkFields(parsed.data);
-  if (invalid) return invalid;
-  const v = parsed.data;
+  const row = columnsOf(parsed.data);
+  if (!row.columns) return { ok: false, error: row.error };
+  const id = parsed.data.id;
   const supabase = await createClient();
   const { data: before } = await supabase
     .from("notes")
     .select("project_id")
-    .eq("id", v.id)
+    .eq("id", id)
     .maybeSingle();
   if (!before) return { ok: false, error: t.notFound };
   const { data, error } = await supabase
     .from("notes")
-    .update({
-      title: v.title.trim(),
-      body: v.body.trim(),
-      project_id: v.projectId,
-    })
-    .eq("id", v.id)
+    .update(row.columns)
+    .eq("id", id)
     .select("id");
   if (error) return failure("updateNote", error);
   if (data.length === 0) return { ok: false, error: t.forbidden };
-  revalidateNotes(before.project_id, v.projectId);
-  return { ok: true, id: v.id, done: notes.form.saved };
+  revalidateNotes(before.project_id, row.columns.project_id);
+  return { ok: true, id, done: notes.document.saved };
 }
 
 /** Deleted for good; its author only (RLS). */

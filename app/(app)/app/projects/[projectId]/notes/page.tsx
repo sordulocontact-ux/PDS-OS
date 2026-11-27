@@ -8,7 +8,7 @@ import { nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts, loadCallMembers } from "@/lib/calls/invite";
 import { fr } from "@/lib/i18n/fr";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
-import { loadNoteProjectOptions } from "@/lib/notes/options";
+import { loadNoteLinkOptions } from "@/lib/notes/options";
 import { getNoteRows } from "@/lib/notes/queries";
 import { asNoteTab } from "@/lib/notes/views";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -30,13 +30,13 @@ export default async function ProjectNotesPage({
 }: PageProps<"/app/projects/[projectId]/notes">) {
   const { projectId } = await params;
   const query = await searchParams;
-  const [access, project, rows, team, contacts, projects] = await allInOrder([
+  const [access, project, rows, team, contacts, choices] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
     getNoteRows(projectId),
     loadCallMembers(projectId),
     loadCallContacts(),
-    loadNoteProjectOptions(),
+    loadNoteLinkOptions(),
   ]);
   const invitable = team
     .filter((p) => p.personId !== access.personId)
@@ -52,11 +52,7 @@ export default async function ProjectNotesPage({
     googleMeet: googleMeetConfigured(),
   };
   const noteButton = (variant: "default" | "outline") => (
-    <NewNoteButton
-      projects={projects}
-      projectId={projectId}
-      variant={variant}
-    />
+    <NewNoteButton choices={choices} projectId={projectId} variant={variant} />
   );
 
   return (
@@ -77,10 +73,10 @@ export default async function ProjectNotesPage({
         now={now}
         door={{ kind: "project", projectId }}
         tab={asNoteTab(query.tab)}
-        project={[]}
+        link={[]}
         person={filterValues(query.person)}
         deleter={callDeleter(access)}
-        projects={projects}
+        choices={choices}
         empty={
           <section className="flex flex-col gap-4">
             <div className="flex max-w-prose flex-col gap-1">
