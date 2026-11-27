@@ -3201,6 +3201,7 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
   | | Brief de cadrage et Plan (M4) | (au 26/11 : titres avec master seulement, « 1 titre sans master final ») | « Rivage test · Titre de Lila Vega (à nommer) », « 2 titres sans master final » |
   | | Sorties au lancement (M6) | (au 26/11 : « À fixer ») | « Rivage test · 7 mai 2027 · Prévue » |
   | | Contrats du titre (M8) | un « Confirmer » par titre | « Confirmer pour les 2 titres » : Rivage test sans Édition (décochée), l'autre titre avec les quatre |
+  | | Mixage et page de l'ingénieur (M9, ingénieur « Ingé test M9 » sans adresse : lien copié, aucun e-mail) | (au 26/11 : « dossier du mix de Micro test ») | objet « « Rivage test » : votre dossier de mix », message et carte de la page `/c/` : « voici le dossier du mix de « Rivage test » » |
   | « Assurance 30 » | Menu et Vue d'ensemble (M12) | Distribution sans compte | Distribution « 3 », carte « Distribution · Néons · À vous : confirmer les paramètres de distribution » |
   | | Contrats du titre (M8) | « Confirmer les contrats nécessaires » seul | plus « Confirmer pour les 7 titres » (non cliqué) |
   | « Micro test » | Prêt pour la sortie | « Contrat de Elio Danvers : À créer » | « Pas d'accord nécessaire », compté fait |
@@ -3216,8 +3217,12 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
   - « Micro test » garde l'action « Faire signer un contrat à Elio Danvers » stockée « bloquée » au lancement (le
     « Pas d'accord nécessaire » datait d'avant) : le tableau du plan la range en « fait », mais une révision de la
     Stratégie la lirait encore ; la retirer = confirmer de nouveau « Contrats des intervenants » dans l'app ;
-  - M9 pas vu dans Chrome : aucun dossier de mix à transmettre sur la base de dev (un dossier déjà transmis garde le
-    nom du projet) ; l'en-tête de la page de contact `/c/` nomme toujours le projet (SQL `get_contact_page`) ;
+  - M9 : un dossier déjà transmis garde le nom du projet ; l'en-tête de la page de contact `/c/` nomme toujours le
+    projet (« « Collectif test 27-11 » · Ingé test M9 », SQL `get_contact_page`) ;
+  - le Mixage n'offre « Copier le lien » que pour un ingénieur sans adresse : avec une adresse et le SMTP actif, la
+    transmission envoie l'e-mail elle-même ;
   - le Cadrage cite les titres sans master, mais pas encore leur invité parmi les personnes (Lila Vega).
 - **Données de test laissées** : titre « Rivage test » au Catalogue (« PDS feat. Tavio Marlan »), projet « Collectif
-  test 27-11 » (Cadrage fait avec des « Non applicable », plan lancé, contrats des deux titres confirmés).
+  test 27-11 » (Cadrage fait avec des « Non applicable », plan lancé, contrats des deux titres confirmés, source
+  « rivage-maquette.wav », Brief Master enregistré, dossier de mix transmis par lien privé à « Ingé test M9 », contact
+  du Réseau sans adresse e-mail, avec une dérogation pour les pistes séparées).

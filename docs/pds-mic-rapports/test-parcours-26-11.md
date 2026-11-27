@@ -184,8 +184,8 @@ Rien n'a été supprimé.
 6. **M4** : le Brief de cadrage et le Plan comptent tous les titres actifs, avec ou sans master.
 7. **M7** : la sortie d'un titre reprend la pochette livrée par la Production.
 8. **M8** : « Confirmer pour les N titres » sur « Contrats du titre ».
-9. **M9** : la page de l'ingénieur nomme le titre (« dossier du mix de Echo test ») ; pas vu
-   dans Chrome (aucun dossier à transmettre sur la base de dev).
+9. **M9** : la page de l'ingénieur nomme le titre (« dossier du mix de Rivage test », vérifié
+   sur « Collectif test 27-11 ») ; son en-tête nomme encore le projet.
 10. **M10** : sans `?sortie=`, la Distribution ouvre la seule sortie, sinon laisse choisir.
 11. **M12** : le « À vous » de la Distribution d'un collectif compte dans le menu et la Vue
     d'ensemble.
