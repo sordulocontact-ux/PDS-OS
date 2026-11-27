@@ -116,8 +116,6 @@ export const masterSource = {
     `En attente de ${artist} : enregistrer les voix définitives${pending ? ` (${pending})` : ""}.`,
   watching:
     "PDS OS surveille le Catalogue : à l'arrivée des voix, il propose de remplacer la source.",
-  waitingOwner: (owner: string) =>
-    `En attente de ${owner} : confirmer la source.`,
   newer: {
     title: "Nouvelle version reçue au Catalogue :",
     proposed: "Nouvelle source proposée",

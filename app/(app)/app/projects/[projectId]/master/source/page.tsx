@@ -93,7 +93,7 @@ export default async function ProjectMasterSourcePage({
       slots={lead ? { lead } : undefined}
     >
       {!gesture && notice}
-      <SourceStep view={view} titleId={titleId} ownerName={project.ownerName} />
+      <SourceStep view={view} titleId={titleId} />
     </MasterStepFrame>
   );
 }

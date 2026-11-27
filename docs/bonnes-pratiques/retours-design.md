@@ -165,3 +165,20 @@ qui a été fait.
   (« Une note est un document »).
 - **À retenir** : pour un parcours de création ou d'interaction, partir d'Accordee (vault, `INSPIRATION/WEBDESIGN/
   accordee/flows/`) avant de reprendre un formulaire existant ; un écrit libre (note) n'est pas un formulaire.
+---
+
+## 27/11/2026 : Master d'un collectif, l'en-tête de l'étape d'un titre
+
+- **Ce que Sacha a dit** : « pour toi c'est normal ça ? » (capture de « Assurance 30 › Master › Marée haute ›
+  Source », la zone titre, pourquoi et ligne « Assurance 30 · PDS · Échéance du projet » entourée).
+- **Son explication** (mon avis, validé par « ok ») : la ligne « projet · artiste » était retirée partout ailleurs, et
+  ici elle parlait du projet alors que l'étape porte sur un titre ; l'échéance du projet n'est pas la sortie du titre ;
+  le pourquoi était une règle pour le code (« Jamais un master final ») ; les 4 tuiles du collectif, posées sous le
+  titre de l'étape, se lisaient comme faisant partie de « Source » de ce titre, deux à « 0 · Aucun titre » ;
+  « En attente de Lina » était dit trois fois avec deux verbes.
+- **Fait** : faits du Master = « Master final attendu le » et la sortie (celle du titre dans un collectif), plus de
+  « projet · artiste » ; « Où en sont les titres » en bas de l'étape avec son titre et « Demander des fichiers » à
+  côté, tuiles à 0 retirées ; l'encadré « En attente de … : confirmer la source » retiré (l'étape le dit déjà) ;
+  pourquoi de Source : « Le fichier sur lequel le mixeur va travailler. ».
+- **À retenir** : entre le titre d'une étape et son contenu, rien qui parle d'autre chose ; une attente se dit une
+  fois ; un pourquoi s'écrit pour la personne, pas pour le code.

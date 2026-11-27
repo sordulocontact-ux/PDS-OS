@@ -481,7 +481,11 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
      `--text-primary` (« Master final **Ven. 20/11/2026** », « Sortie **Sam. 05/12/2026** »), dates
      toujours par `formatDay`. La ligne du projet par défaut (« Néons · Mona Lys · Single »,
      Budget, Responsable, Sortie) n'est plus affichée (Figma 304:20801), ni l'état et les faits de
-     la Vue d'ensemble, qui garde son nom seul.
+     la Vue d'ensemble, qui garde son nom seul. Sur l'étape d'un **titre d'un collectif**, la sortie
+     est **celle du titre** (sinon de la compilation), jamais l'échéance du projet, et le titre n'est
+     pas répété (le fil le nomme) (Sacha, 27/11/2026, Master d'« Assurance 30 »). **Rien d'autre que
+     l'étape entre son titre et son contenu** : une vue de plusieurs objets (« Où en sont les titres »
+     du Master d'un collectif) va en bas de l'étape, sous son propre titre, sans les tuiles à 0.
   Le **Master et la Distribution n'ont plus de chevrons** (leurs étapes sont dans le parcours),
   ni le Juridique ni le Cadrage. Le layout du projet rend un en-tête par défaut, tiré de l'URL ;
   une section qui a ses propres faits ou actions rend son `ModuleHeader` en tête de page, et

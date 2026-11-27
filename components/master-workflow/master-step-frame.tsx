@@ -11,6 +11,7 @@ import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { TitlesOverview } from "@/components/master-workflow/titles-overview";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import {
   masterJourneyContext,
   masterTitleJourney,
@@ -24,23 +25,44 @@ import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { projectHeaderData } from "@/lib/projects/header";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import type { MasterStepKey } from "@/lib/ui/master-steps";
+import { loadRelease, PROJECT_RELEASE } from "@/lib/release/queries";
+import { createClient } from "@/lib/supabase/server";
 import { formatDay } from "@/lib/utils/day";
 
-const fr = { masterJourney };
+const fr = { masterJourney, moduleFrame };
 
 const t = fr.masterJourney;
 
-/** The Master's facts under its title (proto): the project, the master
- * final's date, the release. */
-export async function masterFacts(projectId: string): Promise<ModuleFact[]> {
-  const [data, { facts }] = await Promise.all([
+/**
+ * The Master's facts under its title: the master final's date, then the
+ * release — never « projet · artiste », which the project's bar already
+ * names (docs/DESIGN.md, « En-tête de module », point 4). A collective's
+ * title: its own release, not the project's due date (Sacha, 27/11/2026:
+ * « Assurance 30 · PDS », « Échéance du projet » on the Source of « Marée
+ * haute »); the title is named by the trail.
+ */
+export async function masterFacts(
+  projectId: string,
+  titleScope: MasterTitleScope | null = null,
+): Promise<ModuleFact[]> {
+  const [data, { facts }, titleRelease] = await Promise.all([
     projectHeaderData(projectId),
     masterJourneyContext(projectId),
+    titleScope ? loadTitleRelease(projectId, titleScope) : null,
   ]);
-  const own = data?.facts ?? [];
   const due = facts.brief?.masterFinalDue;
+  const release = titleScope
+    ? titleRelease
+      ? [
+          {
+            key: "release",
+            label: fr.moduleFrame.facts.release,
+            value: formatDay(titleRelease),
+          },
+        ]
+      : []
+    : (data?.facts ?? []).filter((f) => f.key === "release");
   return [
-    ...own.filter((f) => f.key === "project"),
     ...(due
       ? [
           {
@@ -50,15 +72,39 @@ export async function masterFacts(projectId: string): Promise<ModuleFact[]> {
           },
         ]
       : []),
-    ...own.filter((f) => f.key === "release"),
+    ...release,
   ];
+}
+
+/** A collective's title's release date, else its compilation's. */
+async function loadTitleRelease(
+  projectId: string,
+  scope: MasterTitleScope,
+): Promise<string | null> {
+  const supabase = await createClient();
+  try {
+    const [own, compilation] = await Promise.all([
+      loadRelease(supabase, projectId, {
+        kind: "title",
+        titleId: scope.active.titleId,
+      }),
+      loadRelease(supabase, projectId, PROJECT_RELEASE),
+    ]);
+    return (
+      own?.planned_release_date ?? compilation?.planned_release_date ?? null
+    );
+  } catch (error) {
+    // A fact of the head never takes the page down.
+    console.error("masterFacts release:", error);
+    return null;
+  }
 }
 
 /**
  * The frame of a Master step (docs/VISION-UX.md § 4, JourneyLayout): the
  * journey on the left with « Historique du master » at its foot, on its
  * right the head (h1 = the step's title, its why, « Qui fait quoi », the
- * Master's facts) then the step's content.
+ * Master's facts) then the step's content, a collective's titles last.
  */
 export async function MasterStepFrame({
   projectId,
@@ -118,7 +164,7 @@ export async function MasterStepFrame({
                 ? [titleCrumb(projectId, stepKey, titleScope)]
                 : undefined
             }
-            facts={masterFacts(projectId)}
+            facts={masterFacts(projectId, titleScope)}
             actions={
               <WhoDoesWhatButton
                 {...roles}
@@ -136,23 +182,24 @@ export async function MasterStepFrame({
             modules={["master"]}
             steps={choices}
           />
-          {/* A collective: where its titles stand, at a glance (lot 9). */}
-          {titleScope && (
-            <TitlesOverview
-              projectId={projectId}
-              scope={titleScope}
-              canRequest={
-                project.ownerPersonId !== null &&
-                project.ownerPersonId === access.personId
-              }
-            />
-          )}
         </>
       }
     >
       <StepPanel step={step} steps={titled} blockedLabel={t.blocked} {...slots}>
         <StepBlockers stepRef={stepRef} steps={choices} />
         {children}
+        {/* A collective: where its titles stand (lot 9), under the step it
+            is not part of. */}
+        {titleScope && (
+          <TitlesOverview
+            projectId={projectId}
+            scope={titleScope}
+            canRequest={
+              project.ownerPersonId !== null &&
+              project.ownerPersonId === access.personId
+            }
+          />
+        )}
         <StepToolsBlock
           stepRef={stepRef}
           steps={choices}

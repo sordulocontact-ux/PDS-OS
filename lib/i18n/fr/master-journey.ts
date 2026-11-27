@@ -47,7 +47,7 @@ export const masterJourney = {
   steps: {
     source: {
       title: "Source",
-      why: "La version de départ du mix, confirmée. Jamais un master final.",
+      why: "Le fichier sur lequel le mixeur va travailler.",
     },
     brief: {
       title: "Brief",

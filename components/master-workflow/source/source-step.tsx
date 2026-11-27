@@ -34,11 +34,9 @@ const t = fr.masterSource;
 export function SourceStep({
   view,
   titleId,
-  ownerName,
 }: {
   view: SourceStepView;
   titleId: string | null;
-  ownerName: string | null;
 }) {
   const title = pickSourceTitle(view, titleId);
   if (!title) return <ToneCallout tone="info">{t.noTitle}</ToneCallout>;
@@ -50,7 +48,7 @@ export function SourceStep({
   return (
     <div className="flex flex-col gap-5">
       <SourceTitlePills view={view} title={title} />
-      <TitleSource view={view} title={title} ownerName={ownerName} />
+      <TitleSource view={view} title={title} />
     </div>
   );
 }
@@ -58,11 +56,9 @@ export function SourceStep({
 function TitleSource({
   view,
   title,
-  ownerName,
 }: {
   view: SourceStepView;
   title: SourceTitle;
-  ownerName: string | null;
 }) {
   if (title.declared)
     return (
@@ -161,7 +157,9 @@ function TitleSource({
 
       {checked}
 
-      {view.canConfirm ? (
+      {/* Who else waits is said once, by the step (« En attente de … »,
+          StepPanel), never again here (Sacha, 27/11/2026). */}
+      {view.canConfirm && (
         // A confirmed source: « Changer la source » reopens the form.
         <SourceChooser
           projectId={view.projectId}
@@ -174,11 +172,6 @@ function TitleSource({
             />
           }
         />
-      ) : (
-        !current &&
-        ownerName && (
-          <ToneCallout tone="info">{t.waitingOwner(ownerName)}</ToneCallout>
-        )
       )}
     </>
   );
