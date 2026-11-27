@@ -51,7 +51,6 @@ export const onboarding = {
 
   poTitle: "PO prépare, vous décidez",
   poQuestion: "Une question ?",
-  poSpace: "Espace",
   poOpens: "ouvre PO depuis n'importe quelle page.",
 
   journey: [

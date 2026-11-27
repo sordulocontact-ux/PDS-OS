@@ -832,6 +832,17 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
   et le groupe « Créer » du ⌘K (`AppSearch`). Ajouter une action = une entrée de `QUICK_ACTIONS`, sa
   règle de droit, son texte (`shell.quickCreate.actions`), son icône (`quick-action-icons.ts`) et sa
   fenêtre ; le guide de PO (`quick-create`, `lib/assistant/guide/topics/daily.ts`) aussi.
+- **Raccourcis clavier** (27/11/2026, Paramètres › Raccourcis clavier) : `lib/shortcuts/definitions.ts`
+  (actions `search`, `create`, `assistant`, `capture`, défauts, règles : `shortcutProblem`,
+  `shortcutOwner`, `mergeShortcuts`) ; table `account_shortcuts` (une ligne par compte, seulement ce qui
+  diffère du défaut, RLS : son propre compte, test `account_shortcuts_rls.test.sql`), lue par le layout
+  **sans bloquer la page** (`loadMyShortcuts()` passée en promesse à `ShortcutsProvider`, les défauts
+  répondent d'ici là), écrite par `saveShortcut` (`lib/shortcuts/actions.ts`, contrôle du conflit aussi
+  côté serveur). **Toute écoute d'un raccourci passe par `useKeyShortcut(action, …)`**
+  (`components/shell/shortcuts/`) : avec ⌘ partout, une touche seule jamais dans un champ ni fenêtre
+  ouverte, touche doublée (Espace Espace) annulée par un défilement, `capture` pour passer avant (⌘K de
+  Finance). Ajouter un raccourci = une action dans `SHORTCUT_ACTIONS`, son défaut, son texte
+  (`lib/i18n/fr/shortcuts.ts`) et son `useKeyShortcut`.
 - Demandes d'accès en attente : comptées par le layout (`countPendingMemberships`, admins
   seulement) et affichées sur « Équipe », qui ouvre alors `?status=pending`. Un layout ne
   se recalcule pas à chaque navigation : le compteur se met à jour au chargement d'une

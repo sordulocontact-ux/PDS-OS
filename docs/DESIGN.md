@@ -395,11 +395,20 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   téléphone : dans l'en-tête, à la place de l'ancien « + Dépense »), un bouton icône qui
   ouvre un menu de créations : Nouvelle conversation, Écrire un mail, Ajouter une dépense, Nouvelle
   réunion, Nouveau contact, Nouveau deal (ordre fixe, filtrées par droit, `lib/shell/quick-actions.ts`).
-  Touche **N** hors d'un champ (pas C, qui lance la capture d'une zone pour un retour). Les mêmes actions forment le groupe « Créer » du ⌘K (en tête champ
+  Touche **N** par défaut hors d'un champ (pas C, qui lance la capture d'une zone pour un retour),
+  modifiable dans Paramètres › Raccourcis clavier. Les mêmes actions forment le groupe « Créer » du ⌘K (en tête champ
   vide, filtrées par le texte). **Règle d'admission** : seulement un objet qui existe hors d'une étape
   (jamais un geste d'étape, qui reste dans son étape), sept au plus ; chaque entrée ouvre le **vrai**
   formulaire et finit comme sur sa page. Pas de bouton flottant (geste de mobile, l'app est d'abord
   pour l'ordinateur). Références : Linear, Notion, Plain (le « nouveau » en tête de barre).
+- **Raccourcis clavier (Sacha, 27/11/2026)** : chacun change les siens dans Paramètres › Raccourcis
+  clavier (`/app/settings/raccourcis`) : Rechercher (⌘K), Créer (N), Ouvrir PO (Espace Espace), Capturer
+  une zone pour un retour (C). Une ligne par raccourci, ses touches en `Kbd`, « Modifier » (contour)
+  puis « Appuyez sur la nouvelle touche… », Échap annule ; « Rétablir » (texte, à côté) quand il diffère
+  du défaut. Refusés avec leur raison : touche déjà prise par un autre raccourci, ⌘ + une touche du
+  navigateur (copier, rechercher, onglet…), autre chose qu'une lettre ou un chiffre (Espace : deux fois).
+  **Toute touche affichée à l'écran** passe par `ShortcutKeys` / `shortcutText` (barre, infobulle du « + »,
+  phrase sous PO, accueil), jamais écrite en dur.
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
 - Un item sans page encore reste visible, grisé, non cliquable (`disabled` dans `NavItem`),

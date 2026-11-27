@@ -3250,3 +3250,15 @@ Chrome avant de corriger.
   refusé n'empêche plus les suivants. Les trois autres cas de Maël (« Maintenant » après le lancement du plan,
   « 0 contrôle sur 6 » de la Distribution, « Validation en cours… » du mix) n'ont pas de cause trouvée dans le
   code : à rejouer avec `PERF_TRACE=1`.
+
+## Paramètres › Raccourcis clavier (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : une page des Paramètres pour changer les raccourcis de l'app.
+
+- Quatre raccourcis, à chacun : Rechercher (⌘K), Créer (N), Ouvrir PO (Espace Espace), Capturer une zone pour un
+  retour (C). Page `/app/settings/raccourcis` (Paramètres › « Modifier les raccourcis ») : « Modifier » attend la
+  touche, refus avec sa raison (conflit, touche du navigateur, touche impossible), « Rétablir ».
+- Migration `20261127200101_account_shortcuts` (table `account_shortcuts`, RLS : son propre compte ; test pgTAP).
+- Un seul hook d'écoute (`useKeyShortcut`) pour les cinq écoutes de l'app (recherche, recherche de Finance, « + »,
+  PO, capture) ; toutes les touches à l'écran suivent le choix (`ShortcutKeys`).
+- Guide de PO : sujet `shortcuts`, Paramètres et « + » mis à jour.

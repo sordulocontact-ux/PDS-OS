@@ -2293,6 +2293,32 @@ export type Database = {
           },
         ]
       }
+      account_shortcuts: {
+        Row: {
+          account_id: string
+          shortcuts: Json
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string
+          shortcuts?: Json
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          shortcuts?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_shortcuts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           created_at: string

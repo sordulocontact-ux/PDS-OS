@@ -681,7 +681,6 @@ export const shell = {
   // creations open from any page, also in the ⌘K's « Créer » group.
   quickCreate: {
     open: "Créer",
-    shortcut: "N",
     actions: {
       conversation: "Nouvelle conversation",
       mail: "Écrire un mail",

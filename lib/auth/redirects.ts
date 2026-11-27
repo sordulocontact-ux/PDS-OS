@@ -186,6 +186,8 @@ export const routes = {
   members: "/app/members",
   // Each member's own settings: their requests to PO of the day.
   settings: "/app/settings",
+  // Their keyboard shortcuts (27/11/2026).
+  settingsShortcuts: "/app/settings/raccourcis",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",
   artist: (id: string) => `/app/catalog/artists/${id}`,

@@ -6,7 +6,8 @@ import { useCallback, useState } from "react";
 import { navItemClass } from "@/components/shell/nav-item";
 import { QUICK_ACTION_ICONS } from "@/components/shell/quick-create/quick-action-icons";
 import { useQuickCreate } from "@/components/shell/quick-create/quick-create-provider";
-import { useQuickCreateShortcut } from "@/components/shell/quick-create/use-quick-create-shortcut";
+import { ShortcutKeys } from "@/components/shell/shortcuts/shortcut-keys";
+import { useKeyShortcut } from "@/components/shell/shortcuts/use-key-shortcut";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +15,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Kbd } from "@/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -29,8 +29,8 @@ const fr = { shell };
 /**
  * The « + » of the shell: a menu of the creations open to the reader, from
  * any page. In the sidebar's head beside the collapse button (under the
- * magnifier when collapsed), in the mobile header beside the bell; « N »
- * opens it.
+ * magnifier when collapsed), in the mobile header beside the bell; the
+ * reader's shortcut (N by default, Paramètres) opens it.
  */
 export function QuickCreateButton({
   collapsed = false,
@@ -46,7 +46,9 @@ export function QuickCreateButton({
   const wide = useMediaQuery("(min-width: 768px)");
   const onScreen = placement === "sidebar" ? wide : !wide;
   const openMenu = useCallback(() => setMenuOpen(true), []);
-  useQuickCreateShortcut(onScreen && actions.length > 0, openMenu);
+  useKeyShortcut("create", openMenu, {
+    enabled: onScreen && actions.length > 0,
+  });
 
   if (actions.length === 0) return null;
 
@@ -85,7 +87,7 @@ export function QuickCreateButton({
         <TooltipContent side={collapsed && !header ? "right" : "bottom"}>
           <span className="flex items-center gap-2">
             {t.open}
-            <Kbd>{t.shortcut}</Kbd>
+            <ShortcutKeys action="create" />
           </span>
         </TooltipContent>
       </Tooltip>

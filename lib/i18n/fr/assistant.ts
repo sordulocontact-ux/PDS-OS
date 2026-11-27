@@ -402,7 +402,9 @@ export const assistant = {
     description:
       "Parlez : votre demande part à PO dès la fin de la dictée. Il sait sur quelle page vous êtes.",
     stopHint: "Entrée ou le micro pour envoyer, Échap pour annuler.",
-    hint: "Espace Espace pour ouvrir PO depuis n'importe quelle page.",
+    // The reader's shortcut (Espace Espace by default, Paramètres).
+    hint: (keys: string) =>
+      `${keys} pour ouvrir PO depuis n'importe quelle page.`,
     close: "Fermer",
   },
   // Conversation page, opened by a question from the home page.

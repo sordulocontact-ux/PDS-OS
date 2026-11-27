@@ -253,7 +253,7 @@ export const dailyTopics: GuideTopic[] = [
     facts: [
       "En haut de la barre de gauche, « Rechercher… » (⌘K) trouve une page, un projet, un artiste, un titre, un contact, un contrat, un deal, un call ou une session studio et l'ouvre.",
       "Le « + » en haut de la barre de gauche, à côté du bouton qui la replie (barre repliée : sous la loupe), ouvre un menu pour créer sans changer de page : Nouvelle conversation (avec PO), Écrire un mail, Ajouter une dépense, Nouvelle réunion, Nouveau contact, Nouveau deal. Chacun ne voit que ce qu'il a le droit de faire.",
-      "La touche N, hors d'un champ, ouvre ce menu. Les mêmes actions sont en tête de la recherche ⌘K, sous « Créer » : taper « dépense » propose « Ajouter une dépense ».",
+      "La touche N (par défaut, à changer dans Paramètres › Raccourcis clavier), hors d'un champ, ouvre ce menu. Les mêmes actions sont en tête de la recherche ⌘K, sous « Créer » : taper « dépense » propose « Ajouter une dépense ».",
       "Chaque action ouvre le même formulaire que sur sa page, et finit pareil : un contact ou un deal créé ouvre sa fiche, une réunion ouvre sa page.",
       "Sur la page d'un projet, « Ajouter une dépense » vise déjà ce projet ; on peut en choisir un autre.",
       "« Nouvelle réunion » crée la même réunion que le bouton de la page Calls. Le call d'un projet se crée depuis l'onglet Calls du projet.",
@@ -271,6 +271,36 @@ export const dailyTopics: GuideTopic[] = [
       {
         q: "Pourquoi « Écrire un mail » n'apparaît pas ?",
         a: "La boîte de po@pdsrecords.com n'est pas encore branchée sur cette version de PDS OS.",
+      },
+    ],
+  },
+  {
+    key: "shortcuts",
+    title: "Raccourcis clavier",
+    summary:
+      "Les touches qui ouvrent la recherche, le « + », PO et la capture d'un retour, que chacun peut changer dans Paramètres.",
+    keywords: [
+      "raccourci",
+      "raccourcis",
+      "clavier",
+      "touche",
+      "cmd k",
+      "espace espace",
+      "changer de touche",
+    ],
+    href: "/app/settings/raccourcis",
+    where: "Paramètres › Raccourcis clavier",
+    facts: [
+      "Par défaut : ⌘K pour Rechercher, N pour Créer (le « + »), Espace Espace pour ouvrir PO, C pour capturer une zone de la page dans un retour.",
+      "Dans Paramètres › Raccourcis clavier, « Modifier » attend la nouvelle touche : une lettre ou un chiffre, seule ou avec ⌘ ; Espace se presse deux fois. Échap annule.",
+      "Une touche déjà prise par un autre raccourci, ou par le navigateur avec ⌘ (copier, rechercher, nouvel onglet…), est refusée avec sa raison.",
+      "« Rétablir » remet le raccourci par défaut. Les raccourcis sont à chacun : ils suivent la personne sur tous ses ordinateurs.",
+      "Une touche seule ne marche jamais pendant qu'on écrit dans un champ, ni quand une fenêtre est ouverte ; un raccourci avec ⌘ marche partout.",
+    ],
+    faq: [
+      {
+        q: "Comment changer le raccourci de la recherche ?",
+        a: "Dans Paramètres › Raccourcis clavier, « Modifier » sur la ligne Rechercher, puis appuyez sur la nouvelle touche.",
       },
     ],
   },

@@ -165,7 +165,8 @@ qu'un composant commun, une variante, un token ou une icône change. Les briques
   (maison, `ui/toast.ts`, plus de sonner),
   `PdfExportButton`, `useWriteSubmit` (**toute** écriture : attente, erreur, toast ; résultat
   `WriteResult`), `QuickCreateProvider` (le « + » de la coquille et le groupe « Créer » du ⌘K : une
-  action de plus = une entrée de `lib/shell/quick-actions.ts`, `docs/ARCHITECTURE.md` § 3).
+  action de plus = une entrée de `lib/shell/quick-actions.ts`, `docs/ARCHITECTURE.md` § 3), `useKeyShortcut` (**toute** écoute d'un raccourci clavier, choisi par chacun dans
+  Paramètres) et `ShortcutKeys` (**toute** touche affichée).
 - **Formulaires** : `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError`
   (`components/auth/`), `RequiredMark`, `FormDialog`, `DialogFormActions`, `ReasonForm`,
   `FormSection`, `CheckboxField`, `Checkbox`, `ChoiceCards`, `ChipChoice`, `OptionSelect`,

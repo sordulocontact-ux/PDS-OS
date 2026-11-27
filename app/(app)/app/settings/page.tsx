@@ -7,9 +7,13 @@ import { SkeletonRows } from "@/components/ui/skeleton";
 import { BillingForm } from "@/components/settings/billing-form";
 import { DistributionForm } from "@/components/settings/distribution-form";
 import { StyleChoice } from "@/components/settings/style-choice";
+import { buttonVariants } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { shortcuts } from "@/lib/i18n/fr/shortcuts";
 import { getOwnAiUsage } from "@/lib/members/queries";
 import { loadDistributionFormats } from "@/lib/distribution/requirements";
 import { loadBilling } from "@/lib/invoices/billing";
@@ -74,6 +78,22 @@ export default async function SettingsPage({
         card
       >
         <StyleChoice />
+      </PageSection>
+      <PageSection
+        id="shortcuts"
+        title={shortcuts.title}
+        description={shortcuts.settings.description}
+        card
+      >
+        <ViewLink
+          href={routes.settingsShortcuts}
+          className={buttonVariants({
+            variant: "outline",
+            className: "self-start",
+          })}
+        >
+          {shortcuts.settings.open}
+        </ViewLink>
       </PageSection>
       <PageSection
         id="connections"

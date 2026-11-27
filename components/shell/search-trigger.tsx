@@ -3,7 +3,7 @@
 import { IconMagnifier } from "nucleo-sharp-essential";
 
 import { navItemClass } from "@/components/shell/nav-item";
-import { Kbd } from "@/components/ui/kbd";
+import { ShortcutKeys } from "@/components/shell/shortcuts/shortcut-keys";
 import {
   Tooltip,
   TooltipContent,
@@ -45,7 +45,9 @@ export function SearchTrigger({
       {!collapsed && (
         <>
           <span className="min-w-0 flex-1 truncate">{label}</span>
-          {shortcut && <Kbd className="max-sm:hidden">⌘K</Kbd>}
+          {shortcut && (
+            <ShortcutKeys action="search" className="max-sm:hidden" />
+          )}
         </>
       )}
     </button>

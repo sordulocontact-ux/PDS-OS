@@ -112,6 +112,7 @@ export const adminTopics: GuideTopic[] = [
       "Elle y règle les formats audio exigés par The Orchard, repris dans le Brief des ingénieurs.",
       "Connexions : le compte pro @pdsrecords.com a son Agenda, son Gmail et son Drive branchés sans rien faire, en lecture seule ; s'il n'est pas l'adresse de connexion, le directeur général l'écrit dans Équipe (Modifier › Adresse Google pro). « Connecter un compte Google » ajoute un autre compte (Gmail perso), « ⋯ › Déconnecter » le retire. Chacun coupe un service en le décochant ; ce qui en est lu n'est montré qu'à lui, pas même à la direction.",
       "Le thème de l'interface (Système, Clair, Sombre) se change dans le menu du compte.",
+      "Raccourcis clavier : « Modifier les raccourcis » ouvre la page où chacun change ses touches (recherche, « + », PO, capture d'un retour).",
     ],
     faq: [
       {

@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useDeferredValue, useEffect, useId, useState } from "react";
+import { useDeferredValue, useId, useState } from "react";
 
 import { SearchTrigger } from "@/components/shell/search-trigger";
+import { useKeyShortcut } from "@/components/shell/shortcuts/use-key-shortcut";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { SearchField } from "@/components/ui/search-field";
@@ -72,21 +73,16 @@ export function FinanceSearch({
   const listId = useId();
   const needle = normalizeSearch(useDeferredValue(query));
 
-  useEffect(() => {
-    if (!shortcut) return;
-    function onKey(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        // Before the app's ⌘K (the main sidebar's): on a Finance page,
-        // Finance's search answers (AppSearch skips a prevented event).
-        event.preventDefault();
-        setByKeys(true);
-        setOpen((was) => !was);
-      }
-    }
-    window.addEventListener("keydown", onKey, { capture: true });
-    return () =>
-      window.removeEventListener("keydown", onKey, { capture: true });
-  }, [shortcut]);
+  // The reader's search shortcut (⌘K by default), before the app's (the
+  // main sidebar's): on a Finance page, Finance's search answers.
+  useKeyShortcut(
+    "search",
+    () => {
+      setByKeys(true);
+      setOpen((was) => !was);
+    },
+    { enabled: shortcut, capture: true },
+  );
 
   const rows = needle
     ? [...SECTIONS, ...(pulse?.items ?? [])].filter((row) =>
