@@ -149,8 +149,9 @@ export function computedSignal(
       };
     }
     case "visual": {
-      // A title's release (lot 15): its title's cover, in the Catalogue.
-      if (sources.collective?.kind === "title") {
+      // A title's release (lot 15): its title's cover, in the Catalogue,
+      // unless the Production delivered one for it (M7).
+      if (sources.collective?.kind === "title" && !sources.cover?.delivered) {
         const file = sources.collective.catalogCover?.fileName;
         return file
           ? { status: "coherent", text: t.titleCover(file) }

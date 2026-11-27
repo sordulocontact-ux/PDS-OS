@@ -301,8 +301,10 @@ export function distributionReadiness(
 
   items.push(...legalItems(input));
   items.push(...collectiveItems(input, back));
+  // A title's release: the Production's cover once delivered for it (M7),
+  // else its title's cover in the Catalogue.
   items.push(
-    input.collective?.kind === "title"
+    input.collective?.kind === "title" && !input.cover?.delivered
       ? titleCoverItem(input.collective, back)
       : coverItem(input, formatDate),
   );

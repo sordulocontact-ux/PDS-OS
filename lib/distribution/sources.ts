@@ -17,6 +17,8 @@ import { loadFinalView } from "@/lib/master-workflow/final";
 import { loadProjectDates } from "@/lib/projects/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { listMasterCovers } from "@/lib/catalog/covers";
+import { loadTitleScopes, scopeOf } from "@/lib/projects/title-scopes";
+import { titleScopeCovers } from "@/lib/projects/title-scope-rules";
 import { routes } from "@/lib/auth/redirects";
 import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { loadContractGaps, gapNames } from "@/lib/legal/contract-gaps";
@@ -157,11 +159,12 @@ export const loadDistributionSources = trackedCache(async function load(
     distributionCover(project.id, releaseId),
     loadProjectDates(project.id),
   ]);
-  const [titleCovers, gaps] = await Promise.all([
+  const [titleCovers, gaps, titleScopes] = await Promise.all([
     titleCoverMaster
       ? listMasterCovers(titleCoverMaster)
       : Promise.resolve(null),
     scoped ? loadContractGaps(project.id, "release") : Promise.resolve([]),
+    scoped?.kind === "title" ? loadTitleScopes(project.id) : null,
   ]);
 
   const rows = new Map((masters?.data ?? []).map((row) => [row.id, row]));
@@ -268,7 +271,23 @@ export const loadDistributionSources = trackedCache(async function load(
     title: sheet.title,
     status: sheet.status,
   }));
-  const found = cover.data?.[0] ?? null;
+  // A title's release (M7, test de parcours du 26/11/2026): the cover the
+  // Production delivered, when it concerns the title (deliverable_titles),
+  // as for a simple project; else its title's cover in the Catalogue.
+  const any = cover.data?.[0] ?? null;
+  const found =
+    scoped?.kind === "title"
+      ? any?.delivered_at &&
+        scoped.titleId &&
+        (!titleScopes ||
+          !any.deliverable_id ||
+          titleScopeCovers(
+            scopeOf(titleScopes.deliverables, any.deliverable_id),
+            scoped.titleId,
+          ))
+        ? any
+        : null
+      : any;
   const coverInput: ReadinessCover | null = found
     ? {
         id: found.sheet_id,

@@ -261,8 +261,9 @@ export function deliveryFile(input: {
             fromItem(
               "cover",
               t.fields.cover,
-              // A title's release (lot 15): its title's cover, Catalogue.
-              sources.collective?.kind === "title"
+              // A title's release (lot 15): its title's cover, Catalogue,
+              // unless the Production delivered one for it (M7).
+              sources.collective?.kind === "title" && !sources.cover?.delivered
                 ? sources.collective.catalogCover?.fileName
                   ? fr.distribution.readiness.collective.coverFile(
                       sources.collective.catalogCover.fileName,

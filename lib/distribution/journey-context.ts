@@ -142,7 +142,10 @@ async function readContext(projectId: string, releaseId: string | null) {
       key: "cover",
       label: t.external.cover,
       module: t.external.coverModule,
-      done: sources.input.cover?.delivered != null,
+      // A title's release: also its title's cover in the Catalogue (M7).
+      done:
+        sources.input.cover?.delivered != null ||
+        Boolean(sources.input.collective?.catalogCover?.fileName),
     },
     ...sources.input.legal.blockers.map((b) => ({
       key: `clearance-${b.id}`,
@@ -256,7 +259,9 @@ async function readContext(projectId: string, releaseId: string | null) {
   const paramsData: ParamsData = {
     projectId: project.id,
     releaseId: release?.id ?? null,
-    coverFromTitle: release?.kind === "title",
+    // A title's release without a Production cover delivered for it (M7).
+    coverFromTitle:
+      release?.kind === "title" && !sources.input.cover?.delivered,
     // The owner, until a version is submitted (then frozen).
     canEdit: view.canEdit && view.open === null,
     releaseDate: dates.release?.date ?? null,
