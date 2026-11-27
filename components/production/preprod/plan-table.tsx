@@ -60,10 +60,18 @@ export function PlanTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.columns.action}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.holder}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
-        <DataTableHead align="end">{t.columns.state}</DataTableHead>
+        <DataTableHead icon="next" fill>
+          {t.columns.action}
+        </DataTableHead>
+        <DataTableHead icon="person" hideBelow="md">
+          {t.columns.holder}
+        </DataTableHead>
+        <DataTableHead icon="date" hideBelow="sm">
+          {t.columns.due}
+        </DataTableHead>
+        <DataTableHead icon="status" align="end">
+          {t.columns.state}
+        </DataTableHead>
         {canOrganize && <DataTableActionsHead label={t.columns.actions} />}
       </DataTableHeader>
       <DataTableBody>

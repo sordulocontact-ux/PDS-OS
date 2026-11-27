@@ -103,11 +103,15 @@ export function BudgetBlock({
       ) : (
         <DataTable>
           <DataTableHeader>
-            <DataTableHead fill>{t.columns.line}</DataTableHead>
-            <DataTableHead hideBelow="sm" align="end">
+            <DataTableHead icon="item" fill>
+              {t.columns.line}
+            </DataTableHead>
+            <DataTableHead icon="amount" hideBelow="sm" align="end">
               {t.columns.amount}
             </DataTableHead>
-            <DataTableHead align="end">{t.columns.status}</DataTableHead>
+            <DataTableHead icon="status" align="end">
+              {t.columns.status}
+            </DataTableHead>
             {canOrganize && <DataTableActionsHead label={t.columns.actions} />}
           </DataTableHeader>
           <DataTableBody>

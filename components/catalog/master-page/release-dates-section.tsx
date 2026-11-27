@@ -38,10 +38,12 @@ export function ReleaseDatesSection({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{t.project}</DataTableHead>
-            <DataTableHead>{t.target}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.confirmed}</DataTableHead>
-            <DataTableHead hideBelow="sm" fill>
+            <DataTableHead icon="project">{t.project}</DataTableHead>
+            <DataTableHead icon="date">{t.target}</DataTableHead>
+            <DataTableHead icon="date" hideBelow="sm">
+              {t.confirmed}
+            </DataTableHead>
+            <DataTableHead icon="date" hideBelow="sm" fill>
               {t.effective}
             </DataTableHead>
           </DataTableHeader>

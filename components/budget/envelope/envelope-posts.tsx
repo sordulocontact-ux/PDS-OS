@@ -26,12 +26,16 @@ export function EnvelopePosts({ rows }: { rows: EnvelopePostRow[] }) {
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead fill>{t.poste}</DataTableHead>
-        <DataTableHead align="end" hideBelow="sm">
+        <DataTableHead icon="item" fill>
+          {t.poste}
+        </DataTableHead>
+        <DataTableHead icon="amount" align="end" hideBelow="sm">
           {t.planned}
         </DataTableHead>
-        <DataTableHead align="end">{t.spent}</DataTableHead>
-        <DataTableHead align="end" hideBelow="sm">
+        <DataTableHead icon="amount" align="end">
+          {t.spent}
+        </DataTableHead>
+        <DataTableHead icon="amount" align="end" hideBelow="sm">
           {t.rest}
         </DataTableHead>
       </DataTableHeader>

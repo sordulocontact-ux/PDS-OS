@@ -37,10 +37,12 @@ export function SelectionsTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.artists}</DataTableHead>
-        <DataTableHead>{t.columns.holder}</DataTableHead>
-        <DataTableHead hideBelow="md" fill>
+        <DataTableHead icon="master">{t.columns.name}</DataTableHead>
+        <DataTableHead icon="artist" hideBelow="sm">
+          {t.columns.artists}
+        </DataTableHead>
+        <DataTableHead icon="person">{t.columns.holder}</DataTableHead>
+        <DataTableHead icon="updated" hideBelow="md" fill>
           {t.columns.updated}
         </DataTableHead>
       </DataTableHeader>

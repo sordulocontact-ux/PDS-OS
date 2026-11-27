@@ -1,8 +1,10 @@
 import {
   IconAtSign,
+  IconBookmark,
   IconBox2,
   IconCalendarDays,
   IconCalendarStar,
+  IconChartBarAxisX,
   IconCircleHalfDottedCheck,
   IconClipboard,
   IconClipboardCheck,
@@ -13,8 +15,10 @@ import {
   IconHandshake,
   IconLayers,
   IconLayers3,
+  IconLink,
   IconLocation2,
   IconMicrophone,
+  IconMoneyBillCoin,
   IconMsgPen2,
   IconNodes,
   IconPaperPlane2,
@@ -28,6 +32,7 @@ import {
   IconSliders,
   IconSparkle3,
   IconSuitcase5,
+  IconTarget,
   IconTag,
   IconTasks2,
   IconTimer2,
@@ -88,6 +93,16 @@ export const columnIcons = {
   audio: IconVolumeUp,
   ongoing: IconProgressBar,
   ai: IconSparkle3,
+  // Money (a price, a budget, an amount spent, what is left).
+  amount: IconMoneyBillCoin,
+  // A figure measured or counted (a KPI, a metric, declared vs verified).
+  metric: IconChartBarAxisX,
+  // What a figure aims at (an objective, a KPI's target).
+  target: IconTarget,
+  // A link to another record or a page.
+  link: IconLink,
+  // A named line of a budget, a plan or a list (post, envelope, lever, item).
+  item: IconBookmark,
   // Contact details.
   email: IconAtSign,
   phone: IconPhone,

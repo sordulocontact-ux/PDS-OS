@@ -59,10 +59,12 @@ export function DeclarationsSection({
     >
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead>{t.columns.organism}</DataTableHead>
-          <DataTableHead>{t.columns.status}</DataTableHead>
-          <DataTableHead hideBelow="md">{t.columns.reference}</DataTableHead>
-          <DataTableHead hideBelow="sm" fill>
+          <DataTableHead icon="contact">{t.columns.organism}</DataTableHead>
+          <DataTableHead icon="status">{t.columns.status}</DataTableHead>
+          <DataTableHead icon="file" hideBelow="md">
+            {t.columns.reference}
+          </DataTableHead>
+          <DataTableHead icon="date" hideBelow="sm" fill>
             {t.columns.date}
           </DataTableHead>
           {canEdit && <DataTableActionsHead label={t.columns.actions} />}

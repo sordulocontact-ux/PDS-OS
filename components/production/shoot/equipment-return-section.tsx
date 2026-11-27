@@ -76,10 +76,16 @@ export function EquipmentReturnSection({
         ) : (
           <DataTable>
             <DataTableHeader>
-              <DataTableHead fill>{t.columns.label}</DataTableHead>
-              <DataTableHead hideBelow="md">{t.columns.holder}</DataTableHead>
-              <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
-              <DataTableHead>{t.columns.status}</DataTableHead>
+              <DataTableHead icon="item" fill>
+                {t.columns.label}
+              </DataTableHead>
+              <DataTableHead icon="person" hideBelow="md">
+                {t.columns.holder}
+              </DataTableHead>
+              <DataTableHead icon="date" hideBelow="sm">
+                {t.columns.due}
+              </DataTableHead>
+              <DataTableHead icon="status">{t.columns.status}</DataTableHead>
               {canOrganize && (
                 <DataTableActionsHead label={t.columns.actions} />
               )}

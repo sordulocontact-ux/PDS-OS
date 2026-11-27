@@ -55,11 +55,19 @@ export function ReceiptsTable({
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead hideBelow="sm">{c.received}</DataTableHead>
-        <DataTableHead fill>{c.vendor}</DataTableHead>
-        <DataTableHead align="end">{c.amount}</DataTableHead>
-        <DataTableHead hideBelow="md">{c.spend}</DataTableHead>
-        <DataTableHead>{c.state}</DataTableHead>
+        <DataTableHead icon="date" hideBelow="sm">
+          {c.received}
+        </DataTableHead>
+        <DataTableHead icon="contact" fill>
+          {c.vendor}
+        </DataTableHead>
+        <DataTableHead icon="amount" align="end">
+          {c.amount}
+        </DataTableHead>
+        <DataTableHead icon="item" hideBelow="md">
+          {c.spend}
+        </DataTableHead>
+        <DataTableHead icon="status">{c.state}</DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {rows.map((row, index) => {

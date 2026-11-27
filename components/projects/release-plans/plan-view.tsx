@@ -714,15 +714,19 @@ function TimelineSection({ projectId, plan, editable }: Ctx) {
       ) : (
         <DataTable>
           <DataTableHeader>
-            <DataTableHead className="w-32">{tl.columns.date}</DataTableHead>
-            <DataTableHead fill>{tl.columns.format}</DataTableHead>
-            <DataTableHead hideBelow="lg" className="w-40">
+            <DataTableHead icon="date" className="w-32">
+              {tl.columns.date}
+            </DataTableHead>
+            <DataTableHead icon="format" fill>
+              {tl.columns.format}
+            </DataTableHead>
+            <DataTableHead icon="kind" hideBelow="lg" className="w-40">
               {tl.columns.channel}
             </DataTableHead>
-            <DataTableHead hideBelow="lg" className="w-40">
+            <DataTableHead icon="person" hideBelow="lg" className="w-40">
               {tl.columns.owner}
             </DataTableHead>
-            <DataTableHead hideBelow="sm" className="w-28">
+            <DataTableHead icon="decision" hideBelow="sm" className="w-28">
               {tl.columns.validation}
             </DataTableHead>
             <DataTableActionsHead label={tl.columns.actions} />
@@ -1154,14 +1158,16 @@ function VersionsSection({ projectId, plan }: Ctx) {
         ) : (
           <DataTable>
             <DataTableHeader>
-              <DataTableHead fill>{v.columns.version}</DataTableHead>
-              <DataTableHead hideBelow="sm" className="w-40">
+              <DataTableHead icon="format" fill>
+                {v.columns.version}
+              </DataTableHead>
+              <DataTableHead icon="status" hideBelow="sm" className="w-40">
                 {v.columns.status}
               </DataTableHead>
-              <DataTableHead hideBelow="lg" className="w-40">
+              <DataTableHead icon="person" hideBelow="lg" className="w-40">
                 {v.columns.by}
               </DataTableHead>
-              <DataTableHead hideBelow="lg" className="w-44">
+              <DataTableHead icon="date" hideBelow="lg" className="w-44">
                 {v.columns.at}
               </DataTableHead>
               <DataTableActionsHead label={v.columns.actions} />

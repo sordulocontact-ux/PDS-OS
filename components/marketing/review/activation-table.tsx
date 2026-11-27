@@ -30,10 +30,16 @@ export function ActivationTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.columns.title}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.kind}</DataTableHead>
-        <DataTableHead>{t.columns.status}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.owner}</DataTableHead>
+        <DataTableHead icon="next" fill>
+          {t.columns.title}
+        </DataTableHead>
+        <DataTableHead icon="kind" hideBelow="sm">
+          {t.columns.kind}
+        </DataTableHead>
+        <DataTableHead icon="status">{t.columns.status}</DataTableHead>
+        <DataTableHead icon="person" hideBelow="md">
+          {t.columns.owner}
+        </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {activations.map((a) => (

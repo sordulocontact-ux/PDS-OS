@@ -43,9 +43,11 @@ export function TemplatesTable({
     <>
       <DataTable>
         <DataTableHeader>
-          <DataTableHead>{t.columns.name}</DataTableHead>
-          <DataTableHead hideBelow="md">{t.columns.roles}</DataTableHead>
-          <DataTableHead hideBelow="sm" fill>
+          <DataTableHead icon="contract">{t.columns.name}</DataTableHead>
+          <DataTableHead icon="role" hideBelow="md">
+            {t.columns.roles}
+          </DataTableHead>
+          <DataTableHead icon="status" hideBelow="sm" fill>
             {t.columns.status}
           </DataTableHead>
           <DataTableActionsHead label={fr.records.menu.column} />

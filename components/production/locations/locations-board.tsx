@@ -104,13 +104,15 @@ export function LocationsBoard({
           <div>
             <DataTable>
               <DataTableHeader>
-                <DataTableHead fill>{t.compare.place}</DataTableHead>
-                <DataTableHead>{t.compare.price}</DataTableHead>
-                <DataTableHead hideBelow="md">
+                <DataTableHead icon="place" fill>
+                  {t.compare.place}
+                </DataTableHead>
+                <DataTableHead icon="amount">{t.compare.price}</DataTableHead>
+                <DataTableHead icon="date" hideBelow="md">
                   {t.compare.availability}
                 </DataTableHead>
-                <DataTableHead>{t.compare.reviews}</DataTableHead>
-                <DataTableHead hideBelow="sm">
+                <DataTableHead icon="note">{t.compare.reviews}</DataTableHead>
+                <DataTableHead icon="status" hideBelow="sm">
                   {t.compare.missing}
                 </DataTableHead>
               </DataTableHeader>

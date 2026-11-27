@@ -33,11 +33,17 @@ export function DistributionList({
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead>{t.columns.release}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.status}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.date}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.upc}</DataTableHead>
-        <DataTableHead hideBelow="lg" fill>
+        <DataTableHead icon="release">{t.columns.release}</DataTableHead>
+        <DataTableHead icon="status" hideBelow="sm">
+          {t.columns.status}
+        </DataTableHead>
+        <DataTableHead icon="date" hideBelow="md">
+          {t.columns.date}
+        </DataTableHead>
+        <DataTableHead icon="distribution" hideBelow="lg">
+          {t.columns.upc}
+        </DataTableHead>
+        <DataTableHead icon="link" hideBelow="lg" fill>
           {t.columns.links}
         </DataTableHead>
       </DataTableHeader>

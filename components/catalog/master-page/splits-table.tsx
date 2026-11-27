@@ -34,9 +34,11 @@ export function SplitsTable({
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead>{t.columns.party}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>
-        <DataTableHead fill align="end">
+        <DataTableHead icon="contact">{t.columns.party}</DataTableHead>
+        <DataTableHead icon="role" hideBelow="sm">
+          {t.columns.role}
+        </DataTableHead>
+        <DataTableHead icon="rate" fill align="end">
           {t.columns.share}
         </DataTableHead>
         {canEdit && <DataTableActionsHead label={t.columns.actions} />}

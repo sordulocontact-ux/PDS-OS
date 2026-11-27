@@ -40,9 +40,13 @@ export function KpiTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.kpi}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.target}</DataTableHead>
-        <DataTableHead>{t.actual}</DataTableHead>
+        <DataTableHead icon="metric" fill>
+          {t.kpi}
+        </DataTableHead>
+        <DataTableHead icon="target" hideBelow="sm">
+          {t.target}
+        </DataTableHead>
+        <DataTableHead icon="metric">{t.actual}</DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {kpis.map((k) => (

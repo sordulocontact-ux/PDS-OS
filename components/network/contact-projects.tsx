@@ -70,10 +70,16 @@ export function ContactAwaited({
     >
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead>{c.todo}</DataTableHead>
-          <DataTableHead hideBelow="sm">{c.project}</DataTableHead>
-          <DataTableHead hideBelow="md">{c.due}</DataTableHead>
-          <DataTableHead hideBelow="lg">{c.link}</DataTableHead>
+          <DataTableHead icon="next">{c.todo}</DataTableHead>
+          <DataTableHead icon="project" hideBelow="sm">
+            {c.project}
+          </DataTableHead>
+          <DataTableHead icon="date" hideBelow="md">
+            {c.due}
+          </DataTableHead>
+          <DataTableHead icon="link" hideBelow="lg">
+            {c.link}
+          </DataTableHead>
           <DataTableHead fill align="end">
             <span className="sr-only">{c.actions}</span>
           </DataTableHead>
@@ -159,9 +165,13 @@ export function ContactInProjects({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{p.columns.project}</DataTableHead>
-            <DataTableHead hideBelow="sm">{p.columns.artist}</DataTableHead>
-            <DataTableHead fill>{p.columns.role}</DataTableHead>
+            <DataTableHead icon="project">{p.columns.project}</DataTableHead>
+            <DataTableHead icon="artist" hideBelow="sm">
+              {p.columns.artist}
+            </DataTableHead>
+            <DataTableHead icon="role" fill>
+              {p.columns.role}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {projects.map((project) => {
@@ -226,9 +236,13 @@ export function ContactFiches({ projects }: { projects: ContactProject[] }) {
       {fiches.length > 0 && (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{p.columns.project}</DataTableHead>
-            <DataTableHead hideBelow="sm">{p.columns.sentOn}</DataTableHead>
-            <DataTableHead fill>{p.columns.state}</DataTableHead>
+            <DataTableHead icon="project">{p.columns.project}</DataTableHead>
+            <DataTableHead icon="date" hideBelow="sm">
+              {p.columns.sentOn}
+            </DataTableHead>
+            <DataTableHead icon="status" fill>
+              {p.columns.state}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {fiches.map(({ project, item }) => (

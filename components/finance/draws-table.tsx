@@ -54,9 +54,15 @@ export function DrawsTable({
     <>
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead fill>{c.label}</DataTableHead>
-          <DataTableHead hideBelow="sm">{c.next}</DataTableHead>
-          <DataTableHead align="end">{c.left}</DataTableHead>
+          <DataTableHead icon="item" fill>
+            {c.label}
+          </DataTableHead>
+          <DataTableHead icon="date" hideBelow="sm">
+            {c.next}
+          </DataTableHead>
+          <DataTableHead icon="amount" align="end">
+            {c.left}
+          </DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>

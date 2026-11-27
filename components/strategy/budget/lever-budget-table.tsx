@@ -26,12 +26,18 @@ export function LeverBudgetTable({ rows }: { rows: LeverBudget[] }) {
       ) : (
         <DataTable>
           <DataTableHeader>
-            <DataTableHead fill>{t.lever}</DataTableHead>
-            <DataTableHead align="end" hideBelow="sm">
+            <DataTableHead icon="item" fill>
+              {t.lever}
+            </DataTableHead>
+            <DataTableHead icon="amount" align="end" hideBelow="sm">
               {t.proposed}
             </DataTableHead>
-            <DataTableHead align="end">{t.validated}</DataTableHead>
-            <DataTableHead align="end">{t.toDecide}</DataTableHead>
+            <DataTableHead icon="amount" align="end">
+              {t.validated}
+            </DataTableHead>
+            <DataTableHead icon="amount" align="end">
+              {t.toDecide}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {rows.map((row) => (

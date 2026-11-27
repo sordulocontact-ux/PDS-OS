@@ -35,10 +35,14 @@ export function MetricTotals({ metrics }: { metrics: MetricTotal[] }) {
     >
       <DataTable>
         <DataTableHeader>
-          <DataTableHead fill>{t.metrics.metric}</DataTableHead>
-          <DataTableHead>{t.metrics.declared}</DataTableHead>
-          <DataTableHead>{t.metrics.verified}</DataTableHead>
-          <DataTableHead hideBelow="sm">{t.metrics.gaps}</DataTableHead>
+          <DataTableHead icon="metric" fill>
+            {t.metrics.metric}
+          </DataTableHead>
+          <DataTableHead icon="metric">{t.metrics.declared}</DataTableHead>
+          <DataTableHead icon="metric">{t.metrics.verified}</DataTableHead>
+          <DataTableHead icon="metric" hideBelow="sm">
+            {t.metrics.gaps}
+          </DataTableHead>
         </DataTableHeader>
         <DataTableBody>
           {metrics.map((m) => (

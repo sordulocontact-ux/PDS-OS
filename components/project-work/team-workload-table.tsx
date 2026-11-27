@@ -10,12 +10,20 @@ import {
 import { projectWork } from "@/lib/i18n/fr/project-work";
 import type { WorkPerson } from "@/lib/project-work/queries";
 import type { WorkCounts } from "@/lib/project-work/workload";
+import type { ColumnIcon } from "@/lib/ui/column-icons";
 
 const fr = { projectWork };
 
 const t = fr.projectWork;
 
 // Internal members and their load.
+// A workload column's icon, as in every table's head (lib/ui/column-icons.ts).
+const COLUMN_ICONS = {
+  todo: "next",
+  overdue: "date",
+  waiting: "status",
+} as const satisfies Record<string, ColumnIcon>;
+
 export function TeamWorkloadTable({
   people,
   counts,
@@ -27,10 +35,13 @@ export function TeamWorkloadTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.team.columns.person}</DataTableHead>
+        <DataTableHead icon="person" fill>
+          {t.team.columns.person}
+        </DataTableHead>
         {columns.map((c) => (
           <DataTableHead
             key={c}
+            icon={COLUMN_ICONS[c]}
             align="end"
             hideBelow={c === "waiting" ? "sm" : undefined}
           >

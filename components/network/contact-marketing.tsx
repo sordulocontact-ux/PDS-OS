@@ -67,10 +67,16 @@ export function ContactMarketing({
         >
           <DataTable framed>
             <DataTableHeader>
-              <DataTableHead>{t.columns.campaign}</DataTableHead>
-              <DataTableHead hideBelow="sm">{t.columns.project}</DataTableHead>
-              <DataTableHead hideBelow="md">{t.columns.via}</DataTableHead>
-              <DataTableHead fill>{t.columns.state}</DataTableHead>
+              <DataTableHead icon="next">{t.columns.campaign}</DataTableHead>
+              <DataTableHead icon="project" hideBelow="sm">
+                {t.columns.project}
+              </DataTableHead>
+              <DataTableHead icon="contact" hideBelow="md">
+                {t.columns.via}
+              </DataTableHead>
+              <DataTableHead icon="status" fill>
+                {t.columns.state}
+              </DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {campaigns.map((c) => (
@@ -115,10 +121,16 @@ export function ContactMarketing({
         ) : (
           <DataTable framed>
             <DataTableHeader>
-              <DataTableHead>{t.columns.observation}</DataTableHead>
-              <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-              <DataTableHead hideBelow="md">{t.columns.source}</DataTableHead>
-              <DataTableHead hideBelow="lg">{t.columns.note}</DataTableHead>
+              <DataTableHead icon="note">{t.columns.observation}</DataTableHead>
+              <DataTableHead icon="date" hideBelow="sm">
+                {t.columns.date}
+              </DataTableHead>
+              <DataTableHead icon="source" hideBelow="md">
+                {t.columns.source}
+              </DataTableHead>
+              <DataTableHead icon="note" hideBelow="lg">
+                {t.columns.note}
+              </DataTableHead>
               <DataTableHead fill align="end">
                 <span className="sr-only">{t.columns.actions}</span>
               </DataTableHead>

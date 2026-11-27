@@ -22,8 +22,10 @@ export function MasterArtists({ credits }: { credits: Credit[] }) {
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead>{t.artist}</DataTableHead>
-        <DataTableHead fill>{t.role}</DataTableHead>
+        <DataTableHead icon="artist">{t.artist}</DataTableHead>
+        <DataTableHead icon="role" fill>
+          {t.role}
+        </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {credits.map((credit) => (

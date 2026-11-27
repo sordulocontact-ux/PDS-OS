@@ -180,24 +180,40 @@ export function SpendsTable({
     <TableSortProvider>
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead fill>{c.label}</DataTableHead>
+          <DataTableHead icon="item" fill>
+            {c.label}
+          </DataTableHead>
           {!hideEnvelope && (
-            <DataTableHead hideBelow="lg">{c.envelope}</DataTableHead>
+            <DataTableHead icon="item" hideBelow="lg">
+              {c.envelope}
+            </DataTableHead>
           )}
           {show("post") && (
-            <DataTableHead hideBelow="xl">{c.post}</DataTableHead>
+            <DataTableHead icon="item" hideBelow="xl">
+              {c.post}
+            </DataTableHead>
           )}
           {show("supplier") && (
-            <DataTableHead hideBelow="xl">{c.supplier}</DataTableHead>
+            <DataTableHead icon="contact" hideBelow="xl">
+              {c.supplier}
+            </DataTableHead>
           )}
-          {show("day") && <DataTableHead hideBelow="sm">{c.day}</DataTableHead>}
+          {show("day") && (
+            <DataTableHead icon="date" hideBelow="sm">
+              {c.day}
+            </DataTableHead>
+          )}
           {show("state") && (
-            <DataTableHead hideBelow="md">{c.state}</DataTableHead>
+            <DataTableHead icon="status" hideBelow="md">
+              {c.state}
+            </DataTableHead>
           )}
           {show("proof") && (
-            <DataTableHead hideBelow="lg">{c.proof}</DataTableHead>
+            <DataTableHead icon="attached" hideBelow="lg">
+              {c.proof}
+            </DataTableHead>
           )}
-          <DataTableHead align="end" className="w-28 sm:w-48">
+          <DataTableHead icon="amount" align="end" className="w-28 sm:w-48">
             {c.amount}
           </DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}

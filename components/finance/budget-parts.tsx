@@ -92,18 +92,22 @@ export function BudgetParts({
       {head}
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead fill>{t.parts.part}</DataTableHead>
-          <DataTableHead align="end" hideBelow="sm">
+          <DataTableHead icon="item" fill>
+            {t.parts.part}
+          </DataTableHead>
+          <DataTableHead icon="amount" align="end" hideBelow="sm">
             {t.parts.amount}
           </DataTableHead>
-          <DataTableHead align="end" hideBelow="lg">
+          <DataTableHead icon="amount" align="end" hideBelow="lg">
             {t.parts.planned}
           </DataTableHead>
-          <DataTableHead align="end" hideBelow="md">
+          <DataTableHead icon="amount" align="end" hideBelow="md">
             {t.parts.spent}
           </DataTableHead>
-          <DataTableHead align="end">{t.parts.rest}</DataTableHead>
-          <DataTableHead hideBelow="md" className="w-[18%]">
+          <DataTableHead icon="amount" align="end">
+            {t.parts.rest}
+          </DataTableHead>
+          <DataTableHead icon="ongoing" hideBelow="md" className="w-[18%]">
             {t.columns.consumed}
           </DataTableHead>
           {canManage && (

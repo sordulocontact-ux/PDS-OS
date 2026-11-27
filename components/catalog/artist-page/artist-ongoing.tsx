@@ -41,9 +41,13 @@ export function ArtistOngoing({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{t.columns.project}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.columns.type}</DataTableHead>
-            <DataTableHead fill>{t.columns.date}</DataTableHead>
+            <DataTableHead icon="project">{t.columns.project}</DataTableHead>
+            <DataTableHead icon="kind" hideBelow="sm">
+              {t.columns.type}
+            </DataTableHead>
+            <DataTableHead icon="date" fill>
+              {t.columns.date}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {projects.map((p) => (

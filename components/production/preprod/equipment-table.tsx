@@ -57,12 +57,18 @@ export function EquipmentTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.columns.item}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.supplier}</DataTableHead>
-        <DataTableHead hideBelow="sm" align="end">
+        <DataTableHead icon="item" fill>
+          {t.columns.item}
+        </DataTableHead>
+        <DataTableHead icon="contact" hideBelow="md">
+          {t.columns.supplier}
+        </DataTableHead>
+        <DataTableHead icon="amount" hideBelow="sm" align="end">
           {t.columns.price}
         </DataTableHead>
-        <DataTableHead align="end">{t.columns.status}</DataTableHead>
+        <DataTableHead icon="status" align="end">
+          {t.columns.status}
+        </DataTableHead>
         {canOrganize && <DataTableActionsHead label={t.columns.actions} />}
       </DataTableHeader>
       <DataTableBody>

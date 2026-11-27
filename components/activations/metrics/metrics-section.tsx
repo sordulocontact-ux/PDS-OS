@@ -122,13 +122,17 @@ export function MetricsSection({
           )}
           <DataTable>
             <DataTableHeader>
-              <DataTableHead>{t.metric}</DataTableHead>
-              <DataTableHead align="end">{t.value}</DataTableHead>
-              <DataTableHead fill hideBelow="lg">
+              <DataTableHead icon="metric">{t.metric}</DataTableHead>
+              <DataTableHead icon="metric" align="end">
+                {t.value}
+              </DataTableHead>
+              <DataTableHead icon="date" fill hideBelow="lg">
                 {t.periodLabel}
               </DataTableHead>
-              <DataTableHead hideBelow="md">{t.collectedOn}</DataTableHead>
-              <DataTableHead>{t.state}</DataTableHead>
+              <DataTableHead icon="date" hideBelow="md">
+                {t.collectedOn}
+              </DataTableHead>
+              <DataTableHead icon="status">{t.state}</DataTableHead>
               <DataTableHead className="w-px">
                 <span className="sr-only">{t.actions}</span>
               </DataTableHead>

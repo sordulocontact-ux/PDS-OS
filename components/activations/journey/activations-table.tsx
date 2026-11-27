@@ -87,11 +87,21 @@ export function ActivationsTable({
       ) : (
         <DataTable>
           <DataTableHeader>
-            <DataTableHead fill>{t.table.activation}</DataTableHead>
-            <DataTableHead hideBelow="md">{t.table.kind}</DataTableHead>
-            <DataTableHead hideBelow="lg">{t.table.owner}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.table.due}</DataTableHead>
-            <DataTableHead hideBelow="md">{t.table.phase}</DataTableHead>
+            <DataTableHead icon="next" fill>
+              {t.table.activation}
+            </DataTableHead>
+            <DataTableHead icon="kind" hideBelow="md">
+              {t.table.kind}
+            </DataTableHead>
+            <DataTableHead icon="person" hideBelow="lg">
+              {t.table.owner}
+            </DataTableHead>
+            <DataTableHead icon="date" hideBelow="sm">
+              {t.table.due}
+            </DataTableHead>
+            <DataTableHead icon="step" hideBelow="md">
+              {t.table.phase}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {shown.map((a) => (

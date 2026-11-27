@@ -37,10 +37,14 @@ export function EvidenceTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.activation}</DataTableHead>
-        <DataTableHead fill>{t.evidence}</DataTableHead>
-        <DataTableHead>{t.level}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.provenance}</DataTableHead>
+        <DataTableHead icon="next">{t.activation}</DataTableHead>
+        <DataTableHead icon="file" fill>
+          {t.evidence}
+        </DataTableHead>
+        <DataTableHead icon="priority">{t.level}</DataTableHead>
+        <DataTableHead icon="source" hideBelow="md">
+          {t.provenance}
+        </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {evidence.map((e) => (

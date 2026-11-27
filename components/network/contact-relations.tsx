@@ -38,9 +38,13 @@ export function ContactContracts({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{p.columns.contract}</DataTableHead>
-            <DataTableHead hideBelow="sm">{p.columns.role}</DataTableHead>
-            <DataTableHead fill>{p.columns.state}</DataTableHead>
+            <DataTableHead icon="contract">{p.columns.contract}</DataTableHead>
+            <DataTableHead icon="role" hideBelow="sm">
+              {p.columns.role}
+            </DataTableHead>
+            <DataTableHead icon="status" fill>
+              {p.columns.state}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {contracts.map((contract) => (
@@ -86,8 +90,10 @@ export function ContactMembers({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{p.columns.name}</DataTableHead>
-            <DataTableHead fill>{p.columns.roles}</DataTableHead>
+            <DataTableHead icon="person">{p.columns.name}</DataTableHead>
+            <DataTableHead icon="role" fill>
+              {p.columns.roles}
+            </DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {members.map((member) => (

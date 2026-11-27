@@ -39,12 +39,16 @@ export function SplitLines({
     <div className="flex flex-col gap-2">
       <DataTable>
         <DataTableHeader>
-          <DataTableHead>{t.columns.person}</DataTableHead>
-          <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>
-          <DataTableHead hideBelow="md" fill>
+          <DataTableHead icon="person">{t.columns.person}</DataTableHead>
+          <DataTableHead icon="role" hideBelow="sm">
+            {t.columns.role}
+          </DataTableHead>
+          <DataTableHead icon="status" hideBelow="md" fill>
             {t.columns.state}
           </DataTableHead>
-          <DataTableHead align="end">{t.columns.share}</DataTableHead>
+          <DataTableHead icon="rate" align="end">
+            {t.columns.share}
+          </DataTableHead>
         </DataTableHeader>
         <DataTableBody>
           {lines.map((line) => (

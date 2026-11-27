@@ -55,9 +55,13 @@ function DemosTable({ rows }: { rows: MasterRow[] }) {
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.columns.title}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.artists}</DataTableHead>
-        <DataTableHead fill>{t.columns.status}</DataTableHead>
+        <DataTableHead icon="master">{t.columns.title}</DataTableHead>
+        <DataTableHead icon="artist" hideBelow="sm">
+          {t.columns.artists}
+        </DataTableHead>
+        <DataTableHead icon="status" fill>
+          {t.columns.status}
+        </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {rows.map((demo) => (

@@ -61,9 +61,11 @@ export function TracksSection({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{t.columns.name}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.columns.performer}</DataTableHead>
-            <DataTableHead hideBelow="md" fill>
+            <DataTableHead icon="master">{t.columns.name}</DataTableHead>
+            <DataTableHead icon="person" hideBelow="sm">
+              {t.columns.performer}
+            </DataTableHead>
+            <DataTableHead icon="session" hideBelow="md" fill>
               {t.columns.session}
             </DataTableHead>
             {canEdit && <DataTableActionsHead label={t.columns.actions} />}

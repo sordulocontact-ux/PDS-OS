@@ -75,9 +75,13 @@ export function BriefExchanges({
     <div className="grid gap-4">
       <DataTable>
         <DataTableHeader>
-          <DataTableHead fill>{t.columns.call}</DataTableHead>
-          <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-          <DataTableHead align={canEdit ? "start" : "end"}>
+          <DataTableHead icon="call" fill>
+            {t.columns.call}
+          </DataTableHead>
+          <DataTableHead icon="date" hideBelow="sm">
+            {t.columns.date}
+          </DataTableHead>
+          <DataTableHead icon="status" align={canEdit ? "start" : "end"}>
             {t.columns.state}
           </DataTableHead>
           {canEdit && (

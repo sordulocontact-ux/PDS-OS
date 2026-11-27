@@ -39,11 +39,15 @@ export function NetworkListsTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.people}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.replied}</DataTableHead>
-        <DataTableHead>{t.columns.state}</DataTableHead>
-        <DataTableHead hideBelow="md" fill>
+        <DataTableHead icon="people">{t.columns.name}</DataTableHead>
+        <DataTableHead icon="people" hideBelow="sm">
+          {t.columns.people}
+        </DataTableHead>
+        <DataTableHead icon="status" hideBelow="md">
+          {t.columns.replied}
+        </DataTableHead>
+        <DataTableHead icon="status">{t.columns.state}</DataTableHead>
+        <DataTableHead icon="person" hideBelow="md" fill>
           {t.columns.owner}
         </DataTableHead>
       </DataTableHeader>

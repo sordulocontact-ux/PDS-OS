@@ -59,9 +59,9 @@ export function ContributorsSection({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{t.columns.name}</DataTableHead>
-            <DataTableHead>{t.columns.role}</DataTableHead>
-            <DataTableHead hideBelow="sm" fill>
+            <DataTableHead icon="person">{t.columns.name}</DataTableHead>
+            <DataTableHead icon="role">{t.columns.role}</DataTableHead>
+            <DataTableHead icon="note" hideBelow="sm" fill>
               {t.columns.detail}
             </DataTableHead>
             {canEdit && <DataTableActionsHead label={t.columns.actions} />}

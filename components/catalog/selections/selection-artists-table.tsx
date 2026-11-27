@@ -48,9 +48,13 @@ export function SelectionArtistsTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.artists.name}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.artists.relation}</DataTableHead>
-        <DataTableHead fill>{t.artists.titles}</DataTableHead>
+        <DataTableHead icon="artist">{t.artists.name}</DataTableHead>
+        <DataTableHead icon="relation" hideBelow="sm">
+          {t.artists.relation}
+        </DataTableHead>
+        <DataTableHead icon="master" fill>
+          {t.artists.titles}
+        </DataTableHead>
         {canManage && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>

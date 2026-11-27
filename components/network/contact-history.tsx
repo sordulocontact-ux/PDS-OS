@@ -37,8 +37,10 @@ export function ContactHistory({
         >
           <DataTable framed>
             <DataTableHeader>
-              <DataTableHead>{p.columns.title}</DataTableHead>
-              <DataTableHead fill>{p.columns.role}</DataTableHead>
+              <DataTableHead icon="master">{p.columns.title}</DataTableHead>
+              <DataTableHead icon="role" fill>
+                {p.columns.role}
+              </DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {credits.map((credit) => (
@@ -66,8 +68,10 @@ export function ContactHistory({
         >
           <DataTable framed>
             <DataTableHeader>
-              <DataTableHead>{p.columns.call}</DataTableHead>
-              <DataTableHead fill>{p.columns.date}</DataTableHead>
+              <DataTableHead icon="call">{p.columns.call}</DataTableHead>
+              <DataTableHead icon="date" fill>
+                {p.columns.date}
+              </DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {calls.map((call) => (

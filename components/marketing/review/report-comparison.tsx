@@ -83,9 +83,11 @@ export function ReportComparisonView({
       ) : (
         <DataTable>
           <DataTableHeader>
-            <DataTableHead fill>{t.figures}</DataTableHead>
-            <DataTableHead>{t.before}</DataTableHead>
-            <DataTableHead>{t.after}</DataTableHead>
+            <DataTableHead icon="metric" fill>
+              {t.figures}
+            </DataTableHead>
+            <DataTableHead icon="metric">{t.before}</DataTableHead>
+            <DataTableHead icon="metric">{t.after}</DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {c.figures.map((f) => (

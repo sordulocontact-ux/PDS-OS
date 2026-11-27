@@ -181,16 +181,22 @@ export function WorkTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.columns.action}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
-        <DataTableHead hideBelow="lg" className={MODULE_COLUMN}>
+        <DataTableHead icon="next" fill>
+          {t.columns.action}
+        </DataTableHead>
+        <DataTableHead icon="project" hideBelow="md">
+          {t.columns.project}
+        </DataTableHead>
+        <DataTableHead icon="kind" hideBelow="lg" className={MODULE_COLUMN}>
           {t.columns.module}
         </DataTableHead>
-        <DataTableHead hideBelow="sm" className={DUE_COLUMN}>
+        <DataTableHead icon="date" hideBelow="sm" className={DUE_COLUMN}>
           {t.columns.due}
         </DataTableHead>
-        <DataTableHead hideBelow="xl">{t.columns.validator}</DataTableHead>
-        <DataTableHead className={STATE_COLUMN}>
+        <DataTableHead icon="person" hideBelow="xl">
+          {t.columns.validator}
+        </DataTableHead>
+        <DataTableHead icon="status" className={STATE_COLUMN}>
           {t.columns.state}
         </DataTableHead>
       </DataTableHeader>

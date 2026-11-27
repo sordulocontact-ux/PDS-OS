@@ -59,15 +59,19 @@ export function PostsTable({ posts }: { posts: PostRow[] }) {
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead fill>{t.post}</DataTableHead>
-        <DataTableHead align="end" hideBelow="sm">
+        <DataTableHead icon="item" fill>
+          {t.post}
+        </DataTableHead>
+        <DataTableHead icon="amount" align="end" hideBelow="sm">
           {t.forecast}
         </DataTableHead>
-        <DataTableHead align="end">{t.spent}</DataTableHead>
-        <DataTableHead align="end" hideBelow="md">
+        <DataTableHead icon="amount" align="end">
+          {t.spent}
+        </DataTableHead>
+        <DataTableHead icon="amount" align="end" hideBelow="md">
           {t.paid}
         </DataTableHead>
-        <DataTableHead align="end" hideBelow="sm">
+        <DataTableHead icon="metric" align="end" hideBelow="sm">
           {t.gap}
         </DataTableHead>
       </DataTableHeader>

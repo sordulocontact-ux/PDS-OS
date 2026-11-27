@@ -60,15 +60,21 @@ export function StandingGoals({
         ) : (
           <DataTable>
             <DataTableHeader>
-              <DataTableHead fill>{t.objective}</DataTableHead>
-              <DataTableHead align="end">{t.target}</DataTableHead>
-              <DataTableHead align="end" hideBelow="md">
+              <DataTableHead icon="target" fill>
+                {t.objective}
+              </DataTableHead>
+              <DataTableHead icon="target" align="end">
+                {t.target}
+              </DataTableHead>
+              <DataTableHead icon="metric" align="end" hideBelow="md">
                 {t.declared}
               </DataTableHead>
-              <DataTableHead align="end" hideBelow="lg">
+              <DataTableHead icon="metric" align="end" hideBelow="lg">
                 {t.verified}
               </DataTableHead>
-              <DataTableHead align="end">{t.gap}</DataTableHead>
+              <DataTableHead icon="metric" align="end">
+                {t.gap}
+              </DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {goals.map((g) => (
@@ -120,15 +126,19 @@ export function StandingGoals({
           ) : (
             <DataTable>
               <DataTableHeader>
-                <DataTableHead fill>{t.activation}</DataTableHead>
-                <DataTableHead align="end" hideBelow="md">
+                <DataTableHead icon="next" fill>
+                  {t.activation}
+                </DataTableHead>
+                <DataTableHead icon="amount" align="end" hideBelow="md">
                   {t.estimated}
                 </DataTableHead>
-                <DataTableHead align="end">{t.committed}</DataTableHead>
-                <DataTableHead align="end" hideBelow="lg">
+                <DataTableHead icon="amount" align="end">
+                  {t.committed}
+                </DataTableHead>
+                <DataTableHead icon="amount" align="end" hideBelow="lg">
                   {t.invoiced}
                 </DataTableHead>
-                <DataTableHead align="end" hideBelow="lg">
+                <DataTableHead icon="amount" align="end" hideBelow="lg">
                   {t.paid}
                 </DataTableHead>
               </DataTableHeader>

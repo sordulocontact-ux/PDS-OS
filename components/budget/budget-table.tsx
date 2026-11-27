@@ -71,27 +71,29 @@ export function BudgetTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.table.label}</DataTableHead>
-        <DataTableHead hideBelow="md" fill>
+        <DataTableHead icon="item" fill>
+          {t.table.label}
+        </DataTableHead>
+        <DataTableHead icon="kind" hideBelow="md" fill>
           {t.table.family}
         </DataTableHead>
         {showTarget && (
-          <DataTableHead hideBelow="md" fill>
+          <DataTableHead icon="project" hideBelow="md" fill>
             {t.table.target}
           </DataTableHead>
         )}
         {linked && (
-          <DataTableHead hideBelow="lg" fill>
+          <DataTableHead icon="link" hideBelow="lg" fill>
             {t.table.linkedTo}
           </DataTableHead>
         )}
-        <DataTableHead hideBelow="sm" className="w-28">
+        <DataTableHead icon="date" hideBelow="sm" className="w-28">
           {t.table.date}
         </DataTableHead>
-        <DataTableHead hideBelow="sm" className="w-32">
+        <DataTableHead icon="status" hideBelow="sm" className="w-32">
           {t.table.status}
         </DataTableHead>
-        <DataTableHead align="end" className="w-32">
+        <DataTableHead icon="amount" align="end" className="w-32">
           {t.table.amount}
         </DataTableHead>
         {actions && (

@@ -119,11 +119,19 @@ export function WorkFilesSection({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{t.columns.name}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.columns.session}</DataTableHead>
-            <DataTableHead hideBelow="md">{t.columns.status}</DataTableHead>
-            <DataTableHead hideBelow="xl">{t.columns.addedBy}</DataTableHead>
-            <DataTableHead hideBelow="lg">{t.columns.addedAt}</DataTableHead>
+            <DataTableHead icon="file">{t.columns.name}</DataTableHead>
+            <DataTableHead icon="session" hideBelow="sm">
+              {t.columns.session}
+            </DataTableHead>
+            <DataTableHead icon="status" hideBelow="md">
+              {t.columns.status}
+            </DataTableHead>
+            <DataTableHead icon="person" hideBelow="xl">
+              {t.columns.addedBy}
+            </DataTableHead>
+            <DataTableHead icon="date" hideBelow="lg">
+              {t.columns.addedAt}
+            </DataTableHead>
             <DataTableActionsHead label={fr.records.menu.column} />
           </DataTableHeader>
           <DataTableBody>

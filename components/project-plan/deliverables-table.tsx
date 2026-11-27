@@ -29,11 +29,21 @@ export function DeliverablesTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.lever}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.assignee}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.dueDate}</DataTableHead>
-        <DataTableHead align="end">{t.columns.state}</DataTableHead>
+        <DataTableHead icon="next" fill>
+          {t.columns.name}
+        </DataTableHead>
+        <DataTableHead icon="item" hideBelow="md">
+          {t.columns.lever}
+        </DataTableHead>
+        <DataTableHead icon="person" hideBelow="sm">
+          {t.columns.assignee}
+        </DataTableHead>
+        <DataTableHead icon="date" hideBelow="lg">
+          {t.columns.dueDate}
+        </DataTableHead>
+        <DataTableHead icon="status" align="end">
+          {t.columns.state}
+        </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {deliverables.map((d) => (

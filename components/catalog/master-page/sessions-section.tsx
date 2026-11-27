@@ -106,12 +106,14 @@ export function SessionsSection({
       ) : (
         <DataTable framed>
           <DataTableHeader>
-            <DataTableHead>{t.fields.kind}</DataTableHead>
-            <DataTableHead hideBelow="sm">
+            <DataTableHead icon="kind">{t.fields.kind}</DataTableHead>
+            <DataTableHead icon="status" hideBelow="sm">
               {fr.sessions.columns.state}
             </DataTableHead>
-            <DataTableHead hideBelow="md">{t.fields.studio}</DataTableHead>
-            <DataTableHead hideBelow="lg" fill>
+            <DataTableHead icon="place" hideBelow="md">
+              {t.fields.studio}
+            </DataTableHead>
+            <DataTableHead icon="person" hideBelow="lg" fill>
               {t.fields.engineer}
             </DataTableHead>
             {canEdit && <DataTableActionsHead label={fr.records.menu.column} />}

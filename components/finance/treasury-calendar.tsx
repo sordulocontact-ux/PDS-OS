@@ -84,14 +84,26 @@ export function TreasuryCalendar({
         ) : (
           <DataTable framed>
             <DataTableHeader>
-              <DataTableHead className="w-24">{t.date}</DataTableHead>
-              <DataTableHead fill>{t.operation}</DataTableHead>
-              <DataTableHead hideBelow="lg">{t.source}</DataTableHead>
-              <DataTableHead hideBelow="md">{t.nature}</DataTableHead>
-              <DataTableHead align="end" className="w-auto sm:w-48">
+              <DataTableHead icon="date" className="w-24">
+                {t.date}
+              </DataTableHead>
+              <DataTableHead icon="item" fill>
+                {t.operation}
+              </DataTableHead>
+              <DataTableHead icon="source" hideBelow="lg">
+                {t.source}
+              </DataTableHead>
+              <DataTableHead icon="kind" hideBelow="md">
+                {t.nature}
+              </DataTableHead>
+              <DataTableHead
+                icon="amount"
+                align="end"
+                className="w-auto sm:w-48"
+              >
                 {t.amount}
               </DataTableHead>
-              <DataTableHead hideBelow="sm" align="end">
+              <DataTableHead icon="amount" hideBelow="sm" align="end">
                 {t.balance}
               </DataTableHead>
             </DataTableHeader>

@@ -24,9 +24,15 @@ export function ProductionCallList({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.call}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.date}</DataTableHead>
-        <DataTableHead align="end">{t.state}</DataTableHead>
+        <DataTableHead icon="call" fill>
+          {t.call}
+        </DataTableHead>
+        <DataTableHead icon="date" hideBelow="sm">
+          {t.date}
+        </DataTableHead>
+        <DataTableHead icon="status" align="end">
+          {t.state}
+        </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {calls.map((call) => (

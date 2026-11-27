@@ -56,17 +56,23 @@ export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
   return (
     <DataTable framed>
       <DataTableHeader>
-        <DataTableHead fill>{c.envelope}</DataTableHead>
-        <DataTableHead hideBelow="lg">{c.type}</DataTableHead>
-        <DataTableHead align="end" hideBelow="md">
+        <DataTableHead icon="item" fill>
+          {c.envelope}
+        </DataTableHead>
+        <DataTableHead icon="kind" hideBelow="lg">
+          {c.type}
+        </DataTableHead>
+        <DataTableHead icon="amount" align="end" hideBelow="md">
           {c.budget}
         </DataTableHead>
-        <DataTableHead align="end" hideBelow="md">
+        <DataTableHead icon="amount" align="end" hideBelow="md">
           {c.used}
         </DataTableHead>
         {/* On a phone, what is left is what reads: « Reste ». */}
-        <DataTableHead align="end">{c.rest}</DataTableHead>
-        <DataTableHead hideBelow="md" className="w-[22%]">
+        <DataTableHead icon="amount" align="end">
+          {c.rest}
+        </DataTableHead>
+        <DataTableHead icon="ongoing" hideBelow="md" className="w-[22%]">
           {c.consumed}
         </DataTableHead>
       </DataTableHeader>

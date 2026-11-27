@@ -27,9 +27,11 @@ export function ExternalTeamTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.externalColumns.name}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.externalColumns.role}</DataTableHead>
-        <DataTableHead fill hideBelow="md">
+        <DataTableHead icon="person">{t.externalColumns.name}</DataTableHead>
+        <DataTableHead icon="role" hideBelow="sm">
+          {t.externalColumns.role}
+        </DataTableHead>
+        <DataTableHead icon="source" fill hideBelow="md">
           {t.externalColumns.source}
         </DataTableHead>
       </DataTableHeader>

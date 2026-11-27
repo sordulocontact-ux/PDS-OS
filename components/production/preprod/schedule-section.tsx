@@ -136,9 +136,15 @@ export function ScheduleSection({
         {logistics.shootDate.value && (
           <DataTable>
             <DataTableHeader>
-              <DataTableHead fill>{t.columns.step}</DataTableHead>
-              <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-              <DataTableHead align="end">{t.columns.state}</DataTableHead>
+              <DataTableHead icon="step" fill>
+                {t.columns.step}
+              </DataTableHead>
+              <DataTableHead icon="date" hideBelow="sm">
+                {t.columns.date}
+              </DataTableHead>
+              <DataTableHead icon="status" align="end">
+                {t.columns.state}
+              </DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {schedule.rows.map((row) => {

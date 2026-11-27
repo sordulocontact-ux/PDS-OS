@@ -59,8 +59,12 @@ export function LeversCard({
     >
       <DataTable>
         <DataTableHeader>
-          <DataTableHead fill>{t.columns.lever}</DataTableHead>
-          <DataTableHead hideBelow="sm">{t.columns.kind}</DataTableHead>
+          <DataTableHead icon="item" fill>
+            {t.columns.lever}
+          </DataTableHead>
+          <DataTableHead icon="kind" hideBelow="sm">
+            {t.columns.kind}
+          </DataTableHead>
           <DataTableHead className="w-px" align="end">
             <span className="sr-only">{t.create}</span>
           </DataTableHead>

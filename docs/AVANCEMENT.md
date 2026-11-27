@@ -3463,4 +3463,6 @@ chasse fixe, pas d'icône d'en-tête. Sans migration.
   réduite à 1 280 px) : aucun en-tête coupé, défilement dans le cadre avec Artiste et « ⋯ » fixes, fiche ouverte par le
   nom, ↓ vers l'artiste suivant, « Nommer » ouvert par-dessus la fiche (annulé, rien écrit), tri par Statut, cartes à
   380 px de tableau, récap de la Vue d'ensemble et son lien `?ouvrir=` ; aucune erreur dans la console.
-
+- Icônes de colonne sur les 53 tableaux qui n'en avaient pas (Sacha, 27/11) : chaque `DataTableHead` à libellé porte sa clé de
+  `columnIcons` (même clé pour la même sorte de colonne) ; clés ajoutées `amount`, `metric`, `target`, `link`, `item` ; seule
+  `AnswerTable` de PO (en-têtes écrits par le modèle) n'en a pas.
