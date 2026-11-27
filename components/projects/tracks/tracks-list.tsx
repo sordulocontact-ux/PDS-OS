@@ -1,5 +1,5 @@
 import { IconDisc } from "@/components/icons";
-import { NameTitleButton } from "@/components/projects/titles/name-title-button";
+import { NameTitleMenu } from "@/components/projects/titles/name-title-menu";
 import {
   WorkflowProgress,
   WorkflowRing,
@@ -7,6 +7,8 @@ import {
 import { EmptyState } from "@/components/shell/empty-state";
 import {
   DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
   DataTableGroupRow,
@@ -74,7 +76,8 @@ export function TracksList({
   }
   const live = rows.filter((r) => !r.abandoned);
   const abandoned = rows.filter((r) => r.abandoned);
-  const columns = 1 + workflows.length;
+  // The owner's « ⋯ » closes each row (« Nommer le titre »).
+  const columns = 1 + workflows.length + (canManage ? 1 : 0);
   const row = (r: TitleProgress) => (
     <TrackRow
       key={r.title.id}
@@ -102,6 +105,11 @@ export function TracksList({
             {t.columns[workflow as keyof typeof t.columns]}
           </DataTableHead>
         ))}
+        {canManage && (
+          <DataTableActionsHead
+            label={fr.projectTitles.board.columns.actions}
+          />
+        )}
       </DataTableHeader>
       <DataTableBody>
         {live.map(row)}
@@ -127,7 +135,8 @@ function TrackRow({
   projectId: string;
   row: TitleProgress;
   workflows: WorkflowKey[];
-  // The project's owner: « Nommer » on a title still to be named.
+  // The project's owner: « ⋯ » › « Nommer le titre » on a title still to
+  // be named.
   canManage: boolean;
 }) {
   const cardOf = (workflow: WorkflowKey) =>
@@ -141,22 +150,15 @@ function TrackRow({
       <DataTableCell className="w-72">
         <DataTableMedia
           title={
-            <span className="flex min-w-0 flex-wrap items-center gap-2">
-              <DataTableLink
-                href={routes.projectTrack(projectId, row.title.id)}
+            <DataTableLink href={routes.projectTrack(projectId, row.title.id)}>
+              <span
+                className={cn(
+                  row.abandoned && "text-[color:var(--text-secondary)]",
+                )}
               >
-                <span
-                  className={cn(
-                    row.abandoned && "text-[color:var(--text-secondary)]",
-                  )}
-                >
-                  {row.label}
-                </span>
-              </DataTableLink>
-              {canManage && !named && !row.abandoned && (
-                <NameTitleButton projectId={projectId} titleId={row.title.id} />
-              )}
-            </span>
+                {row.label}
+              </span>
+            </DataTableLink>
           }
           subtitle={
             row.abandoned ? (
@@ -184,6 +186,17 @@ function TrackRow({
           <WorkflowProgress card={cardOf(workflow)} />
         </DataTableCell>
       ))}
+      {canManage && (
+        <DataTableActionsCell>
+          {!named && !row.abandoned && (
+            <NameTitleMenu
+              projectId={projectId}
+              titleId={row.title.id}
+              label={row.label}
+            />
+          )}
+        </DataTableActionsCell>
+      )}
     </DataTableRow>
   );
 }

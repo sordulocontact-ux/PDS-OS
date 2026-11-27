@@ -301,3 +301,14 @@ qui a été fait.
   titre et une ligne par artiste en `FactRows` (contrat et deal avec leur icône), au lieu d'un grand tableau.
 - **À retenir** : une vue de consultation rattachée à une page (qui fait quoi, suivi des contrats d'un projet) s'ouvre
   en panneau sur cette page, pas sur une page à part ; une URL à paramètre garde les liens et les notifications.
+
+---
+
+## 27/11/2026 : « Nommer » dans le « ⋯ » de la ligne, pas à côté du titre
+
+- **Ce que Sacha a dit** : « sur la page titre d'un projet collectif, je veux que tu supprimes le bouton nommer du
+  titre, et que l'action soit dans un menu … à la fin de la table ».
+- **Fait** : vue « Par titre » : plus de bouton « Nommer » à côté du nom ; une colonne « ⋯ » en fin de ligne (pour le
+  responsable) avec « Nommer le titre », qui ouvre le champ dans une modale (`NameTitleMenu`).
+- **À retenir** : un geste sur une ligne de tableau va dans son « ⋯ » en dernière colonne, jamais en bouton dans une
+  case ; le tableau se lit, le menu agit (comme « Par artiste »).
