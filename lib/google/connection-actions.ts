@@ -63,7 +63,7 @@ export async function setGoogleService(
   // Already off (a second tab): nothing to change.
   if (error && error.code !== "23505")
     return refusal(error, "setGoogleService");
-  revalidatePath(routes.settings);
+  revalidatePath(routes.settingsConnections);
   return { ok: true, done: on ? t.turnedOn(service) : t.turnedOff(service) };
 }
 
@@ -92,6 +92,6 @@ export async function disconnectGoogleAccount(
     .delete()
     .eq("person_id", access.personId)
     .eq("account_email", data.email);
-  revalidatePath(routes.settings);
+  revalidatePath(routes.settingsConnections);
   return { ok: true, done: t.disconnected(data.email) };
 }

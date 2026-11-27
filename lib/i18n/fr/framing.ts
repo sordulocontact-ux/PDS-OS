@@ -212,6 +212,8 @@ export const framing = {
     framing_not_validated: "Le plan se construit une fois le Brief validé.",
     invalid_owner: "Ce responsable n'est pas membre de l'équipe.",
     already_decided: "Cette version a déjà reçu une décision.",
+    direction_review_kept:
+      "La direction valide toujours cette version : seul un directeur créatif peut être retiré.",
     task_exists:
       "Une tâche existe déjà pour cette action du call : elle est dans le Travail.",
     recommendation_settled:

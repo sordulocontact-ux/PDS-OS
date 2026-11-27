@@ -3,6 +3,7 @@
 import { IconPlus } from "nucleo-sharp-essential";
 import { useEffect, useRef } from "react";
 
+import { SearchGroupLabel } from "@/components/ui/search-group-label";
 import type { FinanceSearchItem } from "@/lib/finance/search";
 import { financeSearch } from "@/lib/i18n/fr/finance-search";
 import { cn } from "@/lib/utils";
@@ -47,12 +48,9 @@ export function SearchResults({
       {rows.map((row, index) => (
         <li key={row.id} role="presentation" className="contents">
           {row.group !== rows[index - 1]?.group && (
-            <span
-              role="presentation"
-              className="px-2 pt-3 pb-1 text-caption text-[color:var(--text-tertiary)] first:pt-1"
-            >
+            <SearchGroupLabel first={index === 0}>
               {financeSearch.groups[row.group]}
-            </span>
+            </SearchGroupLabel>
           )}
           <span
             id={`${id}-${index}`}

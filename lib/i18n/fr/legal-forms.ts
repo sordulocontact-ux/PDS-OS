@@ -120,6 +120,8 @@ export const legalForms = {
   },
   // A field's own help, under its label (the public fiche).
   fieldHints: {
+    birth_date: "Par exemple 14/03/1998. Une société n'a rien à remplir ici.",
+    birth_place: "Ville et pays, par exemple Lyon (France).",
     proposed_split:
       "En pourcentage, par exemple 50 %. C'est indicatif et n'engage personne : la répartition officielle vous sera proposée à part, par un lien de confirmation.",
   } as Record<string, string>,
@@ -130,6 +132,8 @@ export const legalForms = {
     email: "E-mail",
     phone: "Téléphone",
     address: "Adresse postale",
+    birth_date: "Date de naissance",
+    birth_place: "Lieu de naissance",
     entity_type: "Vous intervenez en tant que",
     company_name: "Raison sociale",
     siret: "SIREN / SIRET",

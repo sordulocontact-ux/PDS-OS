@@ -183,4 +183,10 @@ export type ContractFormOptions = {
   owners: { personId: string; name: string }[];
   projects: { id: string; title: string }[];
   artists: { id: string; name: string }[];
+  // The viewer's organization: the folder of the imported contract's file.
+  organizationId: string | null;
+  // « Partir d'un modèle » is offered (manage_legal): a project's contracts
+  // are generated, and their templates written, right in « Nouveau contrat »
+  // (Sacha 26/11/2026).
+  generates: boolean;
 };

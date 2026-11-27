@@ -61,4 +61,4 @@ export function finishConnectFlow(
 
 /** The settings, saying how the round trip ended (`?google=`). */
 export const settingsAfterConnect = (outcome: ConnectOutcome) =>
-  `${routes.settings}?google=${outcome}#connections`;
+  `${routes.settingsConnections}?google=${outcome}`;

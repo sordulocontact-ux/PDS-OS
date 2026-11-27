@@ -8,6 +8,7 @@ import { AccountMenu } from "@/components/shell/account-menu";
 import { AppSearch } from "@/components/shell/app-search";
 import { NavLinks } from "@/components/shell/nav-links";
 import { PdsLogo } from "@/components/shell/pds-logo";
+import { QuickCreateButton } from "@/components/shell/quick-create/quick-create-button";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
 import { scrollFadeY, useScrollFade } from "@/components/ui/use-scroll-fade";
@@ -71,16 +72,22 @@ export function Sidebar({
             <PdsLogo entryLanding className="w-9" />
           </Link>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-[var(--nav-item-hover-bg)]"
-          aria-label={collapsed ? t.expand : t.collapse}
-          onClick={toggle}
-        >
-          {/* 20 px icon, as in the navigation. */}
-          <IconSidebar aria-hidden className="size-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {/* The « + » beside the collapse button, as Linear's, Notion's
+              and Plain's « new »: beside the search, it cut « Rechercher… »
+              (27/11/2026). */}
+          {!collapsed && <QuickCreateButton />}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-[var(--nav-item-hover-bg)]"
+            aria-label={collapsed ? t.expand : t.collapse}
+            onClick={toggle}
+          >
+            {/* 20 px icon, as in the navigation. */}
+            <IconSidebar aria-hidden className="size-5" />
+          </Button>
+        </div>
       </div>
       <div
         ref={pagesRef}
@@ -91,6 +98,9 @@ export function Sidebar({
       >
         {/* The app's ⌘K, first of the navigation (Sacha 24/11/2026). */}
         <AppSearch collapsed={collapsed} />
+        {/* Collapsed, the « + » leaves the head (the button alone stays
+            there) for under the magnifier. */}
+        {collapsed && <QuickCreateButton collapsed />}
         <NavLinks
           isAdmin={isAdmin}
           permissions={permissions}

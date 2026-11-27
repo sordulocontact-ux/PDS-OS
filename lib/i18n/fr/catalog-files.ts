@@ -175,6 +175,13 @@ export const catalogFiles = {
     submit: "Enregistrer",
     submitting: "Enregistrement…",
   },
+  // Several files ticked in a table (Sacha 25/11/2026).
+  selection: {
+    all: "Sélectionner tous les fichiers",
+    row: (name: string) => `Sélectionner « ${name} »`,
+    open: "Ouvrir",
+    download: "Télécharger",
+  },
   menu: {
     label: (name: string) => `Actions pour « ${name} »`,
     open: "Ouvrir",

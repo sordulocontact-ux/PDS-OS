@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -37,7 +38,13 @@ type AssistantContextValue = {
   /** A draft completed outside the review modal (a feedback sent from its card). */
   markSaved: (toolCallId: string, link: SavedLink) => void;
   launcherOpen: boolean;
+  /** Opens or closes the window; opened, it listens (Espace Espace). */
   setLauncherOpen: (open: boolean) => void;
+  /** Opens the window; `voice: false` = typed, the dictation stays off (a
+   * click on the shell's « + » is not a request to speak). */
+  openLauncher: (options: { voice: boolean }) => void;
+  /** Whether the window listens when it opens. */
+  launcherVoice: boolean;
   /** The page the conversation was opened from, if any. */
   origin: PoOrigin | null;
   setOrigin: (origin: PoOrigin | null) => void;
@@ -69,7 +76,16 @@ export function AssistantProvider({
   // the signed-in shell.
   useEffect(() => () => keepChat(null), []);
   const [saved, setSaved] = useState<Record<string, SavedLink>>({});
-  const [launcherOpen, setLauncherOpen] = useState(false);
+  const [launcherOpen, setOpen] = useState(false);
+  const [launcherVoice, setLauncherVoice] = useState(true);
+  const setLauncherOpen = useCallback((open: boolean) => {
+    if (open) setLauncherVoice(true);
+    setOpen(open);
+  }, []);
+  const openLauncher = useCallback(({ voice }: { voice: boolean }) => {
+    setLauncherVoice(voice);
+    setOpen(true);
+  }, []);
   const [origin, setOrigin] = useState<PoOrigin | null>(null);
   const [reviewing, setReviewing] = useState<{
     toolCallId: string;
@@ -81,6 +97,8 @@ export function AssistantProvider({
       saved,
       launcherOpen,
       setLauncherOpen,
+      openLauncher,
+      launcherVoice,
       origin,
       setOrigin,
       review(toolCallId, proposal) {
@@ -92,7 +110,7 @@ export function AssistantProvider({
         setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
-    [saved, launcherOpen, origin],
+    [saved, launcherOpen, setLauncherOpen, openLauncher, launcherVoice, origin],
   );
 
   // The draft after `toolCallId` in the same answer, not saved yet: an

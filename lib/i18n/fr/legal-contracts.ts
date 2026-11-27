@@ -7,6 +7,9 @@ export const legalContracts = {
     "personne.email": "E-mail",
     "personne.telephone": "Téléphone",
     "personne.adresse": "Adresse postale",
+    "personne.date_naissance": "Date de naissance",
+    "personne.lieu_naissance": "Lieu de naissance",
+    "contrat.date": "Date du contrat",
     "personne.statut": "Personne ou société",
     "personne.societe": "Raison sociale",
     "personne.siret": "SIREN / SIRET",
@@ -49,6 +52,7 @@ export const legalContracts = {
     mapping: "Contrats à prévoir",
     organization: "Structure",
     deal: "Deal memo validé",
+    document: "Jour où le contrat est préparé",
   } as Record<string, string>,
   // JUR-16: a value that does not apply to the person, as the contract says it.
   notApplicable: "Sans objet",
@@ -159,6 +163,7 @@ export const legalContracts = {
       "Il ne sera proposé pour aucun contrat. La raison reste visible avec cette version ; une correction se fait par une nouvelle version.",
     refuseReason: "Pourquoi le refuser",
     refused: "Modèle refusé.",
+    saved: "Modèle enregistré, à valider dans Contrats › Modèles.",
     retireReason: "Pourquoi le retirer",
     retired: "Modèle retiré.",
     retiredBecause: (reason: string) => `Retiré ou refusé : ${reason}`,
@@ -181,19 +186,25 @@ export const legalContracts = {
       body: "Texte du modèle",
       submit: "Enregistrer le modèle",
       submitting: "Enregistrement…",
-      proposed:
-        "Nom, type, rôles et usage proposés par PO d'après le contrat : corrigez-les si besoin.",
+      proposed: "Repris du contrat : corrigez si besoin.",
       unknown: (ids: string) => `Champs inconnus : ${ids}.`,
       invalid: "Vérifiez le nom, le type, les rôles et le texte.",
     },
     editor: {
       label: "Texte du modèle",
-      insert: "Insérer une valeur",
-      insertHint:
-        "Placez le curseur dans le texte, puis cliquez sur la valeur à insérer. Elle sera remplie pour chaque contrat.",
-      // The marks the contract prints (document-pdf.ts, Sacha 22/11/2026).
-      marksHint:
-        "**texte** en gras (⌘B), __texte__ souligné (⌘U) ; un texte collé depuis Word garde son gras et son souligné.",
+      // The page's toolbar (DocumentEditor, Sacha 25/11/2026).
+      toolbar: "Mise en forme",
+      bold: "Gras",
+      boldKey: "G",
+      underline: "Souligné",
+      underlineKey: "S",
+      insert: "Insérer une information",
+      // A value clicked on the page (DocumentFieldPopover).
+      field: {
+        title: "Information",
+        restore: (text: string) => `Remettre « ${text} »`,
+        remove: "Retirer",
+      },
       groups: {
         person: "La personne",
         project: "Le projet",
@@ -201,22 +212,15 @@ export const legalContracts = {
         deal: "Les termes du deal",
       },
       placeholder:
-        "Collez ici le texte du contrat, déjà relu par votre juriste.",
+        "Collez ici le texte du contrat ou déposez son fichier, déjà relu par votre juriste.",
     },
     source: {
       title: "Fichier source",
-      description:
-        "Word, PDF ou texte, 10 Mo au plus. PO lit le contrat et repère ses valeurs ; le fichier est gardé avec le modèle.",
-      import: "Importer un fichier",
-      replace: "Remplacer",
+      hint: "Word, PDF ou texte",
       remove: "Retirer",
       reading: "Lecture du fichier…",
       current: (name: string) => `Fichier source : ${name}`,
-      drop: "Déposez le fichier ici",
       imported: (name: string) => `Contrat importé de « ${name} »`,
-      folded:
-        "Le texte du contrat est repris tel quel, chaque valeur repérée remplacée par sa pastille.",
-      showText: "Afficher le texte",
       undo: "Annuler",
       pdfNote: "Lu dans un PDF : la mise en page n'est pas gardée.",
       open: "Télécharger le fichier source",
@@ -227,29 +231,13 @@ export const legalContracts = {
       unreadable: "Aucun texte n'a pu être lu dans ce fichier.",
       failed: "Le fichier n'a pas pu être importé. Réessayez.",
     },
+    // A contract imported or pasted whole: its values found at once, on
+    // the page (use-value-finder.ts).
     values: {
-      title: "Vous partez d'un contrat déjà rempli ?",
-      description:
-        "Collez-le tel quel. PO repère les noms, l'adresse, les titres et la somme, le code les e-mails, téléphones et numéros : vous choisissez ce qui devient une valeur à remplir.",
-      fromFile: (name: string) => `Ce que PO a repéré dans « ${name} »`,
-      fromFileDescription:
-        "Déjà remplacé dans le modèle. Changez le champ si PO s'est trompé, ou « Annuler » pour garder le texte d'origine.",
-      find: "Repérer les valeurs",
       finding: "PO lit le contrat…",
-      findAgain: "Repérer à nouveau",
       empty: "Collez d'abord le texte du contrat.",
-      none: "Aucune valeur repérée : insérez-les avec les boutons au-dessus du texte.",
       partial:
-        "PO n'a pas pu lire le contrat : seuls les e-mails, téléphones et numéros sont proposés.",
-      times: (n: number) => (n === 1 ? "1 fois" : `${n} fois`),
-      gone: "Plus dans le texte",
-      fieldLabel: (excerpt: string) => `Valeur pour « ${excerpt} »`,
-      replace: "Remplacer",
-      ignore: "Ignorer",
-      undo: "Annuler",
-      replaced: (n: number) =>
-        n === 1 ? "Remplacé 1 fois" : `Remplacé ${n} fois`,
-      replaceAll: (n: number) => `Tout remplacer (${n})`,
+        "PO n'a pas pu lire le contrat : seuls les e-mails, téléphones, numéros et lignes à remplir sont repérés.",
       failed: "La lecture du contrat a échoué. Réessayez.",
     },
     versions: "Versions",
@@ -259,7 +247,6 @@ export const legalContracts = {
     // PDF, pas un truc avec les écritures »): its values as blanks to fill,
     // « Modifier » opening the source document, where it is changed.
     document: {
-      name: (name: string, version: string) => `${name} · ${version}`,
       pdf: "Voir le PDF",
       edit: "Modifier",
       editLabel: (name: string) => `Modifier le document source : ${name}`,
@@ -312,6 +299,8 @@ export const legalContracts = {
       close: "Fermer",
       contract: "Contrat",
       choose: "Choisir un contrat",
+      // The contract menu of a person without a validated template.
+      noTemplate: "Aucun modèle pour ce rôle",
       noDeal: "Pas d'accord nécessaire",
       noDealWhy: "Pourquoi aucun accord n'est nécessaire",
       // « Déjà payé » ne suffit pas (JUR-12).

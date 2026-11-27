@@ -684,7 +684,10 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   (une vraie navigation re-rendrait le formulaire en pleine saisie), pour qu'un
   rechargement ou le retour arrière le reprenne ; si la page en cache date d'avant le
   brouillon, elle est relue (`router.refresh`). Enregistrer en quittant rafraîchit la liste
-  des projets (où sont les brouillons), jamais pendant la saisie.
+  des projets (où sont les brouillons), jamais pendant la saisie. Le formulaire n'est remonté
+  que pour un autre brouillon ou une autre sélection (`CreateProjectFormHost`) : le brouillon
+  qu'il a lui-même créé (`isDraftCreatedHere`) ne le remonte pas quand la page est re-rendue
+  (« Créer le titre » la revalide), sinon le titre créé était perdu (test de Maël du 26/11).
 - **Reprendre** : la liste **Projets** montre en tête les brouillons de la personne (vue
   Actifs, avec `create_projects`), le plus récent d'abord, avec leur type (« Musical · EP »)
   et une pastille « Brouillon » (`draftTone`, neutre) ; chacun rouvre le formulaire
@@ -820,6 +823,36 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
 - Coquille : `app/(app)/layout.tsx` (barre latérale blanche flottante, tiroir mobile), projets
   (`lib/projects/*`, étape actuelle calculée par le code), onglets projet : Vue d'ensemble,
   Cadrage, Calls, Sortie.
+- **Le « + » de la coquille** (27/11/2026, `docs/DESIGN.md` § 4 « Coquille ») : la liste des actions
+  est `lib/shell/quick-actions.ts` (`QUICK_ACTIONS`, ordre fixe ; `allowedQuickActions(access, {
+  mailbox })` filtre par droit **dans le layout**, côté serveur ; les formulaires et le RLS décident
+  toujours à l'enregistrement). `QuickCreateProvider` (`components/shell/quick-create/`, dans
+  `AssistantProvider`) expose `useQuickCreate(): { actions, open(action) }` et monte les fenêtres
+  (`QuickCreateDialogs`, chargées à la demande) **hors** du menu et du ⌘K, pour qu'elles survivent à
+  leur fermeture. Deux portes : `QuickCreateButton` (barre latérale, en-tête du téléphone, touche N)
+  et le groupe « Créer » du ⌘K (`AppSearch`). Ajouter une action = une entrée de `QUICK_ACTIONS`, sa
+  règle de droit, son texte (`shell.quickCreate.actions`), son icône (`quick-action-icons.ts`) et sa
+  fenêtre ; le guide de PO (`quick-create`, `lib/assistant/guide/topics/daily.ts`) aussi.
+  Action `note` (27/11/2026) : « Nouvelle note » ouvre `QuickNote` (`quick-create/quick-note.tsx`) = `NewNoteSheet`, une note vide qui s'enregistre seule, liée d'avance au projet de la page quand on en lit un (modifiable) ; les choix de lien sont lus à l'ouverture (`loadNoteLinkOptions`).
+- **Paramètres** (27/11/2026, d'après Accordee) : une page par sujet sous `app/(app)/app/settings/`
+  (`utilisation`, `apparence`, `notifications`, `raccourcis`, `connexions`, et pour la direction
+  `coordonnees`, `distribution`, `requireAdmin`), liste et icônes dans `lib/ui/settings-sections.ts`
+  (`settingsPagesFor(admin)`), routes `routes.settings*`. Le layout pose la seconde colonne
+  (`SettingsSidebar` sur `ContextSidebar`, barre principale repliée par `use-collapsed-nav.tsx`) ;
+  chaque page = `SettingsFrame` (bandeau « Paramètres / page », titre, onglets sur téléphone) puis des
+  `Rows` de `SettingsRow` (libellé à gauche, réglage à droite) ou une carte. `/app/settings` redirige vers
+  la première page (le retour de Google, `?google=`, vers Connexions).
+- **Raccourcis clavier** (27/11/2026, Paramètres › Raccourcis clavier) : `lib/shortcuts/definitions.ts`
+  (actions `search`, `create`, `assistant`, `capture`, défauts, règles : `shortcutProblem`,
+  `shortcutOwner`, `mergeShortcuts`) ; table `account_shortcuts` (une ligne par compte, seulement ce qui
+  diffère du défaut, RLS : son propre compte, test `account_shortcuts_rls.test.sql`), lue par le layout
+  **sans bloquer la page** (`loadMyShortcuts()` passée en promesse à `ShortcutsProvider`, les défauts
+  répondent d'ici là), écrite par `saveShortcut` (`lib/shortcuts/actions.ts`, contrôle du conflit aussi
+  côté serveur). **Toute écoute d'un raccourci passe par `useKeyShortcut(action, …)`**
+  (`components/shell/shortcuts/`) : avec ⌘ partout, une touche seule jamais dans un champ ni fenêtre
+  ouverte, touche doublée (Espace Espace) annulée par un défilement, `capture` pour passer avant (⌘K de
+  Finance). Ajouter un raccourci = une action dans `SHORTCUT_ACTIONS`, son défaut, son texte
+  (`lib/i18n/fr/shortcuts.ts`) et son `useKeyShortcut`.
 - Demandes d'accès en attente : comptées par le layout (`countPendingMemberships`, admins
   seulement) et affichées sur « Équipe », qui ouvre alors `?status=pending`. Un layout ne
   se recalcule pas à chaque navigation : le compteur se met à jour au chargement d'une
@@ -1262,22 +1295,24 @@ s'afficher sans chargement.
 ## 4. Calls, audio, transcription (étape 4 + enregistreur)
 
 - **Deux portes vers les mêmes calls** (Sacha, 05/11/2026 ; `lib/calls/door.ts`, `CallDoor`), comme
-  Travail : **Calls** de la barre principale (`/app/calls`, tous les calls visibles) et **Calls**
-  du projet, dans Pilotage à côté de Travail (`/app/projects/<p>/calls`, plus caché). Un call
-  s'ouvre **dans la porte d'où on vient** : depuis Calls, `/app/calls/<id>` (`routes.call`, ex-
-  `routes.meeting`) sert désormais **tout call visible**, réunion interne ou call de projet
-  (`getVisibleCall` = `getCall(…, "any", …)`, la barre reste sur Calls, « Projet : X › » mène au
-  projet) ; depuis le projet, `/app/projects/<p>/calls/<id>` (dans le cadre du projet, fil
-  « Calls / titre », le titre du call en h1 de l'en-tête de module). Les URLs existantes ne
-  changent pas, rien à rediriger ; le calendrier des Calls ouvre aussi dans Calls, le Calendrier
-  (« là où ça se décide ») garde le lien du projet (`CallListItem.href`). **Un composant par
-  pièce** : la liste (`CallsListView` → `CallsList` → `CallsTable`, lignes de `listAllCalls`,
-  filtré par `projectId` pour un projet) et la page (`CallPage` : lectures, droits, module,
-  projets des tâches, puis `CallWorkspace` ; `CallHeader` dessiné selon la porte) ; seuls le
-  retour, le fil et la navigation allumée diffèrent. `CallPage` met l'`EditAccessProvider` hors
-  d'un projet (le cadre du projet le fait dedans). Le compte rendu partagé
-  (`/app/calls/<id>/report`) reste hors du garde 404 du call (`[callId]/(call)/layout.tsx`) : un
-  membre à qui il est partagé le lit sans voir le call.
+  Travail ; **depuis le 27/11/2026 elles s'appellent Notes** (ticket « Calls → Calendrier + Notes »,
+  § Notes plus bas) : **Notes** de la barre principale (`/app/notes`, tous les calls visibles) et
+  **Notes** du projet, dans Pilotage à côté de Travail (`/app/projects/<p>/notes`). La liste n'est plus
+  `CallsListView` (supprimée) mais **`NotesListView`** (calls passés + notes écrites), la planification
+  est dans le Calendrier (§ 8). **Anciennes URL redirigées** : `/app/calls` → `/app/notes` (filtre
+  `?project=` gardé), `/app/calls?display=calendar&mode=…&date=…` → `/app/calendar?mode=week|month&date=…`,
+  `/app/projects/<p>/calls?view=` → `/app/projects/<p>/notes?tab=` (`upcoming` → À venir, `past` →
+  Calls). Un call s'ouvre **dans la porte d'où on vient** et **ses pages ne bougent pas** :
+  `/app/calls/<id>` (`routes.call`, tout call visible, réunion interne ou call de projet ;
+  `getVisibleCall` = `getCall(…, "any", …)`) allume **Notes** dans la barre (`alsoActiveOn` de
+  `NAV_ITEMS`) et son fil dit « Notes » ; `/app/projects/<p>/calls/<id>` (cadre du projet, titre du call
+  en h1) allume la section Notes du projet (`match` de `project-sections.ts`). `callsHref(door)` mène à
+  la liste de la porte. Le Calendrier garde le lien du projet (`CallListItem.href`). **Un composant par
+  pièce** : la liste (`NotesListView` → `NotesList` → `NotesTable`, filtrée par `projectId` pour un
+  projet) et la page (`CallPage` : lectures, droits, module, projets des tâches, puis `CallWorkspace` ;
+  `CallHeader` dessiné selon la porte). `CallPage` met l'`EditAccessProvider` hors d'un projet (le cadre
+  du projet le fait dedans). Le compte rendu partagé (`/app/calls/<id>/report`) reste hors du garde 404
+  du call (`[callId]/(call)/layout.tsx`) : un membre à qui il est partagé le lit sans voir le call.
 - **Participants d'un call planifié** (retour d'Ibé, 05/11/2026) : « Modifier les participants »
   dans la carte Participants (`CallParticipantsButton`, responsable du call seul), le même champ
   `AttendeeChips` que « Nouveau call », rempli de qui participe (`readParticipantsForm`,
@@ -1285,15 +1320,12 @@ s'afficher sans chargement.
   l'enregistrement (`saveCallParticipants`) : membres et invités ajoutés / retirés par la session
   (RLS `is_call_owner`), un membre ajouté est notifié (`call_invited`), et l'événement Google d'un
   call à venir reçoit la nouvelle liste (`setMeetEventGuests`, Google envoie les invitations).
-- **Liste des calls** (les deux portes) : onglets Tous / À venir / Passés, recherche, filtre Projet
-  (Calls seul) ; les prochains d'abord, le plus proche en haut, puis les passés, titrés « À venir »
-  / « Passés » sous « Tous » ; Projet à la teinte du projet (comme Travail), « Rejoindre » et « ⋯ »
-  en bout de ligne. Le « ⋯ » d'une ligne est **le même menu** que celui de la page
-  (`CallSheetMenu` : lien de la visio, fiche copiée ou écrite en e-mail, « Supprimer la réunion »
-  pour la direction et le responsable du call, `canDeleteCall`, `delete_call`), visible au survol à la souris (`RowActions reveal`), toujours
-  sur écran tactile ; la fiche s'écrit au clic depuis la ligne (`agenda`, `guestEmails` lus par
-  `listAllCalls`). « Nouveau call » d'un projet : bouton de l'en-tête (modale, comme « Nouvelle
-  réunion ») ; formulaire sur place quand le projet n'a aucun call.
+- **Liste des calls** : voir **Notes** (§ plus bas), qui remplace depuis le 27/11/2026 la liste Tous /
+  À venir / Passés. Le « ⋯ » d'une ligne de call reste **le même menu** que celui de la page
+  (`CallSheetMenu` : lien de la visio, fiche copiée ou écrite en e-mail, « Supprimer la réunion » pour la
+  direction et le responsable du call, `canDeleteCall`, `delete_call`), visible au survol (`RowActions
+  reveal`), toujours sur écran tactile. « Nouveau call » : bouton principal de l'en-tête des Notes du
+  projet et du Calendrier (modale, `NewMeetingButton label`).
 - **E-mails d'un call** (`lib/email/`) : `CallPageData.emailEnabled` (= `emailEnabled()`, calculé au
   serveur) décide de l'écran. Résumé aux participants : les invités extérieurs avec adresse (et sans
   lien privé) le reçoivent de PDS OS, nommés avant l'envoi et dans le toast (« … et par e-mail à X,
@@ -1438,10 +1470,10 @@ s'afficher sans chargement.
 Demande de Sacha : « un call comme sur Teams ». Deux vues de la page Calls, la même grille dans
 la semaine du Calendrier, et une création de call qui donne un lien Google Meet.
 
-- **Deux vues** de `/app/calls`, choisies dans l'URL (`ViewToggle` dans l'en-tête) : **Liste par
-  défaut** (Sacha, 01/11/2026 ; Tous / À venir / Passés, filtre Projet) et **Calendrier**
-  (`?display=calendar`, défaut du 10/10 au 01/11). Le même calendrier (`CallsCalendar`, avec
-  `items`) fait la **semaine du Calendrier** (`/app/calendar?mode=week`), les autres dates autour.
+- **Plus de vue calendrier dans Calls** (27/11/2026) : la page Calls n'existe plus, le calendrier est
+  **le Calendrier** (`/app/calendar`, § 8) ; les anciennes vues `?display=` sont redirigées. Le même
+  calendrier (`CallsCalendar`, avec `items`) fait la **semaine du Calendrier** (`?mode=week`), les autres
+  dates autour. (Historique : liste par défaut le 01/11, calendrier par défaut du 10/10 au 01/11.)
   Pas de ligne d'aide ni de légende des couleurs au-dessus (retirées le 01/11). Le calendrier
   (`components/calls/calendar/`, places calculées par le serveur sur l'heure de Paris,
   `lib/calls/calendar.ts`) reprend Teams :
@@ -1738,7 +1770,7 @@ change dans Équipe, et voit son utilisation dans ses paramètres, comme dans Cl
   titre de PO d'un retour direct, suggestion entre homonymes, analyse du Cadrage, remplissages
   lancés après le compte rendu d'un call (le compte rendu est enregistré, seules les
   propositions de PO manquent).
-- **Écrans** : `/app/settings` (« Paramètres », menu du compte et panneau mobile) →
+- **Écrans** : `/app/settings/utilisation` (Paramètres › Utilisation de PO, menu du compte et panneau mobile) →
   `AiUsageMeter` : part utilisée, barre (`ProgressBar tone="error"` à la limite), « 74 sur
   200 », remise à zéro à minuit, qui fixe la limite ; avertissement à 80 %. Équipe : colonne
   « PO aujourd'hui » (`listMemberships` lit `ai_usage_today`) et champ « Requêtes à PO par
@@ -2476,7 +2508,15 @@ d'exécution décrits plus haut** (tables et fonctions gardées).
   (`DecisionPanel` : Valider le Brief de sortie / Valider avec réserves / Demander une modification ;
   valider accepte les alertes critiques d'une ancienne version, montrées sur la pièce),
   `ReturnCallout` + `ResubmitForm` (« Répondre et transmettre à nouveau » = version suivante, même
-  valideurs, réponse en note), « Relancer <Nom> » (`remind_strategy_review`). **Réserve** (migration
+  valideurs, réponse en note), « Relancer <Nom> » (`remind_strategy_review`), « Retirer <Nom> »
+  (`withdraw_strategy_review`, migration `20261127190101`, test de Maël du 26/11 : un valideur retiré
+  de l'équipe bloquait le Brief pour toujours) : le responsable retire un directeur créatif encore
+  attendu, jamais la direction (`strategy_review_is_direction`) ; retiré de `project_creatives` = ses
+  validations en attente retirées (trigger `withdraw_reviews`) ; la version est validée si plus
+  personne n'est attendu (`strategy_document_finish`, aussi la fin de `decide_strategy_document`).
+  `strategy_document_reviews` a son `zz_project_live` (mode `strategy_document`) : avant, une décision
+  qui n'était pas la dernière ne changeait que cette table et la page du valideur restait « En
+  attente » jusqu'au TTL. Même geste dans `ReviewPanel` (Plan de sortie, Dossier de presse). **Réserve** (migration
   `20261019030201`, point 3 tranché comme le proto) : le commentaire devient la réserve et une tâche du
   responsable du projet ; sans date donnée, échéance = date de sortie si elle est à venir, sinon dans 7
   jours (une tâche exige une date, `tasks_due_date_required`). « Modifier avec PO » (ticket § 8) = la
@@ -2843,15 +2883,24 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
 - Une date d'un projet absent de la liste (archivé) est écartée. Une source en échec est dite
   (`error`), jamais lue « rien ».
 - **Mois** par défaut (`?mode=week` pour la semaine, `?date=AAAA-MM-JJ` pour se déplacer),
-  **Tout / À vous** (`?voir=mine` : ce qui demande un geste à la personne — ses étapes, ses
-  tâches, ses calls). Téléphone : agenda par jour. Le mois est rendu côté serveur, des liens
+  sans filtre « Tout / À vous » (retiré le 27/11/2026 : Sacha, « ça fait deux fois le même
+  composant » à côté de Semaine / Mois). Téléphone : agenda par jour. Le mois est rendu côté serveur, des liens
   (`ViewLink`).
 - **Semaine = les heures** (Sacha, 01/11/2026 : « sur la semaine on voit les heures, le même
   calendrier que dans Call ») : le calendrier des Calls (`CallsCalendar` en semaine, avec
   `items`, § 4 bis) ; les calls sur leur créneau (création, déplacement, fiche), une date à l'heure sans
   fin (tournage) sur une heure, les dates sans heure dans la rangée sous les jours (`allDay`).
   `loadCalendar` rend aussi les calls bruts (`calls`), réduits à ceux que les dates gardent
-  (archives, « À vous ») ; le formulaire de réunion est lu en même temps (`loadMeetingFormData`).
+  (archives) ; le formulaire de réunion est lu en même temps (`loadMeetingFormData`).
+- **Planifier les calls** (27/11/2026, ticket « Calls → Calendrier + Notes ») : le Calendrier est le seul
+  calendrier. **« Nouveau call »** (`NewMeetingButton label`, le formulaire de réunion) est le bouton
+  principal. **Une seule ligne d'outils** (Sacha, 27/11/2026) : à gauche « Aujourd'hui », période, titre ;
+  à droite Semaine / Mois et le bouton (`action`) de `CalendarToolbar` ; plus
+  rien dans l'en-tête. **Colonne de droite dès `xl`** (`CalendarSide`, cachée en dessous : rien ne change
+  sur téléphone) : `MiniMonth` (un point sous les jours qui ont une date, aujourd'hui marqué, un jour
+  ouvre sa semaine ; mois voisins par **`?mini=AAAA-MM`**, sinon le mois de la période), puis **« À venir »**
+  (`UpcomingCalls` : les prochains calls en cartes, chacune ouvre son call ; rien à venir = rien, pas de
+  phrase). La clé de rendu de la page compte `mini`.
 - Couleur = **le projet** (`projectHue`, la même que dans les Calls) ; la nature de la date est
   dans son libellé (« Mix V1 attendu », « Sortie » en semi-gras). Point bleu = à vous, rouge = en
   retard ; un jour passé est atténué.
@@ -2859,6 +2908,74 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
   avec les Calls), barre `CalendarToolbar` (`components/ui/`), textes `lib/i18n/fr/calendar.ts`.
 
 ---
+
+### Notes (`/app/notes`, 27/11/2026, ticket « Calls → Calendrier + Notes »)
+
+Demande de Sacha : « la page Calls [soit] un calendrier et les transcriptions / comptes rendus sur une
+nouvelle page Notes ». La liste des calls devient **Notes** : les calls passés avec leur contenu et des
+**notes écrites** à la main. Deux portes (§ 4) : **Notes** (`/app/notes`) et **Notes du projet**
+(`/app/projects/<p>/notes`, section « Notes » du Pilotage ; seule différence : l'onglet « À venir », le
+projet n'ayant pas de calendrier à lui, et pas de filtre Rattaché à).
+
+- **Table `notes`** (migration `20261127180101_notes`) : titre, texte (20 000 caractères), `project_id`
+  facultatif, `created_by` (toujours l'auteur, `set_created_by`), `search` (tsvector français généré).
+  **RLS** : lecture = qui voit le projet (`visible_project_ids()`), **sans projet = tout membre actif de
+  l'organisation** (« note de l'équipe ») ; insertion = tout membre actif, comme auteur, sur un projet
+  qu'il voit (`can_see_project`) ; **modification et suppression = son auteur seul** (grants colonne par
+  colonne : `title`, `body`, `project_id`). **Exception voulue (Sacha, 27/11/2026)** à « dans un projet
+  lancé, seul son responsable écrit » : une note est l'écrit d'un membre sur le projet, pas du contenu du
+  projet (aucune étape, aucun état, rien que lise un parcours). 24 tests pgTAP.
+- **Recherche** : RPC `search_notes(p_query)` (SECURITY INVOKER : le RLS de chaque table s'applique) =
+  ids des calls (titre, compte rendu, points du compte rendu, transcription, résumé envoyé) et des notes
+  qui correspondent, plein texte français + `ilike` sur les titres, 200 de chaque au plus.
+  `search_calls` (PO) reste tel quel : il ne lit que les calls de projets et rend des extraits.
+- **Lectures** (`lib/notes/`) : `queries.ts` (`listAllCalls` + notes, RLS, 500 lignes au plus),
+  `views.ts` (`NoteRow` = `CallNoteRow` | `WrittenNoteRow`, onglet de chaque ligne `noteViewOf`, calculé
+  par le code), `search.ts` / `search-actions.ts` (`searchNotesText`), `read.ts` (`WRITTEN_NOTE_SELECT`,
+  `noteLinkOf` : le lien d'une note lu dans la même requête, jamais une par note), `options.ts`
+  (`loadNoteLinkOptions` : projets, deals, contrats lisibles et le lecteur, en un appel),
+  `actions.ts` / `sheet-actions.ts` (création, modification, suppression, lecture du texte d'une note).
+  Textes : `lib/i18n/fr/notes.ts`.
+- **Onglets** (`?tab=`, `DataTableViews`, nombres calculés après filtres) : **Toutes** (calls passés +
+  notes), **Calls**, **Écrites**, **À compléter** (call passé sans compte rendu ni clôture) ; **À venir**
+  dans un projet. Filtres **Rattaché à** (`?link=` : `project:<id>`, `deal:<id>`, `contract:<id>`,
+  `internal`, `team`, Notes seul ; un ancien `?project=<id>` est lu comme `project:<id>`) et **Personne**
+  (`?person=`). Colonnes Note / Rattaché à / Contenu (extrait) / Date / Par (libellé et trombone de Fichiers) ; « Rattaché à » = `NoteLinkPill` (note
+  écrite, lien vers le projet / deal / contrat) ou `CallProjectPill` (call) ; la ligne ouvre `CallSheet`
+  (call) ou `NoteSheet` (note) ; « ⋯ » d'une note (`NoteMenu`, Supprimer) pour son auteur.
+- **Recherche dans le texte** : `SearchableList` garde sa recherche instantanée sur le titre ; `extraMatch`
+  y ajoute les lignes que le serveur a trouvées dans les textes, `onQueryChange` remonte la requête
+  (`useTextSearch` : dès 3 caractères, après une pause, la réponse précédente reste affichée jusqu'à la
+  suivante, une réponse d'une requête plus ancienne est jetée).
+- **Déclencheur live posé par nom** : `zz_project_live` (`project_live_tick('project')`) sur `notes`, et
+  `zz_project_live_left` (`notes_live_left_project`) pour le projet qu'une note quitte. **Pas
+  `attach_project_live()`** : il remettrait aussi le déclencheur sur `personal_tasks` (laissé sans exprès,
+  `20261112120101`) et sur les tables créées depuis sans lui (`finance_incomes`, `deal_call_proposals`).
+  `delete_project_row` supprime les notes du projet.
+- **Lien d'une note** (Sacha, 27/11/2026, migration `20261127210101_notes_links`) : `deal_id`,
+  `contract_id` à côté de `project_id` (clés composites même organisation), **un lien au plus**
+  (`notes_one_link_check`, `num_nonnulls(...) <= 1`) ou aucun (note de l'équipe). **Lecture selon le
+  lien** : projet visible, deal lisible (sous-requête sur `deals` sous son RLS, `can_read_deal`), contrat
+  visible (`can_see_contract`), sinon membre actif ; **écriture** : son auteur, sur un enregistrement qu'il
+  lit. Un deal ou un contrat ne se supprime qu'avec son projet (`delete_project_row`, aucun grant
+  delete) : ses notes partent avec lui (`on delete cascade`, comme ses calls ; `set null` ferait d'une note
+  privée sur un deal une note lue par tous), et `delete_project_row` les supprime par leur nom. **Pas de
+  lien « devis »** : un devis (`production_quotes`) vit dans la Production d'un projet, une note sur un
+  devis se lie au projet. 37 tests pgTAP (`notes_rls`).
+- **Une note est un document** (Sacha 27/11/2026, d'après Accordee) : « Nouvelle note » (`NewNoteButton`
+  de la page, `QuickNote` du « + » et du ⌘K, § 3) ouvre `NewNoteSheet`, le panneau latéral d'une note
+  vide : « Rattacher à un projet, un deal ou un contrat » (`NoteLinkMenu` : les trois sortes avec leur nombre,
+  puis la liste de la sorte avec recherche), le titre en grand (focus, « Sans titre »), auteur et
+  dernière modification, la pastille du lien (« × » le retire), le texte. **Enregistrement automatique**
+  (`useNoteAutosave`) : créée au premier enregistrement utile (titre ou texte ; titre vide → « Sans
+  titre », texte vide accepté par la base), puis mise à jour après chaque pause de 800 ms et à la
+  fermeture (le démontage de `NoteEditor`), enregistrements à la file (jamais deux créations) ; état dans
+  la barre (`NoteSaveStatus`), échec = toast + « Non enregistré », le texte reste. Fermée vide : rien
+  n'est créé. Ouverte depuis sa ligne (`NoteSheet`), son auteur la modifie sur place de la même façon,
+  les autres la lisent (`NoteDocument` sans `onChange`). `initial` (pré-remplissage pour PO) passe à
+  `NewNoteSheet`. Plus de `NoteForm` ni de fenêtre. **Pas d'éditeur riche** (zone de texte).
+- **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; ni comptes rendus
+  des sessions studio dans Notes.
 
 ## 8 bis. Notifications et mise à jour en direct
 
@@ -2899,7 +3016,7 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
 pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` reste).
 
 - **Navigation** (`components/projects/project-sidebar.tsx`, `project-nav-list.tsx`, `project-nav-chips.tsx`) :
-  Vue d'ensemble, Cadrage, Workflows, Pilotage (Travail, Validations, Activité, Budget). Équipe, Planning, Calls,
+  Vue d'ensemble, Cadrage, Workflows, Pilotage (Travail, Notes, Validations, Activité, Budget). Équipe, Planning,
   Livrables, Fichiers ont `hidden` dans `projectSections` : route et fil d'Ariane gardés, plus d'entrée (Équipe
   n'est plus liée de nulle part : à rattacher à « Qui fait quoi »). Point du Cadrage : `in_progress` jusqu'à
   `planLaunchedAt` (`lib/plan/queries.ts`, `cache`), `done` après. Pastilles « À vous » : `countMine` de
@@ -3164,8 +3281,9 @@ date de sortie de la Stratégie, NDA : à décider).
     par, mois (`lib/budget/expense-filters.ts`), recherche instantanée. **Même ligne** (`BudgetTable
     showTarget`) et mêmes modales (`useBudgetLineDialogs`) que le Budget d'un projet et d'un artiste ;
     modifiable là où le lecteur écrit : une dépense d'artiste, une ligne d'un projet qu'il mène.
-  - **Saisie rapide** (BUD 4) : `QuickExpenseButton`, « + Dépense » dans l'en-tête du téléphone sur
-    toutes les pages (`read_artist_budgets` ou `pilot_projects`), « Ajouter une dépense » sur la page
+  - **Saisie rapide** (BUD 4) : « Ajouter une dépense » du « + » de la coquille sur toutes les pages
+    (`QuickExpenseDialog`, `read_artist_budgets` ou `pilot_projects` ; sur une page de projet, ce
+    projet est visé d'avance ; avant le 27/11/2026 : « + Dépense » de l'en-tête du téléphone), « Ajouter une dépense » sur la page
     Dépenses en ordinateur (les Budgets gardent le leur). **Même formulaire** (`BudgetLineForm` avec
     `target={null}` et `targets`) : justificatif → montant → libellé → poste (suggéré, « Utiliser »)
     → **pour** (`BudgetTargetField` : projets que le lecteur mène, artistes pour `read_artist_budgets`,
@@ -4784,12 +4902,7 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     main au moment de générer : une valeur manquante se complète à sa source, ce qui la rend
     traçable.
   - **Éditeur du texte** (demande de Sacha, 07/10/2026 : « super compliqué s'il faut mettre
-    des variables ») : personne ne tape `{{…}}`. `TemplateBodyEditor` est un `contenteditable`
-    en texte brut où chaque champ est une **pastille** non modifiable (« Nom civil »),
-    insérée au curseur par les boutons groupés au-dessus (La personne / Le projet / L'accord,
-    `CONTRACT_FIELD_GROUPS`) ; le texte enregistré est relu du DOM (`serialize`, pastille →
-    `{{id}}`, `<br>` → `\n`), le format en base ne change pas. Collage en texte brut, `{{id}}`
-    collés convertis en pastilles, pas de gras. En lecture, plus de texte à pastilles depuis le
+    des variables ») : personne ne tape `{{…}}`. **Depuis le 25/11/2026** (demande de Sacha : « là actuellement on crée avec un text field avec des variables, ça fait trop développeur, je voudrais qu'on voie directement le contrat en PDF avec les variables »), `DocumentEditor` (`components/contracts/document-editor.tsx`, barre `document-editor-toolbar.tsx`) remplace `TemplateBodyEditor` et les pastilles (`field-chip.tsx` supprimé) : un `contenteditable` qui écrit le contrat sur sa page A4 comme son PDF, chaque champ en **blanc libellé** (« Nom civil ») identique au PDF, gras et souligné réels. Barre : Gras, Souligné, « Insérer une information » (La personne / Le projet / L'accord / Les termes du deal, `CONTRACT_FIELD_GROUPS`, seulement pour un modèle). Entrée = paragraphe, Maj+Entrée = ligne, collage Word garde gras et souligné, pas d'italique. `editor-dom.ts` rend la page par `templateBodyHtml` et relit le texte (`serialize`) ; le format en base ne change pas (paragraphes séparés par une ligne vide, `**gras**`, `__souligné__`, `{{id}}`), aucune migration. Utilisé par `TemplateForm` (nouveau modèle, nouvelle version) et `ReviseDocumentButton` (sans menu d'informations). En lecture, plus de texte à pastilles depuis le
     18/11/2026 : le modèle se lit comme un document (voir « Modèles en document »).
   - **Partir d'un contrat déjà rempli** (« Repérer les valeurs », `suggestTemplateValues`) :
     on colle le contrat d'une vraie personne ; le **code** repère ce qui a une forme
@@ -4797,14 +4910,16 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     titres, la somme et la structure (`lib/ai/instructions/contract-template-values.ts`, le
     contrat en donnée, 40 000 premiers caractères). Un extrait n'est gardé que s'il est écrit
     **tel quel**, mot entier, hors pastille (`countExcerpt`) ; à qui il appartient (personne
-    ou label) n'est jamais décidé par la machine. Les valeurs restantes sont surlignées dans
-    le texte (CSS Custom Highlight, `::highlight(template-value)`), chacune avec son champ
-    (modifiable), « Remplacer » (toutes ses occurrences, annulable) ou « Ignorer » ; un texte
-    collé n'est remplacé qu'au clic. **Un contrat importé** (Word, PDF, texte) est lu par PO
-    dès l'import et ce qu'il repère est **remplacé aussitôt** (demande de Sacha, 07/10/2026 :
-    pas de transcription à relire, l'analyse directe) : « Ce que PO a repéré dans « … » »,
-    chaque valeur avec son champ encore modifiable (la pastille suit) et « Annuler » ; le
-    texte reste replié derrière « Afficher le texte ». Dans la même lecture, PO décrit le
+    ou label) n'est jamais décidé par la machine. **Depuis le 25/11/2026** (Sacha : la liste « Ce que PO a
+    repéré » supprimée, la correction se fait sur la page) : un contrat **importé** (Word, PDF, texte, ou fichier déposé
+    sur la page) ou **collé en entier** sur une page vide est lu aussitôt (`use-value-finder.ts`) et chaque valeur
+    repérée est **remplacée** dans `DocumentEditor`, surlignée (`data-original`, le texte remplacé) ; un **clic** sur
+    une valeur ouvre `DocumentFieldPopover` : changer d'information, « Remettre « … » » (le texte d'origine) ou
+    « Retirer ». PO en échec (quota, clé) = un toast ; « PO lit le contrat… » à côté de la barre pendant la lecture.
+    Un Word garde ses paragraphes, son gras et son souligné (`docxText`) ; le nom, le type, les rôles et la langue sont
+    lus par le code dans son titre (`template-about.ts`) ; les lignes à remplir « né(e) le ____ à ____ » et « Fait à …,
+    le ____ » sont repérées par leur place (`blanksByPlace`, `ExcerptAt.context`) vers `personne.date_naissance`,
+    `personne.lieu_naissance` (fiche v3) et `contrat.date` (jour de préparation, source `document`), `DocumentEditorHandle` (`replace`, `load`). Dans la même lecture, PO décrit le
     modèle (nom sans nom propre, type de contrat, rôles de la personne, usage) : seuls les
     champs encore vides sont pré-remplis, avec un encart qui le dit, et tout se corrige.
     L'import est en tête du formulaire. Rien n'est enregistré avant
@@ -5298,7 +5413,7 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   - **Modèle en document** (« recevoir le modèle en PDF, pas un truc avec les écritures ») :
     `TemplateView` = une `DocumentCard` (nom · version, type · langue, « Voir le PDF » et
     « Modifier » en contour) avec l'aperçu en `iframe` sandbox ; `templateHtml`
-    (`lib/legal/contracts/document-pdf.ts`) écrit le texte tel quel, chaque valeur en **blanc
+    (`lib/legal/contracts/document-pdf.ts`, mise en page de `document-layout.ts`) écrit le texte tel quel, chaque valeur en **blanc
     libellé** (« Nom civil ») ; la route `/api/contracts/templates/[templateId]` sert le PDF
     (`?view=1` dans l'onglet, Playwright) et la même page en HTML (`?format=html`, en-tête CSP
     `sandbox`) ; liens dans `lib/contracts/template-links.ts`. « Champs injectés » et le texte à
@@ -7175,7 +7290,12 @@ ressemble. Elle reste sous Marketing, les livrables avancent en parallèle (pas 
   `manual`, `strategy_decision` (un levier retenu) ou `call` (un call du projet). Un ajout est
   toujours `to_qualify` : la colonne `status` n'est pas accordée en écriture, rien ne le valide ni ne
   le planifie tout seul. Un besoin à qualifier peut être retiré (confirmé dans une modale). Toute
-  donnée de Conception pointe vers `design_deliverables.id`.
+  donnée de Conception pointe vers `design_deliverables.id`. **Qualifier un besoin** (migration
+  `20261127190201`, test de Maël du 26/11) : un livrable ajouté à la Stratégie (révision) reprend le
+  besoin « à qualifier » du même titre (casse et espaces à part) au lieu d'en créer un second
+  (`design_deliverables_mirror`) ; la ligne passe `strategy`/`confirmed` avec sa fiche, ses versions
+  et son transfert, donc la Production et `distribution_cover` la trouvent. Retiré de la Stratégie,
+  il redevient un besoin à qualifier sans rien perdre (`design_deliverables_release`, avant suppression).
 - **Accueil** (`ConceptionEntry`) : projet, artiste, sortie, état de la Stratégie, résumé compact
   « n confirmés · n à qualifier », liste dépliable (`<details>` natif), puis « Commencer
   directement » (`start_design` : démarre l'étape `design` si besoin et ouvre `design_workspaces`)
@@ -8290,8 +8410,9 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `20261120150101_deal_memo_mail.sql`). Après l'accord sur les termes, le label ou la marque envoie son deal memo par
   e-mail ; PDS OS le range dans le deal « comme les masters », la personne qui négocie le montre à la direction, qui
   le valide ou demande des modifications (motif écrit : les retours d'appel sont notés), puis l'accord validé repart
-  par e-mail depuis po@ ; le contrat long vient ensuite. **Le contenu d'un memo n'est ni lu ni présumé** (Ibé doit en
-  envoyer un exemple) : le PDF est le memo. La partie juridique d'un deal reste sur la page du deal (décidé le 18/11).
+  par e-mail depuis po@ ; le contrat long vient ensuite. **Le contenu d'un memo reçu n'est ni lu ni présumé** : le PDF
+  est le memo. L'exemple d'Ibé (memo Wagram « Projet Dioo », 21/11) sert de modèle au memo écrit par PDS
+  (`lib/deals/memo-pdf.ts`). La partie juridique d'un deal reste sur la page du deal (décidé le 18/11).
   - **Réception** (`lib/email/deal-memo-inbox.ts`, appelé par `/api/cron/inbox` après les justificatifs, échec
     seulement journalisé ; même mécanisme que les réponses aux autorisations) : adresse de PO propre au deal
     `po+deal-<id>@…` (`lib/email/deal-memo-address.ts`, montrée sous le deal memo avec « Copier » pour qui écrit le
@@ -8361,13 +8482,12 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     `generate_deal_contract` (copie remplie v1 dans `contract_documents`, contrat créé et lié au deal, ou v1 du contrat
     déjà lié sans document ; jamais pour une participation). Les modèles ont un groupe « Les termes du deal »
     (`CONTRACT_FIELD_GROUPS.deal`, `deal.*` de `lib/legal/contracts/fields.ts`, jamais remplis dans le Juridique).
-    **Mise en page des contrats** (tous les contrats générés, Juridique compris ; `lib/legal/contracts/document-pdf.ts`,
-    `contractPdf`) = le contrat type envoyé par Ibé le 22/11/2026 : Arial 10 pt justifié, A4 aux marges du modèle,
+    **Mise en page des contrats** (tous les contrats générés, Juridique compris ; seule source : `lib/legal/contracts/document-layout.ts`, module client-safe — `bodyHtml`, `templateBodyHtml`, `documentCss`, `sheetCss`, `fieldLabelOf`, `escapeHtml` — utilisée par le PDF (`document-pdf.ts`, `contractPdf`), l'aperçu d'un modèle et `DocumentEditor` ; le gras ajouté seul par la mise en page porte `data-auto` et n'est jamais relu comme une marque ; la police du Word importé, `contract_templates.font`, passe par `data-font` et `document-fonts.ts`, jumelles libres des polices Microsoft chargées depuis Google Fonts, null = Arial) = le contrat type envoyé par Ibé le 22/11/2026 : Arial 10 pt justifié, A4 aux marges du modèle,
     blocs séparés par une ligne vide = paragraphes (retours à la ligne et tabulations gardés : adresses, signatures),
     « 2. Avance. … » = numéro, tabulation, intitulé en gras souligné, ligne « Article 3 — Durée » seule en gras
     souligné, ligne courte en capitales en gras ; pied de page centré : numéro de page puis titre du contrat
     (`htmlToPdf` option `footer`). Le texte n'est jamais réécrit, seule sa présentation change.
-    **Marques dans un modèle** : `**texte**` en gras, `__texte__` souligné (⌘B / ⌘U dans l'éditeur ; un texte collé depuis
+    **Marques dans un modèle** : `**texte**` en gras, `__texte__` souligné (Gras / Souligné de la barre de `DocumentEditor`, ⌘B / ⌘U ; un texte collé depuis
     Word garde son gras et son souligné, `markedTextOf`). **En-tête** de première page : les coordonnées de la structure
     (Réglages › « Coordonnées de PDS » = `organization_billing` : raison sociale, adresse, téléphone, e-mail, site ;
     `20261122150101`), lues par `contract_letterhead` (membre qui voit le contrat, ou la personne par son lien privé) ;

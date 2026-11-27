@@ -1,6 +1,7 @@
 "use client";
 
 import { IconFilter } from "nucleo-sharp-essential";
+import { Fragment } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CountBadge } from "@/components/ui/count-badge";
@@ -194,7 +195,10 @@ export function ListToolbar({
     <div className="flex flex-wrap items-center gap-3">
       {/* Twice a filter's share: the search is the first way in. */}
       <div className="min-w-0 flex-[2_1_18rem]">{search}</div>
-      {children}
+      {/* Its own fragment: filters drawn by the page's server component
+          came in beside the search as a list child without a key (React's
+          warning on Contrats and Deals, 25/11/2026). */}
+      <Fragment>{children}</Fragment>
     </div>
   );
 }

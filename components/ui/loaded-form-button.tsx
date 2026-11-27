@@ -34,10 +34,12 @@ export function LoadedFormButton<T>({
   // row's stretched link).
   size?: "lg" | "sm" | "xs";
   className?: string;
-  // `wide`: a long form laid out in two columns (the contact form).
-  dialogSize?: "default" | "medium" | "wide";
+  // `wide`: a long form laid out in two columns (the contact form);
+  // `document`: a document read beside its form.
+  dialogSize?: "default" | "medium" | "wide" | "document";
   title: string;
-  description: string;
+  // None: the title says enough (docs/DESIGN.md « Texte à l'écran »).
+  description?: string;
   closeLabel: string;
   load: () => Promise<T>;
   children: (data: T, close: () => void) => ReactNode;

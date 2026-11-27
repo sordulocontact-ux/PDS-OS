@@ -81,7 +81,7 @@ export const adminTopics: GuideTopic[] = [
     key: "settings",
     title: "Paramètres",
     summary:
-      "Votre utilisation de PO, vos connexions Google, et pour la direction la facturation et les exigences de distribution.",
+      "Une page par sujet, dans une colonne à gauche : utilisation de PO, apparence, notifications, raccourcis clavier, connexions Google, et pour la direction les coordonnées de PDS et la distribution.",
     keywords: [
       "parametres",
       "reglages",
@@ -106,12 +106,15 @@ export const adminTopics: GuideTopic[] = [
     href: "/app/settings",
     where: "Dans le menu du compte, en bas de la barre latérale.",
     facts: [
+      "Paramètres a sa propre colonne à gauche (la barre principale se replie en icônes), comme Finance : Mes paramètres (Utilisation de PO, Apparence, Notifications, Raccourcis clavier, Connexions), puis Administration pour la direction (Coordonnées de PDS, Distribution). Sur téléphone, ces pages sont des onglets.",
+      "Apparence : le thème (Système, Clair, Sombre) et le style de l'interface. Notifications : activer les notifications du navigateur sur cet ordinateur.",
       "Utilisation de PO : le nombre de requêtes du jour utilisées sur votre limite. Chaque message, analyse ou lecture de document compte pour une requête.",
       "Le compteur repart à zéro à minuit, heure de Paris. La limite est fixée par la direction dans Équipe.",
       "La direction y règle aussi la facturation de PDS (raison sociale, adresse, SIRET, TVA), que les prestataires lisent sur leur lien privé.",
       "Elle y règle les formats audio exigés par The Orchard, repris dans le Brief des ingénieurs.",
       "Connexions : le compte pro @pdsrecords.com a son Agenda, son Gmail et son Drive branchés sans rien faire, en lecture seule ; s'il n'est pas l'adresse de connexion, le directeur général l'écrit dans Équipe (Modifier › Adresse Google pro). « Connecter un compte Google » ajoute un autre compte (Gmail perso), « ⋯ › Déconnecter » le retire. Chacun coupe un service en le décochant ; ce qui en est lu n'est montré qu'à lui, pas même à la direction.",
       "Le thème de l'interface (Système, Clair, Sombre) se change dans le menu du compte.",
+      "Raccourcis clavier : « Modifier les raccourcis » ouvre la page où chacun change ses touches (recherche, « + », PO, capture d'un retour).",
     ],
     faq: [
       {
@@ -160,7 +163,7 @@ export const adminTopics: GuideTopic[] = [
       "Les états (en cours, en retard, terminé), compteurs, dates et calculs sont toujours faits par le code, jamais par PO.",
       "PO peut préparer un brouillon qui ouvre le vrai formulaire pré-rempli : c'est toujours une personne qui enregistre. PO ne valide, ne signe et ne transmet jamais à la place de quelqu'un.",
       "Le thème de l'interface peut être Clair, Sombre ou suivre l'ordinateur.",
-      "Dans les listes du Réseau, des Contrats et des Calls, cliquer sur un nom ouvre sa fiche à droite sans quitter la liste : l'essentiel en tête, ce qui s'y rattache replié sous des nombres (parties, fichiers, participants…), et l'icône « Ouvrir » vers sa page complète. Un artiste, un titre, une maquette ou une session studio s'ouvre sur sa page. Les flèches ↑ ↓ du clavier passent à la ligne voisine dans l'ordre du tableau.",
+      "Dans les listes du Réseau, des Contrats et des Notes, cliquer sur un nom ouvre sa fiche à droite sans quitter la liste : l'essentiel en tête, ce qui s'y rattache replié sous des nombres (parties, fichiers, participants…), et l'icône « Ouvrir » vers sa page complète. Un artiste, un titre, une maquette ou une session studio s'ouvre sur sa page. Les flèches ↑ ↓ du clavier passent à la ligne voisine dans l'ordre du tableau.",
       "Dans un tableau d'au moins 3 lignes, un clic sur le titre d'une colonne trie les lignes dans l'ordre croissant, un deuxième dans l'ordre décroissant, un troisième remet l'ordre de départ. Les cases vides restent en bas. Le tri tient pendant la recherche et les filtres, et s'efface en quittant la page.",
       "Les filtres d'une liste sont à côté de sa recherche. Jusqu'à 3 filtres, chacun est une liste déroulante où l'on choisit une valeur. Au-delà, un seul bouton « Filtres » ouvre un panneau de cases à cocher : on peut cocher plusieurs valeurs d'un même filtre (une ligne en garde une au moins) et combiner les filtres (une ligne doit les satisfaire tous). « Effacer les filtres » remet la liste entière. Les filtres restent dans l'adresse de la page.",
     ],

@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { rolesOf } from "@/components/legal/contracts/contract-table";
-import { NewTemplateButton } from "@/components/legal/contracts/new-template-button";
+import { NewTemplateDialog } from "@/components/legal/contracts/new-template-dialog";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
@@ -66,6 +68,7 @@ export function MappingEditor({
   projectId,
   request,
   direction,
+  onRequested,
 }: {
   row: AgreementRow;
   value: MappingChoice;
@@ -76,11 +79,18 @@ export function MappingEditor({
   request: RequestState | null;
   // « Claire Morel », else « la direction ».
   direction: string;
+  // A template asked for this person.
+  onRequested?: () => void;
 }) {
   const d = fr.legalDocuments.template;
   const t = fr.legalContracts.agreements;
   const p = t.plan;
   const roleLabel = rolesOf(row);
+  const [creating, setCreating] = useState(false);
+  // « + Nouveau modèle de contrat » at the end of the menu while none is
+  // validated for these roles and none is already asked (Sacha 26/11/2026).
+  const canAsk =
+    row.compatible.length === 0 && organizationId !== null && !request?.pending;
   return (
     <div className="flex flex-col gap-3">
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
@@ -89,11 +99,18 @@ export function MappingEditor({
           name={`contract-${row.key}`}
           label={p.contract}
           required
-          placeholder={p.choose}
+          // The real situation, never « Pas d'accord nécessaire » as the
+          // only answer offered (Sacha 26/11/2026).
+          placeholder={row.compatible.length > 0 ? p.choose : p.noTemplate}
           items={{
             ...Object.fromEntries(row.compatible.map((o) => [o.id, o.label])),
             [NO_DEAL]: p.noDeal,
           }}
+          action={
+            canAsk
+              ? { label: p.newTemplate, onSelect: () => setCreating(true) }
+              : undefined
+          }
           defaultValue={value.choice}
           onValueChange={(choice) => onChange({ choice })}
           error={errors.choice}
@@ -128,13 +145,13 @@ export function MappingEditor({
           error={errors.reason}
         />
       )}
-      <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
-        {row.compatible.length > 0
-          ? p.proposedFrom(roleLabel)
-          : request?.pending
-            ? d.pending(request.name, direction)
-            : p.noTemplateSource}
-      </span>
+      {(row.compatible.length > 0 || request?.pending) && (
+        <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
+          {row.compatible.length > 0
+            ? p.proposedFrom(roleLabel)
+            : d.pending(request!.name, direction)}
+        </span>
+      )}
       {row.existing && (
         <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           {t.existing(row.existing.title)}
@@ -147,11 +164,14 @@ export function MappingEditor({
           note={request.refusal.reason}
         />
       )}
-      {row.compatible.length === 0 && organizationId && !request?.pending && (
-        <NewTemplateButton
-          organizationId={organizationId}
+      {canAsk && (
+        <NewTemplateDialog
+          open={creating}
+          onOpenChange={setCreating}
+          organizationId={organizationId!}
           roles={row.formRoles}
           request={{ projectId, key: row.key, name: row.name }}
+          onDone={onRequested}
         />
       )}
     </div>

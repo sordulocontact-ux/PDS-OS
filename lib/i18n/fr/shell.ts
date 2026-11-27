@@ -22,7 +22,7 @@ export const shell = {
     work: "Travail",
     projects: "Projets",
     calendar: "Calendrier",
-    calls: "Calls",
+    notes: "Notes",
     sessions: "Sessions studio",
     artists: "Artistes",
     // The list of titles ("masters" in the code), named Catalogue (04/10/2026).
@@ -520,7 +520,7 @@ export const shell = {
       // Why a listed section is closed to this viewer.
       restricted: "Réservé à la direction et aux chefs de projet",
       work: "Travail",
-      calls: "Calls",
+      calls: "Notes",
       sessions: "Sessions studio",
       team: "Équipe",
       deliverables: "Livrables",
@@ -671,9 +671,24 @@ export const shell = {
       deal: "Deals",
       call: "Calls",
       session: "Sessions studio",
+      action: "Créer",
     },
     untitled: "Sans titre",
     session: "Session studio",
     keys: { move: "pour choisir", open: "pour ouvrir" },
+  },
+  // The shell's « + » (components/shell/quick-create/, 27/11/2026): the
+  // creations open from any page, also in the ⌘K's « Créer » group.
+  quickCreate: {
+    open: "Créer",
+    actions: {
+      conversation: "Nouvelle conversation",
+      mail: "Écrire un mail",
+      expense: "Ajouter une dépense",
+      call: "Nouvelle réunion",
+      note: "Nouvelle note",
+      contact: "Nouveau contact",
+      deal: "Nouveau deal",
+    },
   },
 } as const;

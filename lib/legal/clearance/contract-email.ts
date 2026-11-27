@@ -3,6 +3,7 @@ import "server-only";
 import type { EmailAttachment } from "@/lib/email/send";
 import { contracts as contractTexts } from "@/lib/i18n/fr/contracts";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
+import { isDocumentFont } from "@/lib/legal/contracts/document-fonts";
 import { contractPdf } from "@/lib/legal/contracts/document-pdf";
 import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import { createClient } from "@/lib/supabase/server";
@@ -83,12 +84,20 @@ export async function contractAttachments(
   for (const c of contracts) {
     const generated = await supabase
       .from("contract_documents")
-      .select("version, body")
+      .select("version, body, template_id")
       .eq("contract_id", c.id)
       .order("version", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (generated.data) {
+      // Printed in its template's typeface (Sacha 25/11/2026).
+      const { data: template } = generated.data.template_id
+        ? await supabase
+            .from("contract_templates")
+            .select("font")
+            .eq("id", generated.data.template_id)
+            .maybeSingle()
+        : { data: null };
       try {
         attachments.push({
           filename: documentFileName(
@@ -97,6 +106,7 @@ export async function contractAttachments(
           content: await contractPdf({
             title: c.title,
             body: generated.data.body,
+            font: isDocumentFont(template?.font) ? template.font : null,
             letterhead: await loadContractLetterhead(supabase, c.id),
           }),
           contentType: "application/pdf",

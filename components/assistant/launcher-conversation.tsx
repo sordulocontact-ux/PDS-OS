@@ -11,7 +11,12 @@ import { newChat } from "@/components/assistant/shared-chat";
 // with the user's session. Loaded when the window opens (with the AI SDK).
 // Saved in the history like any other; « Nouvelle conversation » starts
 // another one.
-export default function LauncherConversation() {
+export default function LauncherConversation({
+  voice = true,
+}: {
+  // Listening at once (Espace Espace); typed when opened by a click.
+  voice?: boolean;
+}) {
   const page = usePathname();
   const [chat, setChat] = useState(() => newChat({ page }));
   return (
@@ -19,7 +24,7 @@ export default function LauncherConversation() {
       chat={chat}
       onNew={() => setChat(newChat({ page }))}
       compact
-      voiceFirst
+      voiceFirst={voice}
     />
   );
 }

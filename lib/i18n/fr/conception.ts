@@ -109,7 +109,7 @@ export const conception = {
     open: "Ajouter un livrable",
     title: "Ajouter un livrable",
     description:
-      "Un besoin arrivé en dernière minute. Il reste à qualifier : il n'est ni validé ni planifié.",
+      "Un besoin arrivé en dernière minute. Il reste à qualifier jusqu'à ce que la Stratégie l'ajoute à ses livrables sous le même nom : il passe alors en Production.",
     titleLabel: "Livrable",
     titlePlaceholder: "Ex. Teaser vertical 15 s",
     originLegend: "D'où vient-il ?",

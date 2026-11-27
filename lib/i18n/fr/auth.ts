@@ -115,6 +115,8 @@ export const auth = {
       role: "Poste",
       status: "Statut",
       decision: "Dernière décision",
+      // The note left with the decision, its own column (Sacha 25/11/2026).
+      note: "Motif",
       actions: "Actions",
     },
     roles: {

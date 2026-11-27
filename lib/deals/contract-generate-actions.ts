@@ -116,6 +116,7 @@ async function fileContractPdf(contractId: string, organizationId: string) {
     title: contract.title,
     body: document.latest.body,
     language: document.language,
+    font: document.font,
     letterhead: await loadContractLetterhead(supabase, contractId),
   });
   const path = `${organizationId}/${contractId}/${crypto.randomUUID()}.pdf`;

@@ -159,3 +159,22 @@ export async function remindBriefReviewer(
   });
   return settled(projectId, error);
 }
+
+/**
+ * « Retirer <Nom> »: a creative asked to validate is no longer awaited (the
+ * owner only, never the direction, in SQL). The version is validated if
+ * nobody else is awaited.
+ */
+export async function withdrawStrategyReviewer(
+  projectId: string,
+  reviewId: string,
+): Promise<WriteResult> {
+  if (!id.safeParse(projectId).success || !id.safeParse(reviewId).success)
+    return invalid;
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("withdraw_strategy_review", {
+    p_review_id: reviewId,
+  });
+  return settled(projectId, error);
+}

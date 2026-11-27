@@ -2293,6 +2293,32 @@ export type Database = {
           },
         ]
       }
+      account_shortcuts: {
+        Row: {
+          account_id: string
+          shortcuts: Json
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string
+          shortcuts?: Json
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          shortcuts?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_shortcuts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           created_at: string
@@ -5259,6 +5285,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           fields: string[]
+          font: string | null
           id: string
           name: string
           organization_id: string
@@ -5285,6 +5312,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fields?: string[]
+          font?: string | null
           id?: string
           name: string
           organization_id: string
@@ -5311,6 +5339,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fields?: string[]
+          font?: string | null
           id?: string
           name?: string
           organization_id?: string
@@ -13816,6 +13845,84 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          body: string
+          contract_id: string | null
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          id: string
+          organization_id: string
+          project_id: string | null
+          search: unknown
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          id?: string
+          organization_id: string
+          project_id?: string | null
+          search?: unknown
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string | null
+          search?: unknown
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
           },
         ]
       }
@@ -23211,6 +23318,10 @@ export type Database = {
         Args: { p_memo_id: string; p_sent_to: string }
         Returns: undefined
       }
+      record_signed_contract: {
+        Args: { p_contract_id: string; p_signed_on: string }
+        Returns: undefined
+      }
       remove_deal_loop: {
         Args: { p_loop_id: string }
         Returns: undefined
@@ -25018,6 +25129,7 @@ export type Database = {
           p_name: string
           p_organization_id: string
           p_roles: string[]
+          p_font?: string
           p_language?: string
           p_series_id: string | null
           p_source_name?: string
@@ -26592,6 +26704,13 @@ export type Database = {
           start_seconds: number
         }[]
       }
+      search_notes: {
+        Args: { p_query: string }
+        Returns: {
+          id: string
+          kind: string
+        }[]
+      }
       search_projects: {
         Args: { p_query: string }
         Returns: {
@@ -26727,6 +26846,10 @@ export type Database = {
       }
       withdraw_framing_brief_request: {
         Args: { p_reason: string; p_request_id: string }
+        Returns: undefined
+      }
+      withdraw_strategy_review: {
+        Args: { p_review_id: string }
         Returns: undefined
       }
       workflow_is_launched: {

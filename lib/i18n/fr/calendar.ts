@@ -26,20 +26,23 @@ export const calendar = {
       "Les dates de tous vos projets : sorties, master, tournages, temps forts, calls et échéances. Chacune s'ouvre là où elle se décide.",
     loadError:
       "Une partie du calendrier n'a pas pu être lue. Rechargez la page.",
-    views: {
-      label: "Afficher",
-      all: "Tout",
-      mine: "À vous",
-    },
-    empty: {
-      all: "Aucune date sur cette période.",
-      mine: "Rien ne vous attend sur cette période.",
-    },
+    empty: "Aucune date sur cette période.",
     more: (count: number) => (count === 1 ? "1 autre" : `${count} autres`),
     dayEmpty: "Aucune date",
     // Screen readers: the day of a cell, then each item.
     mine: "À vous",
     overdue: "En retard",
+  },
+
+  // The page's main button and the right-hand column (xl and up).
+  side: {
+    newCall: "Nouveau call",
+    miniMonth: "Mois",
+    previousMonth: "Mois précédent",
+    nextMonth: "Mois suivant",
+    // The weekday letters of the mini-month, Monday first.
+    weekdays: ["L", "M", "M", "J", "V", "S", "D"],
+    upcoming: "À venir",
   },
 
   // What each date is, said the way the app says it (VISION-UX rule 4: the

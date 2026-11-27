@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 
 import { ListToolbar } from "@/components/ui/filter-bar";
 import { SearchField } from "@/components/ui/search-field";
@@ -23,6 +23,8 @@ export function SearchableList<T>({
   filters,
   empty,
   autoFocus = false,
+  extraMatch,
+  onQueryChange,
   children,
 }: {
   items: T[];
@@ -36,17 +38,24 @@ export function SearchableList<T>({
   // The field takes the focus when shown (a switcher's menu, opened to
   // search).
   autoFocus?: boolean;
+  extraMatch?: (item: T) => boolean;
+  onQueryChange?: (query: string) => void;
   children: (visible: T[]) => React.ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const needle = normalizeSearch(useDeferredValue(query));
   const visible = needle
-    ? items.filter((item) =>
-        normalizeSearch(searchText(item).filter(Boolean).join(" ")).includes(
-          needle,
-        ),
+    ? items.filter(
+        (item) =>
+          normalizeSearch(searchText(item).filter(Boolean).join(" ")).includes(
+            needle,
+          ) || extraMatch?.(item) === true,
       )
     : items;
+  const typed = query.trim();
+  useEffect(() => {
+    onQueryChange?.(typed);
+  }, [typed, onQueryChange]);
 
   return (
     <div className="flex flex-col gap-4">

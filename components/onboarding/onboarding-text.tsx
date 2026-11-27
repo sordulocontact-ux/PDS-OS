@@ -3,9 +3,9 @@
 import { IconBell, IconCheck } from "nucleo-sharp-essential";
 
 import { usePushSubscription } from "@/components/notifications/use-push-subscription";
+import { ShortcutKeys } from "@/components/shell/shortcuts/shortcut-keys";
 import { Button } from "@/components/ui/button";
 import { DialogTitle } from "@/components/ui/dialog";
-import { Kbd } from "@/components/ui/kbd";
 import { notifications } from "@/lib/i18n/fr/notifications";
 import { onboarding } from "@/lib/i18n/fr/onboarding";
 
@@ -83,10 +83,11 @@ export function OnboardingText({
           <Lede>{copy.po.lede}</Lede>
           <p className={note}>
             {t.poQuestion}{" "}
-            <span className="mx-0.5 inline-flex gap-1 align-middle">
-              <Kbd raised>{t.poSpace}</Kbd>
-              <Kbd raised>{t.poSpace}</Kbd>
-            </span>{" "}
+            <ShortcutKeys
+              action="assistant"
+              raised
+              className="mx-0.5 align-middle"
+            />{" "}
             {t.poOpens}
           </p>
         </>

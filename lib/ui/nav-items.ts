@@ -10,7 +10,7 @@ import {
   IconMoneyBillCoin,
   IconMsgs,
   IconNodes,
-  IconPhone,
+  IconPenWriting4,
   IconScale,
   IconSliders,
   IconSparkle3,
@@ -27,8 +27,7 @@ const fr = { shell };
 // The 8 items of the main sidebar (Figma "Devis Sordulo", node 120:47 and
 // 120:74), plus the MVP's Réseau, Contrats and Fichiers, and "Retours": one
 // source, used full-width and icon-only. "Calendrier" gathers every visible
-// project's dates (27/10/2026). "Calls" lists the calls of every visible
-// project and the meetings. `disabled` keeps an item without a page visible,
+// project's dates (27/10/2026). "Notes" gathers the calls' reports and written notes. `disabled` keeps an item without a page visible,
 // greyed (docs/DESIGN.md § 4). « PO », the assistant's page and the history
 // of one's conversations with it (03/11/2026).
 export type NavItem = {
@@ -36,6 +35,8 @@ export type NavItem = {
   label: string;
   icon: typeof IconHouse2;
   exact?: boolean;
+  // Other paths that keep the item lit (a call opened from Notes).
+  alsoActiveOn?: readonly string[];
   adminOnly?: boolean;
   // Shown only to whoever holds it (Dépenses: the budget's readers), or one
   // of them (Deals: the negotiators, the direction, the project managers).
@@ -53,7 +54,15 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: fr.shell.nav.calendar,
     icon: IconCalendarDays,
   },
-  { href: routes.calls, label: fr.shell.nav.calls, icon: IconPhone },
+  // Notes (Sacha, 27/11/2026): the calls' reports and transcripts and the
+  // written notes; a call opened from there keeps it lit. The planning of the
+  // calls is in the Calendrier.
+  {
+    href: routes.notes,
+    label: fr.shell.nav.notes,
+    icon: IconPenWriting4,
+    alsoActiveOn: [routes.calls],
+  },
   // Studio sessions, planned and reported (retour d'Ibé du 01/11/2026).
   { href: routes.sessions, label: fr.shell.nav.sessions, icon: IconSliders },
   { href: routes.artists, label: fr.shell.nav.artists, icon: IconMicrophone },

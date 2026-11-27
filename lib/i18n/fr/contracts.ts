@@ -44,6 +44,10 @@ export const contracts = {
   },
   columns: {
     title: "Contrat",
+    // One fact a column (Sacha 25/11/2026), no longer under the title.
+    type: "Type",
+    project: "Projet",
+    artist: "Artiste",
     parties: "Parties",
     state: "État",
     due: "Échéance",
@@ -88,8 +92,6 @@ export const contracts = {
     documentChosen: (name: string) => `Document choisi : ${name}`,
     documentMissing: "Choisissez le document du contrat.",
     createTitle: "Nouveau contrat",
-    createDescription:
-      "Il commence en préparation : vous ajouterez ensuite ses parties et ses fichiers.",
     editTitle: "Modifier le contrat",
     editDescription: "Modifiable tant qu'il n'est ni en relecture ni résilié.",
     title: "Titre",
@@ -114,26 +116,43 @@ export const contracts = {
     close: "Fermer",
     saved: "Contrat enregistré.",
   },
-  // « Nouveau contrat » asks what is being made first (JUR-18).
+  // « Nouveau contrat » asks what is being made first (JUR-18), two ways,
+  // both done in the modal (Sacha 26/11/2026).
   creation: {
-    legend: "Que voulez-vous faire ?",
-    import: "Enregistrer un contrat qui existe déjà",
-    importHint:
-      "Un contrat signé ou en cours, rédigé hors de PDS OS : vous l'enregistrez, puis vous ajoutez ses parties et son fichier.",
-    importSteps: [
-      "Remplissez ce qui le décrit : titre, type, projet, dates.",
-      "Sur sa page, ajoutez ses parties depuis le Réseau.",
-      "Déposez son fichier, puis envoyez-le à valider.",
-    ],
-    generate: "Le générer depuis un modèle",
-    generateHint:
-      "Un contrat rempli d'après un modèle validé : il se prépare dans le Juridique d'un projet, d'après les contrats nécessaires et les fiches de renseignements.",
-    template: "Créer un modèle réutilisable",
-    templateHint:
-      "Un texte type, avec ses champs à remplir, que la direction valide avant qu'il serve à générer des contrats.",
-    openProjectContracts: "Ouvrir les contrats du projet",
-    chooseProject: "Choisir le projet",
-    openTemplates: "Ouvrir les modèles de contrat",
+    legend: "Nouveau contrat",
+    import: "Déposer un contrat",
+    generate: "Partir d'un modèle",
+    drop: "Déposez le contrat",
+    dropHint: "PDF ou Word : le formulaire se remplit d'après lui.",
+    reading: "Lecture du contrat…",
+    document: "Contrat",
+    documentHint: "PDF ou Word",
+    preview: (name: string) => `Contrat déposé : ${name}`,
+    // A dropped contract already signed: it enters as signed.
+    alreadySigned: "Déjà signé",
+    signedOn: "Signé le",
+    signedOnMissing: "Indiquez le jour de la signature.",
+    importedSigned: "Contrat enregistré comme signé, avec son fichier.",
+    previewUnavailable: "Aperçu indisponible pour ce fichier.",
+    imported: "Contrat enregistré avec son fichier.",
+    project: "Projet",
+    projectPlaceholder: "Choisir le projet",
+    loading: "Chargement des contrats du projet…",
+    loadFailed: "Les contrats de ce projet n'ont pas pu être chargés.",
+    unavailable:
+      "Ce projet n'est pas encore lancé : il n'a pas de contrats à prévoir.",
+    unplanned:
+      "Ses contrats se prévoient une fois son État des lieux confirmé, dans son Juridique.",
+    openLegal: "Ouvrir le Juridique du projet",
+    // « Partir d'un modèle »: the people who still need a contract.
+    allCreated: "Tous les contrats de ce projet sont créés.",
+    templateOf: (name: string) => `Modèle du contrat de ${name}`,
+    chooseTemplateShort: "Choisir un modèle",
+    chooseTemplate: "Choisissez un modèle.",
+    create: "Créer le contrat",
+    creating: "Création…",
+    missingAfter: (name: string) =>
+      `Il manque des informations pour le contrat de ${name} : complétez-les pour le créer.`,
   },
   // The side sheet of a contract, from the list (the Réseau's model,
   // docs/STYLE-FINANCE-PARTOUT.md § 6.7 bis, Sacha 24/11/2026).

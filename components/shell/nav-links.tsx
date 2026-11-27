@@ -61,7 +61,11 @@ export function NavLinks({
             (!item.adminOnly || isAdmin) && navItemAllowed(item, permissions),
         ).map((item) => {
           const href = item.href;
-          const active = isActive(pathname, href, item.exact ?? false);
+          const active =
+            isActive(pathname, href, item.exact ?? false) ||
+            (item.alsoActiveOn ?? []).some((path) =>
+              isActive(pathname, path, false),
+            );
           const Icon = item.icon;
           const mine = item.href === routes.work ? workCount : 0;
           const count = item.href === routes.members ? pendingMembers : 0;

@@ -16,4 +16,6 @@ export const panelWidth = {
   default: undefined,
   medium: "[--panel-width:var(--dialog-width-medium)]",
   wide: "[--panel-width:var(--dialog-width-wide)]",
+  // A document read beside its form (« Déposer un contrat existant »).
+  document: "[--panel-width:var(--dialog-width-viewer)]",
 } as const;

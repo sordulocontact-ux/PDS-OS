@@ -156,6 +156,20 @@
   --hue-red-fg: #a3241c;
   --hue-green-bg: #dcf1e2;
   --hue-green-fg: #17603a;
+  /* Icône d'un type de fichier (FileTypeIcon) : la teinte vive, sans fond
+     (Sacha, 27/11/2026 : « trop sombre / désaturé » en -fg). */
+  --hue-sky-icon: #0ea5e9;
+  --hue-indigo-icon: #6366f1;
+  --hue-violet-icon: #8b5cf6;
+  --hue-pink-icon: #ec4899;
+  --hue-orange-icon: #f97316;
+  --hue-yellow-icon: #eab308;
+  --hue-lime-icon: #84cc16;
+  --hue-teal-icon: #14b8a6;
+  --hue-sand-icon: #b08d57;
+  --hue-slate-icon: #64748b;
+  --hue-red-icon: #ef4444;
+  --hue-green-icon: #22c55e;
 
   /* --- Sélection (DESIGN.md § 3 bis) : l'accent unique de ce qui est choisi
      ou actif (focus, champ en saisie, radio, case cochée, carte de choix).
@@ -194,7 +208,8 @@
   --dialog-width-wide: 900px;
   /* Un formulaire d'une colonne qui garde de l'air (contact du Réseau). */
   --dialog-width-medium: 640px;
-  /* Une image vue en grand (captures d'un retour, ImageGallery). */
+  /* Une image vue en grand (captures d'un retour, ImageGallery), un contrat lu à côté
+     de son formulaire (« Déposer un contrat existant »). */
   --dialog-width-viewer: 1280px;
   --surface-glass: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 
@@ -519,6 +534,18 @@
   --hue-red-fg: #f7a399;
   --hue-green-bg: #102f1e;
   --hue-green-fg: #88d8a8;
+  --hue-sky-icon: #38bdf8;
+  --hue-indigo-icon: #818cf8;
+  --hue-violet-icon: #a78bfa;
+  --hue-pink-icon: #f472b6;
+  --hue-orange-icon: #fb923c;
+  --hue-yellow-icon: #facc15;
+  --hue-lime-icon: #a3e635;
+  --hue-teal-icon: #2dd4bf;
+  --hue-sand-icon: #c8a97e;
+  --hue-slate-icon: #94a3b8;
+  --hue-red-icon: #f87171;
+  --hue-green-icon: #4ade80;
 
   /* --- Sélection : le bleu de Sacha éclairci pour garder 3:1 sur le noir -- */
   --selection: #3b7bff;
@@ -869,16 +896,6 @@
   input[data-empty]:not(:focus)::-webkit-datetime-edit {
     opacity: 0;
   }
-}
-
-/* Valeurs repérées dans un contrat à transformer en modèle, encore à
-   remplacer ou ignorer (« Repérer les valeurs », editor-dom.ts). Le build
-   avertit « 'highlight' is not recognized » (lightningcss ne connaît pas
-   encore ce pseudo-élément) : la règle est gardée telle quelle, sans effet
-   sur le reste. */
-::highlight(template-value) {
-  background-color: var(--tone-warning-bg);
-  color: var(--tone-warning-fg);
 }
 
 /* Un bouton dont l'écriture est en cours (components/ui/navigation-progress.tsx) :

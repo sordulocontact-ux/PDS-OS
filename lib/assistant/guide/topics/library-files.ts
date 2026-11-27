@@ -22,6 +22,7 @@ export const libraryFilesTopics: GuideTopic[] = [
     nav: "/app/contracts",
     facts: [
       "La page a deux onglets : Contrats et Modèles.",
+      "« Nouveau contrat » propose deux façons, au choix en haut de la fenêtre. « Déposer un contrat » : un PDF ou un Word reçu ou signé ; le contrat s'affiche à gauche et ses informations à droite, remplies d'après lui (titre, type, artiste, projet, début et fin), à vérifier ; « Déjà signé », avec le jour de la signature lu dans « Fait à …, le … », le fait entrer directement en « Signé » ; le fichier est rangé avec le contrat, puis sa page s'ouvre. « Partir d'un modèle », pour qui prépare les contrats des projets : le projet, puis les personnes qui ont encore besoin d'un contrat, chacune avec son modèle et « Créer le contrat » ; sans modèle pour son rôle, « + Nouveau modèle de contrat » au bout du menu, envoyé à la direction et repris pour cette personne une fois validé.",
       "Un contrat a un titre, un type (contrat d'artiste, licence, distribution, édition, coproduction, droit à l'image, prestation, partenariat, autre), des parties du Réseau, un responsable, une échéance et des versions de fichiers.",
       "Vues : Tous, En préparation, À valider, À signer, Signés, Résiliés.",
       "Parcours : en préparation, soumis, validé par le business manager (ou modifications demandées avec un commentaire), envoyé pour signature, signé avec sa date, éventuellement résilié. La direction peut aussi valider : elle supervise. Signer pour PDS reste la direction.",
@@ -36,6 +37,10 @@ export const libraryFilesTopics: GuideTopic[] = [
       {
         q: "Qui valide un contrat ?",
         a: "Le business manager. La direction peut aussi valider : elle supervise. Les deux sont prévenus quand un contrat est soumis.",
+      },
+      {
+        q: "Générer un contrat, c'est l'envoyer ?",
+        a: "Non. Générer (ou « Créer le contrat ») met le contrat dans PDS OS, en préparation, rempli depuis son modèle et les informations de la personne : rien n'est envoyé. Ensuite, sur sa page : « Envoyer à valider » à la direction, puis, une fois validé, l'envoi pour signature à la personne. Il se génère même tout seul dès que le modèle est validé et que tout est là.",
       },
       {
         q: "Qui valide un modèle de contrat ?",

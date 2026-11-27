@@ -16,7 +16,8 @@ export function EmptyState({
 }: {
   icon: ComponentType<IconProps>;
   title: string;
-  body: string;
+  // Left out: the title alone (the Notes, 27/11/2026: less text).
+  body?: string;
   action?: React.ReactNode;
   onClick?: () => void;
 }) {
@@ -34,14 +35,16 @@ export function EmptyState({
       >
         <Icon className="size-[22px] text-muted-foreground" aria-hidden />
         <span className="text-base font-medium">{title}</span>
-        <span className="max-w-sm text-sm text-muted-foreground">{body}</span>
+        {body && (
+          <span className="max-w-sm text-sm text-muted-foreground">{body}</span>
+        )}
       </button>
     );
   return (
     <div className={frame}>
       <Icon className="size-[22px] text-muted-foreground" aria-hidden />
       <h2 className="text-base font-medium">{title}</h2>
-      <p className="max-w-sm text-sm text-muted-foreground">{body}</p>
+      {body && <p className="max-w-sm text-sm text-muted-foreground">{body}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

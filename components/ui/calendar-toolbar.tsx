@@ -45,11 +45,15 @@ export function CalendarToolbar({
   period,
   hrefOf,
   modes = true,
+  action,
 }: {
   period: CalendarPeriod;
   // The calendar's URL for a mode and a date (null: today).
   hrefOf: (mode: CalendarMode, date: string | null) => string;
   modes?: boolean;
+  // The page's main button, last on the same line (the Calendrier's
+  // « Nouveau call », Sacha 27/11/2026): no line of its own above.
+  action?: React.ReactNode;
 }) {
   const t = fr.calendar.period;
   return (
@@ -77,17 +81,20 @@ export function CalendarToolbar({
       <h2 className="text-lg font-semibold first-letter:uppercase">
         {periodLabel(period)}
       </h2>
-      {modes && (
-      <div className="ml-auto">
-        <ViewToggle
-          label={t.modes.label}
-          options={CALENDAR_MODES.map((mode) => ({
-            href: hrefOf(mode, period.date),
-            label: t.modes[mode],
-            current: mode === period.mode,
-          }))}
-        />
-      </div>
+      {(modes || action) && (
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {modes && (
+            <ViewToggle
+              label={t.modes.label}
+              options={CALENDAR_MODES.map((mode) => ({
+                href: hrefOf(mode, period.date),
+                label: t.modes[mode],
+                current: mode === period.mode,
+              }))}
+            />
+          )}
+          {action}
+        </div>
       )}
     </div>
   );

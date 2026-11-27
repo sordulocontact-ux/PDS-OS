@@ -143,6 +143,7 @@ async function contractAttachment(
       title,
       body: document.latest.body,
       language: document.language,
+      font: document.font,
       letterhead: await loadContractLetterhead(supabase, contractId),
     }),
   };

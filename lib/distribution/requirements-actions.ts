@@ -8,6 +8,7 @@ import { auth } from "@/lib/i18n/fr/auth";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
+import { routes } from "@/lib/auth/redirects";
 
 const t = distribution.requirements;
 
@@ -48,7 +49,7 @@ export async function saveDistributionFormats(
       error: error.code === "42501" ? auth.errors.forbidden : t.failed,
     };
   }
-  revalidatePath("/app/settings");
+  revalidatePath(routes.settingsDistribution);
   revalidatePath("/app/projects", "layout");
   return { ok: true, done: t.saved };
 }

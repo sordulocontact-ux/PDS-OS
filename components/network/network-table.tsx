@@ -73,13 +73,25 @@ export function NetworkTable({
         {withSelection && <SelectAllHead label={selection.all} />}
         {/* One fact a column (after Accordee, Sacha 24/11/2026); no column
             takes the rest: the width is shared evenly (Sacha, 29/10). */}
-        <DataTableHead>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.roles}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.relations}</DataTableHead>
-        <DataTableHead hideBelow="xl">{t.columns.projects}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.email}</DataTableHead>
-        <DataTableHead hideBelow="xl">{t.columns.phone}</DataTableHead>
-        <DataTableHead hideBelow="2xl">{t.columns.city}</DataTableHead>
+        <DataTableHead icon="contact">{t.columns.name}</DataTableHead>
+        <DataTableHead icon="role" hideBelow="md">
+          {t.columns.roles}
+        </DataTableHead>
+        <DataTableHead icon="relation" hideBelow="lg">
+          {t.columns.relations}
+        </DataTableHead>
+        <DataTableHead icon="project" hideBelow="xl">
+          {t.columns.projects}
+        </DataTableHead>
+        <DataTableHead icon="email" hideBelow="lg">
+          {t.columns.email}
+        </DataTableHead>
+        <DataTableHead icon="phone" hideBelow="xl">
+          {t.columns.phone}
+        </DataTableHead>
+        <DataTableHead icon="city" hideBelow="2xl">
+          {t.columns.city}
+        </DataTableHead>
         <DataTableActionsHead label={t.columns.actions} />
       </DataTableHeader>
       <DataTableBody>
@@ -104,6 +116,7 @@ export function NetworkTable({
                   ) : (
                     <DataTableIcon
                       icon={contact.kind === "person" ? IconUser : IconOffice}
+                      className="size-9 justify-center"
                     />
                   )
                 }

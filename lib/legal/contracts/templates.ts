@@ -6,6 +6,10 @@ import {
   asContractLanguage,
   type ContractLanguage,
 } from "@/lib/legal/contracts/language";
+import {
+  isDocumentFont,
+  type DocumentFont,
+} from "@/lib/legal/contracts/document-fonts";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -30,6 +34,8 @@ export type ContractTemplate = {
   type: ContractType;
   // French or English (Ibé, 18/11/2026): the contracts made from it too.
   language: ContractLanguage;
+  // Its Word file's typeface (document-fonts.ts); null: the default look.
+  font: DocumentFont | null;
   roles: FormRole[];
   usage: string | null;
   body: string;
@@ -62,7 +68,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
   const { data, error } = await supabase
     .from("contract_templates")
     .select(
-      "id, series_id, version, name, type, language, roles, usage, body, fields, status, validated_by, validated_at, retired_reason, source_path, source_name",
+      "id, series_id, version, name, type, language, font, roles, usage, body, fields, status, validated_by, validated_at, retired_reason, source_path, source_name",
     )
     .order("name")
     .order("version", { ascending: false })
@@ -92,6 +98,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
     name: row.name,
     type: asContractType(row.type),
     language: asContractLanguage(row.language),
+    font: isDocumentFont(row.font) ? row.font : null,
     roles: asRoles(row.roles),
     usage: row.usage,
     body: row.body,

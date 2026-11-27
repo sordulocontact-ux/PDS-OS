@@ -4,7 +4,7 @@
 // the person to say: each one is only proposed. Client-safe.
 
 import type { ContractFieldId } from "./fields";
-import { bodySegments } from "./template-text";
+import { bodySegments, type ExcerptAt } from "./template-text";
 
 const SPACE = "[ \\u00a0]?";
 const PATTERNS: Array<{ field: ContractFieldId; re: RegExp; group?: number }> =
@@ -30,6 +30,44 @@ const PATTERNS: Array<{ field: ContractFieldId; re: RegExp; group?: number }> =
       re: /(?<![\d+])(?:\+33[  ]?|0)[1-9](?:[  .-]?\d{2}){4}(?!\d)/g,
     },
   ];
+
+// A line left to fill in by hand: « ____ », « …… », « ........ ».
+const BLANK = "(?:_{3,}|\\.{4,}|…+)";
+// Where it is, the text before it (Sacha 25/11/2026: « née le ____ à ____ »,
+// « Fait à Paris, le ____ »): a blank already made a value ({{…}}) still
+// counts, so each one is found whatever was replaced first.
+const SLOT = `(?:${BLANK}|\\{\\{[a-z0-9_.]+\\}\\})`;
+// « né le », « née le », « né(e) le », never « donne le ».
+const BORN = "(?<!\\p{L})n[ée]e?(?:\\s*\\(e\\))?\\s+le\\s+";
+const BLANKS: Array<{ field: ContractFieldId; context: string }> = [
+  { field: "personne.date_naissance", context: BORN },
+  {
+    field: "personne.lieu_naissance",
+    context: `${BORN}(?:${SLOT}|[^,\\n]{1,40}?)\\s+à\\s+`,
+  },
+  {
+    field: "contrat.date",
+    context: "(?<!\\p{L})fait\\s+à\\s+[^,\\n]{1,40},?\\s+le\\s+",
+  },
+];
+
+/** The blanks a template fills (a date of birth, the contract's date), each
+ * with the text before it that says which one it is. */
+export function blanksByPlace(
+  body: string,
+): Array<ExcerptAt & { field: ContractFieldId }> {
+  const found: Array<ExcerptAt & { field: ContractFieldId }> = [];
+  for (const { field, context } of BLANKS) {
+    const re = new RegExp(`(?<=${context})${BLANK}`, "giu");
+    const seen = new Set<string>();
+    for (const [excerpt] of body.matchAll(re))
+      if (!seen.has(excerpt)) {
+        seen.add(excerpt);
+        found.push({ excerpt, context, field });
+      }
+  }
+  return found;
+}
 
 /** Each value found, once, with its field, in the order of the patterns. */
 export function valuesByShape(

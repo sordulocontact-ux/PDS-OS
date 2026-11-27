@@ -2619,10 +2619,10 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
   chaque étape).
 - Migration `20261120150101_deal_memo_mail.sql` **à pousser en prod** (crée le bucket `deal-files`) ; test
   `supabase/tests/deal-memo-mail.test.sql` (42 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
-- Reste : le contenu du deal memo (exemple attendu d'Ibé, rien n'en est lu ni présumé) ; un vrai `Cc` dans
-  `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; dépôt à la main d'un memo reçu ailleurs
-  (WhatsApp) : aujourd'hui, le transférer par e-mail à l'adresse du deal. Fait le 23/11 : les 5 notifications du
-  deal memo ont leur texte et leur lien (la page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
+- Fait depuis : l'exemple de memo d'Ibé (Wagram, « Projet Dioo », reçu le 21/11) donne sa forme au PDF du memo de
+  PDS (`lib/deals/memo-pdf.ts`, 22/11) ; vrai `Cc` / `Cci` dans `lib/email/send.ts` (22/11) ; « Déposer le memo
+  reçu » pour un memo arrivé ailleurs (23/11) ; les 5 notifications du deal memo ont leur texte et leur lien (la
+  page du deal), vérifiés ; plus d'historique affiché (Ibé, 23/11).
 
 
 ## Retours d'Ibé du 18/11 : parcours PDS Mic (21/11/2026, branche `pre-prod`)
@@ -3227,3 +3227,197 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
   test 27-11 » (Cadrage fait avec des « Non applicable », plan lancé, contrats des deux titres confirmés, source
   « rivage-maquette.wav », Brief Master enregistré, dossier de mix transmis par lien privé à « Ingé test M9 », contact
   du Réseau sans adresse e-mail, avec une dérogation pour les pistes séparées).
+## Contrats : écrire le contrat sur sa page, comme son PDF (25/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « là actuellement on crée avec un text field avec des variables, ça fait trop développeur, je voudrais
+qu'on voie directement le contrat en PDF avec les variables » (suite du retour d'Ibé du 18/11 : « recevoir le modèle en
+PDF, pas un truc avec les écritures »).
+
+- **Une seule mise en page** : `lib/legal/contracts/document-layout.ts` (client-safe : `bodyHtml`, `templateBodyHtml`,
+  `documentCss`, `sheetCss`, `fieldLabelOf`, `escapeHtml`) sert le PDF, l'aperçu d'un modèle et l'éditeur ; le gras ajouté
+  seul (titres d'articles, lignes en capitales) porte `data-auto` et est relu comme du texte simple.
+- **`DocumentEditor` + `DocumentEditorToolbar`** : le contrat s'écrit sur sa page A4 (Arial 10 pt justifié, articles),
+  valeurs en blancs libellés comme dans le PDF, gras et souligné réels ; barre Gras, Souligné, « Insérer une information »
+  (menu groupé, seulement pour un modèle) ; Entrée = paragraphe, Maj+Entrée = ligne ; collage Word garde gras et
+  souligné ; pas d'italique.
+- Utilisé par `TemplateForm` (nouveau modèle, nouvelle version) et par « Modifier une clause » (`ReviseDocumentButton`) ;
+  le texte d'un fichier importé n'est plus replié derrière « Afficher le texte », valeurs repérées surlignées.
+- Supprimés : `TemplateBodyEditor`, `field-chip.tsx` ; `DropdownMenuGroup` ajouté à `ui/dropdown-menu.tsx`.
+- **Aucune migration** : le texte stocké ne change pas (`**gras**`, `__souligné__`, `{{champ}}`).
+- **Suite du même jour, après un essai de Sacha** :
+  - **Un Word importé garde sa mise en page** (`source-text.ts`, `docxText`) : chaque paragraphe Word = un paragraphe
+    du contrat (sauf si l'auteur sépare déjà ses blocs par des paragraphes vides : une adresse reste groupée), gras et
+    souligné des runs repris en marques ; avant, tout devenait un seul bloc collé.
+  - **Un fichier déposé sur la page** est importé comme par « Importer un fichier » (`DocumentEditor onFile`,
+    `TemplateSourceHandle.read`) ; avant, le dépôt ne faisait rien.
+  - **Trois informations** : « Date de naissance », « Lieu de naissance » (`personne.date_naissance` /
+    `lieu_naissance`, lues dans la fiche, « Sans objet » pour une société) et « Date du contrat » (`contrat.date`, le
+    jour où le contrat est préparé, en toutes lettres, source `document`). La fiche de renseignements demande la date et
+    le lieu de naissance (v3, facultatifs).
+  - **Lignes à remplir repérées par leur place** (`value-patterns.ts`, `blanksByPlace`) : « né(e) le ____ », « à ____ »
+    juste après, « Fait à …, le ____ » ; une suggestion porte un `context` (motif du texte qui précède, `ExcerptAt`)
+    respecté par le comptage, le surlignage, Remplacer et Annuler ; « Ligne à remplir » dans la liste.
+  - **Nom, type, rôles et langue pré-remplis par le code** (`template-about.ts`) : le titre du contrat (première ligne
+    en capitales ou en gras) donne le nom et le type, le type les rôles, les mots les plus courants la langue ; PO ne
+    complète que ce qui reste vide. Ce que PO a repéré passe au-dessus de la page (son avertissement était invisible
+    sous le contrat).
+  - Constaté en local : la clé Mistral n'a plus d'abonnement (« You need a subscription to access this API »), PO ne lit
+    plus les contrats en local ; Claude en prod.
+  - **Liste « Ce que PO a repéré » supprimée** (Sacha, même jour) : les valeurs repérées sont remplacées et
+    surlignées dans la page ; un clic sur l'une ouvre un petit menu (changer d'information, « Remettre « … » »,
+    « Retirer », `DocumentFieldPopover`) ; un contrat collé en entier est lu comme un import ; PO en échec = un toast.
+  - **Un modèle s'ouvre en modale depuis la liste** (Sacha, même jour : « je veux pas que ça ouvre une page ») :
+    `TemplateDialog` (état, « Valider », le document) ; la page du modèle reste pour les liens de PO et de la demande.
+  - **La typo du contrat reprise** (Sacha, même jour) : la police la plus utilisée d'un Word (`docxFont`, styles et
+    thème compris) ou d'un texte collé (`pastedFontOf`) devient celle du modèle (`contract_templates.font`, migration
+    `20261125200101`), dans la page, l'aperçu et les PDF de tous les contrats faits avec lui. Une police Microsoft passe
+    par sa jumelle libre aux mêmes métriques (Calibri → Carlito, Cambria → Caladea, Times New Roman → Tinos, Arial →
+    Arimo…, `document-fonts.ts`), chargée depuis Google Fonts ; une police inconnue garde l'Arial par défaut. Le pied de
+    page du PDF reste en Arial. Vérifié : PDF imprimé en Tinos, détection sur trois Word de test.
+  - **Plus d'icône devant les modèles** dans la liste ; **« Nouveau contrat › Créer un modèle réutilisable »** ouvre le
+    formulaire du modèle dans la même fenêtre (plus de renvoi vers la page des modèles), proposé seulement à qui écrit
+    les modèles (`manage_legal`) ; enregistré, il rejoint Contrats › Modèles, à valider (Sacha, même jour).
+  - **« Nouveau contrat » refait, tout dans la fenêtre** (Sacha 26/11 : « la création d'un contrat est bizarre ») :
+    deux choix au lieu de trois. **« Déposer un contrat existant »** : le fichier d'abord (PDF ou Word, lu par
+    `/api/contracts/import-text`, une route car un PDF dépasse la limite d'1 Mo d'une server action), puis le formulaire
+    rempli par le code (`lib/contracts/import-prefill.ts` : titre = première ligne qui commence par « Contrat »,
+    « Licence », « Agreement »…, sinon le nom du fichier ; type par mots-clés ; artiste et projet seulement si un seul
+    nom connu apparaît), le fichier rangé en brouillon du contrat, puis sa page s'ouvre (`ContractImport`).
+    **« Partir d'un modèle »** (`manage_legal`) : le projet (déjà connu depuis son Juridique), puis ses « Contrats à
+    prévoir », le tableau même du Plan d'action (`ProjectContractsPick` → `MappingPanel`, lu par
+    `loadProjectContracts`) : « Générer » ou, sans modèle adapté, « Nouveau modèle de contrat » demandé pour la
+    personne et repris pour elle une fois validé ; le tableau se relit après chaque changement (`onChange`). Le choix
+    « Créer un modèle réutilisable » est retiré (Contrats › Modèles le garde) ; la fenêtre ne s'élargit que pour le
+    tableau ; sans `manage_legal`, on arrive directement au dépôt du fichier.
+  - **Le contrat déposé à côté de ses champs** (retour de Sacha du 26/11, `docs/bonnes-pratiques/retours-design.md`) :
+    - fenêtre `document` (1280 px) ;
+    - le PDF dans le lecteur du navigateur, le Word en son texte sur la feuille du contrat et dans sa police
+      (`ContractFilePreview`) ;
+    - à droite, `ContractForm existing`, sans Échéance ni Notes ;
+    - sur téléphone, les champs d'abord, le contrat dessous ;
+    - `FilePickField`, dans toute l'app : le fichier choisi remplace la zone de dépôt par une ligne avec « Remplacer » ;
+    - plus de phrase sous « Nouveau contrat » ;
+    - dates du formulaire de contrat sur toute leur colonne ;
+    - « PDS Records » n'est plus pris pour l'artiste « PDS ».
+
+    Vérifié dans le navigateur : Word, PDF, remplacement, Annuler, téléphone (cadre de 390 px), enregistrement jusqu'à la
+    page du contrat, « Importer un contrat » d'un deal.
+  - **« Partir d'un modèle » et la fenêtre d'un modèle** (retours de Sacha du 26/11, `docs/bonnes-pratiques/retours-design.md`) :
+    - le choix en `SegmentedControl`, le dépôt choisi d'office ;
+    - « Partir d'un modèle » : les seules personnes qui ont encore besoin d'un contrat, chacune avec son modèle et
+      « Créer le contrat » (`ProjectContractsToCreate`). Le tableau du Plan d'action n'y est plus ;
+    - le menu « Contrat » : « Aucun modèle pour ce rôle », « + Nouveau modèle de contrat » en bout de liste
+      (`OptionSelect action`, `NewTemplateDialog`) ;
+    - formulaire d'un modèle : le contrat à gauche, les informations à droite ;
+    - fichier source en `ChosenFileRow` ;
+    - guide de PO : « Nouveau contrat », et « Générer un contrat, c'est l'envoyer ? ».
+    - réponses de Sacha à trois doutes : la vue d'un modèle passe aussi en deux colonnes (`TemplateView head`) ;
+      « Importer un contrat » d'un deal prend l'écran du dépôt (`ContractImport known onSaved`) ; la liste de
+      tout menu s'ouvre sous son champ (`SelectContent`).
+    - dates d'un contrat déposé lues par le code (`lib/contracts/import-dates.ts`) : début, fin (ou durée), jour de
+      signature ; « Déjà signé » (`AlreadySignedField`) le fait entrer en « Signé » (SQL `record_signed_contract`,
+      migration `20261126170101`, appliquée en local seulement) avec son fichier rangé comme signé
+      (`fileImportedContract`).
+- Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
+  (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.
+
+## Le « + » : créer depuis n'importe quelle page (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : un bouton toujours là pour une nouvelle conversation, écrire un mail, ajouter une dépense…
+Cadrage et décisions : `docs/DESIGN.md` § 4 « Coquille », `docs/ARCHITECTURE.md` § 3.
+
+- **Six actions**, filtrées par droit côté serveur (`lib/shell/quick-actions.ts`) : Nouvelle conversation (fenêtre de
+  PO, sans dictée), Écrire un mail, Ajouter une dépense (le projet de la page visé d'avance), Nouvelle réunion,
+  Nouveau contact, Nouveau deal. « Nouveau projet » écarté par Sacha (son bouton existe).
+- **Deux portes, une liste** : le « + » (en tête de la barre, à gauche du bouton qui la replie ; repliée, sous la
+  loupe ; téléphone, dans l'en-tête à la place de « + Dépense ») et le groupe « Créer » du ⌘K.
+- **Touche N** : C était déjà la capture d'une zone pour un retour.
+- Chaque action ouvre le vrai formulaire de sa page et finit pareil (`components/shell/quick-create/`) ; options du
+  deal lues par une nouvelle server action (`loadNewDealOptionsForReader`).
+- Guide de PO : sujet `quick-create`.
+- Vérifié dans le navigateur (`pnpm start`, compte business manager local) : menu, les six fenêtres, N, ⌘K vide et
+  filtré (« dep »), Entrée, barre repliée, téléphone. **Non vérifié** : la dépense visée d'avance sur une page de
+  projet (aucun compte local avec un projet ne se connecte : `admin@pds.test` est rattaché à « PDS (local) »).
+
+## Retours de Maël sur deux parcours complets : les quatre bloquants (27/11/2026, branche `pre-prod`)
+
+Test de Maël (« Lueur test », single ; « Micro test », collectif), vérifié point par point dans le code et dans
+Chrome avant de corriger.
+
+- **Single : « Créer le titre » perdait le titre** : le brouillon ajoutait `?draft=` à l'adresse, la création du
+  titre re-rendait la page et la clé du formulaire changeait, qui repartait du brouillon d'avant le titre.
+  `CreateProjectFormHost` garde le formulaire pour le brouillon qu'il a lui-même créé. Vérifié dans Chrome.
+- **Valideur du Brief de sortie sans recours** : « Retirer <Nom> » à côté de « Relancer » (directeur créatif
+  seulement, jamais la direction) ; retiré de l'équipe = retiré des valideurs ; version validée si plus personne
+  n'est attendu. Même geste pour le Plan de sortie et le Dossier de presse. Migration `20261127190101`. Vérifié dans
+  Chrome (vu comme Lina) et en transaction annulée.
+- **Livrable ajouté en Conception, jamais en Production, puis en double après une V2** : le livrable que la
+  Stratégie ajoute reprend le besoin « à qualifier » du même titre, avec sa fiche et son transfert. Migration
+  `20261127190201`. Vérifié en transaction annulée ; le parcours complet dans le navigateur reste à rejouer.
+- **Écrans pas à jour** : `strategy_document_reviews` signale maintenant ses changements au cache (la décision du
+  valideur restait « En attente » chez lui) ; une vue nulle n'est plus écrite dans `project_view_cache` et un lot
+  refusé n'empêche plus les suivants. Les trois autres cas de Maël (« Maintenant » après le lancement du plan,
+  « 0 contrôle sur 6 » de la Distribution, « Validation en cours… » du mix) n'ont pas de cause trouvée dans le
+  code : à rejouer avec `PERF_TRACE=1`.
+
+## Paramètres › Raccourcis clavier (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : une page des Paramètres pour changer les raccourcis de l'app.
+
+- Quatre raccourcis, à chacun : Rechercher (⌘K), Créer (N), Ouvrir PO (Espace Espace), Capturer une zone pour un
+  retour (C). Page `/app/settings/raccourcis` (Paramètres › « Modifier les raccourcis ») : « Modifier » attend la
+  touche, refus avec sa raison (conflit, touche du navigateur, touche impossible), « Rétablir ».
+- Migration `20261127200101_account_shortcuts` (table `account_shortcuts`, RLS : son propre compte ; test pgTAP).
+- Un seul hook d'écoute (`useKeyShortcut`) pour les cinq écoutes de l'app (recherche, recherche de Finance, « + »,
+  PO, capture) ; toutes les touches à l'écran suivent le choix (`ShortcutKeys`).
+- Guide de PO : sujet `shortcuts`, Paramètres et « + » mis à jour.
+
+## Calls → Calendrier + Notes (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « nos calls sont que sur la page Calls ; je voudrais que la page Calls soit que un
+calendrier et les transcriptions / comptes rendus sur une nouvelle page Notes, pour séparer les deux » ;
+après l'analyse d'Accordee : une page Notes et le Calendrier (« Calls » gardé en titre pour le projet,
+finalement aussi renommé Notes), avec des notes qu'on peut écrire sur un projet. Ticket :
+`.tickets/2026-11-27-calls-notes/TICKET.md`.
+
+- **Navigation** : l'entrée « Calls » devient **Notes** ; « Calendrier » garde son nom et devient le seul
+  calendrier. `/app/calls` redirige vers `/app/notes`, `/app/calls?display=calendar…` vers le Calendrier,
+  `/app/projects/<p>/calls` vers `/notes`. Les pages d'un call ne bougent pas et allument Notes.
+- **Calendrier** : « Nouveau call » en bouton principal, **une seule ligne d'outils** (Semaine / Mois,
+  bouton ; « Tout / À vous » retiré, retours de Sacha), colonne de droite dès `xl` : mini-mois (`?mini=`) et « À venir ».
+- **Notes** (`/app/notes`) : onglets Toutes / Calls / Écrites / À compléter avec nombres, recherche **dans le
+  texte** (titre, compte rendu, transcription, note), filtres Projet et Personne, fiches latérales
+  (`CallSheet`, `NoteSheet`).
+- **Notes écrites** : table `notes` + RPC `search_notes`, 24 tests pgTAP. Lue par qui voit le projet (sans
+  projet : toute l'équipe), écrite par tout membre qui voit le projet (**exception voulue** à « seul le
+  responsable écrit dans un projet lancé », Sacha 27/11), modifiée et supprimée par son auteur. « Nouvelle
+  note » dans le « + » et le ⌘K.
+- **Projet** : la section « Calls » du Pilotage devient « Notes » (+ onglet « À venir », « Nouveau call » et
+  « Nouvelle note » dans l'en-tête).
+- **Composants** : `NotesListView`, `NotesList`, `NotesTable`, `NoteSheet`, `NoteForm`, `NewNoteButton`,
+  `NoteMenu`, `NoteProjectPill`, `NotesPeople`, `CalendarSide`, `MiniMonth`, `UpcomingCalls` ; props
+  `CalendarToolbar views` / `action`, `EmptyState body` facultatif, `SearchableList extraMatch` /
+  `onQueryChange`, `NAV_ITEMS alsoActiveOn`, `NewMeetingButton label`, `variant` de `CreateCallForm` et
+  `NewNoteButton`. Supprimés : `CallsListView`, `CallsList`, `CallsTable`.
+- **Migration** : `20261127180101_notes` (en local seulement ; à vérifier avec `db push --dry-run` avant toute
+  fusion dans `main`).
+- **Guide de PO** : sujet `calls` devenu « Notes » (page, onglets, recherche, droits des notes écrites), sujets
+  Calendrier (planifier un call) et « + » (Nouvelle note) mis à jour.
+- **Notes liées et note-document** (Sacha, 27/11, d'après Accordee) : colonne et filtre « Lié à » (`?link=`) ; une
+  note se lie à **un** projet, deal ou contrat (pas de devis : on lie au projet), lue selon ce lien (migration
+  `20261127210101_notes_links`, 37 tests pgTAP) ; « Nouvelle note » ouvre une note vide en panneau latéral
+  (« Lier à… », titre en grand, texte), **enregistrée seule** à chaque pause, modifiée sur place par son auteur ;
+  `NoteForm` et `NoteProjectPill` supprimés (`NoteLinkPill`, `NoteLinkMenu`, `NoteDocument`, `NoteEditor`,
+  `NewNoteSheet`, `useNoteAutosave`).
+- **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; parcours à vérifier dans le
+  navigateur par l'équipe.
+
+## Paramètres en pages, double barre (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « tout est dans un seul endroit, fais une double side bar et rajoute des pages », d'après les
+réglages d'Accordee.
+
+- Seconde colonne « Paramètres » (barre principale repliée), une page par sujet : Utilisation de PO, Apparence (thème
+  et style, nouvelle page), Notifications (navigateur, nouvelle page), Raccourcis clavier, Connexions ; pour la
+  direction : Coordonnées de PDS, Distribution. Onglets sur téléphone. `/app/settings` mène à la première page.
+- ⌘K : un filet entre les groupes de résultats (« Créer » / « Pages »…), dans le ⌘K de l'app et celui de Finance.

@@ -93,9 +93,9 @@ export const dailyTopics: GuideTopic[] = [
       "Le Calendrier ne se remplit pas à la main : il montre les dates que PDS OS connaît déjà et chaque date s'ouvre là où elle se décide.",
       "On y voit les sorties ou échéances de projet, les dates attendues du Master, les tournages, les temps forts de la Stratégie, les calls et réunions, et les étapes ouvertes datées.",
       "Vue Mois par défaut, vue Semaine avec les heures ; sur téléphone, un agenda par jour.",
-      "Le filtre Tout / À vous montre soit tout, soit ce qui demande un geste de votre part.",
       "Chaque projet a sa couleur ; un point bleu marque ce qui est à vous, un point rouge ce qui est en retard.",
-      "En vue Semaine, on peut créer une réunion en cliquant ou en glissant sur un créneau libre, et déplacer ses propres calls.",
+      "C'est ici qu'on planifie les calls : le bouton principal « Nouveau call », sur la même ligne que Semaine / Mois, ouvre le formulaire ; en vue Semaine, on peut aussi créer une réunion en cliquant ou en glissant sur un créneau libre, et déplacer ses propres calls.",
+      "Sur grand écran, une colonne à droite montre, en vue Semaine, un mini-mois (un point sous les jours qui ont une date), puis « À venir », les prochains calls en cartes.",
     ],
     faq: [
       {
@@ -104,18 +104,20 @@ export const dailyTopics: GuideTopic[] = [
       },
       {
         q: "Comment planifier une réunion ?",
-        a: "En vue Semaine, cliquez ou glissez sur un créneau libre : le formulaire « Nouvelle réunion » s'ouvre sur ce créneau.",
+        a: "Dans le Calendrier, avec « Nouveau call », ou en vue Semaine en cliquant ou en glissant sur un créneau libre : le formulaire s'ouvre sur ce créneau.",
       },
     ],
   },
   {
     key: "calls",
-    title: "Calls",
+    title: "Notes",
     summary:
-      "Les calls et réunions de tous les projets : planifier, enregistrer, obtenir le compte rendu.",
+      "Les comptes rendus des calls et les notes écrites : retrouver ce qui s'est dit ou noté, par la recherche dans le texte. Les calls se planifient dans le Calendrier.",
     keywords: [
       "call",
       "calls",
+      "notes",
+      "note",
       "reunion",
       "visio",
       "meet",
@@ -126,11 +128,16 @@ export const dailyTopics: GuideTopic[] = [
       "micro",
     ],
     nav: "/app/calls",
+    projectSection: "notes",
     where:
-      "Aussi dans un projet lancé › Pilotage › Calls (les calls de ce projet seulement).",
+      "Aussi dans un projet lancé › Pilotage › Notes (les notes de ce projet seulement, avec en plus l'onglet « À venir »).",
     facts: [
-      "La page Calls liste tous les calls et réunions que vous pouvez voir, avec les onglets Tous, À venir et Passés, une recherche et un filtre par projet.",
-      "Deux vues : la liste (par défaut) et le calendrier.",
+      "La page Notes réunit les calls passés (compte rendu et transcription) et les notes écrites que vous pouvez voir, en liste, avec les onglets Toutes, Calls, Écrites et À compléter (un call passé sans compte rendu ni clôture), chacun avec son nombre.",
+      "La recherche fouille le texte : titre, compte rendu, transcription ou texte d'une note. Deux filtres : Rattaché à (le projet, le deal ou le contrat) et Personne.",
+      "Cliquer un call ouvre sa fiche à droite, cliquer une note écrite ouvre la sienne ; « Compléter » mène à la page du call.",
+      "La planification des calls n'est plus sur cette page mais dans le Calendrier ; « Nouveau call » existe aussi dans les Notes du projet, à côté de « Nouvelle note ».",
+      "Une note écrite a un titre, un texte et, si on veut, un lien vers un seul projet, deal ou contrat (« Rattacher à un projet, un deal ou un contrat » en haut de la note ; un devis n'a pas de page à lui : on lie la note à son projet). Elle est lue par ceux qui voient ce projet, ce deal ou ce contrat ; sans lien, c'est une note de l'équipe, lue par toute l'équipe. On ne lie une note qu'à ce qu'on voit. Tout membre qui voit le projet peut y écrire une note, même quand le projet est lancé (exception voulue à la règle « seul le responsable écrit dans un projet lancé »). Une note n'est modifiée et supprimée que par son auteur.",
+      "Une note s'écrit directement : « Nouvelle note » ouvre une note vide à droite, on tape le titre puis le texte, et elle s'enregistre seule à chaque pause (« Enregistré » en haut du panneau), sans bouton ; fermée vide, rien n'est créé. Son auteur la modifie de la même façon en l'ouvrant ; « ⋯ » la supprime. « Nouvelle note » est aussi dans le « + » de la barre de gauche. PO ne lit pas encore les notes écrites : il lit les calls et leurs comptes rendus.",
       "« Nouveau call » ou « Nouvelle réunion » planifie un échange, avec un lien de visio.",
       "Au moment de l'échange, on l'enregistre depuis l'étape du module qui l'a préparé (Cadrage, Stratégie, Conception, Production, Master) avec « Enregistrer l'échange » : PDS OS enregistre la visio et le micro sans changer de page. Un call hors module s'enregistre depuis sa page.",
       "L'enregistrement est ensuite transcrit puis résumé en compte rendu, qui alimente le Cadrage, la Stratégie ou les autres modules concernés.",
@@ -143,8 +150,16 @@ export const dailyTopics: GuideTopic[] = [
         a: "La direction et le responsable de la réunion. La suppression emporte aussi l'enregistrement, la transcription et le compte rendu, et elle est définitive.",
       },
       {
+        q: "Où sont passés les Calls ?",
+        a: "Les comptes rendus et transcriptions sont dans Notes ; la planification (Nouveau call, À venir) est dans le Calendrier. Les anciens liens vers la page Calls renvoient à Notes.",
+      },
+      {
+        q: "Qui peut modifier une note écrite ?",
+        a: "Son auteur seul, directement dans la note ouverte (elle s'enregistre seule), et lui seul la supprime. Elle est lue par ceux qui voient le projet, le deal ou le contrat auquel elle est liée, ou par toute l'équipe si elle n'est liée à rien.",
+      },
+      {
         q: "Où retrouver le compte rendu d'un call ?",
-        a: "Dans la page du call, ouverte depuis la liste Calls ou depuis les Calls du projet.",
+        a: "Dans la page du call, ouverte depuis Notes ou depuis les Notes du projet (onglet Calls). Un compte rendu manquant se retrouve dans l'onglet « À compléter ».",
       },
     ],
   },
@@ -228,6 +243,79 @@ export const dailyTopics: GuideTopic[] = [
       {
         q: "D'où viennent les mails ?",
         a: "De la boîte Gmail de po@pdsrecords.com, copiée dans PDS OS toutes les 10 minutes (reçus et envoyés). PDS OS n'y modifie rien.",
+      },
+    ],
+  },
+  {
+    key: "quick-create",
+    title: "Créer et rechercher depuis n'importe quelle page",
+    summary:
+      "Le « + » et la recherche ⌘K en haut de la barre de gauche : créer une conversation, un mail, une dépense, une réunion, un contact ou un deal sans quitter la page.",
+    keywords: [
+      "plus",
+      "bouton plus",
+      "creer",
+      "creation rapide",
+      "nouveau",
+      "ajouter",
+      "raccourci",
+      "recherche",
+      "rechercher",
+      "cmd k",
+      "commande k",
+    ],
+    where: "En haut de la barre de gauche ; sur téléphone, dans l'en-tête",
+    facts: [
+      "En haut de la barre de gauche, « Rechercher… » (⌘K) trouve une page, un projet, un artiste, un titre, un contact, un contrat, un deal, un call ou une session studio et l'ouvre.",
+      "Le « + » en haut de la barre de gauche, à côté du bouton qui la replie (barre repliée : sous la loupe), ouvre un menu pour créer sans changer de page : Nouvelle conversation (avec PO), Écrire un mail, Ajouter une dépense, Nouvelle réunion, Nouvelle note, Nouveau contact, Nouveau deal. Chacun ne voit que ce qu'il a le droit de faire.",
+      "La touche N (par défaut, à changer dans Paramètres › Raccourcis clavier), hors d'un champ, ouvre ce menu. Les mêmes actions sont en tête de la recherche ⌘K, sous « Créer » : taper « dépense » propose « Ajouter une dépense ».",
+      "Chaque action ouvre le même formulaire que sur sa page, et finit pareil : un contact ou un deal créé ouvre sa fiche, une réunion ouvre sa page.",
+      "Sur la page d'un projet, « Ajouter une dépense » vise déjà ce projet ; on peut en choisir un autre.",
+      "« Nouvelle réunion » crée la même réunion que « Nouveau call » du Calendrier. « Nouvelle note » ouvre une note vide qui s'enregistre seule (sur la page d'un projet, elle est déjà liée à ce projet, modifiable). Le call d'un projet se crée depuis les Notes du projet.",
+      "Sur téléphone, le « + » est dans l'en-tête, à côté de la cloche.",
+    ],
+    faq: [
+      {
+        q: "Comment ajouter vite une dépense ?",
+        a: "Le « + » en haut de la barre de gauche (ou la touche N), puis « Ajouter une dépense ». Sur la page d'un projet, la dépense vise déjà ce projet.",
+      },
+      {
+        q: "Je ne vois pas « Nouveau deal » ou « Ajouter une dépense » dans le « + ».",
+        a: "Le menu ne montre que ce que votre poste vous permet de faire ; demandez à la direction si vous en avez besoin.",
+      },
+      {
+        q: "Pourquoi « Écrire un mail » n'apparaît pas ?",
+        a: "La boîte de po@pdsrecords.com n'est pas encore branchée sur cette version de PDS OS.",
+      },
+    ],
+  },
+  {
+    key: "shortcuts",
+    title: "Raccourcis clavier",
+    summary:
+      "Les touches qui ouvrent la recherche, le « + », PO et la capture d'un retour, que chacun peut changer dans Paramètres.",
+    keywords: [
+      "raccourci",
+      "raccourcis",
+      "clavier",
+      "touche",
+      "cmd k",
+      "espace espace",
+      "changer de touche",
+    ],
+    href: "/app/settings/raccourcis",
+    where: "Paramètres › Raccourcis clavier",
+    facts: [
+      "Par défaut : ⌘K pour Rechercher, N pour Créer (le « + »), Espace Espace pour ouvrir PO, C pour capturer une zone de la page dans un retour.",
+      "Dans Paramètres › Raccourcis clavier, « Modifier » attend la nouvelle touche : une lettre ou un chiffre, seule ou avec ⌘ ; Espace se presse deux fois. Échap annule.",
+      "Une touche déjà prise par un autre raccourci, ou par le navigateur avec ⌘ (copier, rechercher, nouvel onglet…), est refusée avec sa raison.",
+      "« Rétablir » remet le raccourci par défaut. Les raccourcis sont à chacun : ils suivent la personne sur tous ses ordinateurs.",
+      "Une touche seule ne marche jamais pendant qu'on écrit dans un champ, ni quand une fenêtre est ouverte ; un raccourci avec ⌘ marche partout.",
+    ],
+    faq: [
+      {
+        q: "Comment changer le raccourci de la recherche ?",
+        a: "Dans Paramètres › Raccourcis clavier, « Modifier » sur la ligne Rechercher, puis appuyez sur la nouvelle touche.",
       },
     ],
   },

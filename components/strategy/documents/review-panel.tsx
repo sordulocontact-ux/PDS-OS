@@ -8,6 +8,7 @@ import {
   type CriticalAlert,
 } from "@/components/strategy/documents/decision-form";
 import { ReviewRows } from "@/components/strategy/validation/review-rows";
+import { WithdrawReviewer } from "@/components/strategy/validation/withdraw-reviewer";
 import { Button } from "@/components/ui/button";
 import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import type { Member } from "@/lib/framing/related";
@@ -20,7 +21,8 @@ const fr = { strategyDocuments };
  * Who must validate a sent version and where each stands (ticket Stratégie
  * § 9), on the Brief de sortie's rows (`ReviewRows`): state, comment,
  * « Relancer » for the owner on a pending reviewer; the request's message
- * under the title; the decision form for a reviewer still expected.
+ * under the title; the decision form for a reviewer still expected;
+ * « Retirer » a creative who will not answer (WithdrawReviewer).
  * Kind-agnostic: the Plan de sortie, the Dossier de presse…
  */
 export function ReviewPanel({
@@ -59,19 +61,29 @@ export function ReviewPanel({
           canRemind &&
           r.state === "pending" &&
           r.personId !== meId && (
-            <Button
-              size="xs"
-              variant="outline"
-              disabled={pending}
-              onClick={() =>
-                run(
-                  () => remindStrategyReview(projectId, r.id),
-                  () => toast.success(t.reminded),
-                )
-              }
-            >
-              {t.remind}
-            </Button>
+            <>
+              <Button
+                size="xs"
+                variant="outline"
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () => remindStrategyReview(projectId, r.id),
+                    () => toast.success(t.reminded),
+                  )
+                }
+              >
+                {t.remind}
+              </Button>
+              {r.withdrawable && (
+                <WithdrawReviewer
+                  projectId={projectId}
+                  reviewId={r.id}
+                  name={r.name}
+                  size="xs"
+                />
+              )}
+            </>
           )
         }
       />

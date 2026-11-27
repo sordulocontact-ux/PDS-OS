@@ -90,13 +90,8 @@ export function formatClock(totalSeconds: number): string {
     : `${String(m).padStart(2, "0")}:${sec}`;
 }
 
-/** Views of the Calls page: every call, the planned ones, the others. */
-export const CALL_VIEWS = ["upcoming", "past"] as const;
-export type CallView = (typeof CALL_VIEWS)[number];
-
-export function asCallView(value: unknown): CallView | null {
-  return CALL_VIEWS.find((view) => view === value) ?? null;
-}
+/** A call to come or past (the Notes' tabs, lib/notes/views.ts). */
+export type CallView = "upcoming" | "past";
 
 export function callViewOf(
   call: { status: string; occurredAt: string; endsAt?: string | null },

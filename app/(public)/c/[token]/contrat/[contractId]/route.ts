@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { documentFileName } from "@/lib/legal/contracts/document-name";
+import { isDocumentFont } from "@/lib/legal/contracts/document-fonts";
 import { contractPdf } from "@/lib/legal/contracts/document-pdf";
 import { loadContractLetterhead } from "@/lib/legal/contracts/letterhead";
 import {
@@ -16,6 +17,7 @@ const document = z.object({
   title: z.string(),
   version: z.number(),
   body: z.string(),
+  font: z.string().nullish(),
 });
 
 const pdsFile = z.object({ path: z.string(), file_name: z.string() });
@@ -66,6 +68,7 @@ export async function GET(
     const pdf = await contractPdf({
       title: parsed.data.title,
       body: parsed.data.body,
+      font: isDocumentFont(parsed.data.font) ? parsed.data.font : null,
       letterhead: await loadContractLetterhead(supabase, contractId, token),
     });
     return pdfResponse(

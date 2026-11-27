@@ -192,6 +192,8 @@ export async function loadContractFormOptions(
     })),
     projects: projects.data ?? [],
     artists: artists.data ?? [],
+    organizationId: access.organizationId ?? null,
+    generates: can(access, "manage_legal") && Boolean(access.organizationId),
   };
 }
 

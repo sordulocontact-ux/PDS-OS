@@ -4,15 +4,15 @@ import {
   IconArrowDottedRotateAnticlockwise,
   IconBoxArchive,
   IconTrash,
-  IconXmark,
 } from "nucleo-sharp-essential";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useArchiveRecords } from "@/components/archive/use-archive-records";
 import { useDeleteRecords } from "@/components/archive/use-delete-records";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowSelection, useRowSelection } from "@/components/ui/row-selection";
+import { SelectionBar as FloatingSelectionBar } from "@/components/ui/selection-bar";
 import type { ArchiveKind } from "@/lib/archive/types";
 import { records } from "@/lib/i18n/fr/records";
 
@@ -68,7 +68,7 @@ function SelectionBar({
   manage: boolean;
 }) {
   const t = fr.records;
-  const { selected, clear, toggle } = useRowSelection();
+  const { selected, toggle } = useRowSelection();
   const [open, setOpen] = useState<Confirming>("none");
   const confirming = open !== "none";
   const { pending, remove } = useDeleteRecords(kind);
@@ -77,16 +77,6 @@ function SelectionBar({
   // Drafts of the projects list are deleted, never archived.
   const archivable = selected.filter((row) => !row.draft);
   const words = archived ? t.restore : t.archive;
-
-  // Escape lets go of the selection (the dialog handles its own Escape).
-  useEffect(() => {
-    if (count === 0 || confirming) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") clear();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [count, confirming, clear]);
 
   function confirm() {
     remove(selected, (deleted) => {
@@ -112,59 +102,38 @@ function SelectionBar({
 
   return (
     <>
-      {count > 0 && (
-        <div
-          role="toolbar"
-          aria-label={t.selection.bar}
-          className="surface-glass fixed inset-x-0 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-40 mx-auto flex w-fit items-center gap-1 rounded-full bg-[var(--surface-glass)] py-1.5 pr-1.5 pl-5 text-[color:var(--text-primary)] shadow-[var(--elevation-3)] backdrop-blur-[var(--glass-panel-blur)] transition-[opacity,translate] duration-200 ease-out motion-reduce:transition-none starting:translate-y-2 starting:opacity-0"
-        >
-          <span
-            aria-live="polite"
-            className="mr-3 text-[length:var(--type-body-md)] font-medium tabular-nums"
-          >
-            {t.selection.count(count)}
-          </span>
-          {actions}
-          {manage && archivable.length > 0 && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setOpen("archive")}
-            >
-              {archived ? (
-                <IconArrowDottedRotateAnticlockwise
-                  aria-hidden
-                  data-icon="inline-start"
-                />
-              ) : (
-                <IconBoxArchive aria-hidden data-icon="inline-start" />
-              )}
-              {archived ? t.selection.restore : t.selection.archive}
-            </Button>
-          )}
-          {manage && (
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={() => setOpen("delete")}
-            >
-              <IconTrash aria-hidden data-icon="inline-start" />
-              {t.selection.delete}
-            </Button>
-          )}
+      <FloatingSelectionBar paused={confirming}>
+        {actions}
+        {manage && archivable.length > 0 && (
           <Button
             type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t.selection.clear}
-            onClick={clear}
+            variant="secondary"
+            size="sm"
+            onClick={() => setOpen("archive")}
           >
-            <IconXmark aria-hidden />
+            {archived ? (
+              <IconArrowDottedRotateAnticlockwise
+                aria-hidden
+                data-icon="inline-start"
+              />
+            ) : (
+              <IconBoxArchive aria-hidden data-icon="inline-start" />
+            )}
+            {archived ? t.selection.restore : t.selection.archive}
           </Button>
-        </div>
-      )}
+        )}
+        {manage && (
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={() => setOpen("delete")}
+          >
+            <IconTrash aria-hidden data-icon="inline-start" />
+            {t.selection.delete}
+          </Button>
+        )}
+      </FloatingSelectionBar>
 
       <ConfirmDialog
         open={open === "archive" && archivable.length > 0}

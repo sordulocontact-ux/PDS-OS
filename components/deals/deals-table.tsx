@@ -71,7 +71,7 @@ export function DealsTable({
   today: string;
 }) {
   const t = fr.deals.table;
-  const columns = contracts ? 6 : 5;
+  const columns = contracts ? 7 : 5;
   // The text columns share the width (Sacha, 12/11/2026: everything sat on
   // the left, the space left unused after « Négocié par »); the stage keeps
   // its 192 px.
@@ -112,9 +112,16 @@ export function DealsTable({
         <NextCell deal={deal} today={today} />
       </DataTableCell>
       {contracts && (
-        <DataTableCell hideBelow="md" fill>
-          <ContractCell contract={contracts[deal.id]} />
-        </DataTableCell>
+        <>
+          <DataTableCell hideBelow="md" fill>
+            <DataTableText>
+              {contracts[deal.id]?.title ?? EMPTY_CELL}
+            </DataTableText>
+          </DataTableCell>
+          <DataTableCell hideBelow="lg">
+            <ContractStateCell contract={contracts[deal.id]} />
+          </DataTableCell>
+        </>
       )}
       <DataTableCell hideBelow="lg" fill>
         {deal.assignee?.name ?? t.unassigned}
@@ -124,20 +131,29 @@ export function DealsTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.deal}</DataTableHead>
-        <DataTableHead hideBelow="xl" className="w-40">
+        <DataTableHead icon="deal" fill>
+          {t.deal}
+        </DataTableHead>
+        <DataTableHead icon="kind" hideBelow="xl" className="w-40">
           {t.kind}
         </DataTableHead>
-        <DataTableHead hideBelow="sm">{t.stage}</DataTableHead>
-        <DataTableHead hideBelow="md" fill>
+        <DataTableHead icon="step" hideBelow="sm">
+          {t.stage}
+        </DataTableHead>
+        <DataTableHead icon="next" hideBelow="md" fill>
           {t.next}
         </DataTableHead>
         {contracts && (
-          <DataTableHead hideBelow="md" fill>
-            {t.contract}
-          </DataTableHead>
+          <>
+            <DataTableHead icon="contract" hideBelow="md" fill>
+              {t.contract}
+            </DataTableHead>
+            <DataTableHead icon="status" hideBelow="lg">
+              {t.contractState}
+            </DataTableHead>
+          </>
         )}
-        <DataTableHead hideBelow="lg" fill>
+        <DataTableHead icon="person" hideBelow="lg" fill>
           {t.assignee}
         </DataTableHead>
       </DataTableHeader>
@@ -155,8 +171,9 @@ export function DealsTable({
   );
 }
 
-/** A deal's contract and its state (an artist's page, BIZ 10). */
-function ContractCell({
+/** The state of a deal's contract (an artist's page, BIZ 10); its title
+ * has its own column. */
+function ContractStateCell({
   contract,
 }: {
   contract: { title: string; status: string } | undefined;
@@ -164,14 +181,11 @@ function ContractCell({
   if (!contract) return <>{EMPTY_CELL}</>;
   const states: Record<string, string> = fr.contracts.states;
   return (
-    <span className="flex min-w-0 flex-col items-start gap-1">
-      <span className="truncate">{contract.title}</span>
-      <StatusBadge
-        tone={contractStateTone[contract.status] ?? "neutral"}
-        size="sm"
-      >
-        {states[contract.status] ?? contract.status}
-      </StatusBadge>
-    </span>
+    <StatusBadge
+      tone={contractStateTone[contract.status] ?? "neutral"}
+      size="sm"
+    >
+      {states[contract.status] ?? contract.status}
+    </StatusBadge>
   );
 }

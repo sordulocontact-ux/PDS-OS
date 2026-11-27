@@ -69,13 +69,17 @@ export function ArtistsTable({
     <DataTable>
       <DataTableHeader>
         {withSelection && <SelectAllHead label={selection.all} />}
-        <DataTableHead>{t.name}</DataTableHead>
+        <DataTableHead icon="artist">{t.name}</DataTableHead>
         {showRelation && (
-          <DataTableHead hideBelow="sm">{t.relation}</DataTableHead>
+          <DataTableHead icon="relation" hideBelow="sm">
+            {t.relation}
+          </DataTableHead>
         )}
-        <DataTableHead hideBelow="sm">{t.masters}</DataTableHead>
-        <DataTableHead>{t.ongoing}</DataTableHead>
-        <DataTableHead hideBelow="md" fill>
+        <DataTableHead icon="master" hideBelow="sm">
+          {t.masters}
+        </DataTableHead>
+        <DataTableHead icon="ongoing">{t.ongoing}</DataTableHead>
+        <DataTableHead icon="release" hideBelow="md" fill>
           {t.nextRelease}
         </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}

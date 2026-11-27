@@ -119,9 +119,6 @@ export const budget = {
     partOther: "Ce sous-budget n'est pas celui du budget de la dépense.",
   },
   add: "Ajouter une dépense",
-  // The quick entry of the phone's header (BUD 4).
-  quickAdd: "Dépense",
-  quickAddLabel: "Ajouter une dépense",
   edit: (label: string) => `Modifier « ${label} »`,
   remove: (label: string) => `Supprimer « ${label} »`,
   // A line that follows an invoice (lib/invoices).

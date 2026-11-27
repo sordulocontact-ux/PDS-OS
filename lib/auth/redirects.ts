@@ -118,8 +118,10 @@ export const routes = {
   work: "/app/work",
   // « Mes tâches »: the person's own to-do list, a section of the Travail.
   workTasks: "/app/work?section=taches",
-  // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
+  // Every visible project's dates, one calendar (?mode=week&date=…).
   calendar: "/app/calendar",
+  // Notes: the calls' reports and transcripts, and written notes.
+  notes: "/app/notes",
   calls: "/app/calls",
   // A call opened from the Calls section, the navigation staying on Calls:
   // an internal meeting or a project's call (its project linked from it).
@@ -186,6 +188,15 @@ export const routes = {
   members: "/app/members",
   // Each member's own settings: their requests to PO of the day.
   settings: "/app/settings",
+  // Paramètres, one page per subject (27/11/2026); « settings » opens the
+  // first one.
+  settingsUsage: "/app/settings/utilisation",
+  settingsAppearance: "/app/settings/apparence",
+  settingsNotifications: "/app/settings/notifications",
+  settingsShortcuts: "/app/settings/raccourcis",
+  settingsConnections: "/app/settings/connexions",
+  settingsBilling: "/app/settings/coordonnees",
+  settingsDistribution: "/app/settings/distribution",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",
   artist: (id: string) => `/app/catalog/artists/${id}`,
@@ -389,6 +400,7 @@ export const routes = {
   projectDesignDeliverable: (id: string, deliverableId: string) =>
     `/app/projects/${id}/design/home#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
+  projectNotes: (id: string) => `/app/projects/${id}/notes`,
   projectSessions: (id: string) => `/app/projects/${id}/sessions`,
   // A session opened inside the project (lib/sessions/door.ts).
   projectSession: (id: string, sessionId: string) =>

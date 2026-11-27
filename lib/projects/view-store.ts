@@ -186,7 +186,10 @@ async function write(rows: Pending[]) {
   const settled: Insert[] = [];
   for (const row of rows) {
     const stored = await row.stored.catch(() => null);
-    if (!stored || !jsonSafe(stored.value)) continue;
+    // A view of nothing (`null`) reaches the column as SQL NULL, refused
+    // (`value` is not null): it would fail its whole batch (Maël's log of
+    // 26/11/2026). It is computed again instead.
+    if (!stored || stored.value === null || !jsonSafe(stored.value)) continue;
     const size = JSON.stringify(stored.value).length;
     if (size > MAX_BYTES) continue;
     settled.push({
@@ -210,10 +213,8 @@ async function write(rows: Pending[]) {
         onConflict: "account_id,view,project",
       }),
     );
-    if (error) {
-      console.error("project_view_cache:", error.message);
-      return;
-    }
+    // One batch refused never keeps the next ones from being written.
+    if (error) console.error("project_view_cache:", error.message);
   }
 }
 

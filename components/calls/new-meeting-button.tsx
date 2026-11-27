@@ -88,12 +88,13 @@ export function MeetingComposerProvider({
 }
 
 /** The header's « Nouvelle réunion », on the next round hour. */
-export function NewMeetingButton() {
+// `label`: the Calendrier says « Nouveau call » (27/11/2026).
+export function NewMeetingButton({ label }: { label?: string } = {}) {
   const { open } = useMeetingComposer();
   return (
     <Button type="button" size="lg" onClick={() => open()}>
       <IconPlus aria-hidden data-icon="inline-start" />
-      {fr.calls.meeting.new}
+      {label ?? fr.calls.meeting.new}
     </Button>
   );
 }

@@ -61,20 +61,139 @@ const decode = (text: string) =>
     return Number.isFinite(n) ? String.fromCodePoint(n) : all;
   });
 
-/** The body of a Word document: one line per paragraph, its tabs and line
- * breaks kept; deleted revisions and field codes left out. */
+type Run = { text: string; bold: boolean; underline: boolean };
+
+// A run's own bold and underline (<w:b/>, <w:u w:val="single"/>), never
+// switched off (w:val="0", "false", "none"); <w:bCs/> is another thing.
+const BOLD = /<w:b(?:\s+w:val="(?:true|1|on)")?\s*\/>/;
+const UNDERLINE = /<w:u\s+w:val="(?!none")[^"]+"/;
+
+/** A paragraph's runs as the template's marks (Sacha 22/11/2026, kept as a
+ * pasted text keeps them): « **…** » bold, « __…__ » underlined, spaces
+ * outside the marks; a line to fill in (« ______ ») is never underlined. */
+function marked(runs: Run[]): string {
+  const merged: Run[] = [];
+  for (const run of runs) {
+    const last = merged.at(-1);
+    if (last && last.bold === run.bold && last.underline === run.underline)
+      last.text += run.text;
+    else merged.push({ ...run });
+  }
+  return merged
+    .map(({ text, bold, underline }) =>
+      text
+        .split("\n")
+        .map((line) => {
+          const core = line.trim();
+          if (!core) return line;
+          let out = core;
+          if (underline && /[^_\s]/.test(core)) out = `__${out}__`;
+          if (bold && /[^_\s]/.test(core)) out = `**${out}**`;
+          const at = line.indexOf(core);
+          return line.slice(0, at) + out + line.slice(at + core.length);
+        })
+        .join("\n"),
+    )
+    .join("");
+}
+
+/** The body of a Word document, as a contract's text: each paragraph with
+ * its tabs, line breaks, bold and underline; deleted revisions and field
+ * codes left out. Paragraphs are split by an empty line — unless the author
+ * already put empty paragraphs between the blocks (then a paragraph is a
+ * line of its block: an address, a signature). */
 export function docxText(file: Buffer): string | null {
   const xml = unzipEntry(file, "word/document.xml")?.toString("utf8");
   if (!xml) return null;
-  let out = "";
-  const token =
-    /<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>|<w:tab\/>|<w:(?:br|cr)(?:\s[^>]*)?\/>|<\/w:p>/g;
-  for (const match of xml.matchAll(token)) {
-    if (match[1] !== undefined) out += decode(match[1]);
-    else if (match[0].startsWith("<w:tab")) out += "\t";
-    else out += "\n";
+  const paragraphs: string[] = [];
+  for (const [p] of xml.matchAll(/<w:p[\s>][\s\S]*?<\/w:p>/g)) {
+    const runs: Run[] = [];
+    for (const [r] of p.matchAll(/<w:r[\s>][\s\S]*?<\/w:r>/g)) {
+      const props = /<w:rPr>([\s\S]*?)<\/w:rPr>/.exec(r)?.[1] ?? "";
+      let text = "";
+      const token =
+        /<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>|<w:tab\/>|<w:(?:br|cr)(?:\s[^>]*)?\/>/g;
+      for (const match of r.matchAll(token)) {
+        if (match[1] !== undefined) text += decode(match[1]);
+        else if (match[0].startsWith("<w:tab")) text += "\t";
+        else text += "\n";
+      }
+      if (text)
+        runs.push({
+          text,
+          bold: BOLD.test(props),
+          underline: UNDERLINE.test(props),
+        });
+    }
+    paragraphs.push(marked(runs));
   }
-  return out;
+  const empty = paragraphs.filter((p) => !p.trim()).length;
+  const full = paragraphs.length - empty;
+  return paragraphs.join(empty * 3 >= full ? "\n" : "\n\n");
+}
+
+// A font named by a run, a style or the defaults: its own name, or the
+// theme's (minor: the body's, major: the headings').
+const NAMED_FONT = /<w:rFonts\b[^>]*?\bw:(?:ascii|hAnsi)="([^"]+)"/;
+const THEME_FONT =
+  /<w:rFonts\b[^>]*?\bw:(?:asciiTheme|hAnsiTheme)="(minor|major)/;
+
+/** The typeface most of a Word document's text is written in (Sacha
+ * 25/11/2026, « récupérer la typo du contrat »): each run's own font, else
+ * its style's, its paragraph's style's, the document's default; counted by
+ * characters. Null when the file says none. */
+export function docxFont(file: Buffer): string | null {
+  const xml = unzipEntry(file, "word/document.xml")?.toString("utf8");
+  if (!xml) return null;
+  const styles = unzipEntry(file, "word/styles.xml")?.toString("utf8") ?? "";
+  const themeXml =
+    unzipEntry(file, "word/theme/theme1.xml")?.toString("utf8") ?? "";
+  const theme: Record<string, string | undefined> = {
+    minor: /<a:minorFont>\s*<a:latin typeface="([^"]+)"/.exec(themeXml)?.[1],
+    major: /<a:majorFont>\s*<a:latin typeface="([^"]+)"/.exec(themeXml)?.[1],
+  };
+  const fontIn = (props: string): string | null => {
+    const named = NAMED_FONT.exec(props)?.[1];
+    if (named) return decode(named);
+    const themed = THEME_FONT.exec(props)?.[1];
+    return themed ? (theme[themed] ?? null) : null;
+  };
+  const byStyle = new Map<string, string>();
+  let normal: string | null = null;
+  for (const [style] of styles.matchAll(/<w:style\b[\s\S]*?<\/w:style>/g)) {
+    const id = /w:styleId="([^"]+)"/.exec(style)?.[1];
+    const font = fontIn(/<w:rPr>([\s\S]*?)<\/w:rPr>/.exec(style)?.[1] ?? "");
+    if (id && font) byStyle.set(id, font);
+    if (
+      /w:type="paragraph"[^>]*w:default="1"|w:default="1"[^>]*w:type="paragraph"/.test(
+        style,
+      )
+    )
+      normal = font;
+  }
+  const fallback =
+    normal ??
+    fontIn(/<w:rPrDefault>[\s\S]*?<\/w:rPrDefault>/.exec(styles)?.[0] ?? "") ??
+    theme.minor ??
+    null;
+
+  const count = new Map<string, number>();
+  for (const [p] of xml.matchAll(/<w:p[\s>][\s\S]*?<\/w:p>/g)) {
+    const pStyle = /<w:pStyle w:val="([^"]+)"/.exec(p)?.[1];
+    const paragraphFont = (pStyle && byStyle.get(pStyle)) ?? fallback;
+    for (const [r] of p.matchAll(/<w:r[\s>][\s\S]*?<\/w:r>/g)) {
+      const length = [...r.matchAll(/<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>/g)]
+        .map((m) => m[1].trim().length)
+        .reduce((a, b) => a + b, 0);
+      if (!length) continue;
+      const props = /<w:rPr>([\s\S]*?)<\/w:rPr>/.exec(r)?.[1] ?? "";
+      const rStyle = /<w:rStyle w:val="([^"]+)"/.exec(props)?.[1];
+      const font =
+        fontIn(props) ?? (rStyle && byStyle.get(rStyle)) ?? paragraphFont;
+      if (font) count.set(font, (count.get(font) ?? 0) + length);
+    }
+  }
+  return [...count].sort((a, b) => b[1] - a[1])[0]?.[0] ?? fallback;
 }
 
 async function pdfText(file: Buffer): Promise<string | null> {

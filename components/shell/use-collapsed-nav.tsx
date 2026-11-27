@@ -27,7 +27,10 @@ export function CollapsedNavProvider({
   const withProjectSidebar =
     (DOUBLE_SIDEBAR && pathname.startsWith(`${routes.projects}/`)) ||
     pathname === routes.finance ||
-    pathname.startsWith(`${routes.finance}/`);
+    pathname.startsWith(`${routes.finance}/`) ||
+    // Paramètres' own column of pages (27/11/2026).
+    pathname === routes.settings ||
+    pathname.startsWith(`${routes.settings}/`);
   const [override, setOverride] = useState<boolean | null>(null);
   const hadProjectSidebar = useRef(withProjectSidebar);
 

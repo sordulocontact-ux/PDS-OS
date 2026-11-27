@@ -73,6 +73,7 @@ import { legalReadiness } from "./legal-readiness";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { mailbox } from "./mailbox";
+import { notes } from "./notes";
 import { masterBrief } from "./master-brief";
 import { masterFinal } from "./master-final";
 import { masterInvoice } from "./master-invoice";
@@ -282,6 +283,7 @@ export const fr = {
   catalogFiles,
   library,
   mailbox,
+  notes,
   network,
   contracts,
   facts,

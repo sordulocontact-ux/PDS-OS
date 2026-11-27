@@ -10,6 +10,8 @@ import { AssistantComposer } from "@/components/assistant/assistant-composer";
 import { questionOf } from "@/components/assistant/question";
 import { useSharedChat } from "@/components/assistant/shared-chat";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
+import { shortcutText } from "@/components/shell/shortcuts/shortcut-keys";
+import { useShortcuts } from "@/components/shell/shortcuts/shortcuts-provider";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { assistant } from "@/lib/i18n/fr/assistant";
@@ -36,6 +38,7 @@ export function AssistantPanel({
   voiceFirst?: boolean;
 }) {
   const t = fr.assistant;
+  const { shortcuts } = useShortcuts();
   const router = useRouter();
   const shared = useSharedChat();
   const { messages, sendMessage, regenerate, status, stop, error } = useChat({
@@ -103,7 +106,7 @@ export function AssistantPanel({
         {!compact && (
           <>
             <br />
-            {t.launcher.hint}
+            {t.launcher.hint(shortcutText(shortcuts.assistant))}
           </>
         )}
       </p>

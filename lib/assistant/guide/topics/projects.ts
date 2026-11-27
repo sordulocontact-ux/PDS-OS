@@ -31,7 +31,7 @@ export const projectsTopics: GuideTopic[] = [
       "Le chef de projet reçoit le projet et peut l'accepter, le refuser ou demander une précision. Un refus ou une demande revient à la direction avec un message.",
       "En acceptant, il devient responsable du projet : le projet est lancé et le Cadrage s'ouvre.",
       "Statuts de la liste : Brouillon, Non transmis, Transmis à accepter, Précision demandée, Refusé, En cours, Terminé.",
-      "Un projet lancé s'organise en sections : Vue d'ensemble, Cadrage, puis les workflows Master, Juridique, Marketing, Distribution, et le Pilotage (Travail, Calls, Sessions studio, Validations, Budget).",
+      "Un projet lancé s'organise en sections : Vue d'ensemble, Cadrage, puis les workflows Master, Juridique, Marketing, Distribution, et le Pilotage (Travail, Notes, Sessions studio, Validations, Budget).",
     ],
     faq: [
       {
@@ -154,6 +154,7 @@ export const projectsTopics: GuideTopic[] = [
       "On peut démarrer directement ou préparer un échange stratégique : ce qui y est dit devient des propositions à confirmer, modifier ou écarter. Rien n'est coché d'avance.",
       "Chaque dimension est « À compléter », « En cours », « À arbitrer » ou « Complétée », calculé par le code.",
       "La direction valide le Brief de sortie, sur pièce. Pendant la relecture, la Stratégie est figée.",
+      "Le responsable du projet peut relancer un valideur, ou retirer un directeur créatif qui ne répondra pas (« Retirer <Nom> ») ; la direction ne se retire pas. Un directeur créatif retiré de l'équipe du projet est retiré des valideurs tout seul. Si tous les autres ont validé, le Brief est validé.",
       "Une fois validé, ses décisions alimentent la Conception, les Activations et le calendrier.",
       "La Stratégie est validée avec le Brief de sortie. Ensuite, le Plan de sortie (équipe de l'artiste) et le Dossier de presse (médias) sont facultatifs : chacun se prépare en 8 écrans parcourus avec les flèches, puis peut être envoyé en validation à la direction.",
     ],

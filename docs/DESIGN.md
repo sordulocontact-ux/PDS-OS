@@ -10,6 +10,40 @@ pour changer de design system et miroir Figma (variables, composants, écrans cl
 
 ---
 
+## 0. Regarder l'écran et le parcours à chaque modification (Sacha, 26/11/2026)
+
+Un écran n'est pas fini quand le build passe. Il est fini quand on l'a vu, avec le parcours autour.
+Cela vaut pour chaque modification, même petite.
+
+1. **Voir chaque état rendu.** Faire une capture dans le navigateur à chaque étape du geste : avant,
+   pendant, après, vide, erreur. Si le serveur de Sacha est éteint, en lancer un (worktree et
+   `next start`, Docker si besoin) plutôt que de livrer sans avoir regardé.
+2. **Critiquer la capture comme une capture de Sacha.** Vérifier :
+   - qu'aucun élément ne contredit l'état de l'écran (texte, zone vide, bouton) ;
+   - le texte (§ « Texte à l'écran ») ;
+   - les alignements de la grille ;
+   - qu'il ne faut pas défiler jusqu'à l'action ;
+   - les champs inutiles dans ce cas précis.
+3. **Rejouer le parcours entier, pas seulement l'écran touché.** Vérifier ce qui vient avant, ce qui
+   vient après, le retour en arrière, et les autres écrans qui utilisent le même composant (règle 7
+   de `CLAUDE.md`). Le reste doit rester fluide.
+   **Chercher aussi les patterns semblables qui n'utilisent pas le même composant** (Sacha, 26/11/2026)
+   et les aligner. Exemple : le dépôt d'un contrat montre le contrat à gauche et les informations à
+   droite, donc le modèle aussi ; un fichier choisi s'affiche partout de la même façon. **En cas de
+   doute sur un écran à modifier, poser la question** avant de le changer.
+4. **Un composant réutilisé se relit dans son nouveau contexte.** Ce qui convenait ailleurs peut
+   devenir absurde ici. Exemple : une zone de dépôt qui reste vide alors que le fichier est déjà
+   déposé.
+5. **Un résultat retombé sur la valeur par défaut est un échec.** Exemple : un titre pris du nom du
+   fichier, ou « Aucun » partout dans un pré-remplissage. Il se signale, il ne se compte pas comme
+   réussi.
+6. **Ce qui n'a pas pu être vu se dit en tête du bilan**, comme un risque, jamais en fin de liste.
+
+Origine : « Nouveau contrat » du 26/11/2026, livré sans avoir regardé l'écran après le dépôt du
+fichier (`docs/bonnes-pratiques/retours-design.md`).
+
+---
+
 ## 1. Icônes
 
 ### Famille
@@ -65,6 +99,29 @@ Taille réglée par classe Tailwind, jamais par la prop `size` :
 
 Le trait est fixé à 2 dans la grille de 24 : il s'affine avec la taille (1,33 px à
 `size-4`). C'est voulu, ne pas le compenser.
+
+### En-têtes de tableau
+
+Essai de Sacha (25/11/2026) : chaque colonne d'un tableau de liste porte une icône `size-4` avant
+son nom, dans la couleur de l'en-tête (`DataTableHead icon`). L'icône dit **ce que contient la
+colonne**, pas son libellé : elle est choisie dans `lib/ui/column-icons.ts`, jamais au cas par cas,
+pour que « Responsable » ou « Échéance » aient la même icône partout ; la colonne d'un objet
+(Projet, Artiste, Contrat…) reprend son icône de la navigation. Pas d'icône sur la colonne « ⋯ ».
+
+**Texte coupé** (Sacha, 25/11/2026) : tout texte d'un tableau coupé par « … » se lit entier au survol,
+dans une bulle posée sur lui (`OverflowHintArea`, intégré à `DataTable`) ; plus de `title` natif.
+
+**Un fait par colonne** (Sacha, 25/11/2026) : une cellule ne superpose jamais deux informations
+(« Rattaché à » + son type, un contrat + son état, une date + son motif) ; chacune a sa colonne.
+Seule la cellule du nom garde une sous-ligne grise (`DataTableMedia`), pour ce qui précise le nom
+(version, variante, organisation) ou, sur téléphone, les colonnes masquées. **Jamais une date sous un
+titre** : la date a sa colonne (Notes, rappel de Sacha du 27/11/2026). L'icône d'une ligne sans image
+(`DataTableIcon`) est **seule, sans rond**, grise, avant le nom (Sacha, 27/11/2026, d'après Accordee) ;
+parmi des photos (Réseau), elle garde leur largeur (`size-9 justify-center`) pour aligner les noms.
+Toutes les icônes de ligne font **18 px**, celle d'un fichier aussi (`FileTypeIcon md`), dans la **teinte vive**
+de son type (`--hue-*-icon`, `hueIconClass` : le `-fg` des pastilles était « trop sombre, désaturé », Sacha
+27/11/2026). Une **pastille de teinte** (`StatusBadge` avec une teinte : projet, deal…) a son texte en **13 px, sans
+gras** (22 px de haut en `sm`, 24 en `md`) : en 12 px semi-gras elle se lisait « très petite », Sacha 27/11/2026.
 
 ### Couleur
 
@@ -237,8 +294,8 @@ Production orange, Livraison sarcelle, Défense jaune, Bilan ardoise) et son **t
 (Musical violet, Contenu vert tilleul, Événement sable), distincts des étapes puisqu'ils
 sont sur la même ligne. Jetons `--hue-<teinte>-bg` / `-fg` (`app/globals.css`), variantes
 de `StatusBadge`, correspondance dans `lib/ui/category-hues.ts` seulement.
-Le **type d'un fichier** est aussi une catégorie (`FileTypeIcon`, d'après Accordee, Sacha 24/11/2026) : disque
-teinté devant son nom, PDF rouge, tableur vert, texte bleu ciel, présentation orange, image violet, audio indigo,
+Le **type d'un fichier** est aussi une catégorie (`FileTypeIcon`, d'après Accordee, Sacha 24/11/2026) : icône
+seule dans la teinte de son type, sans disque autour (Sacha 25/11/2026), devant son nom, PDF rouge, tableur vert, texte bleu ciel, présentation orange, image violet, audio indigo,
 vidéo rose, archive sable, autre ardoise (`fileTypeHue`). Le rouge et le vert (`--hue-red-*`, `--hue-green-*`)
 sont réservés aux types de fichier : ailleurs ils se liraient comme un état.
 Le **titre d'une ligne** dans les tableaux du Juridique est aussi une catégorie : un tag dans
@@ -340,6 +397,31 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   (absente du Figma replié, gardée pour ne pas perdre les notifications dans un
   projet). Le texte reste en `body-md` (16 px) : le Figma est dessiné à 14 px, avant
   l'agrandissement 8/7 de l'échelle (§ 2).
+- **Le « + » (Sacha, 27/11/2026)** : en tête de la barre, à gauche du bouton qui la replie (même
+  bouton icône ; à côté de « Rechercher… ⌘K », il coupait le libellé ; repliée : sous la loupe ;
+  téléphone : dans l'en-tête, à la place de l'ancien « + Dépense »), un bouton icône qui
+  ouvre un menu de créations : Nouvelle conversation, Écrire un mail, Ajouter une dépense, Nouvelle
+  réunion, Nouveau contact, Nouveau deal (ordre fixe, filtrées par droit, `lib/shell/quick-actions.ts`).
+  Touche **N** par défaut hors d'un champ (pas C, qui lance la capture d'une zone pour un retour),
+  modifiable dans Paramètres › Raccourcis clavier. Les mêmes actions forment le groupe « Créer » du ⌘K (en tête champ
+  vide, filtrées par le texte). **Règle d'admission** : seulement un objet qui existe hors d'une étape
+  (jamais un geste d'étape, qui reste dans son étape), sept au plus ; chaque entrée ouvre le **vrai**
+  formulaire et finit comme sur sa page. Pas de bouton flottant (geste de mobile, l'app est d'abord
+  pour l'ordinateur). Références : Linear, Notion, Plain (le « nouveau » en tête de barre).
+- **Paramètres en double barre (Sacha, 27/11/2026, d'après Accordee)** : seconde colonne « Paramètres »
+  (Mes paramètres, puis Administration pour la direction), une page par sujet : bandeau, titre, puis des
+  groupes de lignes (`Rows` + `SettingsRow` : libellé et au besoin une phrase à gauche, réglage à droite)
+  ou une carte pour un formulaire. Onglets sur téléphone.
+- **⌘K, groupes séparés (Sacha, 27/11/2026)** : un filet au-dessus de chaque titre de groupe à partir du
+  deuxième (« Créer » puis « Pages »…), dans toute recherche ⌘K (`SearchGroupLabel`).
+- **Raccourcis clavier (Sacha, 27/11/2026)** : chacun change les siens dans Paramètres › Raccourcis
+  clavier (`/app/settings/raccourcis`) : Rechercher (⌘K), Créer (N), Ouvrir PO (Espace Espace), Capturer
+  une zone pour un retour (C). Une ligne par raccourci, ses touches en `Kbd`, « Modifier » (contour)
+  puis « Appuyez sur la nouvelle touche… », Échap annule ; « Rétablir » (texte, à côté) quand il diffère
+  du défaut. Refusés avec leur raison : touche déjà prise par un autre raccourci, ⌘ + une touche du
+  navigateur (copier, rechercher, onglet…), autre chose qu'une lettre ou un chiffre (Espace : deux fois).
+  **Toute touche affichée à l'écran** passe par `ShortcutKeys` / `shortcutText` (barre, infobulle du « + »,
+  phrase sous PO, accueil), jamais écrite en dur.
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
 - Un item sans page encore reste visible, grisé, non cliquable (`disabled` dans `NavItem`),
@@ -585,12 +667,20 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
 
 ### Calendrier
 
-- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` avec **Tout / À
-  vous** en pastilles, `CalendarToolbar` comme les Calls (Mois par défaut, Semaine), puis la
+- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` seul ;
+  Semaine / Mois et « Nouveau call » dans `CalendarToolbar` (Mois par défaut, Semaine), puis la
   grille : filets `--border-hairline`, jours hors du mois sur `--surface-soft`, aujourd'hui en
   rond d'encre. Une date = une pastille de la **teinte de son projet** (comme un call), 13 px,
   heure en chiffres tabulaires, « Sortie » en semi-gras ; point `--selection` = à vous,
   `--error` = en retard ; jour passé à 70 %. Téléphone : agenda par jour.
+- **Une seule ligne d'outils** (Sacha, 27/11/2026) : Semaine / Mois et le bouton principal
+  (« Nouveau call ») sont **sur la même ligne** que « Aujourd'hui » et la période, à droite
+  (`CalendarToolbar action`) ; pas de second sélecteur à côté de Semaine / Mois (« Tout / À vous » retiré :
+  deux fois le même composant), jamais une deuxième ligne ni un bouton dans l'en-tête. Dès `xl`,
+  une colonne à droite : mini-mois (à côté d'une semaine seulement) puis « À venir » (rien affiché s'il n'y a rien). Voir
+  `docs/bonnes-pratiques/retours-design.md`.
+- **`EmptyState` sans texte** (Notes, 27/11/2026) : `body` est facultatif, un état vide de liste peut
+  n'être que son icône et son titre (« Aucune note ») ; moins de texte à l'écran.
 
 - **Travail et Validations d'un projet** (décision C0 du 18/10/2026, proto « Projet
   complet ») : la liste de **mes** actions tirées des parcours (`loadProjectJourneys`, une
@@ -805,7 +895,9 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
 - **Livrables engagés** (Sacha, 07/11/2026, « on se perd ») : chaque levier et le formulaire « Nouveau
   livrable » sont séparés par un **filet** (`--border-hairline`), jamais encadrés (« pas une card
   complète, juste un contour qui le sépare »). Un menu (`OptionSelect`) ne dépasse jamais sa
-  colonne : libellé long coupé par « … ».
+  colonne : libellé long coupé par « … ». Sa liste s'ouvre **sous le champ**, jamais posée par-dessus
+  (Sacha, 26/11/2026 : la liste sur le champ se lisait « deux cadres décalés ») : `SelectContent`
+  par défaut, dans toute l'app.
 - **Largeur d'un champ** (Sacha, 07/11/2026) : dans un formulaire, **chaque champ prend toute la largeur
   de sa colonne** (texte, nombre, date, menu `OptionSelect fill`) ; seul un menu hors formulaire (une
   ligne, un filtre) garde la largeur de sa valeur. Appliqué d'abord à « Nouveau livrable » ; à reprendre
@@ -1022,6 +1114,18 @@ latérale de tout enregistrement qu'on lit (contact, artiste, titre, deal…) : 
 communication, une carte de synthèse, blocs titrés sans carte absents quand ils sont vides, chargement en deux temps,
 ↑ ↓ dans l'ordre affiché. Anatomie et règles : `docs/STYLE-FINANCE-PARTOUT.md` § 6.7 bis. Écart voulu avec la fiche
 d'une ligne d'argent de Finance (grand titre, montant en tête, § 6.7) : là, le montant est le premier fait.
+
+### Une note est un document (Sacha, 27/11/2026, d'après Accordee)
+
+**Écart voulu** avec « Formulaires » (§ 4 : « * », manques en rouge, bouton d'enregistrement) : une note écrite
+(Notes) s'écrit comme un document, dans le panneau latéral de la note (`NewNoteSheet`, `NoteSheet`). En haut
+« Rattacher à un projet, un deal ou un contrat » (bouton `secondary` avec le trombone de « Rattaché à », comme Fichiers ; une fois rattachée, le même bouton nomme la fiche, « × » à côté ; menu par sorte avec leur
+nombre et « › », puis la liste avec recherche), le titre en grand sans bordure (« Sans titre » en attente, focus à
+l'ouverture), auteur · « Modifiée le … », la pastille du lien (« × » pour le retirer), puis le texte sans bordure qui
+grandit (« Commencez à écrire… »). **Pas de « * », pas de bouton de validation, pas de modèles ni d'IA** :
+**enregistrement automatique** après chaque pause et à la fermeture, état discret dans la barre du panneau
+(« Enregistrement… », « Enregistré », « Non enregistré » en rouge avec un toast). Fermée vide, la note n'existe pas.
+Son auteur la modifie sur place ; les autres la lisent. Le « ⋯ » ne garde que Supprimer.
 
 ### Pochette d'un projet (10/11/2026)
 
