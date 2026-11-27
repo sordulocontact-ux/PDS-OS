@@ -7,6 +7,7 @@ import { RoundStep } from "@/components/master-workflow/round/round-step";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { loadRoundStep } from "@/lib/master-workflow/round-step";
 import { loadMasterTitleScope } from "@/lib/master-workflow/title-scope";
+import { packageSubject } from "@/lib/master-workflow/transmission-types";
 
 // Master, Mixage: the package sent to the engineer, the private link, the
 // rate, the versions, their feedback and the validator's decision.
@@ -56,7 +57,7 @@ export default async function ProjectMasterMixPage({
       <RoundStep
         round={round}
         viewerIsOwner={round.view.canEdit}
-        projectTitle={project.title}
+        projectTitle={packageSubject(project, round.view.titles)}
         leadIds={new Set(lead.map((v) => v.id))}
       />
     </MasterStepFrame>

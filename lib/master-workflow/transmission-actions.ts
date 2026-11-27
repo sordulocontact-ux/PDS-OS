@@ -8,7 +8,10 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { transmissionExpiry } from "@/lib/master-workflow/link-expiry";
 import { loadStepView } from "@/lib/master-workflow/transmission";
-import type { MasterPackage } from "@/lib/master-workflow/transmission-types";
+import {
+  packageSubject,
+  type MasterPackage,
+} from "@/lib/master-workflow/transmission-types";
 import { getProject } from "@/lib/projects/queries";
 import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { createClient } from "@/lib/supabase/server";
@@ -119,32 +122,36 @@ export async function transmitPackage(
   });
 
   const b = fr.masterWorkflow.brief;
+  const titles = view.titles.flatMap((title) => {
+    const source = kept.find((file) => file.id === title.source?.id);
+    if (!source || !title.source) return [];
+    return [
+      {
+        masterId: title.id,
+        title: title.title,
+        artists: title.artists,
+        source: {
+          ...fileOf(source),
+          state: fr.catalog.audioStates[title.source.audioState],
+        },
+        stems: kept
+          .filter(
+            (file) => file.master_id === title.id && file.category === "stems",
+          )
+          .map(fileOf),
+        sourceUpdatedAt: null,
+      },
+    ];
+  });
+  // A collective's package is its titles' (M9): the engineer's page and the
+  // e-mail name them, not the collective.
+  const subject = packageSubject(project, titles);
   const pack: MasterPackage = {
     role: input.data.role,
     project: project.title,
+    subject: project.collective ? subject : null,
     engineer: view.engineer.name,
-    titles: view.titles.flatMap((title) => {
-      const source = kept.find((file) => file.id === title.source?.id);
-      if (!source || !title.source) return [];
-      return [
-        {
-          masterId: title.id,
-          title: title.title,
-          artists: title.artists,
-          source: {
-            ...fileOf(source),
-            state: fr.catalog.audioStates[title.source.audioState],
-          },
-          stems: kept
-            .filter(
-              (file) =>
-                file.master_id === title.id && file.category === "stems",
-            )
-            .map(fileOf),
-          sourceUpdatedAt: null,
-        },
-      ];
-    }),
+    titles,
     direction: view.brief.direction,
     references: view.brief.references,
     constraints: view.brief.constraints,
@@ -201,7 +208,7 @@ export async function transmitPackage(
   }
   revalidatePath(routes.projectMasterStep(project.id, input.data.role));
   const sent: Sent = {
-    project: project.title,
+    project: subject,
     engineer: {
       id: view.engineer.id,
       name: view.engineer.name,

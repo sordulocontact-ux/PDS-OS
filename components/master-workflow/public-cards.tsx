@@ -115,7 +115,10 @@ export function masterPortalCards({
       body: (
         <>
           <p className="text-muted-foreground">
-            {t.intro[role](data.package.project, data.package.engineer)}
+            {t.intro[role](
+              data.package.subject ?? data.package.project,
+              data.package.engineer,
+            )}
           </p>
           <PackageTakeCharge token={linkKey} data={data} refusals={refusals} />
           <PublicPackageView data={data} />

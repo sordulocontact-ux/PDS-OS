@@ -10,6 +10,10 @@ export const masterPackageSchema = z.object({
   // Mix (the first packages, before lot 7, have none) or mastering.
   role: z.enum(["mix", "mastering"]).default("mix"),
   project: z.string(),
+  // What the package is the mix of: a collective's titles (« Echo test »,
+  // test de parcours du 26/11/2026, M9); none: the project (a simple
+  // project, the packages sent before).
+  subject: z.string().nullable().default(null),
   engineer: z.string(),
   titles: z.array(
     z.object({
@@ -43,6 +47,19 @@ export const masterPackageSchema = z.object({
   formats: z.string().nullable().default(null),
 });
 export type MasterPackage = z.infer<typeof masterPackageSchema>;
+
+/** What a package is the mix of, as the engineer reads it (their page, the
+ * e-mail): a collective's titles in the package (« Echo test », « Echo test
+ * et Néons »), never the collective's name; a simple project's title. */
+export function packageSubject(
+  project: { title: string; collective: boolean },
+  titles: ReadonlyArray<{ title: string }>,
+): string {
+  if (!project.collective || titles.length === 0) return project.title;
+  return new Intl.ListFormat("fr-FR", { type: "conjunction" }).format(
+    titles.map((t) => t.title),
+  );
+}
 
 /** A sending to the mix engineer, as the follow-up lists it. */
 export type TransmissionRow = {
