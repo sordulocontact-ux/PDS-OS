@@ -14,6 +14,7 @@ import {
 } from "@/components/strategy/validation/brief-out-doc";
 import { RemindReviewer } from "@/components/strategy/validation/remind-reviewer";
 import { ReviewRows } from "@/components/strategy/validation/review-rows";
+import { WithdrawReviewer } from "@/components/strategy/validation/withdraw-reviewer";
 import { SendBrief } from "@/components/strategy/validation/send-brief";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ReturnCallout } from "@/components/ui/return-callout";
@@ -154,12 +155,20 @@ export default async function StrategyValidationPage({
             {sent.reviews
               .filter((r) => r.state === "pending")
               .map((r) => (
-                <RemindReviewer
-                  key={r.id}
-                  projectId={projectId}
-                  reviewId={r.id}
-                  name={r.name}
-                />
+                <span key={r.id} className="flex flex-wrap items-start gap-2">
+                  <RemindReviewer
+                    projectId={projectId}
+                    reviewId={r.id}
+                    name={r.name}
+                  />
+                  {r.withdrawable && (
+                    <WithdrawReviewer
+                      projectId={projectId}
+                      reviewId={r.id}
+                      name={r.name}
+                    />
+                  )}
+                </span>
               ))}
           </div>
         )}

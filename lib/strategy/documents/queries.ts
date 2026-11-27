@@ -21,6 +21,10 @@ export type DocumentReview = {
   // MKT-S1-16: the critical alerts accepted, an approval with reserves.
   acceptedAlerts: string[];
   withReserves: boolean;
+  // A creative of the team asked to validate, still awaited: the owner may
+  // take them off (« Retirer », withdraw_strategy_review). Never the
+  // direction, whose review carries the stage's validation.
+  withdrawable: boolean;
 };
 
 export type StrategyDocument = {
@@ -96,6 +100,9 @@ export const loadStrategyDocuments = trackedCache(
             remindedAt: r.reminded_at,
             acceptedAlerts: r.accepted_alerts,
             withReserves: r.with_reserves,
+            withdrawable:
+              r.state === "pending" &&
+              creatives.some((c) => c.personId === r.person_id),
           }))
           .sort((a, b) => a.name.localeCompare(b.name, "fr")),
       })),

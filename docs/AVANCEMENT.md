@@ -3229,3 +3229,24 @@ Cadrage et décisions : `docs/DESIGN.md` § 4 « Coquille », `docs/ARCHITECTURE
 - Vérifié dans le navigateur (`pnpm start`, compte business manager local) : menu, les six fenêtres, N, ⌘K vide et
   filtré (« dep »), Entrée, barre repliée, téléphone. **Non vérifié** : la dépense visée d'avance sur une page de
   projet (aucun compte local avec un projet ne se connecte : `admin@pds.test` est rattaché à « PDS (local) »).
+
+## Retours de Maël sur deux parcours complets : les quatre bloquants (27/11/2026, branche `pre-prod`)
+
+Test de Maël (« Lueur test », single ; « Micro test », collectif), vérifié point par point dans le code et dans
+Chrome avant de corriger.
+
+- **Single : « Créer le titre » perdait le titre** : le brouillon ajoutait `?draft=` à l'adresse, la création du
+  titre re-rendait la page et la clé du formulaire changeait, qui repartait du brouillon d'avant le titre.
+  `CreateProjectFormHost` garde le formulaire pour le brouillon qu'il a lui-même créé. Vérifié dans Chrome.
+- **Valideur du Brief de sortie sans recours** : « Retirer <Nom> » à côté de « Relancer » (directeur créatif
+  seulement, jamais la direction) ; retiré de l'équipe = retiré des valideurs ; version validée si plus personne
+  n'est attendu. Même geste pour le Plan de sortie et le Dossier de presse. Migration `20261127190101`. Vérifié dans
+  Chrome (vu comme Lina) et en transaction annulée.
+- **Livrable ajouté en Conception, jamais en Production, puis en double après une V2** : le livrable que la
+  Stratégie ajoute reprend le besoin « à qualifier » du même titre, avec sa fiche et son transfert. Migration
+  `20261127190201`. Vérifié en transaction annulée ; le parcours complet dans le navigateur reste à rejouer.
+- **Écrans pas à jour** : `strategy_document_reviews` signale maintenant ses changements au cache (la décision du
+  valideur restait « En attente » chez lui) ; une vue nulle n'est plus écrite dans `project_view_cache` et un lot
+  refusé n'empêche plus les suivants. Les trois autres cas de Maël (« Maintenant » après le lancement du plan,
+  « 0 contrôle sur 6 » de la Distribution, « Validation en cours… » du mix) n'ont pas de cause trouvée dans le
+  code : à rejouer avec `PERF_TRACE=1`.

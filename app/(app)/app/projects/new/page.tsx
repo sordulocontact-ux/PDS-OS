@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { CreateProjectForm } from "@/components/projects/create-project-form";
+import { CreateProjectFormHost } from "@/components/projects/create-project-form-host";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -108,9 +108,10 @@ export default async function NewProjectPage({
       {draftId && !draft && direction && (
         <FormMessage kind="error">{t.draft.notFound}</FormMessage>
       )}
-      <CreateProjectForm
-        // A new form for each draft: nothing carried from the last one.
-        key={draft ? draftId : (fromSelection?.id ?? "new")}
+      <CreateProjectFormHost
+        // A new form for each draft: nothing carried from the last one
+        // (the draft this form saved itself excepted).
+        formKey={(draft ? draftId : null) ?? fromSelection?.id ?? "new"}
         masters={masters}
         artists={artists}
         contentFormats={contentFormats}

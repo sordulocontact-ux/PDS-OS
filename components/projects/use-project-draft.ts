@@ -12,6 +12,16 @@ const SKIPPED = new Set(["intent", "projectId", "draftId"]);
 
 export type DraftStatus = "idle" | "saving" | "saved" | "error";
 
+// The drafts this tab created while typing. Their id lands in the address
+// (`?draft=`), so the next render of the page (e.g. after « Créer le titre »
+// revalidates it) names one: it is the form already shown, not a draft to
+// resume (Maël's test of 26/11/2026, the new title was dropped).
+const createdHere = new Set<string>();
+
+export function isDraftCreatedHere(id: string): boolean {
+  return createdHere.has(id);
+}
+
 function snapshot(form: HTMLFormElement): Record<string, string> {
   const values: Record<string, string> = {};
   for (const [field, value] of new FormData(form).entries()) {
@@ -72,6 +82,7 @@ export function useProjectDraft(
       saved.current = serialized;
       setStatus("saved");
       if (id.current !== result.id) {
+        createdHere.add(result.id);
         id.current = result.id;
         setDraftId(result.id);
         const url = new URL(window.location.href);

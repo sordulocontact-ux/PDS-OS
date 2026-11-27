@@ -683,7 +683,10 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   (une vraie navigation re-rendrait le formulaire en pleine saisie), pour qu'un
   rechargement ou le retour arrière le reprenne ; si la page en cache date d'avant le
   brouillon, elle est relue (`router.refresh`). Enregistrer en quittant rafraîchit la liste
-  des projets (où sont les brouillons), jamais pendant la saisie.
+  des projets (où sont les brouillons), jamais pendant la saisie. Le formulaire n'est remonté
+  que pour un autre brouillon ou une autre sélection (`CreateProjectFormHost`) : le brouillon
+  qu'il a lui-même créé (`isDraftCreatedHere`) ne le remonte pas quand la page est re-rendue
+  (« Créer le titre » la revalide), sinon le titre créé était perdu (test de Maël du 26/11).
 - **Reprendre** : la liste **Projets** montre en tête les brouillons de la personne (vue
   Actifs, avec `create_projects`), le plus récent d'abord, avec leur type (« Musical · EP »)
   et une pastille « Brouillon » (`draftTone`, neutre) ; chacun rouvre le formulaire
@@ -2485,7 +2488,15 @@ d'exécution décrits plus haut** (tables et fonctions gardées).
   (`DecisionPanel` : Valider le Brief de sortie / Valider avec réserves / Demander une modification ;
   valider accepte les alertes critiques d'une ancienne version, montrées sur la pièce),
   `ReturnCallout` + `ResubmitForm` (« Répondre et transmettre à nouveau » = version suivante, même
-  valideurs, réponse en note), « Relancer <Nom> » (`remind_strategy_review`). **Réserve** (migration
+  valideurs, réponse en note), « Relancer <Nom> » (`remind_strategy_review`), « Retirer <Nom> »
+  (`withdraw_strategy_review`, migration `20261127190101`, test de Maël du 26/11 : un valideur retiré
+  de l'équipe bloquait le Brief pour toujours) : le responsable retire un directeur créatif encore
+  attendu, jamais la direction (`strategy_review_is_direction`) ; retiré de `project_creatives` = ses
+  validations en attente retirées (trigger `withdraw_reviews`) ; la version est validée si plus
+  personne n'est attendu (`strategy_document_finish`, aussi la fin de `decide_strategy_document`).
+  `strategy_document_reviews` a son `zz_project_live` (mode `strategy_document`) : avant, une décision
+  qui n'était pas la dernière ne changeait que cette table et la page du valideur restait « En
+  attente » jusqu'au TTL. Même geste dans `ReviewPanel` (Plan de sortie, Dossier de presse). **Réserve** (migration
   `20261019030201`, point 3 tranché comme le proto) : le commentaire devient la réserve et une tâche du
   responsable du projet ; sans date donnée, échéance = date de sortie si elle est à venir, sinon dans 7
   jours (une tâche exige une date, `tasks_due_date_required`). « Modifier avec PO » (ticket § 8) = la
@@ -7150,7 +7161,12 @@ ressemble. Elle reste sous Marketing, les livrables avancent en parallèle (pas 
   `manual`, `strategy_decision` (un levier retenu) ou `call` (un call du projet). Un ajout est
   toujours `to_qualify` : la colonne `status` n'est pas accordée en écriture, rien ne le valide ni ne
   le planifie tout seul. Un besoin à qualifier peut être retiré (confirmé dans une modale). Toute
-  donnée de Conception pointe vers `design_deliverables.id`.
+  donnée de Conception pointe vers `design_deliverables.id`. **Qualifier un besoin** (migration
+  `20261127190201`, test de Maël du 26/11) : un livrable ajouté à la Stratégie (révision) reprend le
+  besoin « à qualifier » du même titre (casse et espaces à part) au lieu d'en créer un second
+  (`design_deliverables_mirror`) ; la ligne passe `strategy`/`confirmed` avec sa fiche, ses versions
+  et son transfert, donc la Production et `distribution_cover` la trouvent. Retiré de la Stratégie,
+  il redevient un besoin à qualifier sans rien perdre (`design_deliverables_release`, avant suppression).
 - **Accueil** (`ConceptionEntry`) : projet, artiste, sortie, état de la Stratégie, résumé compact
   « n confirmés · n à qualifier », liste dépliable (`<details>` natif), puis « Commencer
   directement » (`start_design` : démarre l'étape `design` si besoin et ouvre `design_workspaces`)

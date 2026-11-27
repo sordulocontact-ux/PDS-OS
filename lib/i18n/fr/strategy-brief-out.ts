@@ -66,6 +66,13 @@ export const strategyBriefOut = {
     remindedOn: (when: string) => `Relancée le ${when}`,
     remind: (name: string) => `Relancer ${name}`,
     reminded: (name: string) => `${name} relancée.`,
+    withdraw: (name: string) => `Retirer ${name}`,
+    withdrawTitle: (name: string) => `Retirer ${name} des valideurs ?`,
+    withdrawBody:
+      "Sa validation n'est plus attendue sur cette version. Si les autres valideurs ont déjà validé, elle est validée.",
+    withdrawConfirm: "Retirer",
+    withdrawPending: "Retrait…",
+    withdrawn: (name: string) => `Validation de ${name} retirée.`,
   },
   decision: {
     approve: "Valider le Brief de sortie",

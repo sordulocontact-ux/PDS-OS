@@ -43,7 +43,7 @@ export const conceptionWork = {
     },
     late: "dépassé",
     toQualify:
-      "Ce besoin reste à qualifier : il n'est ni validé ni planifié. Vous pouvez déjà poser ses intentions.",
+      "Ce besoin reste à qualifier : il passe en Production quand la Stratégie l'ajoute à ses livrables sous le même nom. Vous pouvez déjà poser ses intentions.",
   },
 
   questions: {

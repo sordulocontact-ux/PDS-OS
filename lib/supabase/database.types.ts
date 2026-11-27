@@ -26828,6 +26828,10 @@ export type Database = {
       }
       _get_influence_agreement_h: {
         Args: { p_link_hash: string }
+      withdraw_strategy_review: {
+        Args: { p_review_id: string }
+        Returns: undefined
+      }
         Returns: Json
       }
       _get_influence_collaboration_h: {
