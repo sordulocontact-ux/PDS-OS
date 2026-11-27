@@ -22,6 +22,7 @@ import { joinArtistNames } from "@/lib/projects/participation-rules";
 import type { TitleProgress } from "@/lib/projects/title-journeys";
 import { masterNameOf } from "@/lib/projects/title-rules";
 import type { WorkflowKey } from "@/lib/workflow-status/rules";
+import type { ColumnIcon } from "@/lib/ui/column-icons";
 import { cn } from "@/lib/utils";
 
 const fr = { projectTitles, titleTracks };
@@ -42,6 +43,13 @@ const t = fr.titleTracks.list;
  * title yet: the board's empty state, « Ajouter un titre » being in the
  * head of « Titres » (`canManage`).
  */
+// A workflow column's icon, as in every table's head (lib/ui/column-icons.ts).
+const WORKFLOW_ICONS: Partial<Record<WorkflowKey, ColumnIcon>> = {
+  master: "audio",
+  legal: "contract",
+  distribution: "distribution",
+};
+
 export function TracksList({
   projectId,
   rows,
@@ -79,9 +87,16 @@ export function TracksList({
       <DataTableHeader>
         {/* The title as wide as its name, the workflows a quarter each
             (Sacha, 27/11/2026: « Titre » took half the table). */}
-        <DataTableHead className="w-72">{t.columns.title}</DataTableHead>
+        <DataTableHead icon="master" className="w-72">
+          {t.columns.title}
+        </DataTableHead>
         {workflows.map((workflow) => (
-          <DataTableHead key={workflow} hideBelow="xl" className="w-1/4">
+          <DataTableHead
+            key={workflow}
+            icon={WORKFLOW_ICONS[workflow] ?? "step"}
+            hideBelow="xl"
+            className="w-1/4"
+          >
             {t.columns[workflow as keyof typeof t.columns]}
           </DataTableHead>
         ))}
