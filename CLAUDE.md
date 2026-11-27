@@ -372,6 +372,10 @@ toutes les 2 h, en pages de la base Notion **Retours** (PDS OS › Retours,
   « qui pourrait servir ».
 - **À la fin de chaque étape**, `pnpm build` doit passer, et tu listes ce qui a été fait
   et ce qui reste.
+- **Plusieurs sessions en même temps** (Sacha, 27/11/2026 : jusqu'à 15 Go de mémoire) : **un seul
+  serveur Next** pour toutes (avant `pnpm dev`/`start`, regarder `lsof -iTCP:3000 -sTCP:LISTEN` et
+  réutiliser celui qui tourne) et **un seul `next build` à la fois** (`ps -eo args | grep "next build"` :
+  s'il y en a un, attendre qu'il finisse). Ne jamais arrêter le serveur ou le build d'une autre session.
 
 ---
 
