@@ -300,14 +300,10 @@ const UPCOMING_COUNT = 4;
 
 /**
  * The next calls from `now` (« À venir » of the Calendrier): the ones the
- * viewer sees, soonest first; `mine` keeps those they work on. A call of an
+ * viewer sees, soonest first. A call of an
  * archived project is left out, as in the calendar. Bounded to 60 days.
  */
-export async function loadUpcomingCalls(
-  access: Access,
-  now: Date,
-  mine: boolean,
-): Promise<CallListItem[]> {
+export async function loadUpcomingCalls(now: Date): Promise<CallListItem[]> {
   const horizon = parisMidnight(addDays(parisPlace(now).day, UPCOMING_DAYS));
   try {
     const [calls, listed] = await Promise.all([
@@ -316,13 +312,7 @@ export async function loadUpcomingCalls(
     ]);
     const visible = new Set(listed.projects.map((p) => p.id));
     return calls
-      .filter(
-        (call) =>
-          (call.projectId === null || visible.has(call.projectId)) &&
-          (!mine ||
-            (access.personId !== null &&
-              call.ownerPersonId === access.personId)),
-      )
+      .filter((call) => call.projectId === null || visible.has(call.projectId))
       .toSorted((a, b) => a.occurredAt.localeCompare(b.occurredAt))
       .slice(0, UPCOMING_COUNT);
   } catch (error) {

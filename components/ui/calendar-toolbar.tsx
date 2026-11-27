@@ -45,16 +45,12 @@ export function CalendarToolbar({
   period,
   hrefOf,
   modes = true,
-  views,
   action,
 }: {
   period: CalendarPeriod;
   // The calendar's URL for a mode and a date (null: today).
   hrefOf: (mode: CalendarMode, date: string | null) => string;
   modes?: boolean;
-  // What is shown (the Calendrier's Tout / À vous), beside the period's
-  // choice rather than on a line of its own (Sacha, 27/11/2026).
-  views?: React.ReactNode;
   // The page's main button, last on the same line (the Calendrier's
   // « Nouveau call », Sacha 27/11/2026): no line of its own above.
   action?: React.ReactNode;
@@ -85,9 +81,8 @@ export function CalendarToolbar({
       <h2 className="text-lg font-semibold first-letter:uppercase">
         {periodLabel(period)}
       </h2>
-      {(modes || views || action) && (
+      {(modes || action) && (
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          {views}
           {modes && (
             <ViewToggle
               label={t.modes.label}

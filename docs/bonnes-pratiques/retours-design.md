@@ -146,8 +146,8 @@ qui a été fait.
   dans l'en-tête de la page.
 - **Son explication** : pas de deuxième ligne d'outils, le bouton principal compris : tout ce qui sert à lire
   et à agir sur le calendrier tient à côté de « Aujourd'hui » et de la période.
-- **Fait** : `CalendarToolbar` prend `views` (Tout / À vous) et `action` (le bouton principal), à droite de la
-  même ligne ; l'en-tête ne porte plus que le titre. Règle dans `docs/DESIGN.md` (Calendrier). Même esprit :
+- **Fait** : `CalendarToolbar` prend `action` (le bouton principal), à droite de la même ligne ; puis
+  « Tout / À vous » retiré (Sacha : « ça fait 2 fois le même composant » à côté de Semaine / Mois) ; l'en-tête ne porte plus que le titre. Règle dans `docs/DESIGN.md` (Calendrier). Même esprit :
   l'`EmptyState` des Notes n'a que son titre (`body` facultatif), moins de texte à l'écran.
 - **À retenir** : sur une page de calendrier ou de liste, ne pas empiler une ligne de filtres, une ligne de
   vues et un bouton dans l'en-tête ; une seule ligne, le bouton principal en dernier à droite.

@@ -3274,8 +3274,8 @@ finalement aussi renommé Notes), avec des notes qu'on peut écrire sur un proje
 - **Navigation** : l'entrée « Calls » devient **Notes** ; « Calendrier » garde son nom et devient le seul
   calendrier. `/app/calls` redirige vers `/app/notes`, `/app/calls?display=calendar…` vers le Calendrier,
   `/app/projects/<p>/calls` vers `/notes`. Les pages d'un call ne bougent pas et allument Notes.
-- **Calendrier** : « Nouveau call » en bouton principal, **une seule ligne d'outils** (Tout / À vous,
-  Semaine / Mois, bouton ; retour de Sacha), colonne de droite dès `xl` : mini-mois (`?mini=`) et « À venir ».
+- **Calendrier** : « Nouveau call » en bouton principal, **une seule ligne d'outils** (Semaine / Mois,
+  bouton ; « Tout / À vous » retiré, retours de Sacha), colonne de droite dès `xl` : mini-mois (`?mini=`) et « À venir ».
 - **Notes** (`/app/notes`) : onglets Toutes / Calls / Écrites / À compléter avec nombres, recherche **dans le
   texte** (titre, compte rendu, transcription, note), filtres Projet et Personne, fiches latérales
   (`CallSheet`, `NoteSheet`).

@@ -654,16 +654,17 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
 
 ### Calendrier
 
-- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` seul ; Tout / À vous,
+- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` seul ;
   Semaine / Mois et « Nouveau call » dans `CalendarToolbar` (Mois par défaut, Semaine), puis la
   grille : filets `--border-hairline`, jours hors du mois sur `--surface-soft`, aujourd'hui en
   rond d'encre. Une date = une pastille de la **teinte de son projet** (comme un call), 13 px,
   heure en chiffres tabulaires, « Sortie » en semi-gras ; point `--selection` = à vous,
   `--error` = en retard ; jour passé à 70 %. Téléphone : agenda par jour.
-- **Une seule ligne d'outils** (Sacha, 27/11/2026) : Tout / À vous, Semaine / Mois et le bouton principal
+- **Une seule ligne d'outils** (Sacha, 27/11/2026) : Semaine / Mois et le bouton principal
   (« Nouveau call ») sont **sur la même ligne** que « Aujourd'hui » et la période, à droite
-  (`CalendarToolbar views` et `action`), jamais une deuxième ligne ni un bouton dans l'en-tête. Dès `xl`,
-  une colonne à droite : mini-mois puis « À venir » (rien affiché s'il n'y a rien). Voir
+  (`CalendarToolbar action`) ; pas de second sélecteur à côté de Semaine / Mois (« Tout / À vous » retiré :
+  deux fois le même composant), jamais une deuxième ligne ni un bouton dans l'en-tête. Dès `xl`,
+  une colonne à droite : mini-mois (à côté d'une semaine seulement) puis « À venir » (rien affiché s'il n'y a rien). Voir
   `docs/bonnes-pratiques/retours-design.md`.
 - **`EmptyState` sans texte** (Notes, 27/11/2026) : `body` est facultatif, un état vide de liste peut
   n'être que son icône et son titre (« Aucune note ») ; moins de texte à l'écran.

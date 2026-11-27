@@ -118,7 +118,7 @@ export const routes = {
   work: "/app/work",
   // « Mes tâches »: the person's own to-do list, a section of the Travail.
   workTasks: "/app/work?section=taches",
-  // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
+  // Every visible project's dates, one calendar (?mode=week&date=…).
   calendar: "/app/calendar",
   // Notes: the calls' reports and transcripts, and written notes.
   notes: "/app/notes",

@@ -2874,19 +2874,19 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
 - Une date d'un projet absent de la liste (archivé) est écartée. Une source en échec est dite
   (`error`), jamais lue « rien ».
 - **Mois** par défaut (`?mode=week` pour la semaine, `?date=AAAA-MM-JJ` pour se déplacer),
-  **Tout / À vous** (`?voir=mine` : ce qui demande un geste à la personne — ses étapes, ses
-  tâches, ses calls). Téléphone : agenda par jour. Le mois est rendu côté serveur, des liens
+  sans filtre « Tout / À vous » (retiré le 27/11/2026 : Sacha, « ça fait deux fois le même
+  composant » à côté de Semaine / Mois). Téléphone : agenda par jour. Le mois est rendu côté serveur, des liens
   (`ViewLink`).
 - **Semaine = les heures** (Sacha, 01/11/2026 : « sur la semaine on voit les heures, le même
   calendrier que dans Call ») : le calendrier des Calls (`CallsCalendar` en semaine, avec
   `items`, § 4 bis) ; les calls sur leur créneau (création, déplacement, fiche), une date à l'heure sans
   fin (tournage) sur une heure, les dates sans heure dans la rangée sous les jours (`allDay`).
   `loadCalendar` rend aussi les calls bruts (`calls`), réduits à ceux que les dates gardent
-  (archives, « À vous ») ; le formulaire de réunion est lu en même temps (`loadMeetingFormData`).
+  (archives) ; le formulaire de réunion est lu en même temps (`loadMeetingFormData`).
 - **Planifier les calls** (27/11/2026, ticket « Calls → Calendrier + Notes ») : le Calendrier est le seul
   calendrier. **« Nouveau call »** (`NewMeetingButton label`, le formulaire de réunion) est le bouton
   principal. **Une seule ligne d'outils** (Sacha, 27/11/2026) : à gauche « Aujourd'hui », période, titre ;
-  à droite Tout / À vous (`views`), Semaine / Mois et le bouton (`action`) de `CalendarToolbar` ; plus
+  à droite Semaine / Mois et le bouton (`action`) de `CalendarToolbar` ; plus
   rien dans l'en-tête. **Colonne de droite dès `xl`** (`CalendarSide`, cachée en dessous : rien ne change
   sur téléphone) : `MiniMonth` (un point sous les jours qui ont une date, aujourd'hui marqué, un jour
   ouvre sa semaine ; mois voisins par **`?mini=AAAA-MM`**, sinon le mois de la période), puis **« À venir »**

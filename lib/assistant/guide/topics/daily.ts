@@ -93,10 +93,9 @@ export const dailyTopics: GuideTopic[] = [
       "Le Calendrier ne se remplit pas à la main : il montre les dates que PDS OS connaît déjà et chaque date s'ouvre là où elle se décide.",
       "On y voit les sorties ou échéances de projet, les dates attendues du Master, les tournages, les temps forts de la Stratégie, les calls et réunions, et les étapes ouvertes datées.",
       "Vue Mois par défaut, vue Semaine avec les heures ; sur téléphone, un agenda par jour.",
-      "Le filtre Tout / À vous montre soit tout, soit ce qui demande un geste de votre part.",
       "Chaque projet a sa couleur ; un point bleu marque ce qui est à vous, un point rouge ce qui est en retard.",
-      "C'est ici qu'on planifie les calls : le bouton principal « Nouveau call », sur la même ligne que Tout / À vous et Semaine / Mois, ouvre le formulaire ; en vue Semaine, on peut aussi créer une réunion en cliquant ou en glissant sur un créneau libre, et déplacer ses propres calls.",
-      "Sur grand écran, une colonne à droite montre un mini-mois (un point sous les jours qui ont une date) et « À venir », les prochains calls en cartes.",
+      "C'est ici qu'on planifie les calls : le bouton principal « Nouveau call », sur la même ligne que Semaine / Mois, ouvre le formulaire ; en vue Semaine, on peut aussi créer une réunion en cliquant ou en glissant sur un créneau libre, et déplacer ses propres calls.",
+      "Sur grand écran, une colonne à droite montre, en vue Semaine, un mini-mois (un point sous les jours qui ont une date), puis « À venir », les prochains calls en cartes.",
     ],
     faq: [
       {
