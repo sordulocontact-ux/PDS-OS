@@ -1274,12 +1274,14 @@ export const projectTitleTone: Record<string, Tone> = {
 /** A participation of an artist in a title (lot 3), in the Excel's words
  * (Maël 23/11/2026): « À contacter » is nothing done yet (neutral),
  * « Contacté » waits for the artist's answer (warning), « D'accord » is
- * settled (success); « A refusé » and « Retiré » are set aside (neutral). */
+ * settled (success); « A refusé » is a no (danger, Sacha 27/11/2026),
+ * « Retiré » is set aside (neutral). Drawn as a dot and its word, as every
+ * state (no tag since 27/11/2026). */
 export const participationStatusTone: Record<string, Tone> = {
   proposed: "neutral",
   invited: "warning",
   confirmed: "success",
-  declined: "neutral",
+  declined: "danger",
   withdrawn: "neutral",
 };
 

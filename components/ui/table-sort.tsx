@@ -13,6 +13,7 @@ import {
 
 import { IconArrowDown, IconArrowUp } from "@/components/icons";
 import { TableBody } from "@/components/ui/table";
+import { columnIcons, type ColumnIcon } from "@/lib/ui/column-icons";
 import {
   nextSort,
   sortableColumns,
@@ -212,11 +213,14 @@ export function SortedTableBody({
 // `icon`: drawn before the column's name, in its color (DataTableHead icon).
 export function SortableHeadLabel({
   children,
-  icon: Icon,
+  icon,
 }: {
   children: React.ReactNode;
-  icon?: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  // Its key (lib/ui/column-icons.ts), not the component: a table rendered
+  // on the server passes it to this client label (a function cannot cross).
+  icon?: ColumnIcon;
 }) {
+  const Icon = icon && columnIcons[icon];
   const glyph = Icon && <Icon aria-hidden className="size-4 shrink-0" />;
   const context = useContext(SortContext);
   const ref = useRef<HTMLSpanElement>(null);

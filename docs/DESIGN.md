@@ -122,6 +122,12 @@ Toutes les icônes de ligne font **18 px**, celle d'un fichier aussi (`FileTypeI
 de son type (`--hue-*-icon`, `hueIconClass` : le `-fg` des pastilles était « trop sombre, désaturé », Sacha
 27/11/2026). Une **pastille de teinte** (`StatusBadge` avec une teinte : projet, deal…) a son texte en **13 px, sans
 gras** (22 px de haut en `sm`, 24 en `md`) : en 12 px semi-gras elle se lisait « très petite », Sacha 27/11/2026.
+Le tableau **« Titres » par artiste** d'un collectif suit cette règle depuis le 27/11/2026 (Sacha) : une info par
+colonne, chacune avec son icône (Rôle seulement si les rôles diffèrent, Téléphone à part du Contact, Notes sur une
+ligne coupée), tous les états en point + mot, **rien ne se modifie dans une case** (ni crayon, ni « Nommer », ni icône
+d'ajout) : le nom de l'artiste ouvre sa fiche latérale (`TitleArtistSheet`), où tout se lit en entier et se change.
+Écart voulu avec « 5 à 6 colonnes visibles » : c'est le tableau de suivi d'Ibé (son Excel), toutes ses colonnes
+restent ; il défile dans son cadre, Artiste fixe à gauche, sans colonne cachée sur bureau ni en-tête coupé.
 
 ### Couleur
 
@@ -130,14 +136,18 @@ Jamais de couleur en dur sur une icône ; changer la couleur du parent.
 
 ### Rangée de boutons
 
-Quand **trois boutons ou plus** se suivent dans une rangée **dense** (beaucoup d'information,
-peu de place), ce sont des **boutons-icônes seuls**, sans texte : icône `size-5`,
-`aria-label` et infobulle avec le libellé. Ailleurs (place disponible, action principale),
-les boutons gardent leur libellé, sans icône. Décision de Sacha, 24/10/2026.
+**Jamais trois boutons à texte côte à côte**, nulle part (Sacha, 27/11/2026, après le 24/10/2026 qui ne
+le disait que des rangées denses) : au plus **deux** boutons avec un libellé (le geste principal, et un
+secondaire), le reste soit en **boutons-icônes seuls** (`IconAction`, `DialogButton iconOnly` : icône
+`size-5`, `aria-label` et infobulle avec le libellé ; pour des gestes que leur icône dit sans ambiguïté :
+copier, PDF, modifier, supprimer), soit dans le **« ⋯ »** (`RowActions` : `onSelect`, `href`, ou `dialog`
+pour un formulaire en modale). Le « ⋯ » et les icônes seules ne comptent pas dans les deux. Les deux
+boutons d'un pied de modale (`DialogFormActions`) ne sont pas concernés.
 
 **Lien privé** (maquette Figma PDS OS, node `229:2257`) : en-tête = icône lien, « Lien privé
 de … », pastille d'état ; dessous, l'URL dans une pastille avec son bouton-icône « Copier »
-(icône copy), puis « Relancer », « Nouveau lien », « Révoquer l'accès » en texte. Ni
+(icône copy), puis « Relancer » et « Nouveau lien » en texte, le reste (« Marquer comme envoyé »,
+« Révoquer l'accès ») dans « ⋯ » (27/11/2026 : jamais trois boutons à texte). Ni
 sous-titre ni ligne de dates : seuls « Révoqué le … » ou « Expiré le … » s'affichent.
 
 ### Accessibilité
@@ -235,10 +245,10 @@ blanc, gris, sans violet ») : il garde son nom et son sens, sa pastille ne se d
 par la couleur mais par son libellé (« À valider », « ✦ PO »).
 
 Dans le style actuel, un état s'affiche en **point de couleur et mot** (sans fond, `globals.css`).
-Un **tag** (`StatusBadge tag`) garde sa pilule à fond pâle : il est réservé à l'**état principal
-d'une ligne** quand plusieurs colonnes d'états se suivent, pour qu'il ne se perde pas parmi les
-points (Maël 25/11/2026, Statut de « Titres et artistes » et de son récap en Vue d'ensemble). Un seul tag par
-ligne.
+Un **tag** (`StatusBadge tag`) garde sa pilule à fond pâle : il était réservé à l'**état principal
+d'une ligne** quand plusieurs colonnes d'états se suivent (Maël 25/11/2026, Statut de « Titres et artistes »).
+**Retiré de ce tableau le 27/11/2026** (Sacha : deux styles d'état sur une même ligne) : le Statut y est en point +
+mot comme les autres colonnes ; la prop reste pour un écran qui en aurait besoin, aucun ne l'emploie.
 
 - **État d'une information** (un fait, un champ, une dimension, une valeur) : trois mots et
   trois tons, les mêmes dans tous les modules (Ibé, 01/11 : « « à faire » serait plus

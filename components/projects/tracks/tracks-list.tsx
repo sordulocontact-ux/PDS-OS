@@ -77,9 +77,11 @@ export function TracksList({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead fill>{t.columns.title}</DataTableHead>
+        {/* The title as wide as its name, the workflows a quarter each
+            (Sacha, 27/11/2026: « Titre » took half the table). */}
+        <DataTableHead className="w-72">{t.columns.title}</DataTableHead>
         {workflows.map((workflow) => (
-          <DataTableHead key={workflow} hideBelow="xl">
+          <DataTableHead key={workflow} hideBelow="xl" className="w-1/4">
             {t.columns[workflow as keyof typeof t.columns]}
           </DataTableHead>
         ))}
@@ -116,7 +118,7 @@ function TrackRow({
     named && row.guests.length > 0 ? joinArtistNames(row.guests) : null;
   return (
     <DataTableRow>
-      <DataTableCell fill>
+      <DataTableCell className="w-72">
         <DataTableMedia
           title={
             <DataTableLink href={routes.projectTrack(projectId, row.title.id)}>
@@ -151,7 +153,7 @@ function TrackRow({
         />
       </DataTableCell>
       {workflows.map((workflow) => (
-        <DataTableCell key={workflow} hideBelow="xl">
+        <DataTableCell key={workflow} hideBelow="xl" className="w-1/4">
           <WorkflowProgress card={cardOf(workflow)} />
         </DataTableCell>
       ))}

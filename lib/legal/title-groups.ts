@@ -203,7 +203,7 @@ function inTitle(kind: LegalDemarcheKind, step: JourneyStep): JourneyStep {
   };
 }
 
-/** « Rattacher le titre au Catalogue »: a step of the spine only (Travail
+/** « Rattacher au Catalogue »: a step of the spine only (Travail
  * and the project's journey never list it), open while the title has no
  * master. */
 function attachStep(projectId: string, title: LegalTitle): JourneyStep {

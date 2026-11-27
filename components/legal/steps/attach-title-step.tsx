@@ -14,7 +14,7 @@ import { legalAttachKey } from "@/lib/ui/legal-steps";
 const fr = { legalDemarches };
 
 /**
- * « Rattacher le titre au Catalogue », the first step of a collective's
+ * « Rattacher au Catalogue », the first step of a collective's
  * title not in the Catalogue yet (§ 3.6 of Ibé's 18/11): the project's
  * owner attaches it here (who writes the titles, the database deciding
  * again); anyone else reads who does. Once it has a master, the address

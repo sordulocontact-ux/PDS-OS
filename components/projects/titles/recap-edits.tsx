@@ -1,20 +1,14 @@
 "use client";
 
-import { IconMsgWriting, IconPenWriting2 } from "nucleo-sharp-essential";
-import { useState, type FormEvent } from "react";
-
-import { Field } from "@/components/auth/field";
+import {
+  isReleaseValue,
+  type ReleaseValue,
+} from "@/components/projects/titles/recap-edits-words";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { NegotiationCallDialog } from "@/components/deals/negotiation-call-button";
-import { IconUserPlus } from "@/components/icons";
-import { PersonPickerField } from "@/components/network/person-picker-field";
-import { caption } from "@/components/projects/titles/recap-facts";
-import { buttonVariants } from "@/components/ui/button";
-import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { SegmentedControl } from "@/components/ui/segmented-control";
 import {
   Select,
   SelectContent,
@@ -22,11 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   negotiationCallData,
@@ -34,45 +23,22 @@ import {
 } from "@/lib/deals/negotiation-call-rules";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
-import {
-  listNetworkPeople,
-  type NetworkPersonOption,
-} from "@/lib/network/people-actions";
-import {
-  createParticipationContact,
-  setContactPhone,
-  setParticipationContact,
-  setParticipationNote,
-} from "@/lib/projects/participation-actions";
-import {
-  CONTACT_KINDS,
-  contactLabelOf,
-  type ContactKind,
-  type RecapAccord,
-  type RecapContact,
-} from "@/lib/projects/recap-rules";
-import { cn } from "@/lib/utils";
+import { setParticipationNote } from "@/lib/projects/participation-actions";
+import type { RecapAccord } from "@/lib/projects/recap-rules";
 
-// What the collective's recap edits in place (retours d'Ibé du 18/11/2026,
-// lot 2: « contact, sortie oui / non, notes », nothing that has a module):
-// the release of a title, the note and the manager's contact of an artist,
-// and « Caler le call » (Sacha's dialog, from the row's « ⋯ »). `relative z-10`:
-// above a row's DataTableLink, where one covers the row.
+// What the collective's recap edits (retours d'Ibé du 18/11/2026, lot 2:
+// « contact, sortie oui / non, notes », nothing that has a module), from
+// the artist's side sheet since 27/11/2026 (nothing is edited in the
+// table): the release of a title, the note of an artist, and « Caler le
+// call » (Sacha's dialog, also in the row's « ⋯ »). The contact:
+// recap-contact-dialog.tsx.
 
 const fr = { dialogs, projectTitles };
 
-const LINE_BUTTON =
-  "relative z-10 max-w-full rounded-sm text-left outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
-
 // ----------------------------------------------------------------- Release
 
-export type ReleaseValue = "yes" | "no" | "undecided";
-
-export const releaseValueOf = (decision: boolean | null): ReleaseValue =>
-  decision === true ? "yes" : decision === false ? "no" : "undecided";
-
 /** « Sortie » of a title: Oui / Non / Pas décidé, saved at the choice
- * (setTitleRelease, by the board); read only, its word. A 32 px menu, the
+ * (setTitleRelease, in the side sheet's « Titre »); read only, its word. A 32 px menu, the
  * height of a row's menu (docs/DESIGN.md « Hauteur d'un champ »): three
  * segments did not fit beside their label in the title's column. */
 export function ReleaseChoice({
@@ -120,76 +86,40 @@ export function ReleaseChoice({
   );
 }
 
-const isReleaseValue = (value: unknown): value is ReleaseValue =>
-  value === "yes" || value === "no" || value === "undecided";
-
 // -------------------------------------------------------------------- Note
 
-/** The artist's note in its « Note » column (Maël 23/11/2026), two lines
- * at most (the whole on hover); clicked, it opens to be changed. Empty: an
- * icon, « Ajouter une note sur … » in its tooltip, for whoever writes the
- * title (Maël 25/11/2026: words there read as a note), as « Ajouter le
- * contact ». Read only: the note alone, or nothing. */
-export function NoteLine({
+/** « Note sur … » in its modal, opened from the artist's side sheet
+ * (TitleArtistSheet, 27/11/2026: nothing is edited in the table). */
+export function NoteDialog({
+  open,
+  onOpenChange,
   projectId,
   participationId,
   artist,
   note,
-  canEdit,
 }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   projectId: string;
   participationId: string;
   artist: string;
   note: string | null;
-  canEdit: boolean;
 }) {
   const t = fr.projectTitles.recap.note;
-  const [open, setOpen] = useState(false);
-  const lines = cn(
-    caption,
-    "line-clamp-2 whitespace-normal break-words",
-    note && "text-[color:var(--text-secondary)]",
-  );
-  if (!canEdit)
-    return note ? (
-      <span className={lines} title={note}>
-        {note}
-      </span>
-    ) : null;
   return (
-    <>
-      {note ? (
-        <button
-          type="button"
-          className={cn(LINE_BUTTON, lines)}
-          title={note}
-          onClick={() => setOpen(true)}
-        >
-          {/* The note itself is read, after what the button does. */}
-          <span className="sr-only">{`${t.edit(artist)} : `}</span>
-          {note}
-        </button>
-      ) : (
-        <span className="-my-1 flex items-center">
-          <IconAction label={t.addFor(artist)} onClick={() => setOpen(true)}>
-            <IconMsgWriting aria-hidden className="size-4" />
-          </IconAction>
-        </span>
-      )}
-      <FormDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t.title(artist)}
-        closeLabel={fr.dialogs.close}
-      >
-        <NoteForm
-          projectId={projectId}
-          participationId={participationId}
-          note={note}
-          onDone={() => setOpen(false)}
-        />
-      </FormDialog>
-    </>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.title(artist)}
+      closeLabel={fr.dialogs.close}
+    >
+      <NoteForm
+        projectId={projectId}
+        participationId={participationId}
+        note={note}
+        onDone={() => onOpenChange(false)}
+      />
+    </FormDialog>
   );
 }
 
@@ -243,427 +173,13 @@ function NoteForm({
   );
 }
 
-// ----------------------------------------------------------------- Contact
-
-const ICON_LINK = cn(
-  buttonVariants({ variant: "ghost", size: "icon-xs" }),
-  "relative z-10",
-);
-
-/** An icon button of the contact's cell, its name in a quick tooltip and
- * for screen readers (docs/DESIGN.md « Rangée de boutons »). */
-function IconAction({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <button
-            type="button"
-            aria-label={label}
-            className={ICON_LINK}
-            onClick={onClick}
-          />
-        }
-      >
-        {children}
-      </TooltipTrigger>
-      <TooltipContent side="bottom">{label}</TooltipContent>
-    </Tooltip>
-  );
-}
-
-/**
- * Who to call for the artist (the Excel's « Contact »): its role
- * (« Manager », « Producteur », else « Contact ») and name, then its number,
- * as text (no call nor WhatsApp button in the table, Maël 25/11/2026); a
- * private contact's coordinates the reader may not read stay « Coordonnées
- * privées ». For whoever writes the title (another contact of the Réseau, a
- * new one) or the Réseau (the number): « Contact de l'artiste » in a modal;
- * none yet: « Ajouter le contact », an icon. None and nothing to do: nothing.
- */
-export function ContactFacts({
-  projectId,
-  participationId,
-  artist,
-  contact,
-  canManage,
-  canEditNetwork,
-}: {
-  projectId: string;
-  participationId: string;
-  artist: string;
-  contact: RecapContact | null;
-  canManage: boolean;
-  canEditNetwork: boolean;
-}) {
-  const t = fr.projectTitles.recap.contact;
-  const [open, setOpen] = useState(false);
-  const modes = contactModes({ contact, canManage, canEditNetwork });
-  const dialog = modes.length > 0 && (
-    <FormDialog
-      open={open}
-      onOpenChange={setOpen}
-      title={t.title}
-      closeLabel={fr.dialogs.close}
-    >
-      <ContactForm
-        projectId={projectId}
-        participationId={participationId}
-        contact={contact}
-        modes={modes}
-        onDone={() => setOpen(false)}
-      />
-    </FormDialog>
-  );
-
-  // None yet: a quiet icon of the cell, as its other gestures (Maël
-  // 23/11/2026, in place of an outlined button on every such row).
-  if (!contact)
-    return modes.length > 0 ? (
-      <span className="-my-1 flex items-center">
-        <IconAction label={t.addFor(artist)} onClick={() => setOpen(true)}>
-          <IconUserPlus aria-hidden className="size-4" />
-        </IconAction>
-        {dialog}
-      </span>
-    ) : null;
-
-  // Two lines (Maël 23/11/2026): who, then the number and its pencil.
-  return (
-    <span className="flex max-w-full min-w-0 flex-col gap-0.5">
-      <span className="flex max-w-full min-w-0 items-baseline gap-1.5">
-        <span className={cn(caption, "shrink-0")}>
-          {contact.role ?? t.label}
-        </span>
-        <span className="min-w-0 truncate" title={contact.name}>
-          {contact.name}
-        </span>
-      </span>
-      {(contact.hidden || contact.phone || modes.length > 0) && (
-        <span className="flex max-w-full min-w-0 items-center gap-0.5">
-          {contact.hidden ? (
-            <span className={cn(caption, "truncate")}>{t.hidden}</span>
-          ) : (
-            contact.phone && (
-              <span className="truncate text-[color:var(--text-secondary)] tabular-nums">
-                {contact.phone}
-              </span>
-            )
-          )}
-          {modes.length > 0 && (
-            <span className="-my-0.5 -mr-1 flex shrink-0 items-center">
-              <IconAction label={t.edit(artist)} onClick={() => setOpen(true)}>
-                <IconPenWriting2 aria-hidden className="size-4" />
-              </IconAction>
-            </span>
-          )}
-        </span>
-      )}
-      {dialog}
-    </span>
-  );
-}
-
-type ContactMode = "phone" | "pick" | "create";
-
-/** What the reader may do of the contact: change its number in the Réseau
- * (manage_network, a contact of the Réseau), take another contact of the
- * Réseau (who writes the title), or add a new one (both). */
-function contactModes(input: {
-  contact: RecapContact | null;
-  canManage: boolean;
-  canEditNetwork: boolean;
-}): ContactMode[] {
-  return [
-    ...(input.contact?.contactId &&
-    !input.contact.hidden &&
-    input.canEditNetwork
-      ? (["phone"] as const)
-      : []),
-    ...(input.canManage ? (["pick"] as const) : []),
-    ...(input.canManage && input.canEditNetwork ? (["create"] as const) : []),
-  ];
-}
-
-/** « Contact de l'artiste »: one gesture at a time, chosen in segments when
- * there are several (the number first, once there is a contact). */
-function ContactForm({
-  projectId,
-  participationId,
-  contact,
-  modes,
-  onDone,
-}: {
-  projectId: string;
-  participationId: string;
-  contact: RecapContact | null;
-  modes: ContactMode[];
-  onDone: () => void;
-}) {
-  const t = fr.projectTitles.recap.contact;
-  const [mode, setMode] = useState<ContactMode>(modes[0]);
-  return (
-    <div className="flex flex-col gap-4">
-      {modes.length > 1 && (
-        <SegmentedControl<ContactMode>
-          aria-label={t.modesLabel}
-          options={modes.map((value) => ({ value, label: t.modes[value] }))}
-          value={mode}
-          onChange={(next) => next && setMode(next)}
-          fill
-        />
-      )}
-      {mode === "phone" && contact?.contactId ? (
-        <PhoneForm
-          projectId={projectId}
-          contactId={contact.contactId}
-          name={contact.name}
-          phone={contact.phone}
-          onDone={onDone}
-        />
-      ) : mode === "pick" ? (
-        <PickForm
-          projectId={projectId}
-          participationId={participationId}
-          current={contact?.contactId ?? null}
-          currentKind={contact?.kind ?? "manager"}
-          onDone={onDone}
-        />
-      ) : (
-        <CreateForm
-          projectId={projectId}
-          participationId={participationId}
-          onDone={onDone}
-        />
-      )}
-    </div>
-  );
-}
-
-/** The contact's number, changed in the Réseau (« Numéro changé dans le
- * Réseau »); blank removes it. */
-function PhoneForm({
-  projectId,
-  contactId,
-  name,
-  phone,
-  onDone,
-}: {
-  projectId: string;
-  contactId: string;
-  name: string;
-  phone: string | null;
-  onDone: () => void;
-}) {
-  const t = fr.projectTitles.recap;
-  const { pending, error, run } = useWriteSubmit(onDone, t.phoneChanged);
-  return (
-    <form
-      noValidate
-      className="flex flex-col gap-4"
-      onSubmit={(event) => {
-        event.preventDefault();
-        const value = String(
-          new FormData(event.currentTarget).get("contactPhone") ?? "",
-        );
-        run(() => setContactPhone({ projectId, contactId, phone: value }));
-      }}
-    >
-      <Field
-        name="contactPhone"
-        label={t.contact.phone(name)}
-        type="tel"
-        autoComplete="off"
-        defaultValue={phone ?? ""}
-        maxLength={40}
-        autoFocus
-      />
-      {error && <FormMessage kind="error">{error}</FormMessage>}
-      <DialogFormActions
-        pending={pending}
-        submitLabel={t.contact.phoneSubmit}
-        onCancel={onDone}
-      />
-    </form>
-  );
-}
-
-/** What the contact is for the artist: Manager, Producteur, Autre (the
- * participation's label, see CONTACT_KINDS). */
-function KindChoice({
-  value,
-  onChange,
-}: {
-  value: ContactKind;
-  onChange: (kind: ContactKind) => void;
-}) {
-  const t = fr.projectTitles.recap.contact;
-  return (
-    <ChipChoice<ContactKind>
-      name="contactKind"
-      legend={t.role}
-      options={CONTACT_KINDS.map((kind) => ({
-        value: kind,
-        label: t.kinds[kind],
-      }))}
-      value={value}
-      onChange={(next) => next && onChange(next)}
-      fill
-    />
-  );
-}
-
-/** Another contact of the Réseau as the artist's interlocutor (the
- * Réseau's picker: search, or add one to the Réseau without leaving), and
- * what it is for the artist: the current one's kind, a manager of the
- * Réseau once picked. */
-function PickForm({
-  projectId,
-  participationId,
-  current,
-  currentKind,
-  onDone,
-}: {
-  projectId: string;
-  participationId: string;
-  current: string | null;
-  currentKind: ContactKind;
-  onDone: () => void;
-}) {
-  const t = fr.projectTitles.recap.contact;
-  const { pending, error, run } = useWriteSubmit(onDone, t.picked);
-  const [missing, setMissing] = useState(false);
-  const [kind, setKind] = useState<ContactKind>(currentKind);
-  function submit(event: FormEvent<HTMLFormElement>) {
-    // A contact added from the picker submits its own form (in a modal).
-    if (event.target !== event.currentTarget) return;
-    event.preventDefault();
-    const contactId = String(
-      new FormData(event.currentTarget).get("contactId") ?? "",
-    );
-    setMissing(!contactId);
-    if (contactId)
-      run(() =>
-        setParticipationContact({
-          projectId,
-          participationId,
-          contactId,
-          label: contactLabelOf(kind),
-        }),
-      );
-  }
-  return (
-    <form noValidate className="flex flex-col gap-4" onSubmit={submit}>
-      <PersonPickerField
-        refName="contactId"
-        nameName="contactName"
-        legend={t.pick}
-        load={() => listNetworkPeople()}
-        defaultRef={current}
-        defaultName={null}
-        createRoles={["manager"]}
-        refOfContact={(id) => id}
-        onPick={(option: NetworkPersonOption | null) =>
-          option &&
-          setKind(option.roles.includes("manager") ? "manager" : "other")
-        }
-        allowNameOnly={false}
-        required
-        error={missing ? t.pickRequired : undefined}
-      />
-      <KindChoice value={kind} onChange={setKind} />
-      {error && <FormMessage kind="error">{error}</FormMessage>}
-      <DialogFormActions
-        pending={pending}
-        submitLabel={t.pickSubmit}
-        onCancel={onDone}
-      />
-    </form>
-  );
-}
-
-/** A new contact of the Réseau (name, number, and what it is for the artist:
- * a manager, a producer or another), made the artist's interlocutor. The
- * name is asked again in red when left empty. */
-function CreateForm({
-  projectId,
-  participationId,
-  onDone,
-}: {
-  projectId: string;
-  participationId: string;
-  onDone: () => void;
-}) {
-  const t = fr.projectTitles.recap;
-  const { pending, error, run } = useWriteSubmit(onDone, t.contact.created);
-  const [missing, setMissing] = useState(false);
-  const [kind, setKind] = useState<ContactKind>("manager");
-  return (
-    <form
-      noValidate
-      className="flex flex-col gap-4"
-      onSubmit={(event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const name = String(data.get("contactName") ?? "").trim();
-        const phone = String(data.get("contactPhone") ?? "");
-        setMissing(!name);
-        if (!name)
-          return void document.getElementById("recap-contact-name")?.focus();
-        run(() =>
-          createParticipationContact({
-            projectId,
-            participationId,
-            name,
-            phone,
-            kind,
-          }),
-        );
-      }}
-    >
-      <Field
-        id="recap-contact-name"
-        name="contactName"
-        label={t.contact.name}
-        required
-        autoComplete="off"
-        maxLength={200}
-        autoFocus
-        error={missing ? t.errors.nameRequired : undefined}
-        onChange={() => setMissing(false)}
-      />
-      <Field
-        name="contactPhone"
-        label={t.contact.newPhone}
-        type="tel"
-        autoComplete="off"
-        maxLength={40}
-      />
-      <KindChoice value={kind} onChange={setKind} />
-      {error && <FormMessage kind="error">{error}</FormMessage>}
-      <DialogFormActions
-        pending={pending}
-        submitLabel={t.contact.createSubmit}
-        onCancel={onDone}
-      />
-    </form>
-  );
-}
-
 // ------------------------------------------------------------ Caler le call
 
 /** « Caler le call » of a row (Ibé 18/11, 1:00:28): the artist agreed and
- * no call is planned. Opened from the row's « ⋯ » (Maël 25/11/2026: no
- * button in the table). The shared data (negotiators' slots, contacts) is
- * given once to the board, the row's target computed here. */
+ * no call is planned. Opened from the row's « ⋯ » or its side sheet (Maël
+ * 25/11/2026: no button in the table). The shared data (negotiators'
+ * slots, contacts) is given once to the board, the row's target computed
+ * here. */
 export function PlanCallDialog({
   shared,
   accord,
@@ -687,8 +203,8 @@ export function PlanCallDialog({
   );
 }
 
-/** Whether a row may « Caler le call » (its « ⋯ » offers it, its Accord
- * cell says « Call à caler »). */
+/** Whether a row may « Caler le call » (its « ⋯ » and its side sheet offer
+ * it). */
 export const plansCall = (
   shared: SharedNegotiationCall | null,
   accord: RecapAccord,

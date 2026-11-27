@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table-sort";
 import { OverflowHintArea } from "@/components/ui/overflow-hint";
 import { ViewLink } from "@/components/ui/view-link";
-import { type ColumnIcon, columnIcons } from "@/lib/ui/column-icons";
+import type { ColumnIcon } from "@/lib/ui/column-icons";
 import { cn } from "@/lib/utils";
 
 // DataTable: every table of the app, as a card like the home's lists and the
@@ -149,7 +149,7 @@ export function DataTableHead({
         className,
       )}
     >
-      <SortableHeadLabel icon={icon && columnIcons[icon]}>
+      <SortableHeadLabel icon={icon}>
         {children}
       </SortableHeadLabel>
     </TableHead>

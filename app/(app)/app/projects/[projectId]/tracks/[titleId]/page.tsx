@@ -120,6 +120,7 @@ export default async function ProjectTrackPage({
         }
       >
         <TitlesRecapCompact
+          projectId={projectId}
           recap={{ ...recap, titles: mine }}
           href={routes.projectTitles(projectId)}
           masterHref={masterOpen ? routes.projectMaster(projectId) : null}

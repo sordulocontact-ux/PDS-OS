@@ -435,9 +435,13 @@ Comportements :
 - ↑ ↓ passent à la ligne voisine **dans l'ordre affiché**, tri compris (`TableSortProvider` autour du tableau et
   de la fiche) ; Échap ferme.
 - Chaque nombre, date et retard est calculé par le code.
-- Fiches sur ce modèle (24/11/2026) : `ContactSheet` (Réseau), `ContractSheet`, `CallSheet`. **Seulement pour un
-  enregistrement simple** : un artiste, un titre, une maquette, une session studio et un projet gardent leur page,
-  « trop complexes pour une seule modale » (Sacha, 24/11/2026 ; essayé puis retiré le même jour).
+- Fiches sur ce modèle (24/11/2026) : `ContactSheet` (Réseau), `ContractSheet`, `CallSheet`, puis `SessionSheet`
+  (27/11/2026, Sacha : « comme les autres, une petite modale » ; une session est une séance datée comme un call, sa
+  page reste derrière « Ouvrir la session » pour les titres, les liens et les contrats d'un collectif), puis
+  `TitleArtistSheet` (27/11/2026, Sacha : un artiste sur un titre d'un collectif, ouvert depuis « Titres » par artiste ;
+  une participation, pas l'artiste lui-même, qui garde sa page). **Seulement
+  pour un enregistrement simple** : un artiste, un titre, une maquette et un projet gardent leur page, « trop
+  complexes pour une seule modale » (Sacha, 24/11/2026 ; essayé puis retiré le même jour).
 - Briques communes (deuxième fiche : `ContractSheet`, 24/11/2026) : `components/ui/record-sheet.tsx` (`SheetBlock`,
   `SheetLine`, `SheetLines`, `SheetSummaryCard`), `record-sheet-blocks.tsx` (`SheetPeopleBlock`, `SheetLinkedBlock`),
   `use-record-sheet-data.ts` (lecture à l'ouverture, gardée par enregistrement), `components/invoices/

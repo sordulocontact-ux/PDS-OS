@@ -3422,3 +3422,45 @@ réglages d'Accordee.
   et style, nouvelle page), Notifications (navigateur, nouvelle page), Raccourcis clavier, Connexions ; pour la
   direction : Coordonnées de PDS, Distribution. Onglets sur téléphone. `/app/settings` mène à la première page.
 - ⌘K : un filet entre les groupes de résultats (« Créer » / « Pages »…), dans le ⌘K de l'app et celui de Finance.
+
+## Titres par artiste : un fait par colonne, fiche latérale (27/11/2026, branche `pre-prod`)
+
+Sacha (designer) jugeait le tableau « Titres » par artiste d'un collectif mal designé : plusieurs infos par case, deux
+styles d'état, crayons et « Nommer » dans les cases, « Featuring » sur chaque ligne, contact vide en icône, chiffres en
+chasse fixe, pas d'icône d'en-tête. Sans migration.
+
+- **Remplace les choix du 23/11 et du 25/11** : « titre sous le nom » et « deux lignes par case » (Maël), Statut en
+  tag (Maël), contact et note modifiables sur place (Ibé 18/11, remplacé par son « pas de tableau pour modifier » du
+  22/11 et la règle « un fait par colonne » de Sacha du 25/11).
+- **Colonnes, avant** : Artiste (nom · rôle, titre et « Nommer », ⚠) | Statut (tag) | Contact (rôle, nom, numéro,
+  crayon) | Accord (étape, « Call à caler ») | Taux | Fiche de renseignement | Contrat | Mix | Sortie (menu sur place) |
+  Distribution | Beatmaker | Note (deux lignes, modifiable) | « ⋯ ». **Après** : Artiste (nom, ⚠) | Rôle (si les rôles
+  diffèrent) | Titre | Statut | Contact | Téléphone | Accord | Taux | Fiche | Contrat | Mix | Sortie | Distribution (si le
+  workflow existe) | Beatmaker | Notes (une ligne coupée) | « ⋯ ». Chacune avec son icône ; conditions d'affichage
+  inchangées (deals, Juridique, Distribution, notes). Aucune colonne retirée.
+- **États en point + mot partout** (`StatusBadge` sans `tag`) ; « A refusé » passe en danger (`participationStatusTone`).
+  Téléphone et Taux dans la police du texte.
+- **Rien ne se modifie dans les cases** : le nom ouvre `TitleArtistSheet` (fiche latérale du modèle Réseau, ↑ ↓,
+  `?ouvrir=`) : Titre (« Nommer », Renommer, Mix, Sortie modifiable, Distribution, Beatmaker), Statut, Contact
+  (« Appeler », « WhatsApp », modifier / rattacher au Réseau), Accord (« Caler le call »), Juridique (alertes en toutes
+  lettres), Notes. Le « ⋯ » de la ligne garde ses gestes. Les boutons Appeler / WhatsApp, retirés du tableau le 25/11,
+  reviennent dans la fiche seulement.
+- **Largeur** : le tableau garde toutes les colonnes de l'Excel, il défile dans son cadre (Artiste et « ⋯ » fixes, sans
+  ombre, fondu à droite pour un lecteur) ; aucune colonne cachée sur bureau, largeurs calées pour qu'aucun en-tête ne
+  soit coupé. Une ligne par enfant du tableau : le tri par en-tête marche maintenant sur ce tableau.
+- **Récap compact** (Vue d'ensemble, page d'un titre) : mêmes cellules (Artiste, Titre, Statut, Accord, Fiche, Contrat,
+  Mix), sans « Call à caler » sous l'Accord ; le nom ouvre « Titres » sur la fiche de l'artiste.
+- **Découpage** : `titles-board.tsx` (1 616 lignes) devient `titles-board.tsx`, `board-rows.ts`, `board-columns.tsx`,
+  `board-cells.tsx`, `board-table.tsx`, `board-cards.tsx`, `board-artist-cell.tsx`, `board-row-menu.tsx`,
+  `title-row-menu.tsx`, `use-title-actions.ts`, `title-dialogs.tsx`, `titles-filter.tsx`, `title-artist-sheet.tsx` et ses
+  blocs ; `recap-edits.tsx` perd les éditeurs de case (`ContactFacts`, `NoteLine`) au profit de `ContactDialog`
+  (`recap-contact-dialog.tsx`, `recap-contact-forms.tsx`) et `NoteDialog`. `lib/utils/phone.ts` (`telHref`,
+  `whatsappHref`).
+- **Pour Sacha** : `components/ui/table-sort.tsx` et `data-table.tsx` : `SortableHeadLabel` reçoit la clé de l'icône et
+  non le composant, pour qu'un tableau rendu côté serveur puisse donner `DataTableHead icon` (le récap compact plantait
+  sinon) ; rien ne change à l'écran ailleurs.
+- Vérifié dans Chrome sur « Assurance 30 » (vu comme Lina Haddad, fenêtre de 1 440 px : la fenêtre n'a pas pu être
+  réduite à 1 280 px) : aucun en-tête coupé, défilement dans le cadre avec Artiste et « ⋯ » fixes, fiche ouverte par le
+  nom, ↓ vers l'artiste suivant, « Nommer » ouvert par-dessus la fiche (annulé, rien écrit), tri par Statut, cartes à
+  380 px de tableau, récap de la Vue d'ensemble et son lien `?ouvrir=` ; aucune erreur dans la console.
+

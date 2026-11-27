@@ -46,7 +46,7 @@ export function WorkflowProgress({ card }: { card: WorkflowCard | undefined }) {
       <Ring card={card} />
       {/* The column's 192 px less the ring: a longer step wraps once, or is
           cut when a second line is said under it. */}
-      <span className="flex max-w-32 min-w-0 flex-col">
+      <span className="flex max-w-48 min-w-0 flex-col">
         <span
           title={step}
           className={cn(

@@ -129,6 +129,8 @@ export const projectTitles = {
   // per participation; where each stands, computed (lib/projects/
   // title-board-rules.ts).
   board: {
+    // The « ⋯ » at the head of « Titres » (TitlesActions).
+    more: "Plus d'actions sur les titres",
     // An artist's alerts, in a tooltip beside its name.
     alerts: "Alertes",
     facts: {
@@ -156,6 +158,42 @@ export const projectTitles = {
     },
     // The abandoned titles, after the others.
     abandonedGroup: "Abandonnés",
+    // An artist's side sheet (TitleArtistSheet, 27/11/2026): everything the
+    // row says, and what is changed, block by block.
+    sheet: {
+      // « Featuring · Néons ».
+      identity: (role: string, title: string) => `${role} · ${title}`,
+      blocks: {
+        title: "Titre",
+        status: "Statut",
+        contact: "Contact",
+        accord: "Accord",
+        legal: "Juridique",
+        notes: "Notes",
+      },
+      // The lines of a block.
+      lines: {
+        name: "Nom",
+        role: "Rôle",
+        phone: "Téléphone",
+        stage: "Étape",
+        rate: "Taux",
+        nextCall: "Prochain call",
+        negotiator: "Négociateur",
+        fiche: "Fiche",
+        contract: "Contrat",
+        mix: "Mix",
+        release: "Sortie",
+        distribution: "Distribution",
+        beatmaker: "Beatmaker",
+        abandoned: "Abandonné",
+      },
+      call: "Appeler",
+      whatsapp: "WhatsApp",
+      // A block still empty, for whoever may fill it.
+      addContact: "Ajouter le contact",
+      addNote: "Ajouter une note",
+    },
     // A title without any artist yet.
     noArtist: "Aucun artiste invité",
     negotiation: {
@@ -395,7 +433,13 @@ export const projectTitles = {
       status: "Statut",
       accord: "Accord",
       artist: "Artiste",
+      // The artist's role, only when the rows do not all have the same.
+      role: "Rôle",
+      title: "Titre",
       contact: "Contact",
+      // The contact's number, its own column (one fact a column, Sacha
+      // 27/11/2026).
+      phone: "Téléphone",
       // The Excel's « TAUX (%) »: the deal's « Part du master ».
       rate: "Taux",
       // The Excel's « QUESTIONNAIRE REMPLI ».
@@ -407,7 +451,8 @@ export const projectTitles = {
       release: "Sortie",
       distribution: "Distribution",
       beatmaker: "Beatmaker",
-      note: "Note",
+      // A line cut short, the whole on hover; written in the side sheet.
+      note: "Notes",
     },
     // The title's gestures in an artist's « ⋯ », after the artist's own:
     // their words say they are the title's.
@@ -420,7 +465,8 @@ export const projectTitles = {
     // Under an artist's name, for whoever does not read the Juridique: the
     // shoot and the release wait for this contract (lot 12).
     contractMissing: "Contrat non signé",
-    filters: "Filtrer les artistes par statut",
+    // The « Filtres » panel's axis (FilterPanel), no filter set.
+    allStates: "Tous les statuts",
     // No artist in the states chosen.
     filteredEmpty: "Aucun artiste dans ce statut.",
     facts: {

@@ -15,7 +15,7 @@ import { startTitleWork } from "@/lib/projects/title-actions";
 const fr = { legalDemarches, projectTitles };
 
 /**
- * « Rattacher le titre au Catalogue » in a collective's Juridique (§ 3.6 of
+ * « Rattacher au Catalogue » in a collective's Juridique (§ 3.6 of
  * Ibé's 18/11): a title of the Catalogue taken as it is (the form of
  * « Titres et artistes »), or the title created there under a provisional
  * name to drop its audio (« Déposer un audio », as its « ⋯ » does). Once

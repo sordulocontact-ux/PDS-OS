@@ -11,8 +11,6 @@ import {
   type RecapContract,
   type RecapFiche,
 } from "@/lib/projects/recap-rules";
-import { cn } from "@/lib/utils";
-import { formatShortDay } from "@/lib/utils/day";
 import type { Tone } from "@/lib/ui/state-tones";
 import {
   agreementTone,
@@ -22,11 +20,13 @@ import {
 } from "@/lib/ui/state-tones";
 
 // The cells of the collective's recap (retours d'Ibé du 18/11/2026, lot 2)
-// that only read: shared by « Titres et artistes » (titles-board.tsx) and
+// that only read: shared by « Titres » par artiste (board-columns.tsx) and
 // the overview's compact recap (titles-recap-compact.tsx). No hook: they
 // render on the server as well as in the board. « Le tableau lit, les
-// modules font »: each pill leads to its module; a link inside a row whose
-// DataTableLink covers it stays clickable (`relative z-10`).
+// modules font »: each state leads to its module. Every state is a dot and
+// its word on one line, cut by « … » (Sacha 27/11/2026: one fact a column,
+// no pill for a state); a link above the row's own link stays clickable
+// (`relative z-10`).
 
 const fr = { deals, projectTitles };
 
@@ -34,28 +34,13 @@ export const caption =
   "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
 export const muted = "text-[color:var(--text-tertiary)]";
 
-// A pill that opens its module, above the row's own link.
+// A state that opens its module, above the row's own link.
 export const PILL_LINK =
-  "relative z-10 inline-flex max-w-full rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
+  "relative z-10 inline-flex max-w-full min-w-0 rounded-sm outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
 
-// A pill of a cell wraps onto a second line rather than widen its column
-// (a table of 4 fixed columns besides the name does not scroll sideways):
-// `StatusBadge` is one line by default, `h-5`.
-const WRAPPING_PILLS =
-  "[&_[data-slot=status-badge]]:h-auto [&_[data-slot=status-badge]]:min-h-5 [&_[data-slot=status-badge]]:max-w-full [&_[data-slot=status-badge]]:py-0.5 [&_[data-slot=status-badge]]:text-left [&_[data-slot=status-badge]]:whitespace-normal";
-
-/** A cell's facts: one under the other in a column, side by side under the
- * name (`inline`, a small screen). */
-export const factsClass = (inline: boolean) =>
-  cn(
-    inline
-      ? "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"
-      : "flex min-w-0 flex-col items-start gap-1",
-    WRAPPING_PILLS,
-  );
-
-/** A pill, linked to its module when it has one. */
-function LinkedPill({
+/** A state, linked to its module when it has one: its word on one line,
+ * cut by « … » when the column is narrower. */
+export function LinkedPill({
   href,
   tone,
   label,
@@ -64,17 +49,12 @@ function LinkedPill({
   href: string | null;
   tone: Tone;
   label: string;
-  // The whole label, when the pill shows its first words.
+  // The whole label, when the state shows its first words.
   full?: string;
 }) {
   const pill = (
-    <StatusBadge
-      tone={tone}
-      size="sm"
-      className="h-auto min-h-5 max-w-full py-0.5 text-left [overflow-wrap:anywhere] whitespace-normal"
-      title={full && full !== label ? full : undefined}
-    >
-      {label}
+    <StatusBadge tone={tone} size="sm" className="max-w-full min-w-0">
+      <span className="truncate">{label}</span>
     </StatusBadge>
   );
   if (!href) return pill;
@@ -90,138 +70,63 @@ function LinkedPill({
 }
 
 /** « À contacter » (grey), « Contacté » (orange), « D'accord » (green),
- * « A refusé », « Retiré » (grey): where the artist stands. `tag`: in its
- * pill where states are a dot and their text (the board's Statut, the row's
- * main state, Maël 25/11/2026). */
-export function ContactStatePill({
-  status,
-  tag = false,
-}: {
-  status: ParticipationStatus;
-  tag?: boolean;
-}) {
+ * « A refusé » (red), « Retiré » (grey): where the artist stands, a dot and
+ * its word as every state (no tag since Sacha 27/11/2026). */
+export function ContactStatePill({ status }: { status: ParticipationStatus }) {
   return (
-    <StatusBadge tone={participationStatusTone[status]} size="sm" tag={tag}>
+    <StatusBadge tone={participationStatusTone[status]} size="sm">
       {fr.projectTitles.participations.statuses[status]}
     </StatusBadge>
   );
 }
 
-/** A deal's stage in the recap, on one line: « Accord validé », « Accord à
- * valider », « Négociation »… in the deal badge's tone (dealStageToneOf);
- * the deal's own badge (DealStageBadge) keeps its longer words elsewhere.
- * `short`: « Validé », « À valider » under the board's « Accord » column. */
-function AccordPill({
-  stage,
-  agreementStatus,
-  short,
-}: Pick<RecapAccord, "agreementStatus"> & {
-  stage: NonNullable<RecapAccord["stage"]>;
-  short: boolean;
-}) {
+/** The words of a deal's stage in the recap: « Négociation », « Accord à
+ * valider »… (`short`: « À valider », « Validé », the board's column). */
+export function accordStageWords(
+  accord: Pick<RecapAccord, "stage" | "agreementStatus">,
+  short: boolean,
+): string | null {
   const a = fr.projectTitles.recap.accord;
-  return (
-    // Never wrapped (`!`: over the cell's WRAPPING_PILLS).
-    <StatusBadge
-      tone={dealStageToneOf({ stage, agreementStatus })}
-      size="sm"
-      className="h-5! whitespace-nowrap!"
-    >
-      {stage === "agreement" && agreementStatus
-        ? (short ? a.agreementShort : a.agreement)[agreementStatus]
-        : a.stages[stage]}
-    </StatusBadge>
-  );
+  if (!accord.stage) return null;
+  return accord.stage === "agreement" && accord.agreementStatus
+    ? (short ? a.agreementShort : a.agreement)[accord.agreementStatus]
+    : a.stages[accord.stage];
 }
 
 /**
- * The accord of an artist (the Business module), two lines at most (Maël
- * 23/11/2026: « 2 lignes par case »): its deal's stage in short (« Accord
- * à valider » while the direction decides), linked to the deal; under it
- * `planCall` (« Call à caler », given when the row may plan it), else on
- * one line the rate, the day of the call planned (« Call le 23/11 ») and
- * who negotiates, the whole on hover. Nothing known: « — ».
+ * The accord of an artist (the Business module): its deal's stage alone, in
+ * short (« À valider » while the direction decides), in the deal badge's
+ * tone, linked to the deal. The rate, the call and who negotiates are read
+ * in the side sheet (one fact a column, Sacha 27/11/2026). None: « — ».
  */
-export function AccordFacts({
+export function AccordStage({
   accord,
   artist,
-  planCall,
-  inline = false,
-  rate = true,
-  brief = false,
-  board = false,
 }: {
   accord: RecapAccord;
   artist: string;
-  planCall?: React.ReactNode;
-  inline?: boolean;
-  // false: the rate has its own column (« Taux », the board).
-  rate?: boolean;
-  // The stage alone, no rate, call nor negotiator (the overview's recap,
-  // Maël 23/11/2026: too much there).
-  brief?: boolean;
-  // The board's « Accord » column (Maël 25/11/2026): the stage in short
-  // (« Validé », « À valider »), and no negotiator (read on the deal).
-  board?: boolean;
 }) {
-  const r = fr.projectTitles.recap;
-  const stage = accord.stage;
-  if (!stage && !planCall) return <span className={muted}>{EMPTY_CELL}</span>;
-  const stageLabel = stage
-    ? stage === "agreement" && accord.agreementStatus
+  const words = accordStageWords(accord, true);
+  if (!accord.stage || !words)
+    return <span className={muted}>{EMPTY_CELL}</span>;
+  const long =
+    accord.stage === "agreement" && accord.agreementStatus
       ? fr.deals.agreement[accord.agreementStatus]
-      : fr.deals.stages[stage]
-    : null;
-  const details = brief
-    ? []
-    : [
-        rate ? accord.rate : null,
-        accord.nextCallAt
-          ? r.accord.callOn(formatShortDay(accord.nextCallAt, { bare: true }))
-          : null,
-        // Who negotiates, once the deal is read; « À affecter » before.
-        stage && !board
-          ? (accord.negotiator ??
-            (accord.href && stage !== "abandoned"
-              ? fr.projectTitles.board.negotiation.unassigned
-              : null))
-          : null,
-      ].filter((d): d is string => Boolean(d));
+      : fr.deals.stages[accord.stage];
   return (
-    <span className={factsClass(inline)}>
-      {stage &&
-        (accord.href ? (
-          <ViewLink
-            href={accord.href}
-            className={PILL_LINK}
-            aria-label={fr.projectTitles.board.negotiation.link(
-              artist,
-              stageLabel ?? "",
-            )}
-          >
-            <AccordPill
-              stage={stage}
-              agreementStatus={accord.agreementStatus}
-              short={board}
-            />
-          </ViewLink>
-        ) : (
-          <AccordPill
-            stage={stage}
-            agreementStatus={accord.agreementStatus}
-            short={board}
-          />
-        ))}
-      {planCall ??
-        (details.length > 0 && (
-          <span
-            className={cn(caption, "max-w-full truncate")}
-            title={details.join(" · ")}
-          >
-            {details.join(" · ")}
-          </span>
-        ))}
-    </span>
+    <LinkedPill
+      href={accord.href}
+      tone={dealStageToneOf({
+        stage: accord.stage,
+        agreementStatus: accord.agreementStatus,
+      })}
+      label={words}
+      full={
+        accord.href
+          ? fr.projectTitles.board.negotiation.link(artist, long)
+          : undefined
+      }
+    />
   );
 }
 
@@ -261,9 +166,7 @@ export function ContractFacts({
   const pill = contractStatePill(contract.state, true);
   if (!pill) return <span className={muted}>{EMPTY_CELL}</span>;
   return (
-    <span className={factsClass(false)}>
-      <LinkedPill href={contract.href} tone={pill.tone} label={pill.words} />
-    </span>
+    <LinkedPill href={contract.href} tone={pill.tone} label={pill.words} />
   );
 }
 

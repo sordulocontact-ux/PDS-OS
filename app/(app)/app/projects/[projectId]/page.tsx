@@ -239,6 +239,7 @@ export default async function ProjectOverviewPage({
           }
         >
           <TitlesRecapCompact
+            projectId={project.id}
             recap={recap}
             href={routes.projectTitles(project.id)}
             masterHref={

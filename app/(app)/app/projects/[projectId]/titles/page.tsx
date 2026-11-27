@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { TitlesBoard } from "@/components/projects/titles/titles-board";
 import {
   TitlesHeader,
-  TitlesViews,
+  TitlesViewsSwitch,
 } from "@/components/projects/titles/titles-head";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -66,45 +66,44 @@ export default async function ProjectTitlesPage({
         canOpenLegal={can(access, "manage_legal")}
         choices={{ masterOptions, artists }}
       />
-      <TitlesViews projectId={project.id} current="artists">
-        <TitlesBoard
-          projectId={project.id}
-          recap={board}
-          canManage={canManage}
-          artists={artists}
-          masterOptions={masterOptions}
-          links={{
-            tracks: true,
-            master: workflows.includes("master")
-              ? routes.projectMaster(project.id)
-              : null,
-            distribution: workflows.includes("distribution")
-              ? Object.fromEntries(
-                  Object.entries(deposits).map(([titleId, d]) => {
-                    const state = fr.collectiveReleases.distribution[
-                      d.distribution.key
-                    ](d.distribution.number);
-                    return [
-                      titleId,
-                      {
-                        href: withRelease(
-                          routes.projectRelease(project.id),
-                          d.releaseId,
-                        ),
-                        label: d.withCompilation
-                          ? fr.projectTitles.board.distribution.withCompilation(
-                              state,
-                            )
-                          : state,
-                        tone: releaseDistributionTone[d.distribution.key],
-                      },
-                    ];
-                  }),
-                )
-              : null,
-          }}
-        />
-      </TitlesViews>
+      <TitlesBoard
+        views={<TitlesViewsSwitch projectId={project.id} current="artists" />}
+        projectId={project.id}
+        recap={board}
+        canManage={canManage}
+        artists={artists}
+        masterOptions={masterOptions}
+        links={{
+          tracks: true,
+          master: workflows.includes("master")
+            ? routes.projectMaster(project.id)
+            : null,
+          distribution: workflows.includes("distribution")
+            ? Object.fromEntries(
+                Object.entries(deposits).map(([titleId, d]) => {
+                  const state = fr.collectiveReleases.distribution[
+                    d.distribution.key
+                  ](d.distribution.number);
+                  return [
+                    titleId,
+                    {
+                      href: withRelease(
+                        routes.projectRelease(project.id),
+                        d.releaseId,
+                      ),
+                      label: d.withCompilation
+                        ? fr.projectTitles.board.distribution.withCompilation(
+                            state,
+                          )
+                        : state,
+                      tone: releaseDistributionTone[d.distribution.key],
+                    },
+                  ];
+                }),
+              )
+            : null,
+        }}
+      />
     </div>
   );
 }

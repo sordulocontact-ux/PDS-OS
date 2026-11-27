@@ -165,6 +165,47 @@ qui a été fait.
   (« Une note est un document »).
 - **À retenir** : pour un parcours de création ou d'interaction, partir d'Accordee (vault, `INSPIRATION/WEBDESIGN/
   accordee/flows/`) avant de reprendre un formulaire existant ; un écrit libre (note) n'est pas un formulaire.
+
+---
+
+## 27/11/2026 : Sessions studio, une fiche latérale et un fait par colonne
+
+- **Ce que Sacha a dit** : « modifie la page session pour qu'elle soit comme les autres une petite modale (note,
+  réseau, contrat…), à part si tu penses que la page est trop chargée », puis « sur le tableau de session sépare et
+  rajoute les données si besoin ».
+- **Son explication** : ouvrir une ligne ne doit pas faire quitter la liste, comme partout ailleurs ; et une cellule
+  qui empile deux faits (le type et le studio, la date et les horaires, l'ingé et la durée) se lit mal et ne se trie pas.
+- **Fait** : `SessionSheet` sur le modèle du Réseau (une session est une séance datée comme un call, pas un
+  enregistrement complexe comme un artiste ou un projet : la page reste derrière « Ouvrir la session ») ; tableau en
+  une colonne par fait, avec Titres et « Compte rendu par » en plus. Règles dans `docs/STYLE-FINANCE-PARTOUT.md`
+  § 6.7 bis et `docs/COMPOSANTS.md`.
+- **À retenir** : une ligne de liste s'ouvre en fiche latérale dès que l'enregistrement se lit en un coup d'œil ; un
+  tableau met un fait par colonne, jamais une sous-ligne grise qui en cache un second.
+
+---
+
+## 27/11/2026 : Titres › Par artiste, le bouton « Filtres » des listes
+
+- **Ce que Sacha a dit** : « enlève les filtres et met le vrai bouton filtre qu'on a dans les listes » (pastilles
+  « À contacter 1 », « Contacté 1 », « D'accord 4 » au-dessus du tableau).
+- **Fait** : les pastilles `FilterChip` remplacées par `FilterPanel` (bouton « Filtres » en contour, cases du statut,
+  compteur sur le bouton, « Effacer les filtres ») ; `align="start"` ajouté au panneau pour un bouton en début de ligne.
+- **Puis** : « je veux qu'il soit côte à côte » : le bouton sur la ligne des vues « Par titre / Par artiste », juste
+  après elles (`TitlesViewsSwitch` passé au tableau par `views`).
+- **À retenir** : filtrer une liste = le bouton « Filtres » des listes, jamais une rangée de pastilles maison.
+
+---
+
+## 27/11/2026 : « Qui fait quoi › Liens privés », la carte du lien commune
+
+- **Ce que Sacha a dit** : « utilise les bons composants pour les liens », « c'est dans qui fait quoi » (lignes « Bastien
+  Coll · 2 éléments dans le projet », dates en gris, puis Copier le lien / Relancer / Nouveau lien / Révoquer en texte).
+- **Fait** : chaque lien de la section est la carte commune `PersonLinkCard` (via `ContactLinkCard` pour la page par
+  personne, directement pour les liens propres d'un module dans `PrivateLinks`) : pliée, pastille d'état, adresse à
+  copier, Relancer, Nouveau lien, le reste dans « ⋯ ». Les lignes maison et `ContactLinkActions` sont supprimés.
+- **À retenir** : un lien privé, où qu'il soit, s'affiche dans `PersonLinkCard` ; jamais une ligne de texte avec une
+  rangée de boutons.
+
 ---
 
 ## 27/11/2026 : Master d'un collectif, l'en-tête de l'étape d'un titre
@@ -182,6 +223,20 @@ qui a été fait.
   pourquoi de Source : « Le fichier sur lequel le mixeur va travailler. ».
 - **À retenir** : entre le titre d'une étape et son contenu, rien qui parle d'autre chose ; une attente se dit une
   fois ; un pourquoi s'écrit pour la personne, pas pour le code.
+
+---
+
+## 27/11/2026 : jamais trois boutons à texte côte à côte
+
+- **Ce que Sacha a dit** : « sur toutes les pages/composants où on a 3 boutons à côté comme ça, il faut soit mettre
+  des icônes (icon only) soit les mettre dans un menu » (en-tête de Titres : « Ajouter un titre », « Changer
+  l'artiste principal », « Participations et contrats » ; lignes des liens privés).
+- **Fait** : règle écrite dans `docs/DESIGN.md` « Rangée de boutons » (au plus deux boutons à texte, le reste en
+  icône seule ou dans « ⋯ ») ; `RowActions` accepte `dialog` pour ranger un bouton à modale dans le menu ; en-tête de
+  Titres et 18 rangées repérées dans l'app corrigées.
+- **À retenir** : avant d'ajouter un bouton à une rangée, compter ; au troisième, icône seule (geste sans ambiguïté)
+  ou « ⋯ ».
+
 ---
 
 ## 27/11/2026 : des en-têtes trop chargés (pourquoi, explications, faits qui flottent)
@@ -205,3 +260,33 @@ qui a été fait.
   paragraphe ; Nouveau projet, Nouveau titre, Sélections et Nouveau membre sans phrase sous le titre.
 - **À retenir** : rien sous le titre d'une page qui n'est pas l'objet lui-même ; un fait n'est en tête que s'il change
   ce qu'on fait ici et n'apparaît pas dessous ; un réglage se montre dans son bouton.
+
+---
+
+## 27/11/2026 : le tableau « Titres » par artiste
+
+- **Ce que Sacha a dit** : le tableau n'est pas bien designé : plusieurs infos par case (Artiste : nom · « Featuring »
+  puis le titre et « Nommer » ; Contact : « Manager », nom, téléphone, crayon ; Accord : étape puis « Call à caler ») ;
+  il déborde (« Fiche de renseigneme… » coupé) ; deux styles d'état (Statut en pastille pleine, Accord et Fiche en point +
+  mot) ; un contact vide = une icône seule au lieu de « — » ; on modifie dans les cases ; « Featuring » répété sur toutes
+  les lignes ; téléphone et taux en chasse fixe ; pas d'icône dans les en-têtes.
+- **Fait** : une info par colonne avec son icône, Rôle seulement s'il varie, Téléphone à part, tous les états en point +
+  mot, « — » pour un vide, chiffres dans la police du texte ; rien ne se modifie dans le tableau, le nom ouvre la fiche
+  latérale de l'artiste (blocs Titre, Statut, Contact, Accord, Juridique, Notes) ; toutes les colonnes de l'Excel
+  restent, le tableau défile dans son cadre sans en-tête coupé.
+- **À retenir** : une case = un fait sur une ligne ; une valeur identique sur toutes les lignes n'a pas sa colonne ; un
+  seul style pour un état ; un tableau se lit, une fiche se modifie ; un vide se dit « — », jamais par une icône de
+  geste.
+
+
+---
+
+## 27/11/2026 : « Qui fait quoi », les rôles comme une fiche
+
+- **Ce que Sacha a dit** : « je trouve ça très mal designé, fais quelque chose dans ce style » (liste des rôles en
+  blocs empilés : titre, pastille Exécute / Coordonne / Valide, avatar, phrase grise ; modèle : la fiche de
+  renseignements, lignes encadrées icône + libellé / valeur / ⓘ).
+- **Fait** : `RolesPanel` en `FactRows` : une ligne par rôle (icône du type et rôle, titulaire, « Changer », ⓘ avec le
+  type et ce que fait le rôle).
+- **À retenir** : une liste de « qui / quoi » se lit comme des faits (`FactRows`), pas en blocs empilés avec une phrase
+  sous chaque titre ; l'explication va dans le ⓘ.

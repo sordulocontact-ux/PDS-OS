@@ -46,7 +46,8 @@ export const legalDemarches = {
   },
   // A collective's title not in the Catalogue yet (§ 3.6 of Ibé's 18/11).
   attach: {
-    title: "Rattacher le titre au Catalogue",
+    // « le titre » goes without saying in a title's row (Sacha, 27/11/2026).
+    title: "Rattacher au Catalogue",
     inCatalogue: "Déjà au Catalogue",
     audio: "Pas encore au Catalogue",
     onlyOwner: (name: string) =>
