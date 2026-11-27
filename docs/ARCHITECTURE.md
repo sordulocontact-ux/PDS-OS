@@ -819,6 +819,16 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
 - Coquille : `app/(app)/layout.tsx` (barre latérale blanche flottante, tiroir mobile), projets
   (`lib/projects/*`, étape actuelle calculée par le code), onglets projet : Vue d'ensemble,
   Cadrage, Calls, Sortie.
+- **Le « + » de la coquille** (27/11/2026, `docs/DESIGN.md` § 4 « Coquille ») : la liste des actions
+  est `lib/shell/quick-actions.ts` (`QUICK_ACTIONS`, ordre fixe ; `allowedQuickActions(access, {
+  mailbox })` filtre par droit **dans le layout**, côté serveur ; les formulaires et le RLS décident
+  toujours à l'enregistrement). `QuickCreateProvider` (`components/shell/quick-create/`, dans
+  `AssistantProvider`) expose `useQuickCreate(): { actions, open(action) }` et monte les fenêtres
+  (`QuickCreateDialogs`, chargées à la demande) **hors** du menu et du ⌘K, pour qu'elles survivent à
+  leur fermeture. Deux portes : `QuickCreateButton` (barre latérale, en-tête du téléphone, touche N)
+  et le groupe « Créer » du ⌘K (`AppSearch`). Ajouter une action = une entrée de `QUICK_ACTIONS`, sa
+  règle de droit, son texte (`shell.quickCreate.actions`), son icône (`quick-action-icons.ts`) et sa
+  fenêtre ; le guide de PO (`quick-create`, `lib/assistant/guide/topics/daily.ts`) aussi.
 - Demandes d'accès en attente : comptées par le layout (`countPendingMemberships`, admins
   seulement) et affichées sur « Équipe », qui ouvre alors `?status=pending`. Un layout ne
   se recalcule pas à chaque navigation : le compteur se met à jour au chargement d'une
@@ -3163,8 +3173,9 @@ date de sortie de la Stratégie, NDA : à décider).
     par, mois (`lib/budget/expense-filters.ts`), recherche instantanée. **Même ligne** (`BudgetTable
     showTarget`) et mêmes modales (`useBudgetLineDialogs`) que le Budget d'un projet et d'un artiste ;
     modifiable là où le lecteur écrit : une dépense d'artiste, une ligne d'un projet qu'il mène.
-  - **Saisie rapide** (BUD 4) : `QuickExpenseButton`, « + Dépense » dans l'en-tête du téléphone sur
-    toutes les pages (`read_artist_budgets` ou `pilot_projects`), « Ajouter une dépense » sur la page
+  - **Saisie rapide** (BUD 4) : « Ajouter une dépense » du « + » de la coquille sur toutes les pages
+    (`QuickExpenseDialog`, `read_artist_budgets` ou `pilot_projects` ; sur une page de projet, ce
+    projet est visé d'avance ; avant le 27/11/2026 : « + Dépense » de l'en-tête du téléphone), « Ajouter une dépense » sur la page
     Dépenses en ordinateur (les Budgets gardent le leur). **Même formulaire** (`BudgetLineForm` avec
     `target={null}` et `targets`) : justificatif → montant → libellé → poste (suggéré, « Utiliser »)
     → **pour** (`BudgetTargetField` : projets que le lecteur mène, artistes pour `read_artist_budgets`,

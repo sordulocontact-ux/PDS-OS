@@ -231,4 +231,47 @@ export const dailyTopics: GuideTopic[] = [
       },
     ],
   },
+  {
+    key: "quick-create",
+    title: "Créer et rechercher depuis n'importe quelle page",
+    summary:
+      "Le « + » et la recherche ⌘K en haut de la barre de gauche : créer une conversation, un mail, une dépense, une réunion, un contact ou un deal sans quitter la page.",
+    keywords: [
+      "plus",
+      "bouton plus",
+      "creer",
+      "creation rapide",
+      "nouveau",
+      "ajouter",
+      "raccourci",
+      "recherche",
+      "rechercher",
+      "cmd k",
+      "commande k",
+    ],
+    where: "En haut de la barre de gauche ; sur téléphone, dans l'en-tête",
+    facts: [
+      "En haut de la barre de gauche, « Rechercher… » (⌘K) trouve une page, un projet, un artiste, un titre, un contact, un contrat, un deal, un call ou une session studio et l'ouvre.",
+      "Le « + » en haut de la barre de gauche, à côté du bouton qui la replie (barre repliée : sous la loupe), ouvre un menu pour créer sans changer de page : Nouvelle conversation (avec PO), Écrire un mail, Ajouter une dépense, Nouvelle réunion, Nouveau contact, Nouveau deal. Chacun ne voit que ce qu'il a le droit de faire.",
+      "La touche N, hors d'un champ, ouvre ce menu. Les mêmes actions sont en tête de la recherche ⌘K, sous « Créer » : taper « dépense » propose « Ajouter une dépense ».",
+      "Chaque action ouvre le même formulaire que sur sa page, et finit pareil : un contact ou un deal créé ouvre sa fiche, une réunion ouvre sa page.",
+      "Sur la page d'un projet, « Ajouter une dépense » vise déjà ce projet ; on peut en choisir un autre.",
+      "« Nouvelle réunion » crée la même réunion que le bouton de la page Calls. Le call d'un projet se crée depuis l'onglet Calls du projet.",
+      "Sur téléphone, le « + » est dans l'en-tête, à côté de la cloche.",
+    ],
+    faq: [
+      {
+        q: "Comment ajouter vite une dépense ?",
+        a: "Le « + » en haut de la barre de gauche (ou la touche N), puis « Ajouter une dépense ». Sur la page d'un projet, la dépense vise déjà ce projet.",
+      },
+      {
+        q: "Je ne vois pas « Nouveau deal » ou « Ajouter une dépense » dans le « + ».",
+        a: "Le menu ne montre que ce que votre poste vous permet de faire ; demandez à la direction si vous en avez besoin.",
+      },
+      {
+        q: "Pourquoi « Écrire un mail » n'apparaît pas ?",
+        a: "La boîte de po@pdsrecords.com n'est pas encore branchée sur cette version de PDS OS.",
+      },
+    ],
+  },
 ];

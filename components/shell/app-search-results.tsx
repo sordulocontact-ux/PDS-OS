@@ -3,10 +3,23 @@
 import { useEffect, useRef } from "react";
 
 import { shell } from "@/lib/i18n/fr/shell";
-import type { SearchHit } from "@/lib/search/types";
+import { QUICK_ACTION_ICONS } from "@/components/shell/quick-create/quick-action-icons";
+import type { QuickAction } from "@/lib/shell/quick-actions";
+import type { SearchRow } from "@/lib/search/types";
 import { cn } from "@/lib/utils";
 
 const fr = { shell };
+
+// Only the actions wear an icon: it says « this is not a page ».
+function ActionIcon({ action }: { action: QuickAction }) {
+  const Icon = QUICK_ACTION_ICONS[action];
+  return (
+    <Icon
+      aria-hidden
+      className="size-4 shrink-0 self-center text-[color:var(--text-secondary)]"
+    />
+  );
+}
 
 /**
  * The rows of the app's ⌘K, grouped (pages, projects, artists…): the name,
@@ -21,10 +34,10 @@ export function AppSearchResults({
   onPick,
 }: {
   id: string;
-  rows: SearchHit[];
+  rows: SearchRow[];
   active: number;
   onHover: (index: number) => void;
-  onPick: (row: SearchHit) => void;
+  onPick: (row: SearchRow) => void;
 }) {
   const t = fr.shell.appSearch;
   const list = useRef<HTMLUListElement>(null);
@@ -63,10 +76,11 @@ export function AppSearchResults({
               index === active && "bg-[var(--selection-bg)]",
             )}
           >
+            {row.group === "action" && <ActionIcon action={row.action} />}
             <span className="min-w-0 flex-1 truncate text-body-sm text-[color:var(--text-primary)]">
               {row.label || t.untitled}
             </span>
-            {row.detail && (
+            {row.group !== "action" && row.detail && (
               <span className="max-w-[55%] shrink-0 truncate text-caption text-[color:var(--text-secondary)] tabular-nums">
                 {row.detail}
               </span>

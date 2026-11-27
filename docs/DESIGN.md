@@ -390,6 +390,16 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   (absente du Figma replié, gardée pour ne pas perdre les notifications dans un
   projet). Le texte reste en `body-md` (16 px) : le Figma est dessiné à 14 px, avant
   l'agrandissement 8/7 de l'échelle (§ 2).
+- **Le « + » (Sacha, 27/11/2026)** : en tête de la barre, à gauche du bouton qui la replie (même
+  bouton icône ; à côté de « Rechercher… ⌘K », il coupait le libellé ; repliée : sous la loupe ;
+  téléphone : dans l'en-tête, à la place de l'ancien « + Dépense »), un bouton icône qui
+  ouvre un menu de créations : Nouvelle conversation, Écrire un mail, Ajouter une dépense, Nouvelle
+  réunion, Nouveau contact, Nouveau deal (ordre fixe, filtrées par droit, `lib/shell/quick-actions.ts`).
+  Touche **N** hors d'un champ (pas C, qui lance la capture d'une zone pour un retour). Les mêmes actions forment le groupe « Créer » du ⌘K (en tête champ
+  vide, filtrées par le texte). **Règle d'admission** : seulement un objet qui existe hors d'une étape
+  (jamais un geste d'étape, qui reste dans son étape), sept au plus ; chaque entrée ouvre le **vrai**
+  formulaire et finit comme sur sa page. Pas de bouton flottant (geste de mobile, l'app est d'abord
+  pour l'ordinateur). Références : Linear, Notion, Plain (le « nouveau » en tête de barre).
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
 - Un item sans page encore reste visible, grisé, non cliquable (`disabled` dans `NavItem`),

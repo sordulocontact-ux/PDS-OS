@@ -39,7 +39,7 @@ function spaceBelongsTo(target: EventTarget | null): boolean {
  */
 export function AssistantLauncher() {
   const t = fr.assistant.launcher;
-  const { launcherOpen, setLauncherOpen } = useAssistant();
+  const { launcherOpen, setLauncherOpen, launcherVoice } = useAssistant();
   const lastSpace = useRef(0);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export function AssistantLauncher() {
           </DialogDescription>
         </DialogHeader>
         {/* Mounted per opening: a new conversation, listening at once. */}
-        {launcherOpen && <LauncherConversation />}
+        {launcherOpen && <LauncherConversation voice={launcherVoice} />}
       </DialogContent>
     </Dialog>
   );

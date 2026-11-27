@@ -165,6 +165,11 @@ export const deals = {
   // « Nouveau deal » (BIZ 4): the direction and the project managers.
   create: {
     button: "Nouveau deal",
+    // The « + » of the shell: the form's options are read when it opens.
+    loading: "Chargement du formulaire…",
+    loadError: "Impossible de charger le formulaire. Réessayez.",
+    noRight:
+      "Vous n'ouvrez pas de deal : la direction ou le chef de projet le fait.",
     title: "Nouveau deal",
     description:
       "Pour un artiste, avec un label ou une marque : choisissez parmi ce qui existe, puis qui le négocie.",

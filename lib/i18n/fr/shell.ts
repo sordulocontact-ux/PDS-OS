@@ -671,9 +671,24 @@ export const shell = {
       deal: "Deals",
       call: "Calls",
       session: "Sessions studio",
+      action: "Créer",
     },
     untitled: "Sans titre",
     session: "Session studio",
     keys: { move: "pour choisir", open: "pour ouvrir" },
+  },
+  // The shell's « + » (components/shell/quick-create/, 27/11/2026): the
+  // creations open from any page, also in the ⌘K's « Créer » group.
+  quickCreate: {
+    open: "Créer",
+    shortcut: "N",
+    actions: {
+      conversation: "Nouvelle conversation",
+      mail: "Écrire un mail",
+      expense: "Ajouter une dépense",
+      call: "Nouvelle réunion",
+      contact: "Nouveau contact",
+      deal: "Nouveau deal",
+    },
   },
 } as const;

@@ -6,10 +6,11 @@ import { FeedbackProvider } from "@/components/feedback/feedback-provider";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
-import { QuickExpenseButton } from "@/components/budget/quick-expense-button";
 import { PreprodSlot } from "@/components/preprod/preprod-slot";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { PdsLogo } from "@/components/shell/pds-logo";
+import { QuickCreateButton } from "@/components/shell/quick-create/quick-create-button";
+import { QuickCreateProvider } from "@/components/shell/quick-create/quick-create-provider";
 import { Sidebar } from "@/components/shell/sidebar";
 import { CollapsedNavProvider } from "@/components/shell/use-collapsed-nav";
 import { UserPanel } from "@/components/shell/user-panel";
@@ -22,8 +23,10 @@ import { routes } from "@/lib/auth/redirects";
 import { getPublicEnv } from "@/lib/env-public";
 import { welcomeVariantOf } from "@/lib/home/welcome";
 import { fr } from "@/lib/i18n/fr";
+import { inboxEnabled } from "@/lib/email/inbox";
 import { countPendingMemberships } from "@/lib/members/queries";
 import { loadNotifications } from "@/lib/notifications/queries";
+import { allowedQuickActions } from "@/lib/shell/quick-actions";
 import { cn } from "@/lib/utils";
 
 type Notifications = Awaited<ReturnType<typeof loadNotifications>>;
@@ -83,11 +86,11 @@ export default async function AppLayout({
   const name = [access.firstName, access.lastName].filter(Boolean).join(" ");
   const userPanel = <UserPanel name={name} email={access.email} />;
   const signedIn = access.state === "approved" && access.personId !== null;
-  // « + Dépense » on the phone (BUD 4): for whoever may enter one (an
-  // artist's spend, or a line of a project they run).
-  const spends =
-    signedIn &&
-    (can(access, "read_artist_budgets") || can(access, "pilot_projects"));
+  // The « + » (27/11/2026): the creations the reader may start from any
+  // page; on the phone it took the place of « + Dépense » (BUD 4).
+  const quickActions = signedIn
+    ? allowedQuickActions(access, { mailbox: inboxEnabled() })
+    : [];
   // Access requests waiting for a decision: counted on "Équipe" for admins.
   const notifications = signedIn
     ? loadNotifications()
@@ -135,64 +138,66 @@ export default async function AppLayout({
         }
       >
         <AssistantProvider launcher={signedIn}>
-          <CollapsedNavProvider>
-            <OneTimeLinksProvider>
-              <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
-                {/* First Tab: past the navigation, to the page. */}
-                <a
-                  href="#contenu"
-                  className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:bg-background",
-                  )}
-                >
-                  {fr.shell.skipToContent}
-                </a>
-                <NavigationProgress />
-                <AccessWatcher
-                  current={access.state}
-                  role={access.role}
-                  intervalMs={60_000}
-                />
-                {signedIn && access.personId && (
-                  <NotificationListener personId={access.personId} />
-                )}
-
-                <CountedSidebar
-                  isAdmin={isAdmin}
-                  permissions={access.permissions}
-                  pending={pendingMembers}
-                  bell={bell("nav")}
-                  name={name}
-                  email={access.email}
-                />
-
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-                    <CountedMobileNav
-                      isAdmin={isAdmin}
-                      permissions={access.permissions}
-                      pending={pendingMembers}
-                      footer={userPanel}
-                    />
-                    {brand}
-                    <div className="ml-auto flex items-center gap-1">
-                      {spends && <QuickExpenseButton compact />}
-                      {bell("ghost")}
-                    </div>
-                  </header>
-                  <main
-                    id="contenu"
-                    tabIndex={-1}
-                    className="flex min-w-0 flex-1 flex-col outline-none"
+          <QuickCreateProvider actions={quickActions}>
+            <CollapsedNavProvider>
+              <OneTimeLinksProvider>
+                <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+                  {/* First Tab: past the navigation, to the page. */}
+                  <a
+                    href="#contenu"
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:bg-background",
+                    )}
                   >
-                    {children}
-                  </main>
+                    {fr.shell.skipToContent}
+                  </a>
+                  <NavigationProgress />
+                  <AccessWatcher
+                    current={access.state}
+                    role={access.role}
+                    intervalMs={60_000}
+                  />
+                  {signedIn && access.personId && (
+                    <NotificationListener personId={access.personId} />
+                  )}
+
+                  <CountedSidebar
+                    isAdmin={isAdmin}
+                    permissions={access.permissions}
+                    pending={pendingMembers}
+                    bell={bell("nav")}
+                    name={name}
+                    email={access.email}
+                  />
+
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
+                      <CountedMobileNav
+                        isAdmin={isAdmin}
+                        permissions={access.permissions}
+                        pending={pendingMembers}
+                        footer={userPanel}
+                      />
+                      {brand}
+                      <div className="ml-auto flex items-center gap-1">
+                        <QuickCreateButton placement="header" />
+                        {bell("ghost")}
+                      </div>
+                    </header>
+                    <main
+                      id="contenu"
+                      tabIndex={-1}
+                      className="flex min-w-0 flex-1 flex-col outline-none"
+                    >
+                      {children}
+                    </main>
+                  </div>
+                  {signedIn && <PreprodSlot email={access.email} />}
                 </div>
-                {signedIn && <PreprodSlot email={access.email} />}
-              </div>
-            </OneTimeLinksProvider>
-          </CollapsedNavProvider>
+              </OneTimeLinksProvider>
+            </CollapsedNavProvider>
+          </QuickCreateProvider>
         </AssistantProvider>
       </OnboardingProvider>
     </FeedbackProvider>

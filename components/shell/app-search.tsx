@@ -5,19 +5,21 @@ import { useDeferredValue, useEffect, useId, useState } from "react";
 
 import { AppSearchResults } from "@/components/shell/app-search-results";
 import { SearchTrigger } from "@/components/shell/search-trigger";
+import { useQuickCreate } from "@/components/shell/quick-create/quick-create-provider";
 import { useAppSearch } from "@/components/shell/use-app-search";
+import { useSearchRows } from "@/components/shell/use-search-rows";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { SearchField } from "@/components/ui/search-field";
 import { shell } from "@/lib/i18n/fr/shell";
-import type { SearchHit } from "@/lib/search/types";
+import type { SearchRow } from "@/lib/search/types";
 
 const fr = { shell };
 
 /**
  * The app's ⌘K search, at the top of the main sidebar since 24/11/2026
  * (Sacha: the top band says where one is), and in a phone's menu (no ⌘K
- * there: `shortcut`): modelled on Finance's. Nothing typed, the pages the reader may open; typed, the
+ * there: `shortcut`): modelled on Finance's. Nothing typed, the reader's « Créer » actions then the pages they may open; typed, the
  * projects, artists, titles, contacts, contracts, deals, calls and sessions
  * whose name matches (`appSearch`, read with the reader's session). ⌘K or
  * Ctrl K anywhere; ↑ ↓ to choose, Entrée to open.
@@ -40,7 +42,9 @@ export function AppSearch({
   const [active, setActive] = useState(0);
   const listId = useId();
   const typed = useDeferredValue(query.trim());
-  const { hits, error, pending } = useAppSearch(typed, open);
+  const { hits: found, error, pending } = useAppSearch(typed, open);
+  const hits = useSearchRows(typed, found);
+  const { open: openCreate } = useQuickCreate();
   const current = Math.min(active, Math.max(hits.length - 1, 0));
 
   useEffect(() => {
@@ -58,11 +62,14 @@ export function AppSearch({
     return () => window.removeEventListener("keydown", onKey);
   }, [shortcut]);
 
-  function go(row: SearchHit | undefined) {
+  function go(row: SearchRow | undefined) {
     if (!row) return;
     setOpen(false);
     onNavigate?.();
-    router.push(row.href);
+    // The form is mounted by the shell's provider, out of this window, so it
+    // outlives its closing.
+    if (row.group === "action") openCreate(row.action);
+    else router.push(row.href);
   }
 
   function changeOpen(next: boolean) {

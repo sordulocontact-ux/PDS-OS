@@ -3211,3 +3211,21 @@ PDF, pas un truc avec les écritures »).
       (`fileImportedContract`).
 - Reste : vérifier dans un vrai Chrome la frappe et le collage depuis Word, et l'import d'un Word en Times ou Calibri
   (`contrat_test_times.docx`) ; une clé d'IA locale valide ; pousser la migration `20261125200101` en prod.
+
+## Le « + » : créer depuis n'importe quelle page (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : un bouton toujours là pour une nouvelle conversation, écrire un mail, ajouter une dépense…
+Cadrage et décisions : `docs/DESIGN.md` § 4 « Coquille », `docs/ARCHITECTURE.md` § 3.
+
+- **Six actions**, filtrées par droit côté serveur (`lib/shell/quick-actions.ts`) : Nouvelle conversation (fenêtre de
+  PO, sans dictée), Écrire un mail, Ajouter une dépense (le projet de la page visé d'avance), Nouvelle réunion,
+  Nouveau contact, Nouveau deal. « Nouveau projet » écarté par Sacha (son bouton existe).
+- **Deux portes, une liste** : le « + » (en tête de la barre, à gauche du bouton qui la replie ; repliée, sous la
+  loupe ; téléphone, dans l'en-tête à la place de « + Dépense ») et le groupe « Créer » du ⌘K.
+- **Touche N** : C était déjà la capture d'une zone pour un retour.
+- Chaque action ouvre le vrai formulaire de sa page et finit pareil (`components/shell/quick-create/`) ; options du
+  deal lues par une nouvelle server action (`loadNewDealOptionsForReader`).
+- Guide de PO : sujet `quick-create`.
+- Vérifié dans le navigateur (`pnpm start`, compte business manager local) : menu, les six fenêtres, N, ⌘K vide et
+  filtré (« dep »), Entrée, barre repliée, téléphone. **Non vérifié** : la dépense visée d'avance sur une page de
+  projet (aucun compte local avec un projet ne se connecte : `admin@pds.test` est rattaché à « PDS (local) »).

@@ -59,6 +59,7 @@ export function BudgetLineForm({
   levers = [],
   deliverables = [],
   organizationId = null,
+  preferredTargetKey = "",
   storedProof,
   asFinance = false,
   onDone,
@@ -73,6 +74,9 @@ export function BudgetLineForm({
   deliverables?: BudgetDeliverable[];
   // Where a proof is uploaded; no proof field without it.
   organizationId?: string | null;
+  // The target proposed first among `targets` (targetKey), changeable: the
+  // project the shell's « + » was opened on.
+  preferredTargetKey?: string;
   // A file already kept in finance-files (a proof of Finance › Justificatifs,
   // « Créer la dépense »): a Finance spend's proof when no other is chosen.
   storedProof?: { path: string; name: string };
@@ -110,7 +114,7 @@ export function BudgetLineForm({
   });
   const [partId, setPartId] = useState<string | undefined>(undefined);
   const [proof, setProof] = useState<File | null>(null);
-  const [chosen, setChosen] = useState("");
+  const [chosen, setChosen] = useState(preferredTargetKey);
   const target =
     fixedTarget ?? targets.find((o) => targetKey(o) === chosen) ?? null;
   const [tried, setTried] = useState(false);

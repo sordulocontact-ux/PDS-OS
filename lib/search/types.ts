@@ -1,3 +1,5 @@
+import type { QuickAction } from "@/lib/shell/quick-actions";
+
 export const SEARCH_GROUPS = [
   "page",
   "project",
@@ -22,3 +24,15 @@ export type SearchHit = {
 };
 
 export type SearchResult = { hits: SearchHit[]; error: boolean };
+
+/** A row of the « Créer » group: computed on the client from the shell's
+ * quick actions, it opens a form instead of navigating. */
+export type ActionRow = {
+  id: string;
+  group: "action";
+  action: QuickAction;
+  label: string;
+};
+
+/** What the ⌘K lists: server hits and client actions, in one keyboard run. */
+export type SearchRow = SearchHit | ActionRow;
