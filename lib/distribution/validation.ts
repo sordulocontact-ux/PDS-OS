@@ -279,6 +279,20 @@ export const driftModules = (drift: DriftLine[]): string[] => [
   ...new Set(drift.map((line) => line.origin)),
 ];
 
+/** Whether a version froze its title's cover from the Catalogue (the cover
+ * field read from the Catalogue module, not from the Production). */
+export function frozeCatalogCover(
+  snapshot: DistributionSnapshot | null,
+): boolean {
+  return (snapshot?.sections ?? []).some((section) =>
+    section.groups.some((group) =>
+      group.fields.some(
+        (field) => field.key === "cover" && field.origin === "catalog",
+      ),
+    ),
+  );
+}
+
 /** A stored snapshot, read back defensively. */
 export function asSnapshot(value: unknown): DistributionSnapshot | null {
   if (

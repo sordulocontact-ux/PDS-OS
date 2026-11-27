@@ -266,7 +266,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   `p_release_id` (nul par défaut, `release_required` pour un collectif sans sortie). Refus de
   soumission : sortie archivée, titre abandonné, titre provisoire, contrat sans dérogation de
   sortie (`release_submission_blockers`). Sortie d'un titre : pochette livrée par la Production
-  quand il y en a une qui couvre le titre (depuis le 26/11/2026), sinon celle du titre (Catalogue),
+  quand il y en a une qui couvre le titre (depuis le 26/11/2026 ; un dossier déjà validé garde
+  celle de sa version jusqu'à la suivante), sinon celle du titre (Catalogue),
   crédits pour les plateformes (PDS principal, invités en featuring, « Titre (feat. X) »,
   `trackDelivery`), format Single ; compilation : pochette du projet, pistes = titres actifs.
   Adresse `?sortie=` (`lib/distribution/scope.ts`), sortie et pistes `release-scope.ts`.

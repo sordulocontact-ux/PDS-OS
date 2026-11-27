@@ -19,6 +19,7 @@ import type { ProjectDetail } from "@/lib/projects/types";
 import { listMasterCovers } from "@/lib/catalog/covers";
 import { loadTitleScopes, scopeOf } from "@/lib/projects/title-scopes";
 import { titleScopeCovers } from "@/lib/projects/title-scope-rules";
+import { asSnapshot, frozeCatalogCover } from "@/lib/distribution/validation";
 import { routes } from "@/lib/auth/redirects";
 import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { loadContractGaps, gapNames } from "@/lib/legal/contract-gaps";
@@ -159,12 +160,24 @@ export const loadDistributionSources = trackedCache(async function load(
     distributionCover(project.id, releaseId),
     loadProjectDates(project.id),
   ]);
-  const [titleCovers, gaps, titleScopes] = await Promise.all([
+  const [titleCovers, gaps, titleScopes, latestVersion] = await Promise.all([
     titleCoverMaster
       ? listMasterCovers(titleCoverMaster)
       : Promise.resolve(null),
     scoped ? loadContractGaps(project.id, "release") : Promise.resolve([]),
     scoped?.kind === "title" ? loadTitleScopes(project.id) : null,
+    scoped?.kind === "title"
+      ? inScope(
+          supabase
+            .from("distribution_versions")
+            .select("status, superseded_at, snapshot")
+            .eq("project_id", project.id),
+          releaseId,
+        )
+          .order("number", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : null,
   ]);
 
   const rows = new Map((masters?.data ?? []).map((row) => [row.id, row]));
@@ -273,11 +286,20 @@ export const loadDistributionSources = trackedCache(async function load(
   }));
   // A title's release (M7, test de parcours du 26/11/2026): the cover the
   // Production delivered, when it concerns the title (deliverable_titles),
-  // as for a simple project; else its title's cover in the Catalogue.
+  // as for a simple project; else its title's cover in the Catalogue. A
+  // dossier validated with its title's cover keeps it until a new version
+  // is prepared (Maël 27/11/2026): the rule's change does not make it
+  // « ne correspond plus à la source ».
+  const validated = latestVersion?.data ?? null;
+  const keepsCatalogCover =
+    validated?.status === "approved" &&
+    validated.superseded_at === null &&
+    frozeCatalogCover(asSnapshot(validated.snapshot));
   const any = cover.data?.[0] ?? null;
   const found =
     scoped?.kind === "title"
-      ? any?.delivered_at &&
+      ? !keepsCatalogCover &&
+        any?.delivered_at &&
         scoped.titleId &&
         (!titleScopes ||
           !any.deliverable_id ||

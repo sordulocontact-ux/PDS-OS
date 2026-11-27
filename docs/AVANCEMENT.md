@@ -3168,7 +3168,9 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
 - **M4** : le Brief de cadrage et le Plan du projet d'un collectif comptent tous les titres actifs, avec ou sans master
   (« pas encore d'audio »).
 - **M7** : la sortie d'un titre prend la pochette livrée par la Production quand elle couvre le titre ; sinon celle du
-  Catalogue, comme avant.
+  Catalogue, comme avant. Un dossier déjà validé garde la pochette avec laquelle il l'a été (décision de Maël du
+  27/11) : la pochette de la Production ne vaut que pour un dossier pas encore validé ou une nouvelle version
+  (`frozeCatalogCover` sur la dernière version, approuvée et pas remplacée).
 - **M8** : « Confirmer pour les N titres » sur « Contrats du titre » : ce titre avec ses cases, les autres titres non
   confirmés avec les quatre types ; chacun garde sa confirmation et « Modifier ».
 - **M9** : la page de l'ingénieur d'un collectif nomme les titres du dossier (« dossier du mix de Echo test »).
@@ -3204,7 +3206,7 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
   | « Micro test » | Prêt pour la sortie | « Contrat de Elio Danvers : À créer » | « Pas d'accord nécessaire », compté fait |
   | | Suivi juridique, « Projet » | Karim Haddou, Bastien Coll | Elio Danvers, Karim Haddou, Bastien Coll |
   | | Menu Distribution (M12) | sans compte | « 2 » |
-  | | Dossier de livraison (M7) | pochette du Catalogue (« pochette-micro.png ») | « Pochette · v1 · livrée par la Production » |
+  | | Dossier de livraison, V1 validée (M7) | après la première correction : « Pochette · v1 · livrée par la Production », « Le dossier ne correspond plus à la source » | garde « pochette-micro.png » (fichier du titre), sans écart ; la pochette de la Production vaudra pour la V2 |
   | « Lueur test » | Menu, Prêt pour la sortie | Master et Distribution « Terminé », 8 sur 14, 0 blocage | identique |
   | « Minuit pile » | Menu, Prêt pour la sortie | pas encore calculé (plan juridique pas lancé) | identique |
 
@@ -3214,8 +3216,6 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
   - « Micro test » garde l'action « Faire signer un contrat à Elio Danvers » stockée « bloquée » au lancement (le
     « Pas d'accord nécessaire » datait d'avant) : le tableau du plan la range en « fait », mais une révision de la
     Stratégie la lirait encore ; la retirer = confirmer de nouveau « Contrats des intervenants » dans l'app ;
-  - M7 : le dossier V1 de « Micro test », validé avec la pochette du Catalogue, dit maintenant « ne correspond plus à
-    la source » ;
   - M9 pas vu dans Chrome : aucun dossier de mix à transmettre sur la base de dev (un dossier déjà transmis garde le
     nom du projet) ; l'en-tête de la page de contact `/c/` nomme toujours le projet (SQL `get_contact_page`) ;
   - le Cadrage cite les titres sans master, mais pas encore leur invité parmi les personnes (Lila Vega).

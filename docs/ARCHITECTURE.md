@@ -5572,7 +5572,10 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
     encore d'audio ») ; le Brief de cadrage et le Plan du projet (`proposePlan`) les comptent tous.
   - **M7** : la sortie d'un titre prend la pochette livrée par la Production (`distribution_cover`) quand sa fiche
     couvre le titre (`loadTitleScopes`, `titleScopeCovers`) ; sinon celle du titre au Catalogue, comme avant
-    (`sources.ts`, `readiness.ts`, `checks.ts`, `delivery-file.ts`, `journey-context.ts`).
+    (`sources.ts`, `readiness.ts`, `checks.ts`, `delivery-file.ts`, `journey-context.ts`). Un dossier validé garde la
+    pochette de sa version : si la dernière version de la sortie est approuvée, pas remplacée (`superseded_at` nul),
+    et a figé la pochette du Catalogue (`frozeCatalogCover`, champ `cover` d'origine `catalog`), la sortie reste sur
+    la pochette du titre, sans écart à la source ; une nouvelle préparation (V2) prend celle de la Production.
   - **M8** : `confirmAllTitleContractNeeds` (`lib/legal/title-contracts-actions.ts`) confirme le titre ouvert avec ses
     cases et chaque autre titre actif non confirmé avec les quatre types, un appel `confirm_title_contract_needs` par
     titre (une confirmation chacun, « Modifier » ensuite).
