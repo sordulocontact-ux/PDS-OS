@@ -27455,6 +27455,10 @@ export type Database = {
         }[]
       }
       contract_contact: { Args: { p_contract_id: string }; Returns: string }
+      credit_collective_title_at_creation: {
+        Args: { p_title_id: string }
+        Returns: number
+      }
       credit_title_participations: {
         Args: { p_participation_id?: string; p_title_id: string }
         Returns: number

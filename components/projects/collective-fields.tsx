@@ -150,9 +150,11 @@ export function CollectiveSelectionField({
 /**
  * The guests of a collective named in the form (test UX du 12/11/2026: a
  * collective was created without them unless they came from a selection),
- * beside or instead of a selection: each gets a title without a name and a
- * proposed participation (create_collective_project). Never the main
- * artist. Submitted as one JSON field `guestArtistIds`.
+ * beside or instead of a selection: each gets a proposed participation on
+ * the titles chosen that credit them (in featuring there, the main artist at
+ * the head), else on a title without a name (create_collective_project,
+ * Maël 26/11/2026). Never the main artist. Submitted as one JSON field
+ * `guestArtistIds`.
  */
 export function CollectiveGuestsField({
   artists,
