@@ -120,6 +120,8 @@ export const routes = {
   workTasks: "/app/work?section=taches",
   // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
   calendar: "/app/calendar",
+  // Notes: the calls' reports and transcripts, and written notes.
+  notes: "/app/notes",
   calls: "/app/calls",
   // A call opened from the Calls section, the navigation staying on Calls:
   // an internal meeting or a project's call (its project linked from it).
@@ -391,6 +393,7 @@ export const routes = {
   projectDesignDeliverable: (id: string, deliverableId: string) =>
     `/app/projects/${id}/design/home#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
+  projectNotes: (id: string) => `/app/projects/${id}/notes`,
   projectSessions: (id: string) => `/app/projects/${id}/sessions`,
   // A session opened inside the project (lib/sessions/door.ts).
   projectSession: (id: string, sessionId: string) =>

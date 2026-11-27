@@ -22,6 +22,8 @@ type Props = {
   team: (TeamPerson & { detail: string })[];
   contacts: CallContact[];
   googleMeet: boolean;
+  // The button's weight when it sits beside another action (outline then).
+  variant?: "default" | "outline";
 };
 
 /**
@@ -34,6 +36,7 @@ type Props = {
  */
 export function CreateCallForm({
   initiallyOpen,
+  variant = "default",
   ...props
 }: Props & { initiallyOpen: boolean }) {
   const t = fr.calls.create;
@@ -45,7 +48,7 @@ export function CreateCallForm({
       <DialogButton
         label={fr.calls.list.newCall}
         icon={IconPlus}
-        variant="default"
+        variant={variant}
         size="lg"
         title={t.title}
         description={t.description}

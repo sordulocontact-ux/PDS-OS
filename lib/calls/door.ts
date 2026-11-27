@@ -17,9 +17,9 @@ export function callHref(door: CallDoor, callId: string): string {
     : routes.call(callId);
 }
 
-/** The list this door opens on (its tabs and filters added). */
+/** The list this door opens on: its Notes (tabs and filters added). */
 export function callsHref(door: CallDoor): string {
   return door.kind === "project"
-    ? routes.projectCalls(door.projectId)
-    : routes.calls;
+    ? routes.projectNotes(door.projectId)
+    : routes.notes;
 }

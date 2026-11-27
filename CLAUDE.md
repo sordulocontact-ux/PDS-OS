@@ -246,7 +246,7 @@ partout :
 - **Permissions** : postes (DG, chef de projet, directeur créatif) ≠ permissions ; seule
   `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`. **Dans un projet
   lancé, seul son responsable écrit** ; le DG lit et valide (`is_project_owner`,
-  `canEditProject`) ; exception : ses dépenses, écrites aussi par la Finance (`manage_finance`, 24/11). Une étape validée est définitive ; un Cadrage soumis est figé en RLS.
+  `canEditProject`) ; exception : ses dépenses, écrites aussi par la Finance (`manage_finance`, 24/11). Autre exception voulue (Sacha, 27/11) : une **note écrite** (`notes`) l'est par tout membre qui voit le projet, modifiée et supprimée par son auteur. Une étape validée est définitive ; un Cadrage soumis est figé en RLS.
   Visibilité : `can_see_project`. Premier admin local : `admin@pds.test` (Mailpit
   http://127.0.0.1:54324).
 - **Navigation fluide** (§ 3 bis) : `ViewLink`, `loading.tsx` partout, accès + données en un
@@ -320,7 +320,7 @@ partout :
 | Catalogue (artistes, titres, versions audio, fichiers) | `lib/catalog/`, `components/catalog/` | 2 à 2 nonies |
 | Sessions studio (état calculé, page, compte rendu guidé, rushs en liens) et Maquettes (`demo_status`, « Passer au catalogue des masters ») | `lib/sessions/`, `components/sessions/`, `lib/catalog/demo-*` | 2 sexies bis |
 | Projets (création par type, brouillons, liste, pochette : `lib/projects/covers.ts`, `set_project_cover`) | `lib/projects/`, `components/projects/` | 2 septies bis, 2 octies, 8 ter |
-| Calls (deux portes : Calls et Calls du projet, `lib/calls/door.ts` ; liste, calendrier Teams repris par la semaine du Calendrier, enregistrement, compte rendu) | `lib/calls/`, `components/calls/` | 4, 4 bis |
+| Calls et Notes (Notes `/app/notes` et Notes du projet, `lib/calls/door.ts` : comptes rendus des calls et notes écrites ; planification dans le Calendrier ; enregistrement, compte rendu) | `lib/calls/`, `components/calls/`, `lib/notes/`, `components/notes/` | 4, 4 bis, Notes (§ 8) |
 | Cadrage (relecture guidée, Brief, dictée) | `lib/framing/`, `lib/voice/` | 6 |
 | Stratégie | `lib/strategy/` | 6 bis |
 | Plan du projet, Vue d'ensemble | `lib/project-plan/`, `components/overview/` | 6 ter |

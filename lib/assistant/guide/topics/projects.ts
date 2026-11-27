@@ -31,7 +31,7 @@ export const projectsTopics: GuideTopic[] = [
       "Le chef de projet reçoit le projet et peut l'accepter, le refuser ou demander une précision. Un refus ou une demande revient à la direction avec un message.",
       "En acceptant, il devient responsable du projet : le projet est lancé et le Cadrage s'ouvre.",
       "Statuts de la liste : Brouillon, Non transmis, Transmis à accepter, Précision demandée, Refusé, En cours, Terminé.",
-      "Un projet lancé s'organise en sections : Vue d'ensemble, Cadrage, puis les workflows Master, Juridique, Marketing, Distribution, et le Pilotage (Travail, Calls, Sessions studio, Validations, Budget).",
+      "Un projet lancé s'organise en sections : Vue d'ensemble, Cadrage, puis les workflows Master, Juridique, Marketing, Distribution, et le Pilotage (Travail, Notes, Sessions studio, Validations, Budget).",
     ],
     faq: [
       {

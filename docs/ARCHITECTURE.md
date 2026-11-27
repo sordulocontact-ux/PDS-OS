@@ -832,6 +832,7 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
   et le groupe « Créer » du ⌘K (`AppSearch`). Ajouter une action = une entrée de `QUICK_ACTIONS`, sa
   règle de droit, son texte (`shell.quickCreate.actions`), son icône (`quick-action-icons.ts`) et sa
   fenêtre ; le guide de PO (`quick-create`, `lib/assistant/guide/topics/daily.ts`) aussi.
+  Action `note` (27/11/2026) : « Nouvelle note » ouvre `QuickNote` (`quick-create/quick-note.tsx`, le `NoteForm` des Notes, sur le projet de la page quand on en lit un, modifiable) ; la note créée s'ouvre dans sa fiche sur les Notes (`useOpenNote`).
 - **Raccourcis clavier** (27/11/2026, Paramètres › Raccourcis clavier) : `lib/shortcuts/definitions.ts`
   (actions `search`, `create`, `assistant`, `capture`, défauts, règles : `shortcutProblem`,
   `shortcutOwner`, `mergeShortcuts`) ; table `account_shortcuts` (une ligne par compte, seulement ce qui
@@ -1285,22 +1286,24 @@ s'afficher sans chargement.
 ## 4. Calls, audio, transcription (étape 4 + enregistreur)
 
 - **Deux portes vers les mêmes calls** (Sacha, 05/11/2026 ; `lib/calls/door.ts`, `CallDoor`), comme
-  Travail : **Calls** de la barre principale (`/app/calls`, tous les calls visibles) et **Calls**
-  du projet, dans Pilotage à côté de Travail (`/app/projects/<p>/calls`, plus caché). Un call
-  s'ouvre **dans la porte d'où on vient** : depuis Calls, `/app/calls/<id>` (`routes.call`, ex-
-  `routes.meeting`) sert désormais **tout call visible**, réunion interne ou call de projet
-  (`getVisibleCall` = `getCall(…, "any", …)`, la barre reste sur Calls, « Projet : X › » mène au
-  projet) ; depuis le projet, `/app/projects/<p>/calls/<id>` (dans le cadre du projet, fil
-  « Calls / titre », le titre du call en h1 de l'en-tête de module). Les URLs existantes ne
-  changent pas, rien à rediriger ; le calendrier des Calls ouvre aussi dans Calls, le Calendrier
-  (« là où ça se décide ») garde le lien du projet (`CallListItem.href`). **Un composant par
-  pièce** : la liste (`CallsListView` → `CallsList` → `CallsTable`, lignes de `listAllCalls`,
-  filtré par `projectId` pour un projet) et la page (`CallPage` : lectures, droits, module,
-  projets des tâches, puis `CallWorkspace` ; `CallHeader` dessiné selon la porte) ; seuls le
-  retour, le fil et la navigation allumée diffèrent. `CallPage` met l'`EditAccessProvider` hors
-  d'un projet (le cadre du projet le fait dedans). Le compte rendu partagé
-  (`/app/calls/<id>/report`) reste hors du garde 404 du call (`[callId]/(call)/layout.tsx`) : un
-  membre à qui il est partagé le lit sans voir le call.
+  Travail ; **depuis le 27/11/2026 elles s'appellent Notes** (ticket « Calls → Calendrier + Notes »,
+  § Notes plus bas) : **Notes** de la barre principale (`/app/notes`, tous les calls visibles) et
+  **Notes** du projet, dans Pilotage à côté de Travail (`/app/projects/<p>/notes`). La liste n'est plus
+  `CallsListView` (supprimée) mais **`NotesListView`** (calls passés + notes écrites), la planification
+  est dans le Calendrier (§ 8). **Anciennes URL redirigées** : `/app/calls` → `/app/notes` (filtre
+  `?project=` gardé), `/app/calls?display=calendar&mode=…&date=…` → `/app/calendar?mode=week|month&date=…`,
+  `/app/projects/<p>/calls?view=` → `/app/projects/<p>/notes?tab=` (`upcoming` → À venir, `past` →
+  Calls). Un call s'ouvre **dans la porte d'où on vient** et **ses pages ne bougent pas** :
+  `/app/calls/<id>` (`routes.call`, tout call visible, réunion interne ou call de projet ;
+  `getVisibleCall` = `getCall(…, "any", …)`) allume **Notes** dans la barre (`alsoActiveOn` de
+  `NAV_ITEMS`) et son fil dit « Notes » ; `/app/projects/<p>/calls/<id>` (cadre du projet, titre du call
+  en h1) allume la section Notes du projet (`match` de `project-sections.ts`). `callsHref(door)` mène à
+  la liste de la porte. Le Calendrier garde le lien du projet (`CallListItem.href`). **Un composant par
+  pièce** : la liste (`NotesListView` → `NotesList` → `NotesTable`, filtrée par `projectId` pour un
+  projet) et la page (`CallPage` : lectures, droits, module, projets des tâches, puis `CallWorkspace` ;
+  `CallHeader` dessiné selon la porte). `CallPage` met l'`EditAccessProvider` hors d'un projet (le cadre
+  du projet le fait dedans). Le compte rendu partagé (`/app/calls/<id>/report`) reste hors du garde 404
+  du call (`[callId]/(call)/layout.tsx`) : un membre à qui il est partagé le lit sans voir le call.
 - **Participants d'un call planifié** (retour d'Ibé, 05/11/2026) : « Modifier les participants »
   dans la carte Participants (`CallParticipantsButton`, responsable du call seul), le même champ
   `AttendeeChips` que « Nouveau call », rempli de qui participe (`readParticipantsForm`,
@@ -1308,15 +1311,12 @@ s'afficher sans chargement.
   l'enregistrement (`saveCallParticipants`) : membres et invités ajoutés / retirés par la session
   (RLS `is_call_owner`), un membre ajouté est notifié (`call_invited`), et l'événement Google d'un
   call à venir reçoit la nouvelle liste (`setMeetEventGuests`, Google envoie les invitations).
-- **Liste des calls** (les deux portes) : onglets Tous / À venir / Passés, recherche, filtre Projet
-  (Calls seul) ; les prochains d'abord, le plus proche en haut, puis les passés, titrés « À venir »
-  / « Passés » sous « Tous » ; Projet à la teinte du projet (comme Travail), « Rejoindre » et « ⋯ »
-  en bout de ligne. Le « ⋯ » d'une ligne est **le même menu** que celui de la page
-  (`CallSheetMenu` : lien de la visio, fiche copiée ou écrite en e-mail, « Supprimer la réunion »
-  pour la direction et le responsable du call, `canDeleteCall`, `delete_call`), visible au survol à la souris (`RowActions reveal`), toujours
-  sur écran tactile ; la fiche s'écrit au clic depuis la ligne (`agenda`, `guestEmails` lus par
-  `listAllCalls`). « Nouveau call » d'un projet : bouton de l'en-tête (modale, comme « Nouvelle
-  réunion ») ; formulaire sur place quand le projet n'a aucun call.
+- **Liste des calls** : voir **Notes** (§ plus bas), qui remplace depuis le 27/11/2026 la liste Tous /
+  À venir / Passés. Le « ⋯ » d'une ligne de call reste **le même menu** que celui de la page
+  (`CallSheetMenu` : lien de la visio, fiche copiée ou écrite en e-mail, « Supprimer la réunion » pour la
+  direction et le responsable du call, `canDeleteCall`, `delete_call`), visible au survol (`RowActions
+  reveal`), toujours sur écran tactile. « Nouveau call » : bouton principal de l'en-tête des Notes du
+  projet et du Calendrier (modale, `NewMeetingButton label`).
 - **E-mails d'un call** (`lib/email/`) : `CallPageData.emailEnabled` (= `emailEnabled()`, calculé au
   serveur) décide de l'écran. Résumé aux participants : les invités extérieurs avec adresse (et sans
   lien privé) le reçoivent de PDS OS, nommés avant l'envoi et dans le toast (« … et par e-mail à X,
@@ -1461,10 +1461,10 @@ s'afficher sans chargement.
 Demande de Sacha : « un call comme sur Teams ». Deux vues de la page Calls, la même grille dans
 la semaine du Calendrier, et une création de call qui donne un lien Google Meet.
 
-- **Deux vues** de `/app/calls`, choisies dans l'URL (`ViewToggle` dans l'en-tête) : **Liste par
-  défaut** (Sacha, 01/11/2026 ; Tous / À venir / Passés, filtre Projet) et **Calendrier**
-  (`?display=calendar`, défaut du 10/10 au 01/11). Le même calendrier (`CallsCalendar`, avec
-  `items`) fait la **semaine du Calendrier** (`/app/calendar?mode=week`), les autres dates autour.
+- **Plus de vue calendrier dans Calls** (27/11/2026) : la page Calls n'existe plus, le calendrier est
+  **le Calendrier** (`/app/calendar`, § 8) ; les anciennes vues `?display=` sont redirigées. Le même
+  calendrier (`CallsCalendar`, avec `items`) fait la **semaine du Calendrier** (`?mode=week`), les autres
+  dates autour. (Historique : liste par défaut le 01/11, calendrier par défaut du 10/10 au 01/11.)
   Pas de ligne d'aide ni de légende des couleurs au-dessus (retirées le 01/11). Le calendrier
   (`components/calls/calendar/`, places calculées par le serveur sur l'heure de Paris,
   `lib/calls/calendar.ts`) reprend Teams :
@@ -2883,6 +2883,15 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
   fin (tournage) sur une heure, les dates sans heure dans la rangée sous les jours (`allDay`).
   `loadCalendar` rend aussi les calls bruts (`calls`), réduits à ceux que les dates gardent
   (archives, « À vous ») ; le formulaire de réunion est lu en même temps (`loadMeetingFormData`).
+- **Planifier les calls** (27/11/2026, ticket « Calls → Calendrier + Notes ») : le Calendrier est le seul
+  calendrier. **« Nouveau call »** (`NewMeetingButton label`, le formulaire de réunion) est le bouton
+  principal. **Une seule ligne d'outils** (Sacha, 27/11/2026) : à gauche « Aujourd'hui », période, titre ;
+  à droite Tout / À vous (`views`), Semaine / Mois et le bouton (`action`) de `CalendarToolbar` ; plus
+  rien dans l'en-tête. **Colonne de droite dès `xl`** (`CalendarSide`, cachée en dessous : rien ne change
+  sur téléphone) : `MiniMonth` (un point sous les jours qui ont une date, aujourd'hui marqué, un jour
+  ouvre sa semaine ; mois voisins par **`?mini=AAAA-MM`**, sinon le mois de la période), puis **« À venir »**
+  (`UpcomingCalls` : les prochains calls en cartes, chacune ouvre son call ; rien à venir = rien, pas de
+  phrase). La clé de rendu de la page compte `mini`.
 - Couleur = **le projet** (`projectHue`, la même que dans les Calls) ; la nature de la date est
   dans son libellé (« Mix V1 attendu », « Sortie » en semi-gras). Point bleu = à vous, rouge = en
   retard ; un jour passé est atténué.
@@ -2890,6 +2899,51 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
   avec les Calls), barre `CalendarToolbar` (`components/ui/`), textes `lib/i18n/fr/calendar.ts`.
 
 ---
+
+### Notes (`/app/notes`, 27/11/2026, ticket « Calls → Calendrier + Notes »)
+
+Demande de Sacha : « la page Calls [soit] un calendrier et les transcriptions / comptes rendus sur une
+nouvelle page Notes ». La liste des calls devient **Notes** : les calls passés avec leur contenu et des
+**notes écrites** à la main. Deux portes (§ 4) : **Notes** (`/app/notes`) et **Notes du projet**
+(`/app/projects/<p>/notes`, section « Notes » du Pilotage ; seule différence : l'onglet « À venir », le
+projet n'ayant pas de calendrier à lui, et pas de filtre Projet).
+
+- **Table `notes`** (migration `20261127180101_notes`) : titre, texte (20 000 caractères), `project_id`
+  facultatif, `created_by` (toujours l'auteur, `set_created_by`), `search` (tsvector français généré).
+  **RLS** : lecture = qui voit le projet (`visible_project_ids()`), **sans projet = tout membre actif de
+  l'organisation** (« note de l'équipe ») ; insertion = tout membre actif, comme auteur, sur un projet
+  qu'il voit (`can_see_project`) ; **modification et suppression = son auteur seul** (grants colonne par
+  colonne : `title`, `body`, `project_id`). **Exception voulue (Sacha, 27/11/2026)** à « dans un projet
+  lancé, seul son responsable écrit » : une note est l'écrit d'un membre sur le projet, pas du contenu du
+  projet (aucune étape, aucun état, rien que lise un parcours). 24 tests pgTAP.
+- **Recherche** : RPC `search_notes(p_query)` (SECURITY INVOKER : le RLS de chaque table s'applique) =
+  ids des calls (titre, compte rendu, points du compte rendu, transcription, résumé envoyé) et des notes
+  qui correspondent, plein texte français + `ilike` sur les titres, 200 de chaque au plus.
+  `search_calls` (PO) reste tel quel : il ne lit que les calls de projets et rend des extraits.
+- **Lectures** (`lib/notes/`) : `queries.ts` (`listAllCalls` + notes, RLS, 500 lignes au plus),
+  `views.ts` (`NoteRow` = `CallNoteRow` | `WrittenNoteRow`, onglet de chaque ligne `noteViewOf`, calculé
+  par le code), `search.ts` / `search-actions.ts` (`searchNotesText`), `options.ts` (projets du filtre et
+  du formulaire), `actions.ts` / `sheet-actions.ts` (création, modification, suppression, lecture du
+  texte d'une note). Textes : `lib/i18n/fr/notes.ts`.
+- **Onglets** (`?tab=`, `DataTableViews`, nombres calculés après filtres) : **Toutes** (calls passés +
+  notes), **Calls**, **Écrites**, **À compléter** (call passé sans compte rendu ni clôture) ; **À venir**
+  dans un projet. Filtres **Projet** (`?project=`, Notes seul) et **Personne** (`?person=`).
+  Colonnes Note / Projet / Contenu (extrait) / Par ; la ligne ouvre `CallSheet` (call) ou `NoteSheet`
+  (note, modèle `ContactSheet`) ; « ⋯ » d'une note (`NoteMenu`) pour son auteur.
+- **Recherche dans le texte** : `SearchableList` garde sa recherche instantanée sur le titre ; `extraMatch`
+  y ajoute les lignes que le serveur a trouvées dans les textes, `onQueryChange` remonte la requête
+  (`useTextSearch` : dès 3 caractères, après une pause, la réponse précédente reste affichée jusqu'à la
+  suivante, une réponse d'une requête plus ancienne est jetée).
+- **Déclencheur live posé par nom** : `zz_project_live` (`project_live_tick('project')`) sur `notes`, et
+  `zz_project_live_left` (`notes_live_left_project`) pour le projet qu'une note quitte. **Pas
+  `attach_project_live()`** : il remettrait aussi le déclencheur sur `personal_tasks` (laissé sans exprès,
+  `20261112120101`) et sur les tables créées depuis sans lui (`finance_incomes`, `deal_call_proposals`).
+  `delete_project_row` supprime les notes du projet.
+- **Formulaire** `NoteForm` (`initial` / `stay`, règle de PO, ouvert par `NewNoteButton`, `QuickNote` du
+  « + » et `NoteMenu`) ; « Nouvelle note » est une action du « + » et du ⌘K (§ 3). **Pas d'éditeur riche**
+  (zone de texte).
+- **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; ni notes liées à
+  autre chose qu'un projet, ni comptes rendus des sessions studio dans Notes.
 
 ## 8 bis. Notifications et mise à jour en direct
 
@@ -2930,7 +2984,7 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
 pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` reste).
 
 - **Navigation** (`components/projects/project-sidebar.tsx`, `project-nav-list.tsx`, `project-nav-chips.tsx`) :
-  Vue d'ensemble, Cadrage, Workflows, Pilotage (Travail, Validations, Activité, Budget). Équipe, Planning, Calls,
+  Vue d'ensemble, Cadrage, Workflows, Pilotage (Travail, Notes, Validations, Activité, Budget). Équipe, Planning,
   Livrables, Fichiers ont `hidden` dans `projectSections` : route et fil d'Ariane gardés, plus d'entrée (Équipe
   n'est plus liée de nulle part : à rattacher à « Qui fait quoi »). Point du Cadrage : `in_progress` jusqu'à
   `planLaunchedAt` (`lib/plan/queries.ts`, `cache`), `done` après. Pastilles « À vous » : `countMine` de

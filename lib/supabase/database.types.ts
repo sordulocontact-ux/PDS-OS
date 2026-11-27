@@ -13848,6 +13848,64 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          project_id: string | null
+          search: unknown
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id: string
+          project_id?: string | null
+          search?: unknown
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          project_id?: string | null
+          search?: unknown
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_person_id: string | null
@@ -26626,6 +26684,13 @@ export type Database = {
           start_seconds: number
         }[]
       }
+      search_notes: {
+        Args: { p_query: string }
+        Returns: {
+          id: string
+          kind: string
+        }[]
+      }
       search_projects: {
         Args: { p_query: string }
         Returns: {
@@ -26763,6 +26828,10 @@ export type Database = {
         Args: { p_reason: string; p_request_id: string }
         Returns: undefined
       }
+      withdraw_strategy_review: {
+        Args: { p_review_id: string }
+        Returns: undefined
+      }
       workflow_is_launched: {
         Args: { p_project_id: string; p_workflow: string }
         Returns: boolean
@@ -26854,10 +26923,6 @@ export type Database = {
       }
       _get_influence_agreement_h: {
         Args: { p_link_hash: string }
-      withdraw_strategy_review: {
-        Args: { p_review_id: string }
-        Returns: undefined
-      }
         Returns: Json
       }
       _get_influence_collaboration_h: {

@@ -354,7 +354,7 @@ export const calls = {
     audioLength: "Durée audio",
     tokens: "Jetons entrée / sortie",
   },
-  back: "Tous les calls",
+  back: "Toutes les notes",
   // A project's call names its project under the date (link to its overview).
   project: "Projet",
   // « Préparer un échange » (Cadrage, Stratégie): topics and participants.

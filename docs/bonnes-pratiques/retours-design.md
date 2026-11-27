@@ -137,3 +137,17 @@ qui a été fait.
   - trouvé en vérifiant et corrigé : les dates coupées à deux par ligne dans la colonne étroite
     (« Mar. 01/12/2… »), et « Créer le contrat » qu'il fallait aller chercher en faisant défiler la
     colonne.
+
+---
+
+## 27/11/2026 : Calendrier, la barre d'outils sur une seule ligne
+
+- **Ce que Sacha a dit** : « Tout / À vous », Semaine / Mois et « Nouveau call » sur la même ligne ; plus rien
+  dans l'en-tête de la page.
+- **Son explication** : pas de deuxième ligne d'outils, le bouton principal compris : tout ce qui sert à lire
+  et à agir sur le calendrier tient à côté de « Aujourd'hui » et de la période.
+- **Fait** : `CalendarToolbar` prend `views` (Tout / À vous) et `action` (le bouton principal), à droite de la
+  même ligne ; l'en-tête ne porte plus que le titre. Règle dans `docs/DESIGN.md` (Calendrier). Même esprit :
+  l'`EmptyState` des Notes n'a que son titre (`body` facultatif), moins de texte à l'écran.
+- **À retenir** : sur une page de calendrier ou de liste, ne pas empiler une ligne de filtres, une ligne de
+  vues et un bouton dans l'en-tête ; une seule ligne, le bouton principal en dernier à droite.

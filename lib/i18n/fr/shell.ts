@@ -22,7 +22,7 @@ export const shell = {
     work: "Travail",
     projects: "Projets",
     calendar: "Calendrier",
-    calls: "Calls",
+    notes: "Notes",
     sessions: "Sessions studio",
     artists: "Artistes",
     // The list of titles ("masters" in the code), named Catalogue (04/10/2026).
@@ -520,7 +520,7 @@ export const shell = {
       // Why a listed section is closed to this viewer.
       restricted: "Réservé à la direction et aux chefs de projet",
       work: "Travail",
-      calls: "Calls",
+      calls: "Notes",
       sessions: "Sessions studio",
       team: "Équipe",
       deliverables: "Livrables",
@@ -686,6 +686,7 @@ export const shell = {
       mail: "Écrire un mail",
       expense: "Ajouter une dépense",
       call: "Nouvelle réunion",
+      note: "Nouvelle note",
       contact: "Nouveau contact",
       deal: "Nouveau deal",
     },

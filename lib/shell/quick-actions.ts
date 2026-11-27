@@ -11,6 +11,7 @@ export const QUICK_ACTIONS = [
   "mail",
   "expense",
   "call",
+  "note",
   "contact",
   "deal",
 ] as const;
@@ -30,6 +31,7 @@ export function allowedQuickActions(
     expense:
       can(access, "read_artist_budgets") || can(access, "pilot_projects"),
     call: true,
+    note: true,
     contact: can(access, "manage_network"),
     deal:
       can(access, "validate") ||

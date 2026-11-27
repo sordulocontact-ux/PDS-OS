@@ -654,12 +654,19 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
 
 ### Calendrier
 
-- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` avec **Tout / À
-  vous** en pastilles, `CalendarToolbar` comme les Calls (Mois par défaut, Semaine), puis la
+- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` seul ; Tout / À vous,
+  Semaine / Mois et « Nouveau call » dans `CalendarToolbar` (Mois par défaut, Semaine), puis la
   grille : filets `--border-hairline`, jours hors du mois sur `--surface-soft`, aujourd'hui en
   rond d'encre. Une date = une pastille de la **teinte de son projet** (comme un call), 13 px,
   heure en chiffres tabulaires, « Sortie » en semi-gras ; point `--selection` = à vous,
   `--error` = en retard ; jour passé à 70 %. Téléphone : agenda par jour.
+- **Une seule ligne d'outils** (Sacha, 27/11/2026) : Tout / À vous, Semaine / Mois et le bouton principal
+  (« Nouveau call ») sont **sur la même ligne** que « Aujourd'hui » et la période, à droite
+  (`CalendarToolbar views` et `action`), jamais une deuxième ligne ni un bouton dans l'en-tête. Dès `xl`,
+  une colonne à droite : mini-mois puis « À venir » (rien affiché s'il n'y a rien). Voir
+  `docs/bonnes-pratiques/retours-design.md`.
+- **`EmptyState` sans texte** (Notes, 27/11/2026) : `body` est facultatif, un état vide de liste peut
+  n'être que son icône et son titre (« Aucune note ») ; moins de texte à l'écran.
 
 - **Travail et Validations d'un projet** (décision C0 du 18/10/2026, proto « Projet
   complet ») : la liste de **mes** actions tirées des parcours (`loadProjectJourneys`, une

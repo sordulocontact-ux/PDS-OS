@@ -42,6 +42,17 @@ export const calendar = {
     overdue: "En retard",
   },
 
+  // The page's main button and the right-hand column (xl and up).
+  side: {
+    newCall: "Nouveau call",
+    miniMonth: "Mois",
+    previousMonth: "Mois précédent",
+    nextMonth: "Mois suivant",
+    // The weekday letters of the mini-month, Monday first.
+    weekdays: ["L", "M", "M", "J", "V", "S", "D"],
+    upcoming: "À venir",
+  },
+
   // What each date is, said the way the app says it (VISION-UX rule 4: the
   // label says what the date means).
   kinds: {

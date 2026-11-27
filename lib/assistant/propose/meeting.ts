@@ -101,7 +101,7 @@ export function proposeMeetingTool({ access, verbatim }: ProposeContext) {
         title: t.titles.createMeeting(input.title.trim()),
         changes,
         warnings,
-        source: { label: fr.calls.all.title, href: routes.calls },
+        source: { label: fr.calendar.page.title, href: routes.calendar },
       });
     },
   });

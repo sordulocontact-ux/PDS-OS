@@ -180,7 +180,14 @@ export function projectSections(
     // them, like Travail; Sacha 05/11/2026), Validations, Activité, then the
     // Budget (ticket MKT-S1-15).
     section("work", t.work, routes.projectWork(projectId), "steering"),
-    section("calls", t.calls, routes.projectCalls(projectId), "steering"),
+    // The Notes (calls and written notes); lit too on a call's pages, which
+    // stay under /calls/<id>.
+    {
+      ...section("calls", t.calls, routes.projectNotes(projectId), "steering"),
+      match: (p) =>
+        below(routes.projectNotes(projectId))(p) ||
+        below(routes.projectCalls(projectId))(p),
+    },
     // The project's studio sessions (retour d'Ibé du 01/11/2026).
     section(
       "sessions",

@@ -1,5 +1,6 @@
 import {
   IconEnvelopeOpen,
+  IconPenWriting4,
   IconMoneyBillCoin,
   IconNodes,
   IconPhone,
@@ -16,6 +17,7 @@ export const QUICK_ACTION_ICONS: Record<QuickAction, typeof IconPhone> = {
   mail: IconEnvelopeOpen,
   expense: IconMoneyBillCoin,
   call: IconPhone,
+  note: IconPenWriting4,
   contact: IconNodes,
   deal: IconScale,
 };

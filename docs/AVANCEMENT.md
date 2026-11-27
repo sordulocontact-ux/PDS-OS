@@ -3262,3 +3262,37 @@ Demande de Sacha : une page des Paramètres pour changer les raccourcis de l'app
 - Un seul hook d'écoute (`useKeyShortcut`) pour les cinq écoutes de l'app (recherche, recherche de Finance, « + »,
   PO, capture) ; toutes les touches à l'écran suivent le choix (`ShortcutKeys`).
 - Guide de PO : sujet `shortcuts`, Paramètres et « + » mis à jour.
+
+## Calls → Calendrier + Notes (27/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « nos calls sont que sur la page Calls ; je voudrais que la page Calls soit que un
+calendrier et les transcriptions / comptes rendus sur une nouvelle page Notes, pour séparer les deux » ;
+après l'analyse d'Accordee : une page Notes et le Calendrier (« Calls » gardé en titre pour le projet,
+finalement aussi renommé Notes), avec des notes qu'on peut écrire sur un projet. Ticket :
+`.tickets/2026-11-27-calls-notes/TICKET.md`.
+
+- **Navigation** : l'entrée « Calls » devient **Notes** ; « Calendrier » garde son nom et devient le seul
+  calendrier. `/app/calls` redirige vers `/app/notes`, `/app/calls?display=calendar…` vers le Calendrier,
+  `/app/projects/<p>/calls` vers `/notes`. Les pages d'un call ne bougent pas et allument Notes.
+- **Calendrier** : « Nouveau call » en bouton principal, **une seule ligne d'outils** (Tout / À vous,
+  Semaine / Mois, bouton ; retour de Sacha), colonne de droite dès `xl` : mini-mois (`?mini=`) et « À venir ».
+- **Notes** (`/app/notes`) : onglets Toutes / Calls / Écrites / À compléter avec nombres, recherche **dans le
+  texte** (titre, compte rendu, transcription, note), filtres Projet et Personne, fiches latérales
+  (`CallSheet`, `NoteSheet`).
+- **Notes écrites** : table `notes` + RPC `search_notes`, 24 tests pgTAP. Lue par qui voit le projet (sans
+  projet : toute l'équipe), écrite par tout membre qui voit le projet (**exception voulue** à « seul le
+  responsable écrit dans un projet lancé », Sacha 27/11), modifiée et supprimée par son auteur. « Nouvelle
+  note » dans le « + » et le ⌘K.
+- **Projet** : la section « Calls » du Pilotage devient « Notes » (+ onglet « À venir », « Nouveau call » et
+  « Nouvelle note » dans l'en-tête).
+- **Composants** : `NotesListView`, `NotesList`, `NotesTable`, `NoteSheet`, `NoteForm`, `NewNoteButton`,
+  `NoteMenu`, `NoteProjectPill`, `NotesPeople`, `CalendarSide`, `MiniMonth`, `UpcomingCalls` ; props
+  `CalendarToolbar views` / `action`, `EmptyState body` facultatif, `SearchableList extraMatch` /
+  `onQueryChange`, `NAV_ITEMS alsoActiveOn`, `NewMeetingButton label`, `variant` de `CreateCallForm` et
+  `NewNoteButton`. Supprimés : `CallsListView`, `CallsList`, `CallsTable`.
+- **Migration** : `20261127180101_notes` (en local seulement ; à vérifier avec `db push --dry-run` avant toute
+  fusion dans `main`).
+- **Guide de PO** : sujet `calls` devenu « Notes » (page, onglets, recherche, droits des notes écrites), sujets
+  Calendrier (planifier un call) et « + » (Nouvelle note) mis à jour.
+- **Reste** : PO ne lit pas encore les notes écrites (outil `read/`, ticket suivant) ; parcours à vérifier dans le
+  navigateur par l'équipe.

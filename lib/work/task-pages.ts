@@ -36,7 +36,7 @@ const HREF: Record<TaskPage, (projectId: string) => string> = {
   legal: routes.projectLegal,
   release: routes.projectRelease,
   budget: routes.projectBudget,
-  calls: routes.projectCalls,
+  calls: routes.projectNotes,
   files: routes.projectFiles,
 };
 

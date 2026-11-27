@@ -13,6 +13,9 @@ const QuickMail = dynamic(
 const QuickCall = dynamic(
   () => import("@/components/shell/quick-create/quick-call"),
 );
+const QuickNote = dynamic(
+  () => import("@/components/shell/quick-create/quick-note"),
+);
 const QuickContact = dynamic(
   () => import("@/components/shell/quick-create/quick-contact"),
 );
@@ -38,6 +41,8 @@ export default function QuickCreateDialogs({
       return <QuickExpense open={open} onClose={onClose} />;
     case "call":
       return <QuickCall open={open} onClose={onClose} />;
+    case "note":
+      return <QuickNote open={open} onClose={onClose} />;
     case "contact":
       return <QuickContact open={open} onClose={onClose} />;
     case "deal":

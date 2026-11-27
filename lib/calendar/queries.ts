@@ -16,6 +16,8 @@ import { listProjects } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { actionHref, lowerFirst } from "@/lib/ui/journey";
 import {
+  addDays,
+  parisMidnight,
   parisPlace,
   periodRange,
   type CalendarPeriod,
@@ -290,4 +292,41 @@ export async function loadCalendar(
       launched.error ||
       todo.error,
   };
+}
+
+// How far « À venir » looks ahead, and how many calls it shows.
+const UPCOMING_DAYS = 60;
+const UPCOMING_COUNT = 4;
+
+/**
+ * The next calls from `now` (« À venir » of the Calendrier): the ones the
+ * viewer sees, soonest first; `mine` keeps those they work on. A call of an
+ * archived project is left out, as in the calendar. Bounded to 60 days.
+ */
+export async function loadUpcomingCalls(
+  access: Access,
+  now: Date,
+  mine: boolean,
+): Promise<CallListItem[]> {
+  const horizon = parisMidnight(addDays(parisPlace(now).day, UPCOMING_DAYS));
+  try {
+    const [calls, listed] = await Promise.all([
+      listAllCalls(await createClient(), { range: { from: now, to: horizon } }),
+      listProjects(),
+    ]);
+    const visible = new Set(listed.projects.map((p) => p.id));
+    return calls
+      .filter(
+        (call) =>
+          (call.projectId === null || visible.has(call.projectId)) &&
+          (!mine ||
+            (access.personId !== null &&
+              call.ownerPersonId === access.personId)),
+      )
+      .toSorted((a, b) => a.occurredAt.localeCompare(b.occurredAt))
+      .slice(0, UPCOMING_COUNT);
+  } catch (error) {
+    console.error("loadUpcomingCalls", error);
+    return [];
+  }
 }
