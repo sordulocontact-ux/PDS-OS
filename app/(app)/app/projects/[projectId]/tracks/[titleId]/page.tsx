@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { OverviewNow } from "@/components/overview/overview-now";
 import { OverviewProgress } from "@/components/overview/overview-progress";
 import { ProjectHeader } from "@/components/projects/project-header";
+import { TitleHeading } from "@/components/projects/titles/title-heading";
+import { TitleNameField } from "@/components/projects/titles/title-name-field";
 import { TitlesRecapCompact } from "@/components/projects/titles/titles-recap-compact";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -11,6 +13,8 @@ import { ViewLink } from "@/components/ui/view-link";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { workflowsFinished } from "@/lib/overview/cards";
+import { canEditProject } from "@/lib/projects/edit-access";
 import { joinArtistNames } from "@/lib/projects/participation-rules";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { loadTitleRecap } from "@/lib/projects/recap";
@@ -54,7 +58,13 @@ export default async function ProjectTrackPage({
   const t = fr.titleTracks;
   const { title } = progress;
   // An unnamed title's label already names its guests.
-  const named = title.workingTitle ?? masterNameOf(title.master);
+  const masterName = masterNameOf(title.master);
+  const named = title.workingTitle ?? masterName;
+  // Only the project's owner writes (is_project_owner): names it in place,
+  // and « Nommer le titre » leads its « Maintenant » while it has no name
+  // (Sacha, 27/11/2026).
+  const canEdit = canEditProject(access, project);
+  const naming = fr.projectTitles.naming;
   const mine = recap.titles.filter((row) => row.id === title.id);
   const masterOpen = progress.cards.some(
     (card) => card.workflow === "master" && !card.restricted,
@@ -65,6 +75,16 @@ export default async function ProjectTrackPage({
       <ProjectHeader
         projectId={projectId}
         title={progress.label}
+        heading={
+          <TitleHeading
+            projectId={projectId}
+            titleId={title.id}
+            label={progress.label}
+            workingTitle={title.workingTitle}
+            masterName={masterName}
+            canEdit={canEdit && !progress.abandoned}
+          />
+        }
         subtitle={
           named && progress.guests.length > 0
             ? joinArtistNames(progress.guests)
@@ -103,6 +123,23 @@ export default async function ProjectTrackPage({
           <OverviewNow
             mine={progress.journeys.mine}
             waiting={progress.journeys.waiting}
+            finished={workflowsFinished(progress.cards)}
+            lead={
+              canEdit && !named
+                ? {
+                    todo: naming.todo,
+                    gesture: (
+                      <TitleNameField
+                        projectId={projectId}
+                        titleId={title.id}
+                        required
+                        submitLabel={naming.submit}
+                        done={naming.named}
+                      />
+                    ),
+                  }
+                : null
+            }
           />
           <OverviewProgress workflows={progress.cards} />
         </div>

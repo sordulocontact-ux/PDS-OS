@@ -34,6 +34,7 @@ export const framing = {
   actions: {
     confirm: "Confirmer",
     reject: "Rejeter",
+    more: "Plus d'actions",
     edit: "Modifier",
     fill: "Renseigner",
     save: "Enregistrer",

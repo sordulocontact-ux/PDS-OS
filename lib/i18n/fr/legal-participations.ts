@@ -17,12 +17,6 @@ export const legalParticipations = {
     title: "Titre",
     actions: "Actions",
   },
-  // Under 1280 px, the hidden columns under the name.
-  caption: {
-    contract: "Contrat",
-    negotiation: "Négociation",
-    nextAction: "Prochaine action",
-  },
   titleStatus: {
     planned: "Prévu",
     abandoned: "Abandonné",
@@ -31,7 +25,6 @@ export const legalParticipations = {
   empty: {
     title: "Aucun artiste invité pour l'instant",
     body: "Invitez des artistes sur les titres depuis « Titres ».",
-    link: "Ouvrir « Titres »",
   },
   negotiation: {
     none: "Pas de dossier de négociation",

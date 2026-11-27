@@ -6,7 +6,16 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { PlatformConfirm } from "@/components/distribution/platforms/platform-confirm";
 import { PlatformProblem } from "@/components/distribution/platforms/platform-problem";
-import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { IconXmark } from "nucleo-sharp-essential";
+
+import { IconExternalLink } from "@/components/icons";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { RowActions } from "@/components/ui/row-actions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
@@ -175,14 +184,25 @@ export function PlatformRow({
             </Button>
           ) : (
             <>
-              <a
-                href={line.url}
-                target="_blank"
-                rel="noreferrer"
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
-              >
-                <ButtonRoll>{t.open}</ButtonRoll>
-              </a>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <a
+                      href={line.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={t.open}
+                      className={buttonVariants({
+                        variant: "outline",
+                        size: "icon",
+                      })}
+                    />
+                  }
+                >
+                  <IconExternalLink aria-hidden className="size-5" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{t.open}</TooltipContent>
+              </Tooltip>
               {ask ? (
                 <>
                   <Button
@@ -200,9 +220,17 @@ export function PlatformRow({
                     {t.problem}
                   </Button>
                   {mode === "recheck" && (
-                    <Button size="sm" variant="ghost" onClick={reset}>
-                      {t.cancel}
-                    </Button>
+                    <RowActions
+                      label={t.more}
+                      actions={[
+                        {
+                          key: "cancel",
+                          label: t.cancel,
+                          icon: IconXmark,
+                          onSelect: reset,
+                        },
+                      ]}
+                    />
                   )}
                 </>
               ) : (

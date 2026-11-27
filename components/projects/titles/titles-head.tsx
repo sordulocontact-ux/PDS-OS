@@ -5,11 +5,7 @@ import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { routes } from "@/lib/auth/redirects";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import { titleTracks } from "@/lib/i18n/fr/title-tracks";
-import { projectArtists } from "@/lib/projects/participation-rules";
-import { titleCounts } from "@/lib/projects/title-board-rules";
-import type { ProjectTitle } from "@/lib/projects/title-rules";
 import { legalParticipationsHref } from "@/lib/ui/legal-steps";
-import type { ModuleFact } from "@/lib/ui/module-frame";
 
 const fr = { projectTitles, titleTracks };
 
@@ -28,13 +24,12 @@ const fr = { projectTitles, titleTracks };
  */
 export function TitlesHeader({
   project,
-  titles,
   canManage,
   canOpenLegal,
   choices,
+  view,
 }: {
   project: { id: string; artistName: string | null };
-  titles: ProjectTitle[];
   canManage: boolean;
   canOpenLegal: boolean;
   // titleBoardChoices: what « Ajouter un titre » and « Changer l'artiste
@@ -43,28 +38,16 @@ export function TitlesHeader({
     masterOptions: Record<string, string>;
     artists: { options: Record<string, string>; mainArtistId: string | null };
   };
+  // The view shown: « Participations et contrats » opens over it.
+  view: "titles" | "tracks";
 }) {
-  const t = fr.projectTitles.board.facts;
-  const counts = titleCounts(titles);
-  const facts: ModuleFact[] = [
-    ...(project.artistName
-      ? [{ key: "main", label: t.mainArtist, value: project.artistName }]
-      : []),
-    {
-      key: "titles",
-      label: t.titles,
-      value: t.titleCounts(counts.active, counts.planned, counts.abandoned),
-    },
-    {
-      key: "artists",
-      label: t.artists,
-      value: String(projectArtists(titles).length),
-    },
-  ];
+  // No facts line (Sacha, 27/11/2026: « Artiste principal PDS · Titres 2 en
+  // cours · Artistes 7 » floated under the title): the counts are the list's,
+  // the main artist is changed from « ⋯ ».
   return (
     <ProjectHeader
       projectId={project.id}
-      facts={facts}
+      facts={[]}
       actions={
         canManage || canOpenLegal ? (
           <TitlesActions
@@ -73,7 +56,7 @@ export function TitlesHeader({
             artists={choices.artists}
             canManage={canManage}
             legalHref={
-              canOpenLegal ? legalParticipationsHref(project.id) : null
+              canOpenLegal ? legalParticipationsHref(project.id, view) : null
             }
           />
         ) : undefined

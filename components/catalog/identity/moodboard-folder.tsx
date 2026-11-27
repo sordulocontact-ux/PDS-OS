@@ -13,10 +13,11 @@ import { IconArrowUpRight } from "@/components/icons";
 import { MoodboardForm } from "@/components/catalog/identity/moodboard-forms";
 import { useCatalogUpload } from "@/components/catalog/files/use-catalog-upload";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { IconAction } from "@/components/ui/icon-action";
 import { ImageViewer } from "@/components/ui/image-gallery";
 import { toast } from "@/components/ui/toast";
 import { deleteCatalogFile } from "@/lib/catalog/file-actions";
@@ -149,34 +150,30 @@ export function MoodboardFolder({
         </Button>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {folder.sourceUrl && (
-            <a
-              href={folder.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              {t.openInFigma}
-              <IconArrowUpRight aria-hidden data-icon="inline-end" />
-            </a>
+            <IconAction
+              label={t.openInFigma}
+              icon={IconArrowUpRight}
+              onClick={() =>
+                window.open(
+                  folder.sourceUrl ?? "",
+                  "_blank",
+                  "noopener,noreferrer",
+                )
+              }
+            />
           )}
           {folder.id && folder.canEdit && (
             <>
-              <Button
-                variant="outline"
-                size="sm"
+              <IconAction
+                label={t.edit}
+                icon={IconPenWriting2}
                 onClick={() => setEditing(true)}
-              >
-                <IconPenWriting2 aria-hidden data-icon="inline-start" />
-                {t.edit}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
+              />
+              <IconAction
+                label={t.remove}
+                icon={IconTrash}
                 onClick={() => setDeleting({ kind: "folder" })}
-              >
-                <IconTrash aria-hidden data-icon="inline-start" />
-                {t.remove}
-              </Button>
+              />
             </>
           )}
         </div>

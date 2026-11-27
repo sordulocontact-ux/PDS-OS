@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
+import { IconBan } from "@/components/icons";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "@/components/ui/row-actions";
 import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { FactRows } from "@/components/ui/fact-row";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -171,14 +173,18 @@ function CheckRow({
             >
               {c.results.non_compliant}
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => record("not_applicable")}
-            >
-              {c.results.not_applicable}
-            </Button>
+            {/* Never three text buttons: the rare verdict goes in « ⋯ ». */}
+            <RowActions
+              label={t.more}
+              actions={[
+                {
+                  key: "not_applicable",
+                  label: c.results.not_applicable,
+                  icon: IconBan,
+                  onSelect: () => record("not_applicable"),
+                },
+              ]}
+            />
           </>
         ) : editable && done && !noting ? (
           <Button size="sm" variant="ghost" onClick={() => setChanging(true)}>

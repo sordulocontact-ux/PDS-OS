@@ -128,6 +128,7 @@ export const financeReceipts = {
     other: "Choisir une autre dépense",
     create: "Créer la dépense",
     dismiss: "Écarter",
+    more: "Plus d'actions",
     restore: "Remettre à traiter",
     spendLabel: "Dépense justifiée",
     spendSearch: "Rechercher une dépense",

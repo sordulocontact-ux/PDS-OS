@@ -183,6 +183,27 @@ node scripts/preprod-proof-files.mjs
 Il faut `PREPROD_SUPABASE_URL` et `PREPROD_ANON_KEY` dans `.env.preprod.local` (les valeurs « PRÉ-PROD — » de
 `.env.local`). Ajoute seulement, une fois (garde en tête du SQL) ; un fichier déjà déposé est gardé.
 
+## 5 quinquies. Les sessions studio (27/11/2026)
+
+`supabase/preprod/showcase-sessions.sql` (Sacha : « rajoute des données dans les sessions studio ») ajoute douze
+sessions, une par état de `lib/sessions/state.ts`, écrites par Lina et Tom (chefs de projet, `manage_sessions`) à
+travers le RLS, comme `saveStudioSession` et `saveSessionReport` : à venir (Minuit pile, Mirage, Sable chaud sans
+projet, une session d'écriture sans titre pour Assurance 30, Rive gauche sans date), en cours aujourd'hui (Ciel bas,
+journée entière), compte rendu à compléter (Néons avec ses rushs, Feu de camp), terminées avec compte rendu (Velours,
+Aube, Marée haute), annulée (Ciel ouvert). Studios et ingénieurs du Réseau (Studio Ressac, Bastien Coll, Karim
+Haddou), participants membres et contacts, liens vers les rushs. Il écrit aussi le compte rendu des anciennes
+sessions de « Néons » et « Velours », et donne aux séances d'avant leurs horaires, les artistes de leurs titres et Lina en
+participante (le tableau montre un fait par colonne). Dates relatives au jour où il est joué. Une fois (il s'arrête si la session
+« Prises voix lead et chœurs du refrain. » existe), après les autres jeux :
+
+```bash
+psql "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 -f supabase/preprod/showcase-sessions.sql
+# en local (Docker)
+docker exec -i supabase_db_PDS_OS psql -U postgres -q -v ON_ERROR_STOP=1 < supabase/preprod/showcase-sessions.sql
+```
+
+Joué sur la base locale le 27/11/2026.
+
 ## 6. Développer sur la base de pré-prod (sans Docker)
 
 Décision du 26/10/2026 : la stack Supabase locale prend trop de mémoire, et personne d'autre que nous ne

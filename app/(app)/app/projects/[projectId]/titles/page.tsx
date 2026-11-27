@@ -1,4 +1,7 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+
+import { ParticipationsModal } from "@/components/legal/participations/participations-modal";
 
 import { TitlesBoard } from "@/components/projects/titles/titles-board";
 import {
@@ -15,6 +18,7 @@ import { loadTitleRecap } from "@/lib/projects/recap";
 import { titleBoardChoices } from "@/lib/projects/title-board";
 import { allInOrder } from "@/lib/utils/parallel";
 import { withRelease } from "@/lib/distribution/scope";
+import { PARTICIPATIONS_PARAM } from "@/lib/ui/legal-steps";
 import { loadTitleDeposits } from "@/lib/release/collective-releases";
 import { releaseDistributionTone } from "@/lib/release/collective-rules";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
@@ -34,8 +38,9 @@ export const metadata = { title: fr.titleTracks.title };
  */
 export default async function ProjectTitlesPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/titles">) {
-  const { projectId } = await params;
+  const [{ projectId }, query] = await Promise.all([params, searchParams]);
   const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
@@ -61,11 +66,17 @@ export default async function ProjectTitlesPage({
     <div className="flex flex-col gap-6">
       <TitlesHeader
         project={project}
-        titles={board.titles}
         canManage={canManage}
         canOpenLegal={can(access, "manage_legal")}
         choices={{ masterOptions, artists }}
+        view="titles"
       />
+      {query[PARTICIPATIONS_PARAM] !== undefined &&
+        can(access, "manage_legal") && (
+          <Suspense fallback={null}>
+            <ParticipationsModal project={project} access={access} />
+          </Suspense>
+        )}
       <TitlesBoard
         views={<TitlesViewsSwitch projectId={project.id} current="artists" />}
         projectId={project.id}

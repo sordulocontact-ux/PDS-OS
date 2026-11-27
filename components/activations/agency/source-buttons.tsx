@@ -7,8 +7,10 @@ import { toast } from "@/components/ui/toast";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
+import { IconDownload } from "@/components/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DialogButton } from "@/components/ui/dialog-button";
+import { RowActions } from "@/components/ui/row-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   AGENCY_FIELDS,
@@ -102,15 +104,21 @@ function ManualRowForm({
   );
 }
 
-export function ManualRowButton(props: {
+export function ManualRowButton({
+  variant = "outline",
+  ...props
+}: {
   projectId: string;
   sourceId: string;
   press: boolean;
+  // The main gesture of a manual source; outline beside « Actualiser ».
+  variant?: "default" | "outline";
 }) {
   return (
     <DialogButton
       label={t.sources.addRow}
       size="xs"
+      variant={variant}
       title={t.sources.addRowTitle}
       description={t.sources.addRowDescription}
       wide
@@ -120,8 +128,9 @@ export function ManualRowButton(props: {
   );
 }
 
-/** « Importer les statistiques » of a source, asked first. */
-export function ImportMetricsButton({
+/** « ⋯ » of a source: « Importer les statistiques », asked first (never
+ * three text buttons, Sacha 27/11/2026). */
+export function ImportMetricsMenu({
   projectId,
   activationId,
   sourceId,
@@ -135,14 +144,17 @@ export function ImportMetricsButton({
   const [error, setError] = useState<string | null>(null);
   return (
     <>
-      <Button
-        type="button"
-        size="xs"
-        variant="ghost"
-        onClick={() => setOpen(true)}
-      >
-        {t.sources.importMetrics}
-      </Button>
+      <RowActions
+        label={t.sources.more}
+        actions={[
+          {
+            key: "import-metrics",
+            label: t.sources.importMetrics,
+            icon: IconDownload,
+            onSelect: () => setOpen(true),
+          },
+        ]}
+      />
       <ConfirmDialog
         open={open}
         onOpenChange={(next) => {

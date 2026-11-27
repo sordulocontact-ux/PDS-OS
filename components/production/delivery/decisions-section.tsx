@@ -1,8 +1,17 @@
 import { Rows } from "@/components/ui/rows";
-import { DeliveryStepButton } from "@/components/production/delivery-step-button";
+import { IconExternalLink } from "@/components/icons";
+import {
+  DeliveryStepButton,
+  ReopenDeliveryMenu,
+} from "@/components/production/delivery-step-button";
 import { FinalFileButton } from "@/components/production/final-file-button";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
@@ -58,7 +67,7 @@ export function DecisionsSection({
 }) {
   const { delivery: d, version } = data;
   const { creative, technical, delivery } = decisions;
-  const step = (key: "check" | "deliver" | "reopen") => (
+  const step = (key: "check" | "deliver") => (
     <DeliveryStepButton
       projectId={projectId}
       deliverableId={deliverable.id}
@@ -156,15 +165,28 @@ export function DecisionsSection({
               .join(" ") || undefined
           }
         >
+          {/* Its icon alone, beside the two gestures in text (Sacha
+              27/11/2026: never three text buttons side by side). */}
           {d?.finalUrl && (
-            <a
-              href={d.finalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonVariants({ size: "sm", variant: "outline" })}
-            >
-              <ButtonRoll>{t.delivery.final}</ButtonRoll>
-            </a>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <a
+                    href={d.finalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t.delivery.final}
+                    className={buttonVariants({
+                      size: "icon-sm",
+                      variant: "outline",
+                    })}
+                  />
+                }
+              >
+                <IconExternalLink aria-hidden className="size-5" />
+              </TooltipTrigger>
+              <TooltipContent>{t.delivery.final}</TooltipContent>
+            </Tooltip>
           )}
           {canOrganize &&
             delivery.state === "to_do" &&
@@ -185,7 +207,14 @@ export function DecisionsSection({
               onVersion
             />
           )}
-          {canOrganize && d?.checkedAt && step("reopen")}
+          {canOrganize && d?.checkedAt && (
+            <ReopenDeliveryMenu
+              projectId={projectId}
+              deliverableId={deliverable.id}
+              title={deliverable.title}
+              onVersion
+            />
+          )}
         </DecisionCard>
       </Rows>
       {delivery.state === "to_do" && deliver}

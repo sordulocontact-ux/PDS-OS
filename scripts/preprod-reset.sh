@@ -61,5 +61,8 @@ supabase db reset --db-url "$PREPROD_DB_URL" --no-seed --yes
 # and PREPROD_ANON_KEY, supabase/preprod/showcase-finance-proofs.sql).
 "$PSQL" "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 -f supabase/preprod/showcase-finance-proofs.sql >/dev/null
 node scripts/preprod-proof-files.mjs >/dev/null
+# Sessions studio in every state, with reports, attendees and rushes
+# (supabase/preprod/showcase-sessions.sql).
+"$PSQL" "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 -f supabase/preprod/showcase-sessions.sql >/dev/null
 
 echo "Pré-prod remise à zéro : comptes de test et moments prêts."

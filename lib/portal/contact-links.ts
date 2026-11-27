@@ -36,7 +36,12 @@ export type ContactLinkRow = {
   revoked: { at: string; reason: string } | null;
 };
 
-export type ContactLinks = { canEdit: boolean; rows: ContactLinkRow[] };
+export type ContactLinks = {
+  canEdit: boolean;
+  rows: ContactLinkRow[];
+  // For the reminder written by hand (ContactLinkCard's subject).
+  projectTitle: string;
+};
 
 const contacts = z.array(
   z.object({
@@ -58,7 +63,7 @@ export const loadContactLinks = trackedCache(
       getAccess(),
       supabase
         .from("projects")
-        .select("owner_person_id")
+        .select("owner_person_id, title")
         .eq("id", projectId)
         .maybeSingle(),
       supabase.rpc("project_link_contacts", { p_project_id: projectId }),
@@ -128,6 +133,6 @@ export const loadContactLinks = trackedCache(
             : null,
       };
     });
-    return { canEdit, rows };
+    return { canEdit, rows, projectTitle: project.data?.title ?? "" };
   },
 );

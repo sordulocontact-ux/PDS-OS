@@ -30,7 +30,14 @@ const ALL = "all";
  * A one-choice axis (`menuOnly`) stays one choice, as segments. The panel
  * stays open while one ticks; the count of what is ticked on the button.
  */
-export function FilterPanel({ filters }: { filters: FilterControl[] }) {
+export function FilterPanel({
+  filters,
+  align = "end",
+}: {
+  filters: FilterControl[];
+  // « start » when the button opens a row (no search before it).
+  align?: "start" | "end";
+}) {
   const t = fr.urlFilters;
   const count = filters.reduce((sum, filter) => sum + filter.values.length, 0);
 
@@ -50,7 +57,7 @@ export function FilterPanel({ filters }: { filters: FilterControl[] }) {
         }
       />
       <PopoverContent
-        align="end"
+        align={align}
         aria-label={t.panel}
         className="w-[min(20rem,calc(100vw-2rem))]"
       >

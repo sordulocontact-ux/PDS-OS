@@ -8,6 +8,10 @@ import { SubModuleTabs, type SubModuleTab } from "./sub-module-tabs";
 
 type Tone = React.ComponentProps<typeof StatusBadge>["tone"];
 
+/** The h1 of a module's head, for a heading drawn by a page (`heading`). */
+export const moduleTitleClass =
+  "min-w-0 text-[length:var(--type-display-module)] leading-[var(--type-display-module-lh)] break-words";
+
 export type ModuleHeaderProps = {
   // « Module / [sous-module /] Étape »; the last one is the page.
   crumbs: ModuleCrumb[];
@@ -15,6 +19,10 @@ export type ModuleHeaderProps = {
   tabs?: SubModuleTab[];
   // The module's name, the page's h1 (« Stratégie », « Master »).
   title: string;
+  // In place of the h1: the title edited in place (a collective's title
+  // named on its page, Sacha 27/11/2026), which draws its own h1 with
+  // `moduleTitleClass` when it is not a field.
+  heading?: React.ReactNode;
   // Under the title, quiet (the overview: « Mona Lys · Single »).
   subtitle?: string;
   // Before the title (the overview: the project's cover).
@@ -50,6 +58,7 @@ export function ModuleHeader({
   crumbs,
   tabs,
   title,
+  heading: headingSlot,
   subtitle,
   media,
   meta,
@@ -59,11 +68,7 @@ export function ModuleHeader({
   facts,
   className,
 }: ModuleHeaderProps) {
-  const heading = (
-    <h1 className="min-w-0 text-[length:var(--type-display-module)] leading-[var(--type-display-module-lh)] break-words">
-      {title}
-    </h1>
-  );
+  const heading = headingSlot ?? <h1 className={moduleTitleClass}>{title}</h1>;
   return (
     <header
       data-module-header=""

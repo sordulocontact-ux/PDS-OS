@@ -1,4 +1,5 @@
 import { IconDisc } from "@/components/icons";
+import { NameTitleButton } from "@/components/projects/titles/name-title-button";
 import {
   WorkflowProgress,
   WorkflowRing,
@@ -80,6 +81,7 @@ export function TracksList({
       projectId={projectId}
       row={r}
       workflows={workflows}
+      canManage={canManage}
     />
   );
   return (
@@ -120,10 +122,13 @@ function TrackRow({
   projectId,
   row,
   workflows,
+  canManage,
 }: {
   projectId: string;
   row: TitleProgress;
   workflows: WorkflowKey[];
+  // The project's owner: « Nommer » on a title still to be named.
+  canManage: boolean;
 }) {
   const cardOf = (workflow: WorkflowKey) =>
     row.cards.find((card) => card.workflow === workflow);
@@ -136,15 +141,22 @@ function TrackRow({
       <DataTableCell className="w-72">
         <DataTableMedia
           title={
-            <DataTableLink href={routes.projectTrack(projectId, row.title.id)}>
-              <span
-                className={cn(
-                  row.abandoned && "text-[color:var(--text-secondary)]",
-                )}
+            <span className="flex min-w-0 flex-wrap items-center gap-2">
+              <DataTableLink
+                href={routes.projectTrack(projectId, row.title.id)}
               >
-                {row.label}
-              </span>
-            </DataTableLink>
+                <span
+                  className={cn(
+                    row.abandoned && "text-[color:var(--text-secondary)]",
+                  )}
+                >
+                  {row.label}
+                </span>
+              </DataTableLink>
+              {canManage && !named && !row.abandoned && (
+                <NameTitleButton projectId={projectId} titleId={row.title.id} />
+              )}
+            </span>
           }
           subtitle={
             row.abandoned ? (

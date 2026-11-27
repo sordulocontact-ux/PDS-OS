@@ -1,4 +1,7 @@
-import { DeliveryStepButton } from "@/components/production/delivery-step-button";
+import {
+  DeliveryStepButton,
+  ReopenDeliveryMenu,
+} from "@/components/production/delivery-step-button";
 import { FinalFileButton } from "@/components/production/final-file-button";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -185,11 +188,10 @@ export function ProductionDeliverableItem({
             />
           )}
           {canEdit && d.delivery?.approvedAt && (
-            <DeliveryStepButton
+            <ReopenDeliveryMenu
               projectId={projectId}
               deliverableId={d.id}
               title={d.title}
-              step="reopen"
               onVersion={d.prepared}
             />
           )}

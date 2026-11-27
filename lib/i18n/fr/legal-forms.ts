@@ -244,6 +244,7 @@ export const legalForms = {
     revoke: "Révoquer",
     // The private link kept visible (lot 9 J4, rule 19).
     revokeAccess: "Révoquer l'accès",
+    moreActions: "Plus d'actions",
     revokeWhy: "Pourquoi vous révoquez l'accès",
     revokeWhyMissing: "Dites pourquoi vous révoquez l'accès.",
     revokeBody:

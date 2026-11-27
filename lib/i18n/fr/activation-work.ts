@@ -149,6 +149,7 @@ export const activationWork = {
     validate: "Valider",
     requestChanges: "À corriger",
     cancel: "Annuler le message",
+    more: "Plus d'actions",
     cancelled: "Message annulé.",
     declare: "Marquer l'envoi comme déclaré",
     declareTitle: "Déclarer l'envoi",

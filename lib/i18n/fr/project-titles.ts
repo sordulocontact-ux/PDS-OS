@@ -98,6 +98,19 @@ export const projectTitles = {
     submit: "Rattacher le titre",
     done: "Titre du Catalogue rattaché.",
   },
+  // Naming a title where its name is read (Sacha, 27/11/2026): « Nommer »
+  // in the list, « Maintenant » on its page, its title edited in place.
+  naming: {
+    todo: "Nommer le titre",
+    field: "Nom du titre",
+    submit: "Nommer",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    edit: "Modifier le nom",
+    required: "Donnez un nom au titre.",
+    named: "Titre nommé.",
+    renamed: "Titre renommé.",
+  },
   rename: {
     action: "Renommer",
     title: "Renommer le titre",
@@ -133,23 +146,6 @@ export const projectTitles = {
     more: "Plus d'actions sur les titres",
     // An artist's alerts, in a tooltip beside its name.
     alerts: "Alertes",
-    facts: {
-      mainArtist: "Artiste principal",
-      titles: "Titres",
-      // « 3 en cours, 1 prévu »; nothing yet: « aucun ».
-      titleCounts: (active: number, planned: number, abandoned: number) =>
-        [
-          active > 0 ? `${active} en cours` : null,
-          planned > 0 ? `${planned} prévu${planned > 1 ? "s" : ""}` : null,
-          abandoned > 0
-            ? `${abandoned} abandonné${abandoned > 1 ? "s" : ""}`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(", ") || "aucun",
-      // « Artistes du projet » (projectArtists), the main one included.
-      artists: "Artistes",
-    },
     label: "Titres du projet, par artiste",
     // The other columns: recap.columns (lot L2b).
     columns: {

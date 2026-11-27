@@ -1,5 +1,7 @@
 import { Avatar } from "@/components/ui/avatar";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { FactSourceHint } from "@/components/ui/fact-source-hint";
+import type { ColumnIcon } from "@/lib/ui/column-icons";
 import { roles } from "@/lib/i18n/fr/roles";
 
 import { PrivateLinks, type PrivateLinkRow } from "./private-links";
@@ -9,7 +11,13 @@ const fr = { roles };
 const t = fr.roles;
 
 export type RoleKind = "exec" | "coord" | "valid";
-const KIND_TONE = { exec: "info", coord: "neutral", valid: "action" } as const;
+// The role's icon by what it does: coordinates (a person in charge),
+// executes (a job), validates (a decision).
+const KIND_ICON: Record<RoleKind, ColumnIcon> = {
+  coord: "person",
+  exec: "role",
+  valid: "decision",
+};
 
 /** One role of a module: its holder (a member, or a contact through a
  * private link), what it does, and the module's own « Changer ». */
@@ -46,47 +54,49 @@ export function RolesPanel({
   const multi = [...count].filter(([, n]) => n > 1);
   return (
     <div className="flex flex-col gap-6">
-      <ul className="flex flex-col">
+      {/* One row per role, as every fact (Sacha 27/11/2026, after the
+          fiche de renseignements): the role on the left, its holder beside
+          it, what it does and its kind in the ⓘ, « Changer » at the end. */}
+      <FactRows>
         {roles.map((r) => (
-          <li
+          <FactRow
             key={r.key}
-            className="flex flex-wrap items-start justify-between gap-3 border-t border-[color:var(--border-hairline)] py-3 first:border-t-0"
-          >
-            <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <span className="flex flex-wrap items-center gap-2">
-                <b className="font-semibold">{r.label}</b>
-                <StatusBadge size="sm" tone={KIND_TONE[r.kind]}>
-                  {t.kinds[r.kind]}
-                </StatusBadge>
-              </span>
-              {r.holder ? (
-                <span className="flex items-center gap-2">
+            icon={KIND_ICON[r.kind]}
+            label={r.label}
+            value={
+              r.holder ? (
+                <span className="inline-flex items-center gap-2">
                   <Avatar
                     name={r.holder.name}
                     pictureUrl={null}
-                    className="size-6"
+                    className="size-5"
                   />
                   <span>
-                    <b className="font-semibold">{r.holder.name}</b>
+                    {r.holder.name}
                     {[r.holder.detail, r.holder.viaLink ? t.viaLink : null]
                       .filter(Boolean)
-                      .map((x) => ` · ${x}`)
-                      .join("")}
+                      .map((x) => (
+                        <span key={x} className="text-muted-foreground">
+                          {` · ${x}`}
+                        </span>
+                      ))}
                   </span>
                 </span>
               ) : (
                 <span className="text-muted-foreground">{t.none}</span>
-              )}
-              {r.what && (
-                <span className="text-caption text-muted-foreground">
-                  {r.what}
-                </span>
-              )}
-            </span>
-            {r.action}
-          </li>
+              )
+            }
+            side={
+              <>
+                {r.action}
+                <FactSourceHint
+                  label={[t.kinds[r.kind], r.what].filter(Boolean).join(" · ")}
+                />
+              </>
+            }
+          />
         ))}
-      </ul>
+      </FactRows>
       {multi.length > 0 && (
         <p className="text-caption text-muted-foreground">
           {multi.map(([name, n]) => t.multi(name, n)).join(" ")}

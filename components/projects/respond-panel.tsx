@@ -5,8 +5,10 @@ import { useActionState, useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { IconCircleXmark } from "@/components/icons";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "@/components/ui/row-actions";
 import { idleFormState } from "@/lib/auth/form-state";
 import { transmission } from "@/lib/i18n/fr/transmission";
 import { respondToAssignment } from "@/lib/projects/transmission-actions";
@@ -42,14 +44,20 @@ export function RespondPanel({ assignmentId }: { assignmentId: string }) {
           >
             {t.clarify}
           </Button>
-          <Button
-            variant="ghost"
-            size="lg"
-            className="text-[color:var(--text-secondary)] sm:ml-auto"
-            onClick={() => setMode("refused")}
-          >
-            {t.refuse}
-          </Button>
+          <div className="sm:ml-auto">
+            <RowActions
+              label={t.moreActions}
+              size="icon-lg"
+              actions={[
+                {
+                  key: "refuse",
+                  label: t.refuse,
+                  icon: IconCircleXmark,
+                  onSelect: () => setMode("refused"),
+                },
+              ]}
+            />
+          </div>
         </div>
       ) : (
         <form action={action} noValidate className="flex flex-col gap-3">

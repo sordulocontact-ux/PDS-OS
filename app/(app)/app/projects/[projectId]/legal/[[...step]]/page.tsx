@@ -7,7 +7,6 @@ import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-import { ParticipationsPage } from "@/components/legal/participations/participations-page";
 import { AttachTitleStep } from "@/components/legal/steps/attach-title-step";
 import { ConfirmationStep } from "@/components/legal/steps/confirmation-step";
 import { DemarcheStep } from "@/components/legal/steps/demarche-step";
@@ -18,7 +17,7 @@ import { ReadyStep } from "@/components/legal/steps/ready-step";
 import { TitleContractsStep } from "@/components/legal/steps/title-contracts-step";
 import { demarcheTarget, entryHref } from "@/lib/legal/demarches/where";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
-import { legalRouteOf } from "@/lib/ui/legal-steps";
+import { legalParticipationsHref, legalRouteOf } from "@/lib/ui/legal-steps";
 
 // The Juridique as a journey (docs/VISION-UX.md § 4, proto « Projet
 // complet »): /legal redirects to the step that awaits the viewer; the
@@ -82,8 +81,9 @@ export default async function ProjectLegalPage({
       />
     );
   if (route.type === "ready") return <ReadyStep projectId={projectId} />;
+  // A panel over « Titres » since 27/11/2026: former links land there.
   if (route.type === "participations")
-    return <ParticipationsPage projectId={projectId} />;
+    redirect(legalParticipationsHref(projectId));
   // A collective's title not in the Catalogue yet (Ibé, 18/11/2026).
   if (route.type === "attach")
     return <AttachTitleStep projectId={projectId} titleId={route.titleId} />;

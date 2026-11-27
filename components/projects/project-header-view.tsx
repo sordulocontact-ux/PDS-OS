@@ -30,7 +30,7 @@ const fr = { moduleFrame };
 export type ProjectHeaderOverrides = Partial<
   Pick<
     ModuleHeaderProps,
-    "title" | "subtitle" | "media" | "status" | "actions" | "facts"
+    "title" | "heading" | "subtitle" | "media" | "status" | "actions" | "facts"
   >
 > & {
   // Replaces the whole trail.

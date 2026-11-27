@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { CopyButton } from "@/components/ui/copy-button";
+import { PersonLinkCard } from "@/components/ui/person-link-card";
 import { roles } from "@/lib/i18n/fr/roles";
 import { formatDayMonth } from "@/lib/utils/instant";
 
@@ -18,6 +17,7 @@ export type PrivateLinkRow = {
     number: number;
     createdAt: string;
     createdBy: string | null;
+    // Undefined: the module does not keep when it was sent (Production).
     sentAt?: string | null;
     openedAt: string | null;
     expiresAt?: string | null;
@@ -31,9 +31,11 @@ export type PrivateLinkRow = {
 };
 
 /**
- * « Liens privés » (proto BODY.org): for each person, the current link
- * (number, made when and by whom, sent, opened), « Copier le lien » when
- * it can be given again, « Relancer », « Nouveau lien ».
+ * « Liens privés » (proto BODY.org): for each person, the current link as
+ * THE link card (`PersonLinkCard`, Sacha 27/11/2026: never rows of their
+ * own): role and validity under the name, where it stands in its pill,
+ * the address to copy when it can be given again, « Relancer », the
+ * module's « Nouveau lien ».
  */
 export function PrivateLinks({
   links,
@@ -47,59 +49,52 @@ export function PrivateLinks({
     <section className="flex flex-col gap-2">
       <h3 className="text-body-md font-semibold">{t.title}</h3>
       <p className="text-caption text-muted-foreground">{t.hint}</p>
-      <ul className="flex flex-col">
-        {links.map(({ key, name, role, link: l, remindHref, renew }) => (
-          <li
-            key={key}
-            className="flex flex-wrap items-start justify-between gap-3 border-t border-[color:var(--border-hairline)] py-3 first:border-t-0"
-          >
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span>
-                <b className="font-semibold">{name}</b> · {role}
-              </span>
-              <span className="text-caption text-muted-foreground">
-                {!l
-                  ? t.none
-                  : l.revokedAt
-                    ? t.revoked(formatDayMonth(l.revokedAt))
-                    : [
-                        t.active(l.number),
-                        t.created(formatDayMonth(l.createdAt), l.createdBy),
-                        l.sentAt ? t.sent(formatDayMonth(l.sentAt)) : null,
-                        l.openedAt
-                          ? t.opened(formatDayMonth(l.openedAt))
-                          : t.notOpened,
-                        l.expiresAt
-                          ? t.expires(formatDayMonth(l.expiresAt))
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-              </span>
-            </span>
-            <span className="flex flex-wrap items-center gap-2">
-              {l?.url && !l.revokedAt && (
-                <CopyButton
-                  value={l.url}
-                  label={t.copy}
-                  copiedLabel={t.copied}
-                  size="sm"
-                />
-              )}
-              {remindHref && l && !l.revokedAt && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  render={<a href={remindHref} />}
-                  nativeButton={false}
-                >
-                  {t.remind}
-                </Button>
-              )}
-              {renew}
-            </span>
-          </li>
-        ))}
+      <ul className="mt-1 flex flex-col gap-3">
+        {links.map(({ key, name, role, link, remindHref, renew }) => {
+          const live = link && !link.revokedAt ? link : null;
+          return (
+            <li key={key}>
+              <PersonLinkCard
+                name={name}
+                line={[
+                  role,
+                  live?.expiresAt
+                    ? t.expires(formatDayMonth(live.expiresAt))
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                state={
+                  !live
+                    ? "none"
+                    : live.openedAt
+                      ? "opened"
+                      : live.sentAt
+                        ? "sent"
+                        : "notSent"
+                }
+                badge={
+                  live && !live.openedAt && live.sentAt === undefined
+                    ? { tone: "neutral", label: t.notOpenedYet }
+                    : undefined
+                }
+                url={live?.url ?? null}
+                remindHref={live ? remindHref : null}
+                tools={live ? renew : undefined}
+                empty={
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-[color:var(--text-secondary)]">
+                      {link?.revokedAt
+                        ? t.revoked(formatDayMonth(link.revokedAt))
+                        : t.none}
+                    </span>
+                    {renew}
+                  </div>
+                }
+              />
+            </li>
+          );
+        })}
       </ul>
       {children}
     </section>

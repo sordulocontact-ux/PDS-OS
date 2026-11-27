@@ -53,12 +53,18 @@ export type LegalDemarcheKind = (typeof LEGAL_DEMARCHE_KINDS)[number];
 export const LEGAL_READY_KEY = "ready";
 
 // A collective's participations, their contracts and deals (lot 11 of
-// docs/pds-mic-plan.md): a page of the section, reached from the foot of
-// its journey, not a step.
+// docs/pds-mic-plan.md): a side panel over « Titres » (Sacha 27/11/2026:
+// « une page pour ça c'est relou et overkill »), opened by this parameter
+// so that a notification or a link still opens it. The former page
+// (/legal/participations) redirects here.
 export const LEGAL_PARTICIPATIONS_KEY = "participations";
+export const PARTICIPATIONS_PARAM = "participations";
 
-export const legalParticipationsHref = (projectId: string) =>
-  `${routes.projectLegal(projectId)}/${LEGAL_PARTICIPATIONS_KEY}`;
+export const legalParticipationsHref = (
+  projectId: string,
+  view: "titles" | "tracks" = "titles",
+) =>
+  `${view === "tracks" ? routes.projectTracks(projectId) : routes.projectTitles(projectId)}?${PARTICIPATIONS_PARAM}=1`;
 
 // A collective's title not in the Catalogue yet, in the journey of its
 // group (/legal/attach/<project title id>): « Rattacher le titre au

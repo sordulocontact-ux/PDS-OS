@@ -51,9 +51,6 @@ export const contactLinks = {
     `Sa page du projet · lien valable jusqu'au ${day}`,
   noLink: (name: string) =>
     `${name} n'a pas de lien actif : tout ce que PDS attend reste sur sa page dès qu'un nouveau lien est créé.`,
-  // Next to a workflow's own link.
-  offer: (name: string) =>
-    `Sa page du projet : tout ce que PDS attend de ${name}, en un seul lien.`,
   errors: {
     forbidden: "Seul le responsable du projet gère les liens.",
     reason: "Dites pourquoi vous révoquez ce lien.",

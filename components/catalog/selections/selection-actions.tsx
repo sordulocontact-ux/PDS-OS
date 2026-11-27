@@ -1,6 +1,6 @@
 "use client";
 
-import { IconPenWriting2, IconPlus } from "nucleo-sharp-essential";
+import { IconPenWriting2, IconPlus, IconUsers2 } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -30,8 +30,9 @@ type Person = { personId: string; name: string };
 /**
  * A selection's gestures, in its page's head, for who manages the Catalogue
  * (lot 4 of docs/pds-mic-plan.md): « Ajouter des artistes » (the main one),
- * « Transmettre » (to a member who manages the Catalogue, never its
- * holder), and « Renommer » in the « ⋯ ». Each asks a saisie: a modal.
+ * and in the « ⋯ » (never three text buttons, Sacha 27/11/2026) « Transmettre »
+ * (to a member who manages the Catalogue, never its holder) and
+ * « Renommer ». Each asks a saisie: a modal.
  * Lot 5: « Créer le projet » (`createProjectHref`, the direction and its
  * holder, once it has artists) opens the project form on this selection;
  * it is then the main gesture, « Ajouter des artistes » in outline.
@@ -77,25 +78,28 @@ export function SelectionActions({
           variant={createProjectHref ? "outline" : "default"}
         />
       )}
-      <DialogButton
-        label={t.transmit.button}
-        variant="outline"
-        size="lg"
-        title={t.transmit.title}
-        description={t.transmit.description}
-      >
-        {(close) => (
-          <TransmitForm
-            selectionId={selectionId}
-            recipients={recipients.filter((p) => p.personId !== holderPersonId)}
-            onDone={close}
-          />
-        )}
-      </DialogButton>
       <RowActions
         label={t.selectionMenu}
         size="icon-lg"
         actions={[
+          {
+            key: "transmit",
+            label: t.transmit.button,
+            icon: IconUsers2,
+            dialog: {
+              title: t.transmit.title,
+              description: t.transmit.description,
+              body: (close) => (
+                <TransmitForm
+                  selectionId={selectionId}
+                  recipients={recipients.filter(
+                    (p) => p.personId !== holderPersonId,
+                  )}
+                  onDone={close}
+                />
+              ),
+            },
+          },
           {
             key: "rename",
             label: t.rename.action,

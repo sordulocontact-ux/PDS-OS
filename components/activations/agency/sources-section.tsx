@@ -9,7 +9,7 @@ import { formatDateTime } from "@/lib/release/format";
 import { RefreshButton } from "./refresh-button";
 import {
   AddSourceButton,
-  ImportMetricsButton,
+  ImportMetricsMenu,
   ManualRowButton,
 } from "./source-buttons";
 
@@ -64,7 +64,7 @@ export function SourcesSection({
               }
               side={
                 canWrite && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {s.kind !== "manual" && (
                       <RefreshButton
                         scope={scope}
@@ -79,8 +79,9 @@ export function SourcesSection({
                       projectId={scope.projectId}
                       sourceId={s.id}
                       press={press}
+                      variant={s.kind === "manual" ? "default" : "outline"}
                     />
-                    <ImportMetricsButton
+                    <ImportMetricsMenu
                       projectId={scope.projectId}
                       activationId={scope.activationId}
                       sourceId={s.id}

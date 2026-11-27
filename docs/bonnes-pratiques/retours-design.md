@@ -290,3 +290,14 @@ qui a été fait.
   type et ce que fait le rôle).
 - **À retenir** : une liste de « qui / quoi » se lit comme des faits (`FactRows`), pas en blocs empilés avec une phrase
   sous chaque titre ; l'explication va dans le ⓘ.
+
+---
+
+## 27/11/2026 : « Participations et contrats » en panneau, pas en page
+
+- **Ce que Sacha a dit** : « je voudrais que Participations et contrats soit similaire [à « Qui fait quoi »], une modale,
+  je trouve qu'avoir une page pour ça c'est juste relou et overkill ».
+- **Fait** : panneau latéral sur « Titres » (`?participations=1`, l'ancienne page y redirige) ; dedans un bloc par
+  titre et une ligne par artiste en `FactRows` (contrat et deal avec leur icône), au lieu d'un grand tableau.
+- **À retenir** : une vue de consultation rattachée à une page (qui fait quoi, suivi des contrats d'un projet) s'ouvre
+  en panneau sur cette page, pas sur une page à part ; une URL à paramètre garde les liens et les notifications.

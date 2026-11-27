@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState, type ReactNode } from "react";
 
 import { IconDots } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -16,9 +19,17 @@ export type RowAction = {
   key: string;
   label: string;
   icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  // A gesture (`onSelect`) or a place to go (`href`, a link row).
+  // A gesture (`onSelect`), a place to go (`href`, a link row), or a form
+  // in a modal (`dialog`): a button of a row too full moved into « ⋯ »
+  // (Sacha 27/11/2026: never three text buttons side by side).
   onSelect?: () => void;
   href?: string;
+  dialog?: {
+    title: string;
+    description?: string;
+    size?: "default" | "medium" | "wide";
+    body: (close: () => void) => ReactNode;
+  };
 };
 
 // `reveal`: with a mouse, the button shows only while its row
@@ -42,8 +53,11 @@ export function RowActions({
   size?: "icon-sm" | "icon-lg";
   reveal?: boolean;
 }) {
+  const [open, setOpen] = useState<string | null>(null);
   if (actions.length === 0) return null;
+  const close = () => setOpen(null);
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
@@ -58,17 +72,36 @@ export function RowActions({
         <IconDots aria-hidden className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {actions.map(({ key, label: itemLabel, icon: Icon, onSelect, href }) => (
-          <DropdownMenuItem
-            key={key}
-            onClick={onSelect}
-            render={href ? <Link href={href} /> : undefined}
-          >
-            <Icon aria-hidden />
-            {itemLabel}
-          </DropdownMenuItem>
-        ))}
+        {actions.map(
+          ({ key, label: itemLabel, icon: Icon, onSelect, href, dialog }) => (
+            <DropdownMenuItem
+              key={key}
+              onClick={dialog ? () => setOpen(key) : onSelect}
+              render={href ? <Link href={href} /> : undefined}
+            >
+              <Icon aria-hidden />
+              {itemLabel}
+            </DropdownMenuItem>
+          ),
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
+      {actions.map(
+        ({ key, dialog }) =>
+          dialog && (
+            <FormDialog
+              key={key}
+              open={open === key}
+              onOpenChange={(next) => !next && close()}
+              title={dialog.title}
+              description={dialog.description}
+              closeLabel={dialogs.close}
+              size={dialog.size}
+            >
+              {dialog.body(close)}
+            </FormDialog>
+          ),
+      )}
+    </>
   );
 }

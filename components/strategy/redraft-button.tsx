@@ -41,7 +41,7 @@ export function RedraftButton({
   return (
     <Button
       size="sm"
-      variant="ghost"
+      variant="outline"
       onClick={redraft}
       disabled={pending}
       aria-busy={pending || undefined}

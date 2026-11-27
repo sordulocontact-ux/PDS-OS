@@ -1,4 +1,7 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+
+import { ParticipationsModal } from "@/components/legal/participations/participations-modal";
 
 import {
   TitlesHeader,
@@ -12,6 +15,7 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { titleBoardChoices } from "@/lib/projects/title-board";
 import { loadTitlesProgress } from "@/lib/projects/title-journeys";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { PARTICIPATIONS_PARAM } from "@/lib/ui/legal-steps";
 import { allInOrder } from "@/lib/utils/parallel";
 import type { WorkflowKey } from "@/lib/workflow-status/rules";
 
@@ -27,8 +31,9 @@ export const metadata = { title: fr.titleTracks.title };
  */
 export default async function ProjectTracksPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/tracks">) {
-  const { projectId } = await params;
+  const [{ projectId }, query] = await Promise.all([params, searchParams]);
   const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
@@ -48,11 +53,17 @@ export default async function ProjectTracksPage({
     <div className="flex flex-col gap-6">
       <TitlesHeader
         project={project}
-        titles={titles}
         canManage={canManage}
         canOpenLegal={can(access, "manage_legal")}
         choices={choices}
+        view="tracks"
       />
+      {query[PARTICIPATIONS_PARAM] !== undefined &&
+        can(access, "manage_legal") && (
+          <Suspense fallback={null}>
+            <ParticipationsModal project={project} access={access} />
+          </Suspense>
+        )}
       <TitlesViews projectId={project.id} current="tracks">
         <TracksList
           projectId={project.id}

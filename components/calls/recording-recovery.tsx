@@ -2,8 +2,11 @@
 
 import { useState, type ReactNode } from "react";
 
+import { IconTrash } from "nucleo-sharp-essential";
+
 import type { RecorderInterruption } from "@/components/calls/use-recorder";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "@/components/ui/row-actions";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatClock, formatTime } from "@/lib/calls/format";
 import {
@@ -101,7 +104,7 @@ export function RecordingRecovery({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button onClick={onResume} disabled={busy}>
             {starting ? t.starting : saved > 0 ? r.resume : r.retry}
           </Button>
@@ -110,14 +113,18 @@ export function RecordingRecovery({
               {sendingLabel ?? r.sendSaved}
             </Button>
           )}
-          {saved > 0 && (
-            <Button
-              variant="ghost"
-              onClick={() => setConfirming(true)}
-              disabled={busy}
-            >
-              {r.discard}
-            </Button>
+          {saved > 0 && !busy && (
+            <RowActions
+              label={r.more}
+              actions={[
+                {
+                  key: "discard",
+                  label: r.discard,
+                  icon: IconTrash,
+                  onSelect: () => setConfirming(true),
+                },
+              ]}
+            />
           )}
         </div>
       )}

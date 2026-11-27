@@ -60,6 +60,8 @@ export const roles = {
     sent: (day: string) => `envoyé le ${day}`,
     opened: (day: string) => `ouvert le ${day}`,
     notOpened: "jamais ouvert",
+    // The card's pill of a link whose sending is not kept (Production).
+    notOpenedYet: "Pas encore ouvert",
     expires: (day: string) => `valable jusqu'au ${day}`,
     revoked: (day: string) => `Révoqué le ${day} · ce qu'il a déposé reste`,
     copy: "Copier le lien",

@@ -1,5 +1,6 @@
 "use client";
 
+import { IconPenWriting2, IconXmark } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { ProposedBadge } from "@/components/framing/proposed-badge";
@@ -7,6 +8,8 @@ import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
+import { IconAction } from "@/components/ui/icon-action";
+import { RowActions } from "@/components/ui/row-actions";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -99,7 +102,7 @@ export function BriefFieldCard({
       )}
 
       {!editing && canEdit && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {field.status === "proposed" && (
             <>
               <Button
@@ -113,32 +116,34 @@ export function BriefFieldCard({
               >
                 {t.actions.confirm}
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pending}
-                onClick={() =>
-                  run(() =>
-                    rejectField(projectId, field.deliverable, field.key),
-                  )
-                }
-              >
-                {t.actions.reject}
-              </Button>
             </>
           )}
-          <Button
-            size="sm"
-            variant="ghost"
+          {actions}
+          <IconAction
+            label={field.value ? t.actions.edit : t.actions.fill}
+            icon={IconPenWriting2}
             disabled={pending}
             onClick={() => {
               setDraft(field.value ?? "");
               setEditing(true);
             }}
-          >
-            {field.value ? t.actions.edit : t.actions.fill}
-          </Button>
-          {actions}
+          />
+          {field.status === "proposed" && (
+            <RowActions
+              label={t.actions.more}
+              actions={[
+                {
+                  key: "reject",
+                  label: t.actions.reject,
+                  icon: IconXmark,
+                  onSelect: () =>
+                    run(() =>
+                      rejectField(projectId, field.deliverable, field.key),
+                    ),
+                },
+              ]}
+            />
+          )}
         </div>
       )}
     </section>

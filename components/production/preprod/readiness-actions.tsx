@@ -18,9 +18,12 @@ import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
 import { useState } from "react";
 
+import { IconBan, IconUserPlus } from "@/components/icons";
+import { RowActions, type RowAction } from "@/components/ui/row-actions";
+import { IconCheck, IconXmark } from "nucleo-sharp-essential";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { AssignCheckButton, DerogateButton } from "./readiness-dialogs";
+import { AssignForm, DerogateForm } from "./readiness-dialogs";
 
 const fr = { productionPreprod };
 
@@ -57,51 +60,83 @@ export function ReadinessActions({
       else toast.error(result.error);
     });
   const label = t.checks[row.key];
+  const actions: RowAction[] = [
+    {
+      key: "assign",
+      label: t.assign,
+      icon: IconUserPlus,
+      dialog: {
+        title: t.assignTitle(label),
+        description: t.assignDescription,
+        body: (close) => (
+          <AssignForm
+            projectId={projectId}
+            sheetId={sheetId}
+            row={row}
+            members={members}
+            contacts={contacts}
+            onDone={close}
+          />
+        ),
+      },
+    },
+    {
+      key: "required",
+      label: row.required ? t.unrequire : t.require,
+      icon: row.required ? IconXmark : IconCheck,
+      onSelect: () => set(null, !row.required),
+    },
+    ...(row.state === "confirmed"
+      ? []
+      : [
+          {
+            key: "derogate",
+            label: t.derogate,
+            icon: IconBan,
+            dialog: {
+              title: t.derogateTitle(label),
+              description: t.derogateDescription,
+              body: (close: () => void) => (
+                <DerogateForm
+                  projectId={projectId}
+                  sheetId={sheetId}
+                  row={row}
+                  onDone={close}
+                />
+              ),
+            },
+          },
+        ]),
+  ];
+  // One text button (the main gesture), the rest in « ⋯ » (Sacha 27/11/2026).
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <AssignCheckButton
-        projectId={projectId}
-        sheetId={sheetId}
-        row={row}
-        members={members}
-        contacts={contacts}
-      />
-      <Button
-        size="xs"
-        variant="ghost"
-        disabled={pending}
-        onClick={() => set(null, !row.required)}
-      >
-        {row.required ? t.unrequire : t.require}
-      </Button>
       {row.state === "confirmed" ? (
         <Button
           size="sm"
-          variant="ghost"
+          variant="outline"
           disabled={pending}
           onClick={() => set(false, null)}
         >
           {t.withdraw}
         </Button>
       ) : (
-        <>
-          <DerogateButton projectId={projectId} sheetId={sheetId} row={row} />
-          <DialogButton
-            label={t.confirm}
-            title={t.confirmTitle(label)}
-            description={t.confirmDescription}
-          >
-            {(close) => (
-              <ConfirmCheckForm
-                projectId={projectId}
-                sheetId={sheetId}
-                row={row}
-                onDone={close}
-              />
-            )}
-          </DialogButton>
-        </>
+        <DialogButton
+          label={t.confirm}
+          title={t.confirmTitle(label)}
+          description={t.confirmDescription}
+        >
+          {(close) => (
+            <ConfirmCheckForm
+              projectId={projectId}
+              sheetId={sheetId}
+              row={row}
+              onDone={close}
+            />
+          )}
+        </DialogButton>
       )}
+      <RowActions label={t.more(label)} actions={actions} />
     </div>
   );
 }

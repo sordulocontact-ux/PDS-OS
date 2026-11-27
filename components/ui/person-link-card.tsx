@@ -57,6 +57,7 @@ export function PersonLinkCard({
   remindHref,
   onRenew,
   actions = [],
+  tools,
   empty,
   badge,
   children,
@@ -74,6 +75,9 @@ export function PersonLinkCard({
   onRenew?: () => void;
   // In « ⋯ ».
   actions?: RowAction[];
+  // A module's own gestures on its link, rendered by it (Production's
+  // « Nouveau lien » and « Révoquer »), before « ⋯ ».
+  tools?: ReactNode;
   // No link yet: what to say and the button that creates it.
   empty?: ReactNode;
   badge?: { tone: Tone; label: string };
@@ -149,6 +153,7 @@ export function PersonLinkCard({
                   {t.renew}
                 </Button>
               )}
+              {tools}
               <RowActions label={t.more(name)} actions={actions} />
             </span>
           </div>

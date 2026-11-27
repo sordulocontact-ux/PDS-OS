@@ -823,6 +823,7 @@ export const productionPreprod = {
       "Écrivez la preuve : sans elle, le contrôle ne se confirme pas.",
     responsible: (who: string) => `Responsable : ${who}`,
     noResponsible: "Responsable : chef de projet",
+    more: (check: string) => `Plus d'actions pour « ${check} »`,
     assign: "Attribuer",
     assignTitle: (check: string) => `Qui sécurise « ${check} » ?`,
     assignDescription:

@@ -30,6 +30,7 @@ export const activationAgency = {
     person: "Interlocuteur",
     connected: "Source connectée.",
     refresh: "Actualiser",
+    more: "Plus d'actions",
     refreshTitle: "Actualiser depuis un fichier",
     refreshDescription: "Déposez la dernière version du tableau de l'agence.",
     file: "Fichier",

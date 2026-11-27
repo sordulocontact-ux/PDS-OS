@@ -23,7 +23,7 @@ import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { workflowCards } from "@/lib/overview/cards";
+import { workflowCards, workflowsFinished } from "@/lib/overview/cards";
 import { loadShellJourneys } from "@/lib/overview/journeys";
 import { planLaunchedAt } from "@/lib/plan/queries";
 import {
@@ -148,6 +148,15 @@ export default async function ProjectOverviewPage({
   // A launched project: only its owner writes (is_project_owner).
   const canEditCover = canEditProject(access, project);
   const t = fr.projectShell.overview;
+  const cards =
+    launchedAt && flows
+      ? workflowCards({
+          projectId: project.id,
+          workflows: flows.workflows,
+          states: flows.states,
+          journeys: all,
+        })
+      : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -209,16 +218,13 @@ export default async function ProjectOverviewPage({
           « Vue d'ensemble » validated 10/11): what the viewer does now,
           where the project stands. */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <OverviewNow mine={all.mine} waiting={all.waiting} />
+        <OverviewNow
+          mine={all.mine}
+          waiting={all.waiting}
+          finished={workflowsFinished(cards)}
+        />
         {launchedAt && flows ? (
-          <OverviewProgress
-            workflows={workflowCards({
-              projectId: project.id,
-              workflows: flows.workflows,
-              states: flows.states,
-              journeys: all,
-            })}
-          />
+          <OverviewProgress workflows={cards} />
         ) : (
           <OverviewProgress framing={framing} />
         )}

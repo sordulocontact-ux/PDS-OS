@@ -1,5 +1,6 @@
 "use client";
 
+import { IconXmark } from "nucleo-sharp-essential";
 import { useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
@@ -121,14 +122,6 @@ export function CallItemRow({
           <>
             <Button
               size="sm"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => review("rejected")}
-            >
-              {t.reject}
-            </Button>
-            <Button
-              size="sm"
               variant="outline"
               disabled={pending}
               onClick={() => review("confirmed")}
@@ -140,7 +133,7 @@ export function CallItemRow({
         {canOrganize && item.status === "rejected" && (
           <Button
             size="sm"
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             onClick={() => review("proposed")}
           >
@@ -150,6 +143,18 @@ export function CallItemRow({
         {canOrganize && (
           <RecordMenu
             label={item.body.slice(0, 60)}
+            extra={
+              item.status === "proposed"
+                ? [
+                    {
+                      key: "reject",
+                      label: t.reject,
+                      icon: IconXmark,
+                      onSelect: () => review("rejected"),
+                    },
+                  ]
+                : []
+            }
             edit={{
               title: t.editTitle,
               description: t.formDescription,

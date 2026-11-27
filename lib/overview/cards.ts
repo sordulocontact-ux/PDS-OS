@@ -115,3 +115,9 @@ export function workflowCards({
     };
   });
 }
+
+/** Every workflow the viewer may open is done (« Tout ce qui vous concerne
+ * est fait »); none yet, nothing is done. */
+export const workflowsFinished = (cards: WorkflowCard[]) =>
+  cards.length > 0 &&
+  cards.every((card) => card.restricted || card.status === "done");

@@ -1,13 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
+import { IconBan } from "@/components/icons";
 import { ReceiptCheckForm } from "@/components/finance/receipts/receipt-check-form";
 import { ReceiptChooseForm } from "@/components/finance/receipts/receipt-choose-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ReasonForm } from "@/components/ui/reason-form";
+import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { attachProof, dismissProof } from "@/lib/finance/proof-gestures";
 import type { ProofRow, SpendRef } from "@/lib/finance/proof-view";
@@ -27,8 +30,8 @@ const t = financeReceipts;
 /**
  * What a person does with a proof, in its sheet: « Vérifier les valeurs »,
  * « Rattacher » to the proposal, « Choisir une autre dépense », « Créer la
- * dépense », « Écarter » (with why), « Remettre à traiter ». Who only reads
- * Finance sees none.
+ * dépense », « Écarter » (with why), « Remettre à traiter ». At most two
+ * text buttons, the rest in « ⋯ ». Who only reads Finance sees none.
  */
 export function ReceiptGestures({
   row,
@@ -37,15 +40,39 @@ export function ReceiptGestures({
   row: ProofRow;
   choices: SpendRef[];
 }) {
-  const [dialog, setDialog] = useState<"check" | "create" | "dismiss" | null>(
-    null,
-  );
+  const [dialog, setDialog] = useState<"check" | "create" | null>(null);
   const [choosing, setChoosing] = useState(false);
   const attach = useWriteSubmit(undefined, t.attached);
   const restore = useWriteSubmit(undefined, t.dismiss.restored);
   const { proof, state } = row;
   const best = row.matches[0];
   const close = () => setDialog(null);
+  const more: RowAction[] = [];
+  if (state === "proposed" && best)
+    more.push({
+      key: "create",
+      label: t.actions.create,
+      icon: IconPlus,
+      onSelect: () => setDialog("create"),
+    });
+  more.push({
+    key: "dismiss",
+    label: t.actions.dismiss,
+    icon: IconBan,
+    dialog: {
+      title: t.dismiss.title,
+      description: t.dismiss.description,
+      body: (closeDialog) => (
+        <ReasonForm
+          label={t.dismiss.reason}
+          submitLabel={t.dismiss.save}
+          doneMessage={t.dismiss.saved}
+          run={(reason) => dismissProof(proof.id, reason)}
+          onDone={closeDialog}
+        />
+      ),
+    },
+  });
 
   if (state === "dismissed")
     return (
@@ -66,7 +93,7 @@ export function ReceiptGestures({
       <div
         role="group"
         aria-label={financeSheet.actions}
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap items-center gap-2"
       >
         {state === "toCheck" && (
           <Button onClick={() => setDialog("check")}>{t.sheet.check}</Button>
@@ -81,24 +108,19 @@ export function ReceiptGestures({
             {t.actions.attach}
           </Button>
         )}
+        {state !== "toCheck" && !(state === "proposed" && best) && (
+          <Button onClick={() => setDialog("create")}>
+            {t.actions.create}
+          </Button>
+        )}
         {state !== "toCheck" && (
           <Button variant="outline" onClick={() => setChoosing(!choosing)}>
             {t.actions.other}
           </Button>
         )}
-        {state !== "toCheck" && (
-          <Button variant="outline" onClick={() => setDialog("create")}>
-            {t.actions.create}
-          </Button>
-        )}
-        {/* Text only beside outlined buttons (docs/DESIGN.md, « Bouton
-            secondaire »). */}
-        <Button
-          variant={state === "toCheck" ? "outline" : "ghost"}
-          onClick={() => setDialog("dismiss")}
-        >
-          {t.actions.dismiss}
-        </Button>
+        {/* Never three text buttons (docs/DESIGN.md, « Rangée de
+            boutons »): the rest is in « ⋯ ». */}
+        <RowActions label={t.actions.more} size="icon-lg" actions={more} />
       </div>
       {attach.error && (
         <p className="text-caption text-[color:var(--tone-danger-fg)]">
@@ -116,21 +138,6 @@ export function ReceiptGestures({
         closeLabel={dialogs.close}
       >
         <ReceiptCheckForm proof={proof} onDone={close} />
-      </FormDialog>
-      <FormDialog
-        open={dialog === "dismiss"}
-        onOpenChange={(next) => !next && close()}
-        title={t.dismiss.title}
-        description={t.dismiss.description}
-        closeLabel={dialogs.close}
-      >
-        <ReasonForm
-          label={t.dismiss.reason}
-          submitLabel={t.dismiss.save}
-          doneMessage={t.dismiss.saved}
-          run={(reason) => dismissProof(proof.id, reason)}
-          onDone={close}
-        />
       </FormDialog>
       {dialog === "create" && (
         <ReceiptNewSpend

@@ -73,6 +73,7 @@ export const production = {
   saving: "Enregistrement…",
   cancel: "Annuler",
   close: "Fermer",
+  moreActions: "Plus d'actions",
   errors: {
     url: "Le lien doit commencer par https://",
     forbidden:

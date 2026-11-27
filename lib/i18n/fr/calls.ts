@@ -237,6 +237,7 @@ export const calls = {
     savingRest: "Sauvegarde des dernières secondes…",
     recovery: {
       title: "Enregistrement interrompu",
+      more: "Plus d'actions",
       saved: (clock: string, at: string) =>
         `${clock} sauvegardées, jusqu'à ${at}.`,
       parts: (n: number) =>

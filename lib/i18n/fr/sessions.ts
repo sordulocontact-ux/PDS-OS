@@ -13,11 +13,17 @@ export const sessions = {
     done: "Terminées",
     all: "Toutes",
   },
+  // One fact a column (Sacha, 27/11/2026).
   columns: {
-    date: "Date",
     session: "Séance",
+    date: "Date",
+    hours: "Horaires",
+    studio: "Studio",
+    engineer: "Ingé son",
     artists: "Artistes",
+    titles: "Titres",
     projects: "Projets",
+    responsible: "Compte rendu par",
     state: "État",
   },
   // Computed, never typed (lib/sessions/state.ts).
@@ -122,6 +128,15 @@ export const sessions = {
     keep: "Garder la séance",
     restore: "Rétablir la séance",
     restored: "Séance rétablie",
+  },
+  // The side sheet of a session opened from a list (the Réseau's model,
+  // Sacha 27/11/2026).
+  sheet: {
+    expand: "Ouvrir la session",
+    loadFailed: "Le détail de cette session n'a pas pu être chargé.",
+    lines: { titles: "Titres et maquettes", participants: "Participants" },
+    linked: "Fiches liées",
+    team: "Équipe PDS",
   },
   report: {
     title: "Compte rendu",

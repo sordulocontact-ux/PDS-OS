@@ -19,15 +19,34 @@ const caption =
  * one named as « Aussi à vous ». Nothing for the viewer: who is awaited, on
  * what, with the way to it. Every action read from the journeys
  * (loadShellJourneys), the Cadrage's before the plan, everyone's after.
+ * `lead`: a gesture made in the card itself, before the journeys' (a
+ * collective's title to name, Sacha 27/11/2026); the viewer's first action
+ * then reads as « Aussi à vous ». « Tout ce qui vous concerne est fait »
+ * only once the workflows are `finished`, else « Rien à faire pour vous »
+ * (Sacha, same day: a title waiting for its master is not « fait »).
  */
 export function OverviewNow({
   mine,
   waiting,
+  lead,
+  finished,
 }: {
   mine: NowItem[];
   waiting: NowItem[];
+  lead?: { todo: string; gesture: React.ReactNode } | null;
+  finished: boolean;
 }) {
   const t = fr.projectShell.overview.now;
+  if (lead)
+    return (
+      <ContentCard title={t.label} quietTitle className="gap-5 p-6">
+        <h3 className="text-[length:var(--type-display-md)] leading-[var(--type-display-md-lh)] font-semibold tracking-[var(--type-display-tracking)] text-balance">
+          {lead.todo}
+        </h3>
+        {lead.gesture}
+        {mine[0] && <AlsoMine items={mine} />}
+      </ContentCard>
+    );
   const [first, ...more] = mine;
   const awaited = first ? null : waiting[0];
   const place = (item: NowItem) =>
@@ -52,7 +71,11 @@ export function OverviewNow({
           </p>
         )}
         <h3 className="text-[length:var(--type-display-md)] leading-[var(--type-display-md-lh)] font-semibold tracking-[var(--type-display-tracking)] text-balance">
-          {first ? first.step.actor?.todo : awaited ? t.nothing : t.allDone}
+          {first
+            ? first.step.actor?.todo
+            : awaited || !finished
+              ? t.nothing
+              : t.allDone}
         </h3>
         {first?.step.why && (
           <p className="max-w-prose text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-pretty text-[color:var(--text-secondary)]">
@@ -77,18 +100,7 @@ export function OverviewNow({
           >
             <ButtonRoll>{t.open}</ButtonRoll>
           </ViewLink>
-          {more.length > 0 && (
-            <p className={caption}>
-              {t.also}{" "}
-              <ViewLink
-                href={actionHref(more[0].step)}
-                className="font-medium text-[color:var(--text-primary)] underline underline-offset-2"
-              >
-                {`${lowerFirst(more[0].step.actor?.todo ?? more[0].step.title)} (${more[0].place ?? more[0].step.title})`}
-              </ViewLink>
-              {more.length > 1 && ` ${t.more(more.length - 1)}`}
-            </p>
-          )}
+          {more.length > 0 && <AlsoMine items={more} />}
         </div>
       ) : (
         awaited && (
@@ -103,5 +115,24 @@ export function OverviewNow({
         )
       )}
     </ContentCard>
+  );
+}
+
+/** « Aussi à vous : … » — the next of the viewer's actions, the count of
+ * the others. */
+function AlsoMine({ items }: { items: NowItem[] }) {
+  const t = fr.projectShell.overview.now;
+  const [next, ...rest] = items;
+  return (
+    <p className={caption}>
+      {t.also}{" "}
+      <ViewLink
+        href={actionHref(next.step)}
+        className="font-medium text-[color:var(--text-primary)] underline underline-offset-2"
+      >
+        {`${lowerFirst(next.step.actor?.todo ?? next.step.title)} (${next.place ?? next.step.title})`}
+      </ViewLink>
+      {rest.length > 0 && ` ${t.more(rest.length)}`}
+    </p>
   );
 }

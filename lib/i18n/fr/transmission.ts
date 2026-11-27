@@ -77,6 +77,7 @@ export const transmission = {
     accept: "Accepter et lancer le projet",
     accepting: "Lancement…",
     refuse: "Refuser",
+    moreActions: "Plus d'actions",
     clarify: "Demander une précision",
     refuseLabel: "Motif du refus",
     clarifyLabel: "Votre question",
