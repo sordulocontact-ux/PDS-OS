@@ -3227,6 +3227,7 @@ Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de 
   test 27-11 » (Cadrage fait avec des « Non applicable », plan lancé, contrats des deux titres confirmés, source
   « rivage-maquette.wav », Brief Master enregistré, dossier de mix transmis par lien privé à « Ingé test M9 », contact
   du Réseau sans adresse e-mail, avec une dérogation pour les pistes séparées).
+
 ## Contrats : écrire le contrat sur sa page, comme son PDF (25/11/2026, branche `pre-prod`)
 
 Demande de Sacha : « là actuellement on crée avec un text field avec des variables, ça fait trop développeur, je voudrais
