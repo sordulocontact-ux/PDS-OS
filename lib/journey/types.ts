@@ -50,5 +50,9 @@ export type ProjectJourneys = {
   validations: ProjectAction[];
 };
 
+/** The part key of a collective release's Distribution journey (lot 15):
+ * « release:<id> », one per live release, side by side. */
+export const RELEASE_PART = "release:";
+
 export const placeOf = (journey: ModuleJourney) =>
   journey.part ? `${journey.label} › ${journey.part.label}` : journey.label;

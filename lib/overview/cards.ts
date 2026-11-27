@@ -4,7 +4,7 @@
 // else from its chevrons (lib/workflow-status/). Computed, never stored.
 // Pure, client-safe.
 
-import type { ProjectJourneys } from "@/lib/journey/types";
+import { RELEASE_PART, type ProjectJourneys } from "@/lib/journey/types";
 import { actionHref, OPEN_STATUSES } from "@/lib/ui/journey";
 import { workflowStepHref, workflowSteps } from "@/lib/ui/workflow-hrefs";
 import type {
@@ -53,6 +53,18 @@ export function workflowCards({
     const mine = journeys.mine.find((a) => a.module === workflow);
     const other = journeys.waiting.find((a) => a.module === workflow);
     const action = mine ?? other;
+    const own = journeys.journeys.filter((j) => j.module === workflow);
+    // A collective's Distribution, one journey per release (lot 15): the
+    // card follows one release, named after the workflow (« Distribution ·
+    // Néons »): the action's, else the first not done, else the first.
+    const release =
+      own.length > 1 && own.every((j) => j.part?.key.startsWith(RELEASE_PART))
+        ? (own.find((j) => j.part?.key === action?.part) ??
+          own.find((j) =>
+            j.steps.some((s) => s.status !== "done" && s.status !== "obsolete"),
+          ) ??
+          own[0])
+        : null;
     const next = action?.step.actor
       ? {
           mine: Boolean(mine),
@@ -60,10 +72,13 @@ export function workflowCards({
           todo: lower(action.step.actor.todo),
         }
       : null;
-    const steps = journeys.journeys
-      .filter((j) => j.module === workflow)
-      .flatMap((j) => j.steps);
-    const base = { workflow, restricted: false as const, status: state.status };
+    const steps = (release ? [release] : own).flatMap((j) => j.steps);
+    const base = {
+      workflow,
+      restricted: false as const,
+      status: state.status,
+      ...(release?.part ? { scope: release.part.label } : {}),
+    };
     if (steps.length > 0) {
       const done = steps.filter((s) => s.status === "done").length;
       const current =
