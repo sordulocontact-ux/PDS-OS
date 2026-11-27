@@ -2,7 +2,10 @@ import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
 import { todayInParis } from "@/lib/contracts/types";
-import { completeFormContacts } from "@/lib/legal/forms/queries";
+import {
+  completeFormContacts,
+  noAgreementContacts,
+} from "@/lib/legal/forms/queries";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import { splitStates } from "@/lib/legal/splits/queries";
 import {
@@ -43,27 +46,35 @@ async function readTracking(
   if (error) console.error("loadTracking plan:", error.message);
   if (!plan?.launched_at) return { state: "not_launched" };
 
-  const [items, rows, clearances, people, completeContacts, splitOf] =
-    await Promise.all([
-      supabase
-        .from("legal_plan_items")
-        .select(
-          "id, item_key, kind, master_id, label, detail, why, subject, credit_ids, status, depends_on, responsible_person_id, due_on",
-        )
-        .eq("plan_id", plan.id)
-        .order("created_at"),
-      readInventoryRows(
-        project.id,
-        project.masters,
-        can(access, "manage_catalog"),
-      ),
-      legalClearanceRows(project.id),
-      access.organizationId
-        ? listLegalPeople(access.organizationId)
-        : Promise.resolve({ data: [], error: null }),
-      completeFormContacts(project.id),
-      splitStates(project.id),
-    ]);
+  const [
+    items,
+    rows,
+    clearances,
+    people,
+    completeContacts,
+    splitOf,
+    noAgreement,
+  ] = await Promise.all([
+    supabase
+      .from("legal_plan_items")
+      .select(
+        "id, item_key, kind, master_id, label, detail, why, subject, credit_ids, status, depends_on, responsible_person_id, due_on",
+      )
+      .eq("plan_id", plan.id)
+      .order("created_at"),
+    readInventoryRows(
+      project.id,
+      project.masters,
+      can(access, "manage_catalog"),
+    ),
+    legalClearanceRows(project.id),
+    access.organizationId
+      ? listLegalPeople(access.organizationId)
+      : Promise.resolve({ data: [], error: null }),
+    completeFormContacts(project.id),
+    splitStates(project.id),
+    noAgreementContacts(project.id),
+  ]);
   if (items.error) console.error("loadTracking items:", items.error.message);
   // The borrowings whose conditions wait for the direction.
   const clearanceIds = (clearances.data ?? []).map((c) => c.id);
@@ -85,6 +96,7 @@ async function readTracking(
   const added = proposePlan({
     rows,
     completeContacts,
+    noAgreement,
     clearances: (clearances.data ?? []).map((c) => ({
       id: c.id,
       masterId: c.master_id,

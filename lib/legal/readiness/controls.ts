@@ -115,10 +115,35 @@ const SACEM_FILED = ["submitted", "processing", "completed"];
 function fromDemarches(
   demarches: Demarche[],
   sacemBlocks: boolean,
+  noAgreement: ReadonlySet<string>,
 ): ReadinessControl[] {
   return demarches
     .filter((d) => !d.proposed && d.step.status !== "obsolete")
     .map((d): ReadinessControl => {
+      // « Pas d'accord nécessaire » for this person: their contract is
+      // settled, whatever their fiche (test de parcours du 26/11/2026).
+      const noDeal =
+        d.kind === "person" &&
+        (noAgreement.has(d.ref) ||
+          d.parts.some(
+            (p) =>
+              p.panel.kind === "contract" &&
+              p.panel.row.noAgreementReason !== null,
+          ));
+      if (noDeal)
+        return {
+          key: keyOf(`${d.kind}:${legalRefSlug(d.ref)}`),
+          domain: "rights",
+          label: t.contractOf(d.subject),
+          blocking: false,
+          status: "ok",
+          reason: fr.legalDemarches.summary.noDeal,
+          next: null,
+          responsible: d.step.owner?.name ?? null,
+          source: t.sources.legal,
+          href: d.step.href,
+          waiver: null,
+        };
       const done = d.step.status === "done";
       const sacem = d.parts[0]?.panel;
       const filed =
@@ -200,11 +225,17 @@ export function legalReadiness(input: {
   // The project's invoices, where each one stands (never their content).
   invoices?: InvoiceStateRow[];
   projectId?: string;
+  // The people (agreement keys) said to need no agreement.
+  noAgreement?: ReadonlySet<string>;
 }): LegalReadiness {
   const waiverOf = new Map(input.waivers.map((w) => [w.key, w]));
   const controls = [
     ...fromDistribution(input.distribution ?? []),
-    ...fromDemarches(input.demarches, input.sacemBlocks),
+    ...fromDemarches(
+      input.demarches,
+      input.sacemBlocks,
+      input.noAgreement ?? new Set(),
+    ),
     ...fromInvoices(
       input.invoices ?? [],
       input.projectId ?? null,

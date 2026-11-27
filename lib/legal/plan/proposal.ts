@@ -83,6 +83,8 @@ export function proposePlan(input: {
   clearances: PlanClearance[];
   // Contacts whose fiche de renseignements is complete (Juridique 02).
   completeContacts: Set<string>;
+  // Contacts said to need no agreement (« Pas d'accord nécessaire »).
+  noAgreement?: Set<string>;
 }): PlanItem[] {
   const { rows } = input;
   const titleOf = new Map(rows.titles.map((m) => [m.id, m.title]));
@@ -168,6 +170,10 @@ export function proposePlan(input: {
       // Qualified in the Cadrage as needing no new contract (existing, not
       // needed, not applicable): no « Faire signer » (PROJ-BUG-03).
       if (rows.settledParties.has(normalizeSearch(person.name.trim())))
+        return [];
+      // « Pas d'accord nécessaire » chosen for them, even before the launch
+      // (test de parcours du 26/11/2026): nothing to sign.
+      if (person.contactId && input.noAgreement?.has(person.contactId))
         return [];
       const running = theirs.some(
         (c) => c.status !== "terminated" && c.status !== "signed",

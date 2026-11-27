@@ -2,7 +2,10 @@ import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
 import { todayInParis } from "@/lib/insights/dates";
-import { completeFormContacts } from "@/lib/legal/forms/queries";
+import {
+  completeFormContacts,
+  noAgreementContacts,
+} from "@/lib/legal/forms/queries";
 import { planDueDates } from "@/lib/legal/plan/due-dates";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import {
@@ -77,7 +80,7 @@ export async function proposeLegalPlan(
   },
   access: Access,
 ): Promise<PlanItem[]> {
-  const [rows, clearances, completeContacts] = await Promise.all([
+  const [rows, clearances, completeContacts, noAgreement] = await Promise.all([
     readInventoryRows(
       project.id,
       project.masters,
@@ -85,8 +88,9 @@ export async function proposeLegalPlan(
     ),
     listPlanClearances(project.id),
     completeFormContacts(project.id),
+    noAgreementContacts(project.id),
   ]);
-  return proposePlan({ rows, clearances, completeContacts });
+  return proposePlan({ rows, clearances, completeContacts, noAgreement });
 }
 
 export async function loadLegalPlan(

@@ -246,3 +246,18 @@ export async function completeFormContacts(
   if (error) console.error("completeFormContacts:", error.message);
   return new Set((data ?? []).map((row) => row.contact_id));
 }
+
+/** The people of the project the Juridique said need no agreement (« Pas
+ * d'accord nécessaire », legal_no_agreement_reasons): no « Faire signer »
+ * is proposed for them (test de parcours du 26/11/2026). */
+export async function noAgreementContacts(
+  projectId: string,
+): Promise<Set<string>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("legal_no_agreement_reasons")
+    .select("contact_id")
+    .eq("project_id", projectId);
+  if (error) console.error("noAgreementContacts:", error.message);
+  return new Set((data ?? []).map((row) => row.contact_id));
+}

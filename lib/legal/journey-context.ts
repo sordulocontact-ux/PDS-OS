@@ -156,6 +156,11 @@ export const legalJourneyContext = trackedCache(
           direction: direction ?? fr.legalDemarches.direction,
           invoices: invoiceStates,
           projectId,
+          noAgreement: new Set(
+            agreements.rows
+              .filter((r) => r.noAgreementReason !== null)
+              .map((r) => r.key),
+          ),
         })
       : null;
     const steps = legalJourney({

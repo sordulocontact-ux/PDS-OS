@@ -259,7 +259,8 @@ export function titleContractsStep(
 /**
  * The Juridique's journeys of a collective: `steps` as legalJourney built
  * them (Dossier, démarches, Sortie), each démarche put in « Projet » or in
- * its titles' journeys (`anchors`, by step key). A title without a master
+ * its titles' journeys (`anchors`, by step key); a person in « Projet » and
+ * in their titles' journeys. A title without a master
  * and not abandoned starts with its attach step; a title with nothing in it
  * has no journey. `extra`: more steps of a title's journey, after its
  * attach step and before its démarches (« Contrats du titre »). A title's
@@ -284,6 +285,10 @@ export function layoutByTitle(input: {
       project.push(step);
       continue;
     }
+    // A person stays among the project's people too, beside their titles:
+    // the Suivi lists every guest the overview asks a fiche of (test de
+    // parcours du 26/11/2026).
+    if (anchor.kind === "person") project.push(step);
     for (const title of titles)
       byTitle.get(title.id)?.push(inTitle(anchor.kind, step));
   }

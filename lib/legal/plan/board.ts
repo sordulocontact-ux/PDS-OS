@@ -431,10 +431,20 @@ export function planBoard(input: {
     if (kind === "contract") {
       const agreement = input.agreements.find((a) => a.key === ref);
       const form = formOf.get(ref);
+      // « Pas d'accord nécessaire », chosen after this action was stored
+      // (before the launch, or not retired): settled, waits for no fiche
+      // (test de parcours du 26/11/2026).
+      const noDeal =
+        agreement?.state === "not_needed" &&
+        agreement.noAgreementReason !== null;
       const blockedByFiche =
-        item.current === "blocked" && form && form.state !== "complete";
+        !noDeal &&
+        item.current === "blocked" &&
+        form &&
+        form.state !== "complete";
       rows.push({
         ...base,
+        group: noDeal ? "done" : base.group,
         label: item.subject ?? item.label,
         meta: metaOf(item, [item.detail]),
         badge: blockedByFiche
