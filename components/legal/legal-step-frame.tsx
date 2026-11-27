@@ -45,7 +45,7 @@ const fr = { legalJourney, legalParticipations };
  * does; `titre` keeps the title of a step two titles share (a guest of
  * both). A title's step names its title in a tag before its h1 (the hue of
  * its tags in the État des lieux) and no longer repeats it in its own
- * title. A step of the spine only (« Rattacher le titre au Catalogue »,
+ * title. A step of the spine only (« Rattacher au Catalogue »,
  * `attach:<id>`) has no tools: nothing to report or note on it.
  * « Participations et contrats » is a button of the head, on every step of
  * a collective's Juridique.
@@ -119,7 +119,9 @@ export async function LegalStepFrame({
               project.collective ? (
                 <ViewLink
                   href={legalParticipationsHref(projectId)}
-                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                  // A link to another page, as quiet as « Qui fait quoi »
+                  // (Sacha, 27/11/2026).
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
                 >
                   <ButtonRoll>{fr.legalParticipations.link}</ButtonRoll>
                 </ViewLink>

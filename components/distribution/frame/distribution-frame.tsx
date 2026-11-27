@@ -27,7 +27,6 @@ import {
 } from "@/lib/distribution/journey-context";
 import { isOpen } from "@/lib/distribution/anomalies";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
-import { projectFormatLabel } from "@/lib/projects/labels";
 import { withRelease } from "@/lib/distribution/scope";
 import {
   DISTRIBUTION_STEPS,
@@ -44,39 +43,14 @@ const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney;
 
-/** « « Néons » · Mona Lys · single », Master final, Sortie, Distributeur.
- * A collective's release (lot 15): « « Marina » · sortie du titre · PDS ». */
+/**
+ * The dates the Distribution hangs on: the Master final and the release
+ * (Sacha, 27/11/2026: no « « Néons » · artiste · format », the project's bar
+ * and the trail name them, nor « Distributeur The Orchard », always the same).
+ */
 function factsOf(ctx: DistributionContext): ModuleFact[] {
-  const { project, dates, release } = ctx;
-  const format = projectFormatLabel({
-    type: project.type,
-    musicFormat: project.musicFormat,
-    contentFormatName: project.contentFormat?.name ?? null,
-  });
+  const { dates } = ctx;
   return [
-    release
-      ? {
-          key: "project",
-          value: [
-            `« ${release.label} »`,
-            release.kind === "title"
-              ? t.facts.titleRelease
-              : t.facts.compilation(project.masters.length),
-            project.artistName,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-        }
-      : {
-          key: "project",
-          value: [
-            `« ${project.title} »`,
-            project.artistName,
-            format?.toLowerCase(),
-          ]
-            .filter(Boolean)
-            .join(" · "),
-        },
     ...(dates.masterFinal
       ? [
           {
@@ -95,7 +69,6 @@ function factsOf(ctx: DistributionContext): ModuleFact[] {
           },
         ]
       : []),
-    { key: "distributor", label: t.facts.distributor, value: t.distributor },
   ];
 }
 

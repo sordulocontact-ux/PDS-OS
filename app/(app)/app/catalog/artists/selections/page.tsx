@@ -75,7 +75,6 @@ export default async function ArtistSelectionsPage({
   return (
     <SectionFrame
       title={t.title}
-      description={t.subtitle}
       action={shown.length > 0 ? newButton : null}
       list={false}
       parent={{ label: fr.shell.nav.artists, href: routes.artists }}

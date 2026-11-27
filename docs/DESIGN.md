@@ -1041,9 +1041,16 @@ composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 - **Décision = `DecisionPanel`** : principal d'abord à gauche, puis contour, puis fantôme ;
   commentaire **obligatoire pour toute issue autre que « oui »** (réserves, modification,
   précision, refus), erreur rouge au premier essai, jamais de bouton désactivé.
-- **Fait = `FactRow`** : la source **sous** la valeur ; « Modifié par … » en couleur de
-  sélection (fait changé par une personne) ; une personne non désignée = « À choisir » en
-  rouge (`--error`), jamais une supposition.
+- **Fait = `FactRow`**, **une ligne par fait** (Sacha, 27/11/2026, d'après Accordee) : l'icône du
+  concept (`icon`, dictionnaire `lib/ui/column-icons.ts`, le même que les colonnes des tableaux)
+  et le libellé dans une colonne de 11 rem à gauche, la valeur à côté ; **une source simple (un
+  lieu : « Réseau », « Crédits du titre ») est un ⓘ à droite avec son infobulle** (`FactSourceHint`,
+  « Source : … »), plus une ligne grise ; **ce qui a été dit reste écrit** sous la valeur (citation
+  `{quote, from}`, proposition de PO, « Modifié par … » en couleur de sélection), règle 12 de la
+  vision UX ; une personne non désignée = « À choisir » en rouge (`--error`), jamais une
+  supposition. Un champ (`control`) ou un libellé seul gardent la mise en page empilée. Pas de
+  titre au-dessus d'une liste de faits qui répète celui de la carte (« Déjà connu, pré-rempli »).
+  Une icône aide à retrouver une ligne, jamais décorative, jamais à la place d'un mot du métier.
 
 ### Modale : une seule, « verre »
 

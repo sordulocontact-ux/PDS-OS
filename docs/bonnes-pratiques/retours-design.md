@@ -197,7 +197,11 @@ qui a été fait.
 - **Fait (lot 1)** : le pourquoi de chaque étape n'est plus sous le titre, il devient la description de « Qui fait
   quoi » (`StepWhyProvider`) ; Sorties et Plans de sortie perdent leur phrase et leurs comptes ; le mode de sortie est
   le libellé de son bouton (« Sorties individuelles ⇕ »), un fait seulement pour qui ne peut pas le changer.
-- **Reste** : trier les autres lignes de faits (65 fichiers) ; les paragraphes avant un bouton (Source) ; les sources
-  des faits en icône avec infobulle ; les icônes devant les libellés de faits.
+- **Fait (lots 2 à 5, « ok fais les autres lots »)** : `FactRow` en une ligne par fait, icône du concept devant le
+  libellé, source simple en ⓘ avec infobulle (les citations restent écrites) ; fiche de Nilo sans « Déjà connu,
+  pré-rempli dans sa fiche » et « Participations et contrats » en bouton discret ; lignes de faits triées (Distribution
+  sans « « Néons » · artiste · format » ni « Distributeur », Production sans « livrable · Fiche Vn », Plan d'un titre
+  sans version, Participations sans compteurs) ; Source : « Importer la maquette ou la mise à plat » au lieu du
+  paragraphe ; Nouveau projet, Nouveau titre, Sélections et Nouveau membre sans phrase sous le titre.
 - **À retenir** : rien sous le titre d'une page qui n'est pas l'objet lui-même ; un fait n'est en tête que s'il change
   ce qu'on fait ici et n'apparaît pas dessous ; un réglage se montre dans son bouton.

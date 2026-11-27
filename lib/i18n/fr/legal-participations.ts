@@ -8,13 +8,6 @@ const de = (name: string) =>
 export const legalParticipations = {
   title: "Participations et contrats",
   link: "Participations et contrats",
-  facts: {
-    signed: "Contrats signés",
-    signedValue: (signed: number, confirmed: number) =>
-      `${signed} sur ${confirmed} participation${confirmed > 1 ? "s" : ""} confirmée${confirmed > 1 ? "s" : ""}`,
-    withoutDeal: "Sans dossier de négociation",
-    followUps: "Relances dues",
-  },
   columns: {
     artist: "Artiste",
     status: "Participation",

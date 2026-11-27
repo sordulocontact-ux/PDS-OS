@@ -38,7 +38,6 @@ export default async function ProjectReleasePlanPage({
   ]);
   if (!plan) notFound();
   const t = fr.titleReleasePlans;
-  const latest = plan.versions[0];
   const facts: ModuleFact[] = [
     {
       key: "date",
@@ -46,11 +45,6 @@ export default async function ProjectReleasePlanPage({
       value: plan.release.date
         ? formatShortDate(plan.release.date)
         : t.sections.release.noDate,
-    },
-    {
-      key: "version",
-      label: t.page.facts.version,
-      value: latest ? t.list.version(latest.version) : t.list.noVersion,
     },
   ];
   return (

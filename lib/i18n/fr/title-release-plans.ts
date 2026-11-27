@@ -81,7 +81,6 @@ export const titleReleasePlans = {
     facts: {
       status: "Statut",
       date: "Date cible",
-      version: "Version",
     },
     steps: "Étapes du plan",
   },

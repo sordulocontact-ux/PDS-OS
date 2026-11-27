@@ -21,7 +21,6 @@ export default async function NewMemberPage() {
       list={false}
       parent={{ label: fr.shell.nav.members, href: routes.members }}
       title={t.title}
-      description={t.subtitle}
     >
       <Card>
         <CardContent>

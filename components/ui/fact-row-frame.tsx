@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { ReactNode, Ref } from "react";
 
+import { FactSourceHint } from "@/components/ui/fact-source-hint";
 import { RequiredMark } from "@/components/ui/required-mark";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { decisions } from "@/lib/i18n/fr/decisions";
+import { columnIcons, type ColumnIcon } from "@/lib/ui/column-icons";
 import type { Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -44,6 +46,10 @@ export type FactChange = {
 
 export type FactRowProps = {
   label?: string;
+  // Before the label, from the one dictionary of the tables' columns (a
+  // concept wears one icon everywhere, Sacha 27/11/2026): helps find the
+  // row without reading, never replaces the label.
+  icon?: ColumnIcon;
   value?: ReactNode;
   source?: FactSource | null;
   state?: { tone: Tone; label: string } | null;
@@ -121,6 +127,7 @@ export const factSourceWords = (source: FactSource | null | undefined) =>
 /** The layout of a fact row, shared by the editable ones. */
 export function FactRowFrame({
   label,
+  icon,
   value,
   source,
   state,
@@ -155,9 +162,59 @@ export function FactRowFrame({
   const titleOnly = pill && empty && !control;
   const shownState =
     state ?? (pill ? { tone: "warning" as const, label: missingLabel } : null);
+  // One line per fact (Sacha, 27/11/2026, after Accordee): the label in a
+  // column on the left, the value beside it; a plain source (a place: « Réseau »,
+  // « Crédits du titre ») in a hint on the right. What was said (a quote, PO's
+  // proposal, « Modifié par … ») stays written: what PO understood always
+  // shows its words (docs/VISION-UX.md rule 12). A field or a label alone
+  // keep their stacked layout.
+  const inline = !control && !titleOnly && Boolean(label);
+  const hint =
+    inline && !changedBy && !sourceNode && typeof source === "string"
+      ? source
+      : null;
   const frame =
     "grid grid-cols-1 items-start gap-x-3 gap-y-1 border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 text-body-sm last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto]";
-  const content = (
+  const sourceLine = hint
+    ? null
+    : (sourceNode ?? <FactSourceText source={source} changedBy={changedBy} />);
+  const content = inline ? (
+    <>
+      <div className="flex min-w-0 flex-col gap-0.5 md:flex-row md:items-baseline md:gap-4">
+        {action && hrefLabel && <span className="sr-only">{hrefLabel}</span>}
+        {/* Text, not a flex box: the label keeps the value's baseline. */}
+        <span className="text-caption text-muted-foreground md:w-44 md:shrink-0">
+          {icon && <FactIcon icon={icon} />}
+          {label}
+          {required && <RequiredMark />}
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span
+            className={cn(
+              "break-words [overflow-wrap:anywhere]",
+              missing && !pill && "font-semibold text-error",
+            )}
+          >
+            {missing && empty && !pill ? missingLabel : value}
+          </span>
+          {sourceLine}
+        </span>
+      </div>
+      {(hint || shownState || side || hoverAction) && (
+        <div className="flex flex-wrap items-center gap-2 md:justify-end">
+          {hint && <FactSourceHint label={t.source(hint)} inert={action} />}
+          {shownState && (
+            <StatusBadge tone={shownState.tone} size="sm">
+              {shownState.label}
+            </StatusBadge>
+          )}
+          {side}
+          {hoverAction && <HoverVerb verb={hoverAction} />}
+        </div>
+      )}
+      {below && <div className="flex flex-col gap-2 md:col-span-2">{below}</div>}
+    </>
+  ) : (
     <>
       <div className="flex min-w-0 flex-col gap-0.5">
         {action && hrefLabel && (
@@ -203,20 +260,7 @@ export function FactRowFrame({
             </StatusBadge>
           )}
           {side}
-          {hoverAction && (
-            // Folded at rest (the pill stays against the edge). On hover the
-            // verb comes out from the row's edge glued to the pill and pushes
-            // it: one motion, one speed (Sacha, 05/11/2026). A hover done
-            // dozens of times a day: --duration-slide in, faster out, with
-            // the curve of what moves on screen; no slide when motion is reduced.
-            <span className="-ml-2 grid grid-cols-[0fr] transition-[grid-template-columns] duration-[var(--duration-base)] ease-[var(--ease-standard)] group-hover/fact:grid-cols-[1fr] group-hover/fact:duration-[var(--duration-slide)] group-focus-visible/fact:grid-cols-[1fr] motion-reduce:transition-none">
-              <span className="min-w-0 overflow-hidden">
-                <span className="block px-2 text-body-sm font-medium whitespace-nowrap opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100">
-                  {hoverAction}
-                </span>
-              </span>
-            </span>
-          )}
+          {hoverAction && <HoverVerb verb={hoverAction} />}
         </div>
       )}
       {control && (
@@ -263,5 +307,32 @@ export function FactRowFrame({
     </ViewLink>
   ) : (
     <div className={frame}>{content}</div>
+  );
+}
+
+/**
+ * The verb of a row opening on click, folded at rest. On hover it comes out
+ * from the row's edge glued to the pill and pushes it: one motion, one speed
+ * (Sacha, 05/11/2026). A hover done dozens of times a day: --duration-slide
+ * in, faster out, with the curve of what moves on screen; no slide when
+ * motion is reduced.
+ */
+function HoverVerb({ verb }: { verb: string }) {
+  return (
+    <span className="-ml-2 grid grid-cols-[0fr] transition-[grid-template-columns] duration-[var(--duration-base)] ease-[var(--ease-standard)] group-hover/fact:grid-cols-[1fr] group-hover/fact:duration-[var(--duration-slide)] group-focus-visible/fact:grid-cols-[1fr] motion-reduce:transition-none">
+      <span className="min-w-0 overflow-hidden">
+        <span className="block px-2 text-body-sm font-medium whitespace-nowrap opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100">
+          {verb}
+        </span>
+      </span>
+    </span>
+  );
+}
+
+/** The icon before a fact's label (`columnIcons`). */
+function FactIcon({ icon }: { icon: ColumnIcon }) {
+  const Icon = columnIcons[icon];
+  return (
+    <Icon aria-hidden className="mr-1.5 inline size-3.5 align-[-0.2em]" />
   );
 }

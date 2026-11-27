@@ -37,7 +37,6 @@ export default async function NewMasterPage({
       list={false}
       className="max-w-2xl"
       title={demo ? fr.demos.newDemo : t.title}
-      description={demo ? fr.demos.createHint : t.subtitle}
       parent={
         original
           ? [

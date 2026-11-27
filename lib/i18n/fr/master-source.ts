@@ -31,9 +31,9 @@ export const masterSource = {
     "Les versions audio du titre au Catalogue. Un master final ne peut pas être une source.",
   notListed: "Une version manque ?",
   importVersion: "Importer une version",
-  // The step's gesture when the title has no audio (Akili, 02/11/2026).
-  noAudio:
-    "Importez la maquette ou la mise à plat dont part le mix. Elle rejoint les fichiers du titre au Catalogue ; vous confirmerez ensuite que c'est la source.",
+  // The step's gesture when the title has no audio (Akili, 02/11/2026): the
+  // button says it, no paragraph before it (Sacha, 27/11/2026).
+  importFirst: "Importer la maquette ou la mise à plat",
   checked: "Ce que PDS OS a vérifié",
   mix: {
     label: "Où en est le mix",

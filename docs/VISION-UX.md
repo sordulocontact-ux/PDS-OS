@@ -183,8 +183,8 @@ sans parcours : Anomalies, Historique), « Qui fait quoi » à droite, pourquoi,
 Chaque règle vient d'une décision de Sacha ou d'Ibé, ou d'une correction faite en testant. Elles
 valent partout, dans l'app comme dans les protos.
 
-1. **Tout ce que PDS OS sait est pré-rempli, avec sa source.** La source est écrite à droite de la
-   valeur : « Catalogue · 02/10 », « Lu par le code », « Calculé : 6 jours avant le master final »,
+1. **Tout ce que PDS OS sait est pré-rempli, avec sa source.** La source est à droite de la valeur,
+   dans un ⓘ avec infobulle quand c'est un lieu (27/11/2026), écrite quand c'est une parole : « Catalogue · 02/10 », « Lu par le code », « Calculé : 6 jours avant le master final »,
    « Brief de cadrage › Équipe » (le nom de la rubrique, jamais un code comme « dimension 04 »),
    ou la citation exacte du call (« « 18 pour le clip » »). L'action principale est alors de
    **confirmer**, pas de remplir. *(Ibé 13/10 ; CLAUDE.md « Formulaires : ne jamais faire

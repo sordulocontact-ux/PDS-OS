@@ -639,7 +639,6 @@ export const legal = {
     // (Sacha, 06/11/2026: « pas pro »; proto juridique-v3 `link`).
     fiche: {
       decision: "Décision",
-      known: "Déjà connu, pré-rempli dans sa fiche",
       roles: "Rôles sur le projet",
       creditName: "Nom à créditer",
       artistName: "Nom d'artiste",

@@ -8,9 +8,7 @@ import { routes } from "@/lib/auth/redirects";
 import { legalParticipations } from "@/lib/i18n/fr/legal-participations";
 import { shell } from "@/lib/i18n/fr/shell";
 import { loadParticipationTracking } from "@/lib/legal/participation-tracking";
-import { trackingCounts } from "@/lib/legal/participation-tracking-rules";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import type { ModuleFact } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
 
 const fr = { legalParticipations, shell };
@@ -30,36 +28,6 @@ export async function ParticipationsPage({ projectId }: { projectId: string }) {
   if (!can(access, "manage_legal") || !project.collective) notFound();
   const tracking = await loadParticipationTracking(project, access);
   const t = fr.legalParticipations;
-  const counts = trackingCounts(
-    tracking.titles,
-    tracking.dealReach,
-    tracking.today,
-  );
-  const facts: ModuleFact[] = [
-    {
-      key: "signed",
-      label: t.facts.signed,
-      value: t.facts.signedValue(counts.signed, counts.confirmed),
-    },
-    ...(counts.withoutDeal !== null
-      ? [
-          {
-            key: "without-deal",
-            label: t.facts.withoutDeal,
-            value: String(counts.withoutDeal),
-          },
-        ]
-      : []),
-    ...(tracking.dealReach !== "none"
-      ? [
-          {
-            key: "follow-ups",
-            label: t.facts.followUps,
-            value: String(counts.followUps),
-          },
-        ]
-      : []),
-  ];
   return (
     <div className="flex flex-col gap-6">
       <ProjectHeader
@@ -69,7 +37,6 @@ export async function ParticipationsPage({ projectId }: { projectId: string }) {
           href: routes.projectLegal(projectId),
           label: fr.shell.project.sidebar.legal,
         }}
-        facts={facts}
       />
       <ParticipationsView
         projectId={projectId}

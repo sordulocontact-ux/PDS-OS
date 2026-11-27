@@ -14,26 +14,14 @@ const t = fr.productionPrep;
 const j = fr.productionJourney.header;
 
 /** What frames the deliverable produced, as the facts of the module's header
- * (ModuleHeader): the Fiche Livrable it is built on, its envelope, the shoot
- * and the delivery aimed at (Production or Fiche values), said in full. */
+ * (ModuleHeader): its envelope, the shoot and the delivery aimed at
+ * (Production or Fiche values), said in full. */
 export function sheetFacts(data: ProductionSheetData): ModuleFact[] {
-  const { fiche, source } = data.heritage;
+  const { fiche } = data.heritage;
   const logistics = effectiveLogistics(data.sheet?.logistics ?? null, fiche);
-  const facts: ModuleFact[] = [
-    {
-      key: "deliverable",
-      value: [
-        data.deliverable.title,
-        fiche
-          ? t.fiche(fiche.version)
-          : source
-            ? t.source(source.number)
-            : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
-    },
-  ];
+  // The deliverable is named by the trail (Sacha, 27/11/2026): its envelope
+  // and its dates only.
+  const facts: ModuleFact[] = [];
   if (logistics.budgetEnvelopeCents.value !== null)
     facts.push({
       key: "envelope",

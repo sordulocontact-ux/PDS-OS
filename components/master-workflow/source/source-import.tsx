@@ -33,23 +33,23 @@ export function SourceImport({
           : "gap-2 sm:flex-row sm:items-center sm:justify-between",
       )}
     >
-      <p
-        className={cn(
-          "text-[color:var(--text-secondary)]",
-          first
-            ? "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]"
-            : "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]",
-        )}
-      >
-        {first ? t.noAudio : t.catalogNote}
-      </p>
+      {/* No audio yet: the button says the gesture, no paragraph before it
+          (Sacha, 27/11/2026). */}
+      {!first && (
+        <p className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+          {t.catalogNote}
+        </p>
+      )}
       {organizationId && (
         <FileImport
           organizationId={organizationId}
           owner={{ kind: "master", id: masterId }}
           audio={{ defaultState: "demo" }}
         >
-          <FileImportButton compact={!first} label={t.importVersion} />
+          <FileImportButton
+            compact={!first}
+            label={first ? t.importFirst : t.importVersion}
+          />
         </FileImport>
       )}
     </div>

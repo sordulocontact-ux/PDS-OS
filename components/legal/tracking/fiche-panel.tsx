@@ -151,9 +151,9 @@ export function FichePanel({
   )
     return (
       <div className="flex flex-col gap-3.5 modern:gap-4">
-        <StepSection title={p.known}>
-          <KnownRows row={row} />
-        </StepSection>
+        {/* No title of its own: the fiche's heading already names it, and
+            what is filled is visibly prefilled (Sacha, 27/11/2026). */}
+        <KnownRows row={row} />
         {row.revokedReason && (
           <ToneCallout tone="warning">
             {t.revokedWhy(row.revokedReason)}
@@ -276,19 +276,31 @@ function KnownRows({ row }: { row: FormRow }) {
   return (
     <FactRows>
       {roles && (
-        <FactRow label={p.roles} value={roles} source={p.fromCredits} />
+        <FactRow
+          icon="role"
+          label={p.roles}
+          value={roles}
+          source={p.fromCredits}
+        />
       )}
       {row.performer ? (
         <FactRow
+          icon="artist"
           label={p.artistName}
           value={row.performer.name}
           source={p.fromArtist}
         />
       ) : (
-        <FactRow label={p.creditName} value={row.name} source={p.fromCredits} />
+        <FactRow
+          icon="person"
+          label={p.creditName}
+          value={row.name}
+          source={p.fromCredits}
+        />
       )}
       {row.email && (
         <FactRow
+          icon="email"
           label={fr.legalForms.fields.email}
           value={row.email}
           source={p.fromNetwork}

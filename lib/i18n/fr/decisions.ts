@@ -76,6 +76,8 @@ export const decisions = {
     cancel: "Annuler",
     missing: "À choisir",
     changedBy: (who: string) => `Modifié par ${who}`,
+    // The source of a fact, in its hint (Sacha, 27/11/2026: no grey line).
+    source: (where: string) => `Source : ${where}`,
     proposal: (value: string, source: string | null) =>
       `Proposition : ${value}${source ? ` · ${source}` : ""} — Entrée enregistre, Échap annule.`,
     saved: "Enregistré.",

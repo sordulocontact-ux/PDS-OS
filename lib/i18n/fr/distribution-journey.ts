@@ -284,6 +284,7 @@ export const distributionJourney = {
   },
   checks: {
     title: "Contrôles de cohérence",
+    more: "Plus d'actions",
     count: (n: number) =>
       `${n} contrôle${n > 1 ? "s" : ""} sur 6 enregistré${n > 1 ? "s" : ""}`,
     body: "Chacun est enregistré par une personne. Le calcul de PDS OS aide, il ne vaut jamais contrôle.",
@@ -426,6 +427,7 @@ export const distributionJourney = {
     verifiedBy: (who: string | null, at: string, note: string | null) =>
       `Vérifiée par ${who ?? "—"} le ${at}${note ? ` : « ${note} »` : ""}`,
     open: "Ouvrir",
+    more: "Plus d'actions",
     allGood: "Tout est bon",
     problem: "Il y a un problème",
     recheck: "Revérifier",
@@ -712,13 +714,9 @@ export const distributionJourney = {
   facts: {
     masterFinal: "Master final",
     release: "Sortie",
-    distributor: "Distributeur",
     // A collective's release (lot 15).
     titleReleaseSource: "Date de la sortie du titre",
     compilationSource: "Échéance du projet (compilation)",
-    titleRelease: "sortie du titre",
-    compilation: (n: number) =>
-      n > 1 ? `compilation de ${n} titres` : "compilation",
   },
   // Back to the choice of a collective's release (lot 15).
   releases: "Sorties",

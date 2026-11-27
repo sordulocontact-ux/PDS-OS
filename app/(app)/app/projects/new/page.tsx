@@ -79,14 +79,11 @@ export default async function NewProjectPage({
     typeof masterParam === "string"
       ? masters.find((m) => m.id === masterParam)
       : undefined;
-  const holder = !direction ? (collective?.holder ?? null) : null;
-
   return (
     <SectionFrame
       list={false}
       className="max-w-2xl"
       title={t.title}
-      description={holder ? t.collective.subtitle : t.subtitle}
       parent={
         fromSelection
           ? [
