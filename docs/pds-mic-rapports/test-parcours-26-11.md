@@ -175,8 +175,24 @@ Rien n'a été supprimé.
 2. **M5** : plus de « Terminé » (Master, Distribution, clôture) tant que des titres actifs n'ont
    ni audio ni sortie ; ils comptent dans « Attendent leur source ».
 
-**Décisions à prendre avant de coder** : M2 et M3 (création d'un collectif), M6 (date des
-sorties de titres).
+**Corrigé le 27/11, après les décisions de Maël du 26/11 (détail dans `docs/AVANCEMENT.md`) :**
+3. **M2** : un invité déjà crédité sur un titre choisi reçoit sa participation sur ce titre, sans
+   titre « à nommer ».
+4. **M3** : chaque titre choisi crédite PDS en tête et ses invités en featuring, sans doublon.
+5. **M6** : la sortie d'un titre naît datée de l'échéance du projet, modifiable dans Sorties.
+   M2, M3 et M6 : migration `20261126180101_collective_creation_credits`, à pousser par Sacha.
+6. **M4** : le Brief de cadrage et le Plan comptent tous les titres actifs, avec ou sans master.
+7. **M7** : la sortie d'un titre reprend la pochette livrée par la Production.
+8. **M8** : « Confirmer pour les N titres » sur « Contrats du titre ».
+9. **M9** : la page de l'ingénieur nomme le titre (« dossier du mix de Echo test ») ; pas vu
+   dans Chrome (aucun dossier à transmettre sur la base de dev).
+10. **M10** : sans `?sortie=`, la Distribution ouvre la seule sortie, sinon laisse choisir.
+11. **M12** : le « À vous » de la Distribution d'un collectif compte dans le menu et la Vue
+    d'ensemble.
+12. **Juridique d'un invité** : après « Pas d'accord nécessaire », plus de « Contrat : À créer »,
+    et le plan ne crée plus de contrat à signer, donc plus de contrat bloqué au Brief de sortie
+    (« Micro test » garde l'action stockée avant la correction) ; le Suivi liste les invités dans
+    « Projet ».
 
 **À transmettre à Sacha** : C1 à C16.
 

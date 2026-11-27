@@ -236,8 +236,9 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   (`set_collective_release_mode`, droits des titres, archive / ramène, refusé si la sortie retirée
   est partie, journal). `releases.project_title_id` (nul = sortie du projet / compilation) et
   `archived_at` ; création idempotente (`ensure_title_release` : titre actif avec master, plan
-  lancé ; `ensure_compilation_release`) ; dates : la sortie d'un titre garde la sienne, la
-  compilation suit l'échéance. `loadRelease(…, PROJECT_RELEASE | { kind: "title" })` échoue pour
+  lancé ; `ensure_compilation_release`) ; dates : la sortie d'un titre naît datée de l'échéance
+  du projet (depuis le 26/11/2026, M6 du test de parcours), puis garde la sienne, modifiable dans
+  « Sorties » (une sortie ramenée garde sa date) ; la compilation suit l'échéance. `loadRelease(…, PROJECT_RELEASE | { kind: "title" })` échoue pour
   un collectif sans sélecteur ; lectures « la » date : `next_release_date`. Détection : ISRC du
   master du titre, UPC de la compilation. UPC par sortie. Verrou de sortie du lot 12 étendu aux
   sorties (livrée ou confirmée en ligne). Page **« Sorties »** du collectif (entrée sous
@@ -264,7 +265,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   partiels ; garde-fou : un collectif écrit toujours avec sa sortie) ; fonctions avec
   `p_release_id` (nul par défaut, `release_required` pour un collectif sans sortie). Refus de
   soumission : sortie archivée, titre abandonné, titre provisoire, contrat sans dérogation de
-  sortie (`release_submission_blockers`). Sortie d'un titre : pochette du titre (Catalogue),
+  sortie (`release_submission_blockers`). Sortie d'un titre : pochette livrée par la Production
+  quand il y en a une qui couvre le titre (depuis le 26/11/2026), sinon celle du titre (Catalogue),
   crédits pour les plateformes (PDS principal, invités en featuring, « Titre (feat. X) »,
   `trackDelivery`), format Single ; compilation : pochette du projet, pistes = titres actifs.
   Adresse `?sortie=` (`lib/distribution/scope.ts`), sortie et pistes `release-scope.ts`.
@@ -301,7 +303,15 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   la Vue d'ensemble s'appelle « Artistes ». La Distribution d'un titre qui sort avec la compilation le dit
   (« Distribution · avec la compilation », « Avec la compilation » dans la liste) : ce qui s'y fait vaut pour tous les
   titres de la compilation.
-- Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
+- **Test de parcours du 26/11** (`docs/pds-mic-rapports/test-parcours-26-11.md`) : création (M2, M3, ci-dessous
+  « Invités dès la création ») et date des sorties de titres (M6, lot 13) ; le Brief de cadrage et le Plan comptent
+  tous les titres actifs, avec ou sans master (M4) ; la sortie d'un titre reprend la pochette livrée par la
+  Production (M7) ; « Confirmer pour les N titres » sur « Contrats du titre » (M8) ; la page de l'ingénieur nomme
+  les titres du dossier (M9) ; sans `?sortie=`, la Distribution ouvre la seule sortie ou laisse choisir (M10) ; le
+  « À vous » de chaque sortie compte dans le menu et la Vue d'ensemble (M12) ; après « Pas d'accord nécessaire »,
+  le plan ne propose plus le contrat d'un invité (même choisi avant le lancement), une action déjà stockée passe en
+  « fait », « Prêt pour la sortie » le lit réglé, et le Suivi liste les invités dans « Projet ».
+- Tests : `collective-projects`, `collective-creation-credits` (26/11), `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
   événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12), `title-releases` (lot 13), `title-release-plans` (lot 14), `release-distribution` (lot 15).
@@ -312,13 +322,21 @@ Lu après le pull du 13/11/2026 ; ses tests : `deals-collective`, `deals-bm-open
 
 - **Invités dès la création** (`20261112130101_collective_guests`) : `create_collective_project`
   prend `p_guest_artist_ids` (dernier paramètre, facultatif) ; champ « Artistes invités » du
-  formulaire (`collective-fields.tsx`), à côté ou à la place d'une sélection. Chaque invité reçoit
-  un titre sans nom et une participation proposée, par `add_project_title` /
-  `add_title_participation` ; sélection et invités ensemble : chaque artiste une fois, jamais
-  l'artiste principal.
-  Depuis le 23/11/2026, les artistes crédités des titres choisis sont préremplis dans
-  « Artistes invités » (`ProjectKindFields`) ; à la création, ils reçoivent toujours un titre sans
-  nom, pas le titre choisi.
+  formulaire (`collective-fields.tsx`), à côté ou à la place d'une sélection ; sélection et
+  invités ensemble : chaque artiste une fois, jamais l'artiste principal. Les artistes crédités
+  des titres choisis sont préremplis dans « Artistes invités » (`ProjectKindFields`).
+  Depuis le 26/11/2026 (`20261126180101_collective_creation_credits`, décisions de Maël après le
+  test de parcours, qui remplacent celles du 23/11) :
+  - un invité déjà crédité sur un titre choisi reçoit sa participation proposée **sur ce titre**
+    (sur chacun de ceux qui le créditent), sans titre « à nommer » ; seul un invité crédité sur
+    aucun titre choisi reçoit un titre sans nom (`add_project_title` / `add_title_participation`) ;
+  - chaque titre choisi crédite l'artiste principal en tête (`main`) et les invités du titre en
+    featuring (« PDS feat. Elio Danvers »), sans doublon ni retrait
+    (`credit_collective_title_at_creation`, à la création seulement) ; un master aussi dans un
+    projet simple ou archivé reste tel quel (décision 10). Le dossier de livraison n'a donc plus
+    à renvoyer au Catalogue pour « Crédits pour les plateformes » ;
+  - les titres choisis ne sont proposés qu'en Musical : un collectif Contenu · PDS Mic part de
+    ses invités, chacun sur un titre sans nom.
 - **Le deal d'un collectif passe par une participation** : `create_deal` refuse « projet +
   artiste » ou un projet seul sur un collectif (`collective_needs_participation`, ou
   `use_participation` si l'artiste a une participation en jeu) ; une participation refusée ou

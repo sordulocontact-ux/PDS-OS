@@ -3150,3 +3150,74 @@ migration ; seuls les collectifs changent.
   - « Lueur test » et « Minuit pile » : inchangés. Aucune erreur dans la console.
 - Attention en vérifiant : le cache des vues (`byProjectVersion`) sert encore 5 min un état calculé par l'ancien
   code.
+
+## PDS Mic : suite du test de parcours du 26/11, création d'un collectif et corrections (27/11/2026)
+
+Suite de `docs/pds-mic-rapports/test-parcours-26-11.md`, avec les décisions de Maël du 26/11 (elles remplacent celles du
+23/11 dans `docs/pds-mic-resume.md`).
+
+- **Migration `20261126180101_collective_creation_credits.sql`, à pousser par Sacha** (test
+  `collective-creation-credits`, 17) :
+  - **M2** : à la création, un invité déjà crédité sur un titre choisi reçoit sa participation sur ce titre, sans titre
+    « à nommer » ; seul un invité crédité sur aucun titre choisi en reçoit un ;
+  - **M3** : chaque titre choisi crédite l'artiste principal en tête et ses invités en featuring (« PDS feat. Tavio
+    Marlan »), sans doublon ni retrait ; un master aussi dans un projet simple reste tel quel (décision 10) ;
+  - **M6** : la sortie d'un titre naît datée de l'échéance du projet, puis garde sa date (modifiable dans « Sorties »).
+  - Appliquée sur la base de dev le 27/11 avec les 13 migrations de Sacha des 23-24/11 qu'elle n'avait pas. Les 17
+    tests voisins (création, titres, participations, sorties, Distribution, deals) passent sur cette base.
+- **M4** : le Brief de cadrage et le Plan du projet d'un collectif comptent tous les titres actifs, avec ou sans master
+  (« pas encore d'audio »).
+- **M7** : la sortie d'un titre prend la pochette livrée par la Production quand elle couvre le titre ; sinon celle du
+  Catalogue, comme avant.
+- **M8** : « Confirmer pour les N titres » sur « Contrats du titre » : ce titre avec ses cases, les autres titres non
+  confirmés avec les quatre types ; chacun garde sa confirmation et « Modifier ».
+- **M9** : la page de l'ingénieur d'un collectif nomme les titres du dossier (« dossier du mix de Echo test »).
+- **M10** (commit à part, `bf385201`) : sans `?sortie=`, la Distribution d'un collectif ouvre sa seule sortie, sinon la
+  sortie où une étape attend le lecteur, et le fil propose les autres.
+- **M12** : chaque sortie active d'un collectif est un parcours de Distribution : ses « À vous » comptent dans le menu,
+  et la Vue d'ensemble montre la carte de la sortie en cours (« Distribution · Néons »).
+- **Juridique d'un invité** : après « Pas d'accord nécessaire », le plan ne propose plus son contrat (même choisi avant
+  le lancement), une action déjà stockée passe en « fait » sans attendre de fiche, et « Prêt pour la sortie » lit son
+  contrat comme réglé ; le Suivi du collectif liste aussi les invités dans « Projet ».
+- **Pour Sacha** (code touché, collectifs seulement sauf mention) :
+  - Cadrage : `lib/framing/knowledge.ts`, `lib/framing/assess.ts`, `lib/plan/propose.ts` (`masterCount` lit les
+    masters du projet), `lib/i18n/fr/framing-intel.ts` ;
+  - Distribution : `lib/distribution/sources.ts`, `readiness.ts`, `checks.ts`, `delivery-file.ts`,
+    `journey-context.ts` (sorties de titre seulement) ;
+  - Juridique : `lib/legal/plan/proposal.ts`, `plan/queries.ts`, `plan/board.ts`, `tracking/queries.ts`,
+    `readiness/controls.ts`, `journey-context.ts`, `forms/queries.ts` (`noAgreementContacts`). Ces règles valent aussi
+    pour un projet simple qui a un « Pas d'accord nécessaire » : son contrat n'est plus proposé ni compté « À créer » ;
+  - parcours et cartes : `lib/journey/distribution.ts`, `lib/journey/types.ts` (`RELEASE_PART`), `lib/overview/cards.ts` ;
+  - Master : `lib/master-workflow/transmission-types.ts` (`subject`, facultatif), `transmission-actions.ts`,
+    `components/master-workflow/public-cards.tsx`.
+- **Vérifié dans Chrome** (avant → après) :
+
+  | Projet | Écran | Avant | Après |
+  |---|---|---|---|
+  | « Collectif test 27-11 » (créé dans l'app, Musical · Compilation, « Rivage test » de Tavio Marlan + Lila Vega sans titre) | Titres (M2) | — (au 26/11 : un titre « à nommer » en plus pour l'invité crédité) | Tavio Marlan sur « Rivage test », Lila Vega sur « Titre de Lila Vega (à nommer) », rien d'autre |
+  | | Catalogue « Rivage test » (M3) | « Tavio Marlan » | « PDS feat. Tavio Marlan » |
+  | | Brief de cadrage et Plan (M4) | (au 26/11 : titres avec master seulement, « 1 titre sans master final ») | « Rivage test · Titre de Lila Vega (à nommer) », « 2 titres sans master final » |
+  | | Sorties au lancement (M6) | (au 26/11 : « À fixer ») | « Rivage test · 7 mai 2027 · Prévue » |
+  | | Contrats du titre (M8) | un « Confirmer » par titre | « Confirmer pour les 2 titres » : Rivage test sans Édition (décochée), l'autre titre avec les quatre |
+  | « Assurance 30 » | Menu et Vue d'ensemble (M12) | Distribution sans compte | Distribution « 3 », carte « Distribution · Néons · À vous : confirmer les paramètres de distribution » |
+  | | Contrats du titre (M8) | « Confirmer les contrats nécessaires » seul | plus « Confirmer pour les 7 titres » (non cliqué) |
+  | « Micro test » | Prêt pour la sortie | « Contrat de Elio Danvers : À créer » | « Pas d'accord nécessaire », compté fait |
+  | | Suivi juridique, « Projet » | Karim Haddou, Bastien Coll | Elio Danvers, Karim Haddou, Bastien Coll |
+  | | Menu Distribution (M12) | sans compte | « 2 » |
+  | | Dossier de livraison (M7) | pochette du Catalogue (« pochette-micro.png ») | « Pochette · v1 · livrée par la Production » |
+  | « Lueur test » | Menu, Prêt pour la sortie | Master et Distribution « Terminé », 8 sur 14, 0 blocage | identique |
+  | « Minuit pile » | Menu, Prêt pour la sortie | pas encore calculé (plan juridique pas lancé) | identique |
+
+- **Limites** :
+  - les documents figés gardent leur texte : Brief de cadrage V1 et Plan lancé de « Micro test » (« 1 titre sans
+    master final », `project_plan_items.why`), Brief de sortie V2 ;
+  - « Micro test » garde l'action « Faire signer un contrat à Elio Danvers » stockée « bloquée » au lancement (le
+    « Pas d'accord nécessaire » datait d'avant) : le tableau du plan la range en « fait », mais une révision de la
+    Stratégie la lirait encore ; la retirer = confirmer de nouveau « Contrats des intervenants » dans l'app ;
+  - M7 : le dossier V1 de « Micro test », validé avec la pochette du Catalogue, dit maintenant « ne correspond plus à
+    la source » ;
+  - M9 pas vu dans Chrome : aucun dossier de mix à transmettre sur la base de dev (un dossier déjà transmis garde le
+    nom du projet) ; l'en-tête de la page de contact `/c/` nomme toujours le projet (SQL `get_contact_page`) ;
+  - le Cadrage cite les titres sans master, mais pas encore leur invité parmi les personnes (Lila Vega).
+- **Données de test laissées** : titre « Rivage test » au Catalogue (« PDS feat. Tavio Marlan »), projet « Collectif
+  test 27-11 » (Cadrage fait avec des « Non applicable », plan lancé, contrats des deux titres confirmés).
