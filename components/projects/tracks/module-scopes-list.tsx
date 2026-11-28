@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/data-table";
 import { titleTracks } from "@/lib/i18n/fr/title-tracks";
 import type { WorkflowCard } from "@/lib/overview/cards";
-import { cn } from "@/lib/utils";
 
 const fr = { titleTracks };
 
@@ -21,11 +20,9 @@ export type ModuleScopeRow = {
   label: string;
   // Its guests, under its name.
   subtitle?: string | null;
-  // Its step in the workflow; null: nothing to open yet (`note` says why).
+  // Its step in the workflow; null: not for this viewer to open.
   href: string | null;
-  card?: WorkflowCard;
-  note?: string;
-  muted?: boolean;
+  card: WorkflowCard;
 };
 
 /**
@@ -62,26 +59,14 @@ export function ModuleScopesList({
                   row.href ? (
                     <DataTableLink href={row.href}>{row.label}</DataTableLink>
                   ) : (
-                    <span
-                      className={cn(
-                        row.muted && "text-[color:var(--text-secondary)]",
-                      )}
-                    >
-                      {row.label}
-                    </span>
+                    row.label
                   )
                 }
                 subtitle={row.subtitle ?? undefined}
               />
             </DataTableCell>
             <DataTableCell>
-              {row.card ? (
-                <WorkflowProgress card={row.card} />
-              ) : (
-                <span className="text-[color:var(--text-secondary)]">
-                  {row.note}
-                </span>
-              )}
+              <WorkflowProgress card={row.card} />
             </DataTableCell>
           </DataTableRow>
         ))}

@@ -3485,3 +3485,6 @@ et que je vais sur Juridique, je reste sur ce titre ». Sans migration.
 - Guide de PO (`workflows.ts`), `docs/VISION-UX.md` (nouvelle règle), `DESIGN.md`, `ARCHITECTURE.md`, `COMPOSANTS.md`.
 - **Reste** : passage navigateur (l'extension Chrome ne chargeait pas le serveur local) ; la Distribution allume
   l'entrée « Sorties » du menu quand elle ouvre la liste des sorties.
+- **Même jour, « Son attendu »** (Sacha : « je dois faire quoi pour son attendu ? ») : un titre pas encore au
+  Catalogue dit maintenant son geste dans la liste du Master, « Rattacher au Catalogue » (« À vous » pour le
+  responsable), et son nom ouvre cette étape du Juridique.

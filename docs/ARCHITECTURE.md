@@ -5790,8 +5790,10 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   `TitlesOverview` supprimé). `/master` d'un collectif rend `MasterTitlesPage` : en-tête « Master » (faits, « Brief »
   avec son « À vous », « Demander des fichiers » du lot 9 bis pour le responsable, « Qui fait quoi »), puis
   `ModuleScopesList` (`components/projects/tracks/`) : une ligne par titre vivant, sa carte Master de
-  `loadTitlesProgress` (`WorkflowProgress` : anneau, étape, « À vous »), le nom ouvrant l'étape du titre ; sans
-  audio, « Son attendu » sans lien. `/legal` d'un collectif (`collectiveEntry`) rend `LegalScopesPage` : « Projet »
+  `loadTitlesProgress` (`WorkflowProgress` : anneau, étape, « À vous »), le nom ouvrant l'étape du titre ; un
+  titre pas encore au Catalogue dit son geste, « Rattacher au Catalogue » (« À vous » pour le responsable,
+  `attachCard`), et ouvre l'étape du Juridique pour qui a `manage_legal` (Sacha, 28/11 : « Son attendu » était un
+  cul-de-sac). `/legal` d'un collectif (`collectiveEntry`) rend `LegalScopesPage` : « Projet »
   puis chaque portée de `legalTitleLayout`, ouverte par `scopeEntry` ; avec « Projet » seul, l'entrée du parcours
   comme avant. `/release` : voir M10. Un seul titre (ou une seule sortie) : redirection directe. Le menu du projet
   ne précalcule plus l'entrée de ces trois modules pour un collectif (`moduleEntries(…, { collective })`) : il pointe
