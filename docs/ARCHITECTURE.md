@@ -5810,7 +5810,7 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   `carriedTitle` (`lib/projects/title-carry.ts`, serveur) : un titre abandonné ou la compilation donnent la liste.
 - **Audit des parcours d'un collectif** (28/11/2026, trois revues Master, Juridique, Distribution/Titres) : étapes
   propres d'un titre au Juridique avec un acteur (le responsable : « Rattacher au Catalogue », « Contrats du titre »,
-  « Créditer les auteurs » s'il manque compositeur/auteur/arrangeur, « Ajouter au plan » si sa répartition ou sa SACEM
+  « Créditer les auteurs » s'il manque compositeur/auteur/arrangeur (page du Juridique `/legal/title-credits/<titre>`, `TitleCreditsStep`, qui ouvre les crédits au Catalogue : la navigation ne sort jamais du projet), « Ajouter au plan » si sa répartition ou sa SACEM
   manque au plan lancé : `titlePendingSteps`, `tracking.addedMasters`) ; rattacher un titre ajoute ses actions au plan
   (`addLegalPlanItems(projectId, masterId)`) puis ouvre la suite du titre (`/legal?titre=`), comme la première
   confirmation des contrats du titre et « Ajouter au plan » ; `stepFinished` (fait ou obsolète) partagé par la liste,

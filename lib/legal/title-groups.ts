@@ -26,13 +26,14 @@ import {
   awaitingNames,
   type TitleContractNeeds,
 } from "@/lib/legal/title-contracts-rules";
-import { routes } from "@/lib/auth/redirects";
 import { titleHue, type Hue } from "@/lib/ui/category-hues";
 import type { JourneyPerson, JourneyStep } from "@/lib/ui/journey";
 import {
   legalAttachHref,
   legalAttachKey,
   legalStepHref,
+  legalTitleCreditsHref,
+  legalTitleCreditsKey,
   legalTitleContractsHref,
   legalTitleContractsKey,
   type LegalDemarcheKind,
@@ -296,8 +297,8 @@ export function titlePendingSteps(
     return [
       {
         ...base,
-        key: `credits:${title.id}`,
-        href: routes.masterCredits(title.masterId),
+        key: legalTitleCreditsKey(title.id),
+        href: legalTitleCreditsHref(projectId, title.id),
         title: t.titleCredits.title,
         summary: t.titleCredits.summary,
         actor: actor(t.titleCredits.title),

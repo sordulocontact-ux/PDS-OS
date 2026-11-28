@@ -88,6 +88,18 @@ export const legalTitleContractsKey = (titleId: string) =>
 export const legalTitleContractsHref = (projectId: string, titleId: string) =>
   `${routes.projectLegal(projectId)}/${LEGAL_TITLE_CONTRACTS_SEGMENT}/${titleId}`;
 
+// A collective's title in the Catalogue without a composer, an author or an
+// arranger (/legal/title-credits/<project title id>): « Créditer les
+// auteurs », a step of the spine only, opening its credits in the Catalogue
+// from a page of the Juridique (audit du 28/11/2026).
+export const LEGAL_TITLE_CREDITS_SEGMENT = "title-credits";
+
+export const legalTitleCreditsKey = (titleId: string) =>
+  `${LEGAL_TITLE_CREDITS_SEGMENT}:${titleId}`;
+
+export const legalTitleCreditsHref = (projectId: string, titleId: string) =>
+  `${routes.projectLegal(projectId)}/${LEGAL_TITLE_CREDITS_SEGMENT}/${titleId}`;
+
 /** A démarche's ref as a URL segment: ids stay as they are, a person's key
  * (`contact:<id>`, `artist:<id>` or a normalized name) becomes a slug. */
 export function legalRefSlug(ref: string): string {
@@ -114,7 +126,8 @@ export type LegalRoute =
   | { type: "ready" }
   | { type: "participations" }
   | { type: "attach"; titleId: string }
-  | { type: "titleContracts"; titleId: string };
+  | { type: "titleContracts"; titleId: string }
+  | { type: "titleCredits"; titleId: string };
 
 /** What a URL's segments below /legal open: a step of the Dossier, a
  * démarche, « Prêt pour la sortie » or a former branch page (redirected to
@@ -130,6 +143,8 @@ export function legalRouteOf(
       return { type: "attach", titleId: second };
     if (first === LEGAL_TITLE_CONTRACTS_SEGMENT)
       return { type: "titleContracts", titleId: second };
+    if (first === LEGAL_TITLE_CREDITS_SEGMENT)
+      return { type: "titleCredits", titleId: second };
     const kind = LEGAL_DEMARCHE_KINDS.find((k) => k === first);
     return kind ? { type: "demarche", kind, slug: second } : null;
   }

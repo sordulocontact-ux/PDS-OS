@@ -67,6 +67,7 @@ export const legalDemarches = {
   titleCredits: {
     title: "Créditer les auteurs",
     summary: "Compositeur, auteur ou arrangeur au Catalogue",
+    open: "Ouvrir les crédits du titre",
   },
   // Its split and SACEM declaration, not in the plan launched before it.
   titlePlan: {

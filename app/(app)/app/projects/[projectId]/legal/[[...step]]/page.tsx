@@ -16,6 +16,7 @@ import { InventoryStep } from "@/components/legal/steps/inventory-step";
 import { PlanStep } from "@/components/legal/steps/plan-step";
 import { ReadyStep } from "@/components/legal/steps/ready-step";
 import { TitleContractsStep } from "@/components/legal/steps/title-contracts-step";
+import { TitleCreditsStep } from "@/components/legal/steps/title-credits-step";
 import { demarcheTarget, entryHref } from "@/lib/legal/demarches/where";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { scopeEntry } from "@/lib/legal/title-groups";
@@ -123,6 +124,9 @@ export default async function ProjectLegalPage({
   // The contracts a collective's title needs (Ibé, 18/11/2026, § 3.4).
   if (route.type === "titleContracts")
     return <TitleContractsStep projectId={projectId} titleId={route.titleId} />;
+  // Its authors to credit in the Catalogue (audit du 28/11/2026).
+  if (route.type === "titleCredits")
+    return <TitleCreditsStep projectId={projectId} titleId={route.titleId} />;
   if (route.type === "step") {
     const key = route.key;
     if (key === "inventory")

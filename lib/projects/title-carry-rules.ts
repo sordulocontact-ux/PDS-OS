@@ -50,7 +50,9 @@ export function carriedTitleOf(
   // A collective's title steps of the Juridique name it in their path.
   if (
     from === "legal" &&
-    (second === "attach" || second === "title-contracts") &&
+    (second === "attach" ||
+      second === "title-contracts" ||
+      second === "title-credits") &&
     third &&
     UUID.test(third)
   )
