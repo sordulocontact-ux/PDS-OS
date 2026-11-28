@@ -5819,6 +5819,18 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   Distribution » avec le titre ; une étape au titre inconnu renvoie à `/master?titre=` ; le Mixage d'un titre attend
   sa propre source ; messages de l'ingénieur et factures hors du parcours d'un titre (dits une fois, par le projet).
   « Voir » (Prêt pour la sortie) sans lien pour qui n'a pas `manage_legal`.
+- **Audit, second lot** (28/11/2026) : `JourneyTransmission.packageTitles` (`package -> titles`, `packageTitlesOf`) :
+  titre hors du dossier → action « Ajouter … au dossier de … » (`masterJourney`), `RoundStepView.missingFromPackage`
+  rouvre « Renvoyer le dossier » ; `masterTitleJourney` reprend l'étape Brief du projet, ferme le Mixage d'un titre
+  sans source et le verrouille tant qu'un autre titre attend sa source avant le premier envoi ; `withOutcome`
+  (`titledOpen`) ouvre `/master` au lieu d'une étape sans titre dans un collectif ; `loadMasterTitleScope` coche un
+  titre quand son parcours est fini. Juridique : `SourceContext.abandonedMasters` (obsolète « Le titre est
+  abandonné ») ; `tracking.addedKeys` → `DemarcheContext.pendingContracts` ; contrat en attente d'accord =
+  statut `waiting`, `awaitingGuest`. Distribution : migrations `20261128090101` (`ensure_project_title_master` reprend
+  `working_title`, `rename_project_title`, rattrapage) et `20261128090201` (`open_reserves`, `closed_open`) ;
+  `loadTitleDeposits` ne donne la compilation qu'en mode `compilation` à un titre au Catalogue ; `projectSections` :
+  la Distribution d'un collectif mène à `/releases` et s'allume sur `/release` et `/releases` (plus d'entrée
+  « Sorties ») ; `/release` sans titre → « Sorties » (`onlyCollectiveRelease` supprimé).
 - **Source** (`source-step.ts`, `components/master-workflow/source/`, migration `20261019080101`) :
   versions candidates = maquettes et mises à plat, **la plus récente détectée** (proto, ticket § 1) ; un
   mix trouvé au Catalogue se propose comme mix final avec motif **obligatoire** (`declare_mix_final`

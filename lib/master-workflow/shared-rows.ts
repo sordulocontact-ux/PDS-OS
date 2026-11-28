@@ -46,7 +46,7 @@ export const masterTransmissionRows = trackedCache(
     return supabase
       .from("master_transmissions")
       .select(
-        "id, role, contact_id, created_at, note, link_sent_at, opened_at, acknowledged_at, delivered_at, revoked_at, revoke_reason, expires_at, derogations, continues_id, contact:network_contacts!master_transmissions_contact_same_org(name), sender:people!master_transmissions_created_by_fkey(first_name, last_name)",
+        "id, role, contact_id, created_at, note, package_titles:package->titles, link_sent_at, opened_at, acknowledged_at, delivered_at, revoked_at, revoke_reason, expires_at, derogations, continues_id, contact:network_contacts!master_transmissions_contact_same_org(name), sender:people!master_transmissions_created_by_fkey(first_name, last_name)",
       )
       .eq("project_id", projectId)
       .order("created_at", { ascending: false });

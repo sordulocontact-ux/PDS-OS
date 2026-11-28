@@ -138,6 +138,8 @@ export const legalDemarches = {
   // gestures of someone outside stay short: their name comes before them
   // (« Sami Kader · remplir sa fiche »).
   todo: {
+    // A guest added after the plan's launch (audit du 28/11/2026).
+    addContract: "Ajouter son contrat au plan",
     prepareFiche: (name: string) => `Créer le lien de la fiche ${de(name)}`,
     markSent: (name: string) => `Envoyer à ${name} le lien de sa fiche`,
     fillFiche: "Remplir sa fiche de renseignements",

@@ -111,14 +111,16 @@ export function RoundStep({
         </>
       )}
 
-      {sent && round.briefChangedSinceSent && (
-        <VersionCard
-          title={t.package.title[stage]}
-          meta={formatShortInstant(link!.createdAt)}
-        >
-          <PackagePreview view={view} />
-        </VersionCard>
-      )}
+      {sent &&
+        (round.briefChangedSinceSent ||
+          round.missingFromPackage.length > 0) && (
+          <VersionCard
+            title={t.package.title[stage]}
+            meta={formatShortInstant(link!.createdAt)}
+          >
+            <PackagePreview view={view} />
+          </VersionCard>
+        )}
 
       {inHouse && !inHouse.assignedAt && (
         <>
@@ -143,11 +145,18 @@ export function RoundStep({
       )}
       {viewerIsOwner &&
         view.engineer &&
-        (!sent || round.briefChangedSinceSent) && (
+        (!sent ||
+          round.briefChangedSinceSent ||
+          round.missingFromPackage.length > 0) && (
           <>
             {sent && round.briefChangedSinceSent && (
               <ToneCallout tone="warning">
                 {t.send.briefChanged(engineer)}
+              </ToneCallout>
+            )}
+            {sent && round.missingFromPackage.length > 0 && (
+              <ToneCallout tone="warning">
+                {t.send.missing(engineer, round.missingFromPackage)}
               </ToneCallout>
             )}
             {blockers.length === 0 && (

@@ -11,7 +11,9 @@ import { byProjectVersion } from "@/lib/projects/version-cache";
 import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
-import { masterJourney } from "./journey";
+import { masterJourney as masterJourneyText } from "@/lib/i18n/fr/master-journey";
+
+import { liveTransmission, masterJourney } from "./journey";
 import {
   loadMasterJourneyFacts,
   type MasterJourneyFacts,
@@ -96,10 +98,74 @@ export function titleFacts(
  */
 export const masterTitleJourney = trackedCache(
   async (projectId: string, masterId: string) => {
-    const { access, project, facts } = await masterJourneyContext(projectId);
-    return journeyOf(projectId, access, project, titleFacts(facts, masterId));
+    const { access, project, facts, steps } =
+      await masterJourneyContext(projectId);
+    const own = await journeyOf(
+      projectId,
+      access,
+      project,
+      titleFacts(facts, masterId),
+    );
+    const others = othersWithoutSource(facts, masterId);
+    const sourced = own.find((s) => s.key === "source")?.status === "done";
+    return own.map((step) => {
+      // A title added after the Brief: its Mixage waits for its own source
+      // (the Brief, shared, is done already).
+      if (step.key === "mix" && step.status !== "done" && !sourced)
+        return { ...step, status: "blocked" as const, actor: null };
+      // One Brief for the project (décision 4): the same step on every
+      // title, never open on one and locked on another (audit du 28/11).
+      if (step.key === "brief")
+        return steps.find((s) => s.key === "brief") ?? step;
+      // The package leaves for every title at once: while another title
+      // waits for its source, nothing can be sent for this one either.
+      if (
+        step.key === "mix" &&
+        others.length > 0 &&
+        step.status !== "done" &&
+        !liveTransmission(facts, "mix")
+      )
+        return {
+          ...step,
+          status: "blocked" as const,
+          actor: null,
+          external: [
+            ...(step.external ?? []),
+            {
+              key: "others-source",
+              label: masterJourneyText.prereq.othersSource(
+                others.map((x) => `« ${x} »`).join(", "),
+                others.length > 1,
+              ),
+              done: false,
+            },
+          ],
+        };
+      return step;
+    });
   },
 );
+
+/** The other titles in the Master's flow still without a confirmed source
+ * (none, a mix validated or a master final: past it). */
+function othersWithoutSource(
+  facts: MasterJourneyFacts,
+  masterId: string,
+): string[] {
+  return facts.titles.flatMap((title) =>
+    title.id !== masterId &&
+    title.sources.length === 0 &&
+    !title.audio.some((a) => a.audioState === "final_master") &&
+    !facts.versions.some(
+      (v) =>
+        v.masterId === title.id &&
+        v.stage === "mix" &&
+        v.decision === "approved",
+    )
+      ? [title.title]
+      : [],
+  );
+}
 
 /** The direction (permission `validate`), who pays and arbitrates: the
  * first one (list_direction_people; a member reads only their own

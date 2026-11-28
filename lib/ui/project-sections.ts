@@ -127,13 +127,8 @@ export function projectSections(
               below(routes.projectTracks(projectId))(p) ||
               below(routes.projectTitles(projectId))(p),
           },
-          // Its releases: per title and/or the compilation (lot 13).
-          {
-            key: "releases",
-            label: t.releases,
-            href: routes.projectReleases(projectId),
-            match: below(routes.projectReleases(projectId)),
-          },
+          // Its releases (lot 13) are its Distribution's list since
+          // 28/11/2026: the « Distribution » entry opens them (below).
           // Its titles' Plans de sortie (lot 14).
           {
             key: "release-plans",
@@ -170,12 +165,25 @@ export function projectSections(
         ].some((href) => below(href)(p)),
       group: "workflows",
     },
-    section(
-      "distribution",
-      t.distribution,
-      routes.projectRelease(projectId),
-      "workflows",
-    ),
+    // A collective's Distribution is held release by release: its entry is
+    // « Sorties », the list of its releases (mode, dates, UPC, each deposit),
+    // lit on both (Sacha, 28/11/2026: it lit an entry of its own).
+    collective
+      ? {
+          key: "distribution",
+          label: t.distribution,
+          href: routes.projectReleases(projectId),
+          match: (p: string) =>
+            below(routes.projectRelease(projectId))(p) ||
+            below(routes.projectReleases(projectId))(p),
+          group: "workflows" as const,
+        }
+      : section(
+          "distribution",
+          t.distribution,
+          routes.projectRelease(projectId),
+          "workflows",
+        ),
     // Pilotage (proto): Travail, the project's Calls (the second door to
     // them, like Travail; Sacha 05/11/2026), Validations, Activité, then the
     // Budget (ticket MKT-S1-15).

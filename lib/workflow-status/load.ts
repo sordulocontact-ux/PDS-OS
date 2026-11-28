@@ -246,6 +246,7 @@ type DistributionRows = {
     kind: string;
     status: string;
     reserves: unknown;
+    open_reserves?: number;
     proposed_at: string;
     decided_at: string | null;
   } | null;
@@ -385,6 +386,7 @@ async function distributionFactsOf(
               kind: open.kind === "normal" ? "normal" : "reserves",
               on: open.decided_at ?? open.proposed_at,
               reserves: Array.isArray(open.reserves) ? open.reserves.length : 0,
+              openReserves: open.open_reserves ?? 0,
             }
           : null,
     },

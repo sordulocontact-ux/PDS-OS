@@ -25,6 +25,7 @@ import type {
 import {
   legalDemarcheHref,
   legalDemarcheKey,
+  legalStepHref,
   LEGAL_READY_KEY,
   type LegalDemarcheKind,
 } from "@/lib/ui/legal-steps";
@@ -66,6 +67,10 @@ export type DemarcheContext = {
   owner: { personId: string | null; name: string | null };
   // The direction's name when one member validates (« Claire Morel »).
   validatorName: string | null;
+  // The people whose contract the dossier asks for, not in the plan yet (a
+  // guest added after the launch): their démarche is not done until it is
+  // (audit du 28/11/2026).
+  pendingContracts?: Set<string>;
 };
 
 // Most urgent first (lib/legal/plan/board.ts).
@@ -263,7 +268,36 @@ export function launchedDemarches(input: {
         : items[0]) ??
       items[0] ??
       null;
-    const state = stateOf(current, parts, own, ctx);
+    const stated = stateOf(current, parts, own, ctx);
+    // A guest's contract waiting for their accord (§ 3.5): nobody of PDS
+    // acts in the démarche, it waits (audit du 28/11/2026).
+    const computed =
+      stated.status === "current" &&
+      !stated.actor &&
+      parts.some(
+        (p) => p.panel.kind === "contract" && isAwaitingAgreement(p.panel.row),
+      )
+        ? { ...stated, status: "waiting" as const }
+        : stated;
+    // A person whose contract is still to add to the plan: the démarche
+    // waits for that gesture, on the Plan d'action, not « fiche seule ».
+    const state =
+      kind === "person" &&
+      computed.status === "done" &&
+      ctx.pendingContracts?.has(ref)
+        ? {
+            status: "current" as const,
+            actor: ctx.owner.name
+              ? {
+                  name: ctx.owner.name,
+                  viewer: ctx.owner.personId === ctx.viewer.personId,
+                  viaLink: false,
+                  todo: t.todo.addContract,
+                  href: legalStepHref(ctx.projectId, "plan"),
+                }
+              : null,
+          }
+        : computed;
     const deps = own?.dependsOn ?? [];
     const prereq = [
       "plan",

@@ -59,6 +59,9 @@ export type JourneyTransmission = {
   expiresAt: string;
   sentBy: string | null;
   continued: boolean;
+  // The titles (masters) its package holds, frozen at the sending; null:
+  // not read.
+  packageTitles: string[] | null;
 };
 
 export type JourneyVersion = {
@@ -463,6 +466,7 @@ export async function loadMasterJourneyFacts(project: {
       expiresAt: t.expires_at,
       sentBy: nameOf(t.sender),
       continued: t.continues_id !== null,
+      packageTitles: packageTitlesOf(t.package_titles),
     })),
     versions: (versions.data ?? []).map((v) => ({
       id: v.id,
@@ -547,4 +551,17 @@ export async function loadMasterJourneyFacts(project: {
     })),
     failed: errors.length > 0,
   };
+}
+
+/** The masters a package holds (`package -> titles`, each `{ masterId }`);
+ * null when it cannot be read. */
+export function packageTitlesOf(titles: unknown): string[] | null {
+  if (!Array.isArray(titles)) return null;
+  return titles.flatMap((title) =>
+    title &&
+    typeof title === "object" &&
+    typeof (title as { masterId?: unknown }).masterId === "string"
+      ? [(title as { masterId: string }).masterId]
+      : [],
+  );
 }

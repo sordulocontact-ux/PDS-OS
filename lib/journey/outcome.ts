@@ -10,6 +10,8 @@ import type {
   WriteResult,
 } from "@/lib/utils/write-result";
 
+import { routes } from "@/lib/auth/redirects";
+import { getProject } from "@/lib/projects/queries";
 import { projectVersion } from "@/lib/projects/version-cache";
 
 import { loadProjectJourneys, readProjectJourneys } from "./project";
@@ -145,6 +147,21 @@ export async function withOutcome<R extends WriteResult>(
     ...result,
     done,
     ...outcome,
-    ...(openNext && open && { open }),
+    ...(openNext && open && { open: await titledOpen(projectId, open) }),
   } as R;
+}
+
+/** A collective's Master is worked title by title: a step of it named
+ * without its title would open on a title chosen by the code. It opens the
+ * Master's entry instead, the list of the titles with the viewer's next
+ * gestures (or the only title), audit du 28/11/2026. */
+async function titledOpen(
+  projectId: string,
+  open: ResultOpen,
+): Promise<ResultOpen> {
+  const master = routes.projectMaster(projectId);
+  if (!open.href.startsWith(`${master}/`) || open.href.includes("titre="))
+    return open;
+  const project = await getProject(projectId);
+  return project?.collective ? { ...open, href: master } : open;
 }

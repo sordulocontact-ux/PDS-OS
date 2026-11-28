@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 
-import { onlyCollectiveRelease } from "@/lib/distribution/default-release";
 import { distributionContext } from "@/lib/distribution/journey-context";
 import { distributionEntry } from "@/lib/journey/landing";
 import { isUuid } from "@/lib/release/uuid";
@@ -16,11 +15,10 @@ async function collectiveRelease(
 ): Promise<string | null> {
   const title = await carriedTitle(projectId, query);
   // A title named: its release (or the compilation it goes out with), else
-  // « Sorties », never another title's release.
-  if (title)
-    return (await loadTitleDeposits(projectId))[title.id]?.releaseId ?? null;
-  if (typeof query.titre === "string") return null;
-  return onlyCollectiveRelease(projectId);
+  // « Sorties », the Distribution's list (mode, dates, UPC), never another
+  // title's release.
+  if (!title) return null;
+  return (await loadTitleDeposits(projectId))[title.id]?.releaseId ?? null;
 }
 
 // /release opens the Distribution's step that awaits the viewer, else the
@@ -35,8 +33,8 @@ export default async function ReleasePage({
   // A collective's Distribution is a release's (lot 15): the one named, else
   // the release of the title named (from another workflow of the same
   // title, lib/projects/title-carry-rules.ts: its own, or the compilation it
-  // goes out with), else its only release; with several, « Sorties » lists
-  // them (Sacha, 28/11/2026: never one chosen by the code).
+  // goes out with), else « Sorties », which lists them (Sacha, 28/11/2026:
+  // never one chosen by the code).
   const named = releaseParamOf(query);
   const project = await getProject(projectId);
   const releaseId =

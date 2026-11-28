@@ -3518,3 +3518,25 @@ bandeau après un geste sans le titre, sélecteur du Master « fait » trop tôt
 et son contrat, invité ajouté après le lancement « Terminé » sans contrat, « En attente de l'accord » sans qui ni où ;
 master provisoire jamais nommé (migration), « Avec la compilation » pour un titre qui n'y est pas, clôture avec
 réserves en trois états, « Sortie : Non » sans effet (Ibé), « Distribution » qui allume « Sorties ».
+
+## Audit des parcours d'un collectif : second lot (28/11/2026, branche `pre-prod`)
+
+Sacha : « fais tout ce qui est le plus logique pour toi ». Migrations `20261128090101_title_master_named` et
+`20261128090201_distribution_open_reserves` (appliquées en local ; pré-prod et prod à pousser).
+
+- **Master** : un titre absent du dossier reçu par l'ingénieur (ajouté après l'envoi) devient « Ajouter « X » au
+  dossier de Karim » pour le responsable, l'étape le dit et propose de renvoyer le dossier (le paquet est lu dans
+  `master_transmissions.package`) ; le Brief a le même état sur tous les titres ; un titre ne propose plus de
+  transmettre quand l'envoi attend la source d'un autre (« Source de « B » confirmée » dans ce qui débloque) ; le
+  Mixage d'un titre attend sa propre source (dans son parcours seulement) ; après un geste, la suite s'ouvre sur la
+  liste des titres plutôt que sur un titre choisi par le code ; la coche du menu des titres suit leur parcours.
+- **Juridique** : un titre abandonné rend obsolètes sa répartition, sa SACEM et le contrat de qui n'est crédité que
+  sur lui ; un invité ajouté après le lancement garde sa démarche ouverte (« Ajouter son contrat au plan ») ;
+  « En attente de l'accord de Jay sur « Néons » », statut d'attente, lien « Participations et contrats ».
+- **Distribution** : un titre déjà nommé donne son nom à son master (plus de master provisoire qui bloquait la sortie,
+  rattrapage des existants, « Renommer » nomme un master resté provisoire) ; « Avec la compilation » seulement en
+  mode compilation, pour un titre au Catalogue ; une clôture avec réserves ouvertes n'est plus « Clôturée » ni
+  « Terminé » ; l'entrée « Distribution » d'un collectif ouvre « Sorties » et s'allume dessus (l'entrée « Sorties »
+  est fondue dedans) ; les titres pas encore au Catalogue y mènent à leur page.
+- **Reste à trancher** : « Sortie : Non » (aucun ticket ne dit ce qu'il retire) ; la génération automatique du
+  contrat d'un invité qui n'a plus qu'un titre abandonné (la démarche est obsolète, la génération n'est pas filtrée).

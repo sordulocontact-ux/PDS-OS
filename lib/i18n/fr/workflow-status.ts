@@ -204,6 +204,8 @@ export const workflowStatus = {
       `Plateformes vérifiées : ${verified} sur ${total}`,
     closure: "Plateformes vérifiées : clôture du suivi à faire",
     closurePending: "Clôture proposée : en attente du validateur",
+    reservesOpen: (n: number) =>
+      `Clôturée avec réserves : ${n} réserve${n > 1 ? "s" : ""} à lever`,
     closedNormal: (date: string) => `Clôturée normalement le ${date}`,
     closedReserves: (date: string, n: number) =>
       `Clôturée avec réserves le ${date} (${n} réserve${n > 1 ? "s" : ""} non vérifiée${n > 1 ? "s" : ""})`,

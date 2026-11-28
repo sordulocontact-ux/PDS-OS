@@ -3,7 +3,10 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { routes } from "@/lib/auth/redirects";
-import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import {
+  masterJourneyContext,
+  masterTitleJourney,
+} from "@/lib/master-workflow/journey-context";
 import type { JourneyFileRequest } from "@/lib/master-workflow/journey-facts";
 import {
   titleMasterLabel,
@@ -133,6 +136,18 @@ export const loadMasterTitleScope = trackedCache(
               : null,
         },
       ];
+    });
+    // Checked when its own journey is done (deliverables included), not
+    // as soon as a mastering is validated (audit du 28/11/2026).
+    const finished = await Promise.all(
+      choices.map(async (choice) =>
+        (await masterTitleJourney(projectId, choice.masterId)).every(
+          (step) => step.status === "done",
+        ),
+      ),
+    );
+    choices.forEach((choice, i) => {
+      choice.done = finished[i];
     });
     if (choices.length === 0) return null;
     // A title named that is not in the Master (abandoned since, or named by

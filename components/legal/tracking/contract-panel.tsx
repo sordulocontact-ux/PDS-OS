@@ -18,6 +18,7 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
+import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { advanceContract } from "@/lib/contracts/actions";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { legal } from "@/lib/i18n/fr/legal";
@@ -145,9 +146,16 @@ export function ContractPanel({
   // contract is not drafted before, so no gesture of drafting, only the wait.
   const awaiting = row.awaitingAgreement && (
     <ToneCallout tone="info">
-      {fr.legalContracts.agreements.awaitingOf(
-        row.awaitingAgreement.join(", "),
-      )}
+      {fr.legalContracts.agreements.awaitingGuest(
+        row.name,
+        row.awaitingAgreement.map((label) => `« ${label} »`).join(", "),
+      )}{" "}
+      <Link
+        href={legalParticipationsHref(projectId)}
+        className="underline underline-offset-2"
+      >
+        {fr.legalContracts.agreements.awaitingWhere}
+      </Link>
     </ToneCallout>
   );
   const toGenerate = (

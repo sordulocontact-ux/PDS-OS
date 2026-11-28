@@ -282,10 +282,29 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       actions.push(...ownerDoes(t.todo.renewLink));
     else if (link && !link.acknowledgedAt)
       actions.push({ who: ext, todo: t.todo.takeCharge });
-    else
+    else {
+      // Titles the engineer's package does not hold (added after the
+      // sending): theirs to add, by the owner sending it again.
+      const missing = inFlow.filter(
+        (title) =>
+          link?.packageTitles &&
+          !link.packageTitles.includes(title.id) &&
+          !approved(title.id, stage) &&
+          (stage === "mix" || approved(title.id, "mix")),
+      );
+      if (missing.length > 0)
+        actions.push(
+          ...ownerDoes(
+            t.todo.addToPackage(
+              firstName(engineer.name),
+              missing.map((x) => `« ${x.title} »`).join(", "),
+            ),
+          ),
+        );
       for (const title of inFlow) {
         if (approved(title.id, stage)) continue;
         if (stage === "mastering" && !approved(title.id, "mix")) continue;
+        if (missing.includes(title)) continue;
         const [last] = versionsOf(title.id, stage);
         if (
           !last ||
@@ -308,6 +327,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
             lead: true,
           });
       }
+    }
     const open = facts.messages.filter(
       (m) => m.stage === stage && m.status === "open",
     ).length;
@@ -498,9 +518,6 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       // « Source confirmée », not the Source step done: anticipating with a
       // working version opens the Brief.
       (key !== "brief" || sourceConfirmed || nothingToDo) &&
-      // A collective's title added after the Brief: its Mixage waits for
-      // its own source (the Brief, shared, is already done).
-      (key !== "mix" || sourceConfirmed || nothingToDo) &&
       // Waiting for the final vocals keeps the Mixage closed.
       (key !== "mix" || !waitForVocals);
     const actor = actorOf(actionsOf[key], key);

@@ -47,6 +47,8 @@ export function trackPlan(input: {
   today: string;
   completeContacts: Set<string>;
   splitOf: Map<string, SplitState>;
+  // A collective's abandoned titles (their masters): out of the Juridique.
+  abandonedMasters?: Set<string>;
 }): TrackedItem[] {
   const ctx = sourceContext(input);
   const sourceOf = (item: PlanRow, depsDone: boolean) =>

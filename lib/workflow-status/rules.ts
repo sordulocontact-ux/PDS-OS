@@ -452,6 +452,8 @@ export type DistributionFacts = {
     kind: "normal" | "reserves";
     on: string;
     reserves: number;
+    // Its reserves not lifted yet: the closure is not finished.
+    openReserves?: number;
   } | null;
 };
 
@@ -485,6 +487,17 @@ export function distributionState(
 
   if (!facts.launched && !facts.version)
     return state("not_started", "prep", t.notLaunched);
+  // Closed with reserves still open: the lifting remains (recette
+  // DIST-007, as the module says it; audit du 28/11/2026).
+  if (
+    facts.closure?.status === "closed" &&
+    (facts.closure.openReserves ?? 0) > 0
+  )
+    return state(
+      "in_progress",
+      "closure",
+      t.reservesOpen(facts.closure.openReserves ?? 0),
+    );
   // Closed: done, and said with its reserves (never « distribué » when
   // closed with reserves).
   if (facts.closure?.status === "closed")

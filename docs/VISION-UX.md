@@ -91,7 +91,9 @@ activation à droite du 18-19/10)*
 Dans un projet collectif, le Master, le Juridique et la Distribution se font titre par titre. Ouvrir l'un
 d'eux depuis le menu du projet montre **la liste** : une ligne par titre (« Projet » en tête du Juridique ;
 les sorties pour la Distribution, page « Sorties »), l'étape où il en est, « À vous » en bleu ; un clic
-ouvre son parcours, sur l'étape qui attend la personne. Un seul titre : on y va directement. Une entrée qui
+ouvre son parcours, sur l'étape qui attend la personne. Un seul titre : on y va directement (sauf la
+Distribution, dont la liste « Sorties » porte aussi le mode, les dates et les UPC : son entrée du menu y mène
+toujours, et s'allume dessus). Une entrée qui
 porte déjà le titre (Travail, une notification, la page d'un titre) mène droit à l'étape. **Le titre suit
 d'un module à l'autre** : depuis l'étape d'un titre, « Juridique » dans le menu ouvre le Juridique de ce
 titre (par son adresse, jamais une mémoire cachée), le fil d'Ariane le nomme, son chevron change de titre

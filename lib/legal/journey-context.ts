@@ -113,6 +113,15 @@ export const legalJourneyContext = trackedCache(
       },
       owner: ownerPerson,
       validatorName: direction,
+      pendingContracts: new Set(
+        tracking.state === "tracking"
+          ? tracking.addedKeys.flatMap((key) =>
+              key.startsWith("contract:")
+                ? [key.slice("contract:".length)]
+                : [],
+            )
+          : [],
+      ),
     };
     const board =
       tracking.state === "tracking"

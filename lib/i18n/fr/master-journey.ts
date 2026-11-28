@@ -54,6 +54,11 @@ export const masterJourney = {
     },
   },
   prereq: {
+    // A collective's title: the package leaves for every title at once.
+    othersSource: (titles: string, many: boolean) =>
+      many
+        ? `Sources de ${titles} confirmées`
+        : `Source de ${titles} confirmée`,
     plan: "Plan du projet lancé",
     planSource: (day: string | null) =>
       day ? `Plan du projet · fait ${day}` : "Plan du projet",
@@ -106,6 +111,10 @@ export const masterJourney = {
       stage === "mix" ? "Transmettre au mixeur" : "Transmettre au mastering",
     renewLink: "Renouveler le lien de l'ingénieur",
     takeCharge: "Prendre en charge le dossier",
+    // A title not in the package the engineer received (a collective's
+    // title added after the sending, audit du 28/11/2026).
+    addToPackage: (engineer: string, titles: string) =>
+      `Ajouter ${titles} au dossier de ${engineer}`,
     deposit: (label: string, n: number, title: string | null) =>
       `Déposer le ${label} V${n}${title ? ` de « ${title} »` : ""}`,
     validate: (label: string, n: number, title: string | null) =>

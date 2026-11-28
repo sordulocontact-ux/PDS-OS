@@ -349,6 +349,11 @@ export const legalContracts = {
     // artist. The titles concerned follow, when they are said.
     awaiting: "En attente de l'accord",
     awaitingOf: (names: string) => `En attente de l'accord · ${names}`,
+    // Who gives it and on what (audit du 28/11/2026: « … · Néons » said
+    // neither); the link after it opens « Participations et contrats ».
+    awaitingGuest: (name: string, titles: string | null) =>
+      `En attente de l'accord ${/^[aeiouyhéèêàâîïôûù]/i.test(name) ? "d'" : "de "}${name}${titles ? ` sur ${titles}` : ""}.`,
+    awaitingWhere: "Participations et contrats",
     generate: "Générer le contrat",
     generating: "Génération…",
     open: "Ouvrir le contrat",

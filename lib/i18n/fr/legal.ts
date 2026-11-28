@@ -525,6 +525,7 @@ export const legal = {
       signatureToCheck: "Signé des deux côtés : vérifier la signature",
       noContract: "Aucun contrat pour l'instant",
       titleRemoved: "Le titre n'est plus dans le projet",
+      titleAbandoned: "Le titre est abandonné",
       splitConfirmed: "Répartition confirmée par tous",
       splitDisputed: "Répartition contestée",
       splitWaiting: (confirmed: number, total: number) =>

@@ -64,7 +64,9 @@ export function releaseDistributionOf(
 ): ReleaseDistribution {
   if (!row) return { key: "to_prepare", number: null };
   if (row.closure_status === "closed") return { key: "closed", number: null };
-  if (row.closure_status === "pending") return { key: "closing", number: null };
+  // Closed with reserves still open (« closed_open »): not closed yet.
+  if (row.closure_status === "pending" || row.closure_status === "closed_open")
+    return { key: "closing", number: null };
   const n = row.version_number;
   if (n === null || row.superseded) return { key: "to_prepare", number: null };
   if (row.version_status === "pending") return { key: "pending", number: n };
@@ -106,7 +108,9 @@ export type CollectiveReleases = {
   launched: boolean;
   releases: CollectiveRelease[];
   // Live titles not in the Catalogue yet (no release until their master).
-  waiting: string[];
+  // Each opens its page, where « Rattacher au Catalogue » is (audit du
+  // 28/11/2026: named without a link).
+  waiting: Array<{ id: string; label: string }>;
   canEdit: boolean;
   // The project's due date: the compilation's date.
   dueDate: string | null;

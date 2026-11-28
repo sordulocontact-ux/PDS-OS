@@ -84,6 +84,9 @@ export type RoundStepView = {
   // The Brief is recorded, unchanged since; or why not.
   brief: "ready" | "dirty" | "never";
   briefChangedSinceSent: boolean;
+  // The titles of the round the engineer's package does not hold (added
+  // after the sending, audit du 28/11/2026): the package is sent again.
+  missingFromPackage: string[];
   // What prevents the package from leaving, worded, with the step where it
   // is lifted: the final vocals awaited (« Attendre »), then the view's own.
   // Read by the page and by PO (step_status), so both say the same thing.
@@ -294,6 +297,11 @@ export async function loadRoundStep(
     briefChangedSinceSent: Boolean(
       live && brief && brief.contentChangedAt > live.createdAt,
     ),
+    missingFromPackage: live?.packageTitles
+      ? view.titles
+          .filter((x) => !live.packageTitles?.includes(x.id))
+          .map((x) => x.title)
+      : [],
     notNeeded: mixVersions.flatMap((v) =>
       v.declared && (!masterId || v.masterId === masterId)
         ? [

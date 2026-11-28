@@ -197,9 +197,7 @@ export function ReleasesView({
           title={t.empty.none.title}
           body={t.empty.none.body}
         />
-        {data.waiting.length > 0 && (
-          <p className={caption}>{t.waiting(data.waiting.join(", "))}</p>
-        )}
+        <WaitingTitles projectId={projectId} titles={data.waiting} />
       </div>
     );
   const columns = 7;
@@ -255,10 +253,35 @@ export function ReleasesView({
           {rows(abandoned)}
         </DataTableBody>
       </DataTable>
-      {data.waiting.length > 0 && (
-        <p className={caption}>{t.waiting(data.waiting.join(", "))}</p>
-      )}
+      <WaitingTitles projectId={projectId} titles={data.waiting} />
     </div>
+  );
+}
+
+/** The live titles not in the Catalogue yet, each opening its page. */
+function WaitingTitles({
+  projectId,
+  titles,
+}: {
+  projectId: string;
+  titles: Array<{ id: string; label: string }>;
+}) {
+  if (titles.length === 0) return null;
+  return (
+    <p className={caption}>
+      {fr.collectiveReleases.waiting}{" "}
+      {titles.map((title, i) => (
+        <span key={title.id}>
+          {i > 0 && ", "}
+          <ViewLink
+            href={routes.projectTrack(projectId, title.id)}
+            className="underline underline-offset-2"
+          >
+            {title.label}
+          </ViewLink>
+        </span>
+      ))}
+    </p>
   );
 }
 

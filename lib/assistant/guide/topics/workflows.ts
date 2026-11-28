@@ -135,7 +135,7 @@ export const workflowsTopics: GuideTopic[] = [
       "Plateformes : le lien officiel de chaque plateforme, puis ce qu'une personne a constaté en l'ouvrant.",
       "Clôture : on ferme le suivi, normalement quand tout est déclaré et vérifié, sinon avec des réserves.",
       "Les écoutes et statistiques de streaming ne sont pas branchées.",
-      "Projet collectif : la Distribution se fait sortie par sortie. « Distribution » ouvre la seule sortie, sinon la page « Sorties » qui les liste ; depuis un titre du Master ou du Juridique, il ouvre la sortie de ce titre (ou la compilation avec laquelle il sort).",
+      "Projet collectif : la Distribution se fait sortie par sortie. « Distribution » ouvre « Sorties », la liste des sorties (mode, dates, UPC, dépôt de chacune) ; depuis un titre du Master ou du Juridique, il ouvre la sortie de ce titre (ou la compilation avec laquelle il sort).",
     ],
     faq: [
       {

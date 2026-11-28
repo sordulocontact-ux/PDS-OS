@@ -66,7 +66,10 @@ export async function TitleContractsStep({
     <LegalStepFrame projectId={projectId} stepKey={key} titre={titleId}>
       {waiting.length > 0 && (
         <ToneCallout tone="info">
-          {fr.legalContracts.agreements.awaitingOf(awaitingNames(waiting))}
+          {fr.legalContracts.agreements.awaitingGuest(
+            awaitingNames(waiting),
+            null,
+          )}
         </ToneCallout>
       )}
       <TitleContractNeedsForm

@@ -74,8 +74,8 @@ export const collectiveReleases = {
       ? "Aucun titre au Catalogue"
       : `${titles.length} titre${titles.length > 1 ? "s" : ""} : ${titles.join(", ")}`,
   gaps: (names: string) => `Sortie bloquée : contrat non signé de ${names}`,
-  waiting: (titles: string) =>
-    `Pas encore au Catalogue, leur sortie viendra avec leur master : ${titles}.`,
+  // Before the links to the titles still out of the Catalogue.
+  waiting: "Pas encore au Catalogue, leur sortie viendra avec leur master :",
   empty: {
     notLaunched: {
       title: "Pas encore de sortie",

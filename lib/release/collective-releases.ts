@@ -142,7 +142,7 @@ export async function loadCollectiveReleases(
     // Live titles a single would cover but not yet in the Catalogue.
     waiting: live
       .filter((t) => !t.master && !withRelease.has(t.id))
-      .map(labelOf),
+      .map((t) => ({ id: t.id, label: labelOf(t) })),
     // Who writes the titles writes the mode (the database decides again).
     canEdit:
       canEditProject(access, project) ||
@@ -152,7 +152,10 @@ export async function loadCollectiveReleases(
 }
 
 /** A title's deposit as « Titres et artistes » shows it (lot 15): its own
- * release's, else the compilation's it goes out with. */
+ * release's, else the compilation's it goes out with — only in the mode
+ * « compilation finale uniquement », for a title in the Catalogue (audit du
+ * 28/11/2026: « Avec la compilation » was said of a title without a
+ * master, or waiting for its own single). */
 export type TitleDeposit = {
   releaseId: string;
   // It goes out with the compilation (no release of its own).
@@ -164,7 +167,7 @@ export async function loadTitleDeposits(
   projectId: string,
 ): Promise<Record<string, TitleDeposit>> {
   const supabase = await createClient();
-  const [releases, titles, deposits] = await Promise.all([
+  const [releases, titles, deposits, project] = await Promise.all([
     supabase
       .from("releases")
       .select("id, project_title_id")
@@ -172,10 +175,17 @@ export async function loadTitleDeposits(
       .is("archived_at", null),
     supabase
       .from("project_titles")
-      .select("id, status")
+      .select("id, status, master_id")
       .eq("project_id", projectId),
     supabase.rpc("release_distribution_states", { p_project_id: projectId }),
+    supabase
+      .from("projects")
+      .select("collective_release_mode")
+      .eq("id", projectId)
+      .maybeSingle(),
   ]);
+  const compilationOnly =
+    project.data?.collective_release_mode === "compilation";
   const rows = releases.data ?? [];
   const stateOf = (id: string) =>
     releaseDistributionOf(
@@ -191,7 +201,12 @@ export async function loadTitleDeposits(
         withCompilation: false,
         distribution: stateOf(own.id),
       };
-    else if (compilation && title.status !== "abandoned")
+    else if (
+      compilation &&
+      compilationOnly &&
+      title.master_id &&
+      title.status !== "abandoned"
+    )
       out[title.id] = {
         releaseId: compilation.id,
         withCompilation: true,

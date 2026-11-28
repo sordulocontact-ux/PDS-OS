@@ -147,6 +147,9 @@ export const masterRound = {
     resent: "Dossier renvoyé",
     briefChanged: (name: string) =>
       `Le Brief a changé depuis l'envoi : ${first(name)} a toujours l'ancien dossier.`,
+    // A collective's title added after the sending (audit du 28/11/2026).
+    missing: (name: string, titles: string[]) =>
+      `${titles.map((x) => `« ${x} »`).join(", ")} ${titles.length > 1 ? "ne sont pas" : "n'est pas"} dans le dossier de ${first(name)} : renvoyez-le pour ${titles.length > 1 ? "les" : "l'"}ajouter.`,
   },
   mastering: {
     ready: "Le Mix final est validé. Le Mastering peut commencer.",

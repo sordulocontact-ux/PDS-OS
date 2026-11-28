@@ -48,6 +48,10 @@ export type SourceContext = {
   completeContacts: Set<string>;
   // Each title's active split sheet (Juridique 04).
   splitOf: Map<string, SplitState>;
+  // A collective's abandoned titles (their masters): their split, SACEM
+  // and the contract of who is only on them are no longer needed (lot 9,
+  // audit du 28/11/2026); computed, so a reactivation brings them back.
+  abandonedMasters: Set<string>;
 };
 
 export function sourceContext(input: {
@@ -57,6 +61,7 @@ export function sourceContext(input: {
   today: string;
   completeContacts: Set<string>;
   splitOf: Map<string, SplitState>;
+  abandonedMasters?: Set<string>;
 }): SourceContext {
   const credits = [...input.rows.creditsOf.values()].flat();
   const contactOf = new Map<string, string | null>();
@@ -66,6 +71,7 @@ export function sourceContext(input: {
   }
   return {
     ...input,
+    abandonedMasters: input.abandonedMasters ?? new Set(),
     titleIds: new Set(input.rows.titles.map((m) => m.id)),
     credits,
     contactOf,
@@ -115,6 +121,12 @@ export function itemSource(
     const person = legalDemarcheHref(projectId, "person", ref);
     if (!contactOf.has(ref))
       return { status: "obsolete", reason: t.noLongerCredited, href: null };
+    // Credited only on abandoned titles: no contract to sign for them.
+    const on = [...rows.creditsOf].flatMap(([masterId, list]) =>
+      list.some((c) => normalizeSearch(c.name) === ref) ? [masterId] : [],
+    );
+    if (on.length > 0 && on.every((m) => ctx.abandonedMasters.has(m)))
+      return { status: "obsolete", reason: t.titleAbandoned, href: null };
     const contactId = contactOf.get(ref);
     const theirs = rows.contracts.filter(
       (c) => contactId && c.partyIds.includes(contactId),
@@ -189,6 +201,8 @@ export function itemSource(
   if (kind === "splits") {
     if (!titleIds.has(ref))
       return { status: "obsolete", reason: t.titleRemoved, href: null };
+    if (ctx.abandonedMasters.has(ref))
+      return { status: "obsolete", reason: t.titleAbandoned, href: null };
     // Done once every person confirmed the active version (Juridique 04).
     const href = legalDemarcheHref(projectId, "split", ref);
     const split = ctx.splitOf.get(ref);
@@ -248,6 +262,8 @@ export function itemSource(
   // formality (SACEM declaration of a title)
   if (!titleIds.has(ref))
     return { status: "obsolete", reason: t.titleRemoved, href: null };
+  if (ctx.abandonedMasters.has(ref))
+    return { status: "obsolete", reason: t.titleAbandoned, href: null };
   const sacem = rows.filedOf.get(ref)?.get("sacem");
   if (sacem?.status === "confirmed")
     return {

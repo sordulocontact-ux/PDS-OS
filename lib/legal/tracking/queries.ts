@@ -32,6 +32,8 @@ export type LegalTracking =
       // SACEM declaration, a borrowing): their journey says « Ajouter au
       // plan » (lib/legal/title-groups.ts).
       addedMasters: string[];
+      // Their keys (« contract:<person> », « splits:<master> »…).
+      addedKeys: string[];
       // Who may answer for an action (delegation).
       people: Array<{ personId: string; name: string }>;
     };
@@ -80,6 +82,15 @@ async function readTracking(
     noAgreementContacts(project.id),
   ]);
   if (items.error) console.error("loadTracking items:", items.error.message);
+  // A collective's abandoned titles: their démarches are no longer needed.
+  const { data: abandoned } = await supabase
+    .from("project_titles")
+    .select("master_id")
+    .eq("project_id", project.id)
+    .eq("status", "abandoned");
+  const abandonedMasters = new Set(
+    (abandoned ?? []).flatMap((row) => (row.master_id ? [row.master_id] : [])),
+  );
   // The borrowings whose conditions wait for the direction.
   const clearanceIds = (clearances.data ?? []).map((c) => c.id);
   const { data: pendingTerms } = clearanceIds.length
@@ -125,12 +136,14 @@ async function readTracking(
     state: "tracking",
     added,
     addedMasters,
+    addedKeys: fresh.map((item) => item.key),
     people: [...names].map(([personId, name]) => ({ personId, name })),
     items: trackPlan({
       projectId: project.id,
       today: todayInParis(new Date()),
       completeContacts,
       splitOf,
+      abandonedMasters,
       rows,
       clearances: (clearances.data ?? []).map((c) => ({
         id: c.id,
