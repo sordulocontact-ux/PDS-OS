@@ -82,7 +82,11 @@ export function TitlesActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {canManage && (
+        // The page's main gesture: full size and filled (Sacha, 27/11/2026),
+        // its neighbours stay small.
         <DialogButton
+          variant="default"
+          size="default"
           label={t.add.button}
           title={t.add.title}
           description={t.add.description}
