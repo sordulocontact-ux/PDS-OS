@@ -259,14 +259,35 @@ export async function loadAgreements(
       (noAgreement.data ?? []).map((r) => [r.contact_id, r.reason]),
     ),
   });
+  // A collective's abandoned titles (lot 9): who is credited only on them
+  // has no contract to draft (audit du 28/11/2026), the démarche being
+  // obsolete; computed, so a reactivation brings it back.
+  const { data: abandoned } = await supabase
+    .from("project_titles")
+    .select("master_id")
+    .eq("project_id", project.id)
+    .eq("status", "abandoned");
+  const gone = new Set(
+    (abandoned ?? []).flatMap((t) => (t.master_id ? [t.master_id] : [])),
+  );
+  const onlyOnAbandoned = (contactId: string | null) => {
+    if (!contactId || gone.size === 0) return false;
+    const on = [...rows.creditsOf].flatMap(([masterId, credits]) =>
+      credits.some((c) => c.contactId === contactId) ? [masterId] : [],
+    );
+    return on.length > 0 && on.every((masterId) => gone.has(masterId));
+  };
   return {
     rows: agreed.map((row) => {
       const titles =
         row.contactId && !row.contract ? awaiting[row.contactId] : undefined;
+      const marked = onlyOnAbandoned(row.contactId)
+        ? { ...row, onlyAbandoned: true }
+        : row;
       return titles &&
         (row.state === "needs_info" || row.state === "ready_to_generate")
-        ? { ...row, awaitingAgreement: titles }
-        : row;
+        ? { ...marked, awaitingAgreement: titles }
+        : marked;
     }),
     hasValidatedTemplate: templates.some((t) => t.status === "validated"),
     approval: approval.data

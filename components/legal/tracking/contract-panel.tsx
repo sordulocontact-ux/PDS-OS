@@ -214,7 +214,9 @@ export function ContractPanel({
     case "needs_info":
       return toGenerate;
     case "ready_to_generate":
-      if (row.awaitingAgreement) return toGenerate;
+      // Only on abandoned titles: nothing to draft (the démarche is
+      // struck out, « Le titre est abandonné »).
+      if (row.awaitingAgreement || row.onlyAbandoned) return toGenerate;
       return (
         <>
           {toGenerate}

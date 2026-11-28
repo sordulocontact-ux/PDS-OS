@@ -150,11 +150,15 @@ export function agreementsToGenerate<
     state: string;
     needId: string | null;
     awaitingAgreement?: readonly string[] | null;
+    onlyAbandoned?: boolean;
   },
 >(rows: readonly R[]): R[] {
   return rows.filter(
     (row) =>
-      row.state === "ready_to_generate" && row.needId && !row.awaitingAgreement,
+      row.state === "ready_to_generate" &&
+      row.needId &&
+      !row.awaitingAgreement &&
+      !row.onlyAbandoned,
   );
 }
 

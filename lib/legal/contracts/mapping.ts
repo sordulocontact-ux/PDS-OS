@@ -54,6 +54,9 @@ export type AgreementRow = {
   key: string;
   name: string;
   contactId: string | null;
+  // Credited only on a collective's abandoned titles: no contract drafted
+  // for them (agreementsToGenerate).
+  onlyAbandoned?: boolean;
   creditRoles: FormPerson["creditRoles"];
   formRoles: FormRole[];
   needId: string | null;

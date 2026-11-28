@@ -3538,5 +3538,7 @@ Sacha : « fais tout ce qui est le plus logique pour toi ». Migrations `2026112
   mode compilation, pour un titre au Catalogue ; une clôture avec réserves ouvertes n'est plus « Clôturée » ni
   « Terminé » ; l'entrée « Distribution » d'un collectif ouvre « Sorties » et s'allume dessus (l'entrée « Sorties »
   est fondue dedans) ; les titres pas encore au Catalogue y mènent à leur page.
-- **Reste à trancher** : « Sortie : Non » (aucun ticket ne dit ce qu'il retire) ; la génération automatique du
-  contrat d'un invité qui n'a plus qu'un titre abandonné (la démarche est obsolète, la génération n'est pas filtrée).
+- **Reste à trancher** : « Sortie : Non » (aucun ticket ne dit ce qu'il retire).
+- **Même jour** : migrations `20261128090101` et `20261128090201` poussées sur la base de pré-prod (pas la prod) ;
+  le contrat d'une personne créditée seulement sur des titres abandonnés n'est plus généré, ni automatiquement ni
+  par le bouton (`AgreementRow.onlyAbandoned`).
