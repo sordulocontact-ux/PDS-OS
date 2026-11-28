@@ -1,11 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { routes } from "@/lib/auth/redirects";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import {
   confirmAllTitleContractNeeds,
@@ -68,6 +70,14 @@ export function TitleContractNeedsForm({
     tickedKinds(needs),
   );
   const { pending, run } = useLegalAction();
+  const router = useRouter();
+  // A first confirmation opens the title's next step (règle 7, Sacha
+  // 28/11/2026: one stayed on a finished page); a correction stays here.
+  const confirmed = () => {
+    setEditing(false);
+    if (!needs.confirmed)
+      router.push(`${routes.projectLegal(projectId)}?titre=${titleId}`);
+  };
 
   if (!canConfirm || (needs.confirmed && !editing))
     return (
@@ -121,7 +131,7 @@ export function TitleContractNeedsForm({
                     ticked.includes(kind),
                   ),
                 }),
-              () => setEditing(false),
+              confirmed,
             )
           }
         >
@@ -142,7 +152,7 @@ export function TitleContractNeedsForm({
                       ticked.includes(kind),
                     ),
                   }),
-                () => setEditing(false),
+                confirmed,
               )
             }
           >

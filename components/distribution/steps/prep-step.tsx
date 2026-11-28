@@ -36,7 +36,13 @@ export function PrepStep({
   failed: boolean;
   // « Juridique › Prêt pour la sortie », read from its own computation
   // (loadLegalReadiness): said, never recomputed here.
-  legal: { value: string; source: string; done: boolean; href: string };
+  // `href`: null for who may not open the Juridique (its pages answer 404).
+  legal: {
+    value: string;
+    source: string;
+    done: boolean;
+    href: string | null;
+  };
 }) {
   const blockers = readiness.blockers.length;
   return (
@@ -79,15 +85,17 @@ export function PrepStep({
                       : fr.distributionJourney.legalReady.states.open,
                   }}
                   side={
-                    <ViewLink
-                      href={legal.href}
-                      className={buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      })}
-                    >
-                      <ButtonRoll>{t.see}</ButtonRoll>
-                    </ViewLink>
+                    legal.href ? (
+                      <ViewLink
+                        href={legal.href}
+                        className={buttonVariants({
+                          variant: "outline",
+                          size: "sm",
+                        })}
+                      >
+                        <ButtonRoll>{t.see}</ButtonRoll>
+                      </ViewLink>
+                    ) : undefined
                   }
                 />
               )}

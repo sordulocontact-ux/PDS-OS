@@ -28,6 +28,10 @@ export type LegalTracking =
       // Actions the dossier asks for now that the plan does not hold
       // (a person or a title added since the launch): « Ajouter au plan ».
       added: number;
+      // The titles (masters) those added actions are about (a split, a
+      // SACEM declaration, a borrowing): their journey says « Ajouter au
+      // plan » (lib/legal/title-groups.ts).
+      addedMasters: string[];
       // Who may answer for an action (delegation).
       people: Array<{ personId: string; name: string }>;
     };
@@ -93,7 +97,7 @@ async function readTracking(
     ...(items.data ?? []).map((row) => row.item_key),
     ...plan.dismissed_keys,
   ]);
-  const added = proposePlan({
+  const fresh = proposePlan({
     rows,
     completeContacts,
     noAgreement,
@@ -105,7 +109,11 @@ async function readTracking(
       author: c.author,
       status: c.status,
     })),
-  }).filter((item) => !planKeys.has(item.key)).length;
+  }).filter((item) => !planKeys.has(item.key));
+  const added = fresh.length;
+  const addedMasters = [
+    ...new Set(fresh.flatMap((item) => (item.masterId ? [item.masterId] : []))),
+  ];
   const names = new Map(
     (people.data ?? []).map((p) => [
       p.person_id,
@@ -116,6 +124,7 @@ async function readTracking(
   return {
     state: "tracking",
     added,
+    addedMasters,
     people: [...names].map(([personId, name]) => ({ personId, name })),
     items: trackPlan({
       projectId: project.id,

@@ -261,7 +261,7 @@ export async function loadRoundStep(
         ? [
             {
               text: fr.masterRound.blockers.vocals,
-              href: masterStepHref(projectId, "source"),
+              href: `${masterStepHref(projectId, "source")}${masterId ? `?titre=${masterId}` : ""}`,
             },
           ]
         : []),

@@ -276,8 +276,10 @@ async function readStepView(
     diagnosis.some((row) => row.state === "done");
   const r = fr.masterRound.blockers;
   const rec = recorded.data;
-  const at = (step: "source" | "brief" | "mix") =>
-    masterStepHref(project.id, step);
+  // A title's step keeps it in the address (a collective, lot 8): a
+  // blocker opens that title, not the first one.
+  const at = (step: "source" | "brief" | "mix", masterId?: string) =>
+    `${masterStepHref(project.id, step)}${masterId ? `?titre=${masterId}` : ""}`;
   const blockers: Blocker[] = [
     ...(!rec?.recorded_at
       ? [{ text: r.briefNotRecorded, href: at("brief") }]
@@ -300,8 +302,8 @@ async function readStepView(
       .filter((title) => !title.source)
       .map((title) =>
         role === "mix"
-          ? { text: t.source(title.title), href: at("source") }
-          : { text: t.mixFinal(title.title), href: at("mix") },
+          ? { text: t.source(title.title), href: at("source", title.id) }
+          : { text: t.mixFinal(title.title), href: at("mix", title.id) },
       ),
   ];
 

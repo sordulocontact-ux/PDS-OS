@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { addLegalPlanItems } from "@/lib/legal/plan/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -193,7 +194,10 @@ export async function startTitleWork(input: {
   return { ok: true, masterId: data };
 }
 
-/** « Rattacher un titre du Catalogue » to a title that has none yet. */
+/** « Rattacher un titre du Catalogue » to a title that has none yet. Its
+ * split, SACEM and borrowings join a plan launched before it, given to the
+ * project's owner (Sacha, 28/11/2026: its Juridique read « Terminé » with
+ * nothing in it); the Juridique's gesture, so only for who holds it. */
 export async function attachCatalogTitle(input: {
   projectId: string;
   titleId: string;
@@ -215,6 +219,9 @@ export async function attachCatalogTitle(input: {
   });
   if (error)
     return { ok: false, error: catalogError("attachCatalogTitle", error) };
+  // Attached either way: the plan can still be completed from its page.
+  const added = await addLegalPlanItems(projectId.data, masterId.data);
+  if (!added.ok) console.error("attachCatalogTitle plan:", added.error);
   refresh(projectId.data);
   revalidatePath(routes.master(masterId.data), "layout");
   return { ok: true };

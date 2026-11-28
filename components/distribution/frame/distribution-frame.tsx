@@ -2,9 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { DistributionReleaseProvider } from "@/components/distribution/frame/release-scope";
-import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { requireApproved } from "@/lib/auth/dal";
@@ -18,7 +16,6 @@ import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { DistributionRolesButton } from "@/components/distribution/frame/distribution-roles";
-import { defaultCollectiveRelease } from "@/lib/distribution/default-release";
 import { distributionStatus } from "@/lib/distribution/journey";
 import {
   distributionContext,
@@ -95,16 +92,12 @@ export async function DistributionFrame({
   children: (ctx: DistributionContext) => React.ReactNode;
 }) {
   // A collective's Distribution is a release's (lot 15): without one named,
-  // its default release, the others chosen in the trail (Maël 26/11/2026);
-  // « Sorties » only when it has none. A release not of the project is not
-  // found.
+  // its entry decides (its only release, else « Sorties »: Sacha,
+  // 28/11/2026, never one chosen by the code). A release not of the project
+  // is not found.
   const read = await getProject(projectId);
-  const releaseId =
-    read?.collective && !named
-      ? await defaultCollectiveRelease(projectId)
-      : named;
-  if (read?.collective && !releaseId)
-    redirect(routes.projectReleases(projectId));
+  if (read?.collective && !named) redirect(routes.projectRelease(projectId));
+  const releaseId = named;
   const ctx = await distributionContext(
     projectId,
     read?.collective ? releaseId : null,
@@ -139,14 +132,6 @@ export async function DistributionFrame({
   }));
   const actions = (
     <>
-      {ctx.release && (
-        <ViewLink
-          href={routes.projectReleases(projectId)}
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-        >
-          <ButtonRoll>{t.releases}</ButtonRoll>
-        </ViewLink>
-      )}
       <DistributionRolesButton ctx={ctx} />
     </>
   );

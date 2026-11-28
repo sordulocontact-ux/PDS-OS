@@ -3493,3 +3493,28 @@ et que je vais sur Juridique, je reste sur ce titre ». Sans migration.
   « Non » le dépôt de l'audio sur place (plus de sortie vers la fiche du Catalogue). Plus de pastille du titre avant
   le h1 des étapes d'un titre au Juridique : le fil d'Ariane le nomme. « Contrats du titre » reste en cours à côté :
   la confirmation des contrats nécessaires (§ 3.4 d'Ibé) ne dépend pas du master.
+
+## Audit des parcours d'un collectif : premier lot de corrections (28/11/2026, branche `pre-prod`)
+
+Sacha : « vérifie tous les pages du parcours … s'il y a des trous comme ceux qu'on vient de voir, des problèmes de
+design et fluidité ». Trois revues du code (Master, Juridique, Distribution et Titres) : 34 trous. Corrigés, sans
+migration :
+
+- **Juridique** : après « Rattacher au Catalogue », plus de « Terminé » trompeur (étapes « Créditer les auteurs » /
+  « Ajouter au plan », actions du titre ajoutées au plan au rattachement, ouverture de la suite) ; étapes propres d'un
+  titre « À vous » pour le responsable ; suite ouverte après la confirmation des contrats et après « Ajouter au plan »
+  (toast) ; étapes obsolètes comptées comme finies partout ; liste avec les invités et « (abandonné) » ; Fiche et
+  Contrat de « Titres » ouvrent la démarche dans le titre.
+- **Master** : les liens gardent le titre (points bloquants, voix, Distribution) ; titre inconnu → entrée du Master ;
+  Mixage d'un titre ajouté après le Brief fermé tant que sa source n'est pas confirmée ; factures et messages de
+  l'ingénieur plus répétés sur chaque titre.
+- **Distribution** : jamais la sortie d'un autre titre (titre sans sortie → « Sorties ») ; plus de sortie choisie par
+  le code dans les étapes ; sortie archivée sans « À vous » ; bouton « Sorties » retiré de l'en-tête ; « Voir » sans
+  lien et en contour.
+
+**Reste, à trancher ou plus lourd** (détail dans le bilan de la session) : dossier du mixeur figé à l'envoi (titre
+ajouté après, jamais mixable), Brief ouvert ou fermé selon le titre, envoi bloqué par la source d'un autre titre,
+bandeau après un geste sans le titre, sélecteur du Master « fait » trop tôt ; titre abandonné qui garde ses démarches
+et son contrat, invité ajouté après le lancement « Terminé » sans contrat, « En attente de l'accord » sans qui ni où ;
+master provisoire jamais nommé (migration), « Avec la compilation » pour un titre qui n'y est pas, clôture avec
+réserves en trois états, « Sortie : Non » sans effet (Ibé), « Distribution » qui allume « Sorties ».

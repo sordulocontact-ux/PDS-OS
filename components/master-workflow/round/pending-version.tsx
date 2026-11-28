@@ -67,7 +67,8 @@ export function PendingVersion({
                 ? { text: t.decision.unblock.newMix(engineer), href: null }
                 : {
                     text: t.decision.unblock.vocals,
-                    href: masterStepHref(round.view.projectId, "source"),
+                    // The title of this version (a collective, lot 8).
+                    href: `${masterStepHref(round.view.projectId, "source")}?titre=${version.masterId}`,
                   },
             ]}
             then={t.decision.unblock.then(engineer)}

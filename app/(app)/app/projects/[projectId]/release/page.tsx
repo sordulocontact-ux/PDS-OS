@@ -15,8 +15,12 @@ async function collectiveRelease(
   query: Record<string, string | string[] | undefined>,
 ): Promise<string | null> {
   const title = await carriedTitle(projectId, query);
-  const deposit = title ? (await loadTitleDeposits(projectId))[title.id] : null;
-  return deposit?.releaseId ?? (await onlyCollectiveRelease(projectId));
+  // A title named: its release (or the compilation it goes out with), else
+  // « Sorties », never another title's release.
+  if (title)
+    return (await loadTitleDeposits(projectId))[title.id]?.releaseId ?? null;
+  if (typeof query.titre === "string") return null;
+  return onlyCollectiveRelease(projectId);
 }
 
 // /release opens the Distribution's step that awaits the viewer, else the

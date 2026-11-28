@@ -625,6 +625,7 @@ export const legal = {
           : `${count} actions sont apparues depuis le lancement (des personnes ou des titres ajoutés).`,
       action: "Ajouter au plan",
       adding: "Ajout…",
+      done: "Actions ajoutées au plan",
       failed: "Les actions n'ont pas pu être ajoutées. Réessayez.",
     },
     notLaunched: {

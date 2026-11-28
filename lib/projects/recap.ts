@@ -47,6 +47,7 @@ import {
   titleGuestNames,
 } from "@/lib/projects/title-rules";
 import { createClient } from "@/lib/supabase/server";
+import { withTitre } from "@/lib/legal/title-groups";
 import { legalDemarcheHref } from "@/lib/ui/legal-steps";
 import { normalizeSearch } from "@/lib/utils/search";
 
@@ -348,14 +349,17 @@ export async function loadTitleRecap(
       (FORM_ROLES as readonly string[]).includes(c.role) ? [c.contact_id] : [],
     ),
   );
+  // The person's démarche in this title's journey (`?titre=`): it opens in
+  // the title's scope, and the navigation keeps the title from there.
   const demarcheOf = (
     key: string,
     who: { artistId: string | null; contactId: string | null },
+    titleId: string,
   ) =>
     creditedKeys.has(key) ||
     (who.artistId !== null && featured.has(who.artistId)) ||
     (who.contactId !== null && added.has(who.contactId))
-      ? legalDemarcheHref(project.id, "person", key)
+      ? withTitre(legalDemarcheHref(project.id, "person", key), titleId)
       : null;
   // The contact a name has on the project (the first credit that links
   // one), as the Juridique's person (formPeople).
@@ -417,6 +421,7 @@ export async function loadTitleRecap(
                           creditName: person.name,
                         }),
                         { artistId: null, contactId: person.contactId },
+                        title.id,
                       ),
                     )
                   : null,
@@ -433,10 +438,11 @@ export async function loadTitleRecap(
             contactId: person,
             artist: p.artist,
           });
-          const demarche = demarcheOf(key, {
-            artistId: p.artist.id,
-            contactId: person,
-          });
+          const demarche = demarcheOf(
+            key,
+            { artistId: p.artist.id, contactId: person },
+            title.id,
+          );
           // The deal the board reads is the one the state speaks of.
           const deal = p.deal && state?.dealId === p.deal.id ? p.deal : null;
           let accord: RecapAccord | null = null;

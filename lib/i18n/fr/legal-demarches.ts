@@ -61,6 +61,18 @@ export const legalDemarches = {
     onlyOwner: (name: string) =>
       `${name}, responsable du projet, peut rattacher ce titre.`,
   },
+  // A title of a collective in the Catalogue without its authors: no
+  // split nor SACEM can be proposed (Sacha, 28/11/2026: its Juridique read
+  // « Terminé »).
+  titleCredits: {
+    title: "Créditer les auteurs",
+    summary: "Compositeur, auteur ou arrangeur au Catalogue",
+  },
+  // Its split and SACEM declaration, not in the plan launched before it.
+  titlePlan: {
+    title: "Ajouter au plan",
+    summary: "Sa répartition et sa déclaration SACEM",
+  },
   // The contracts a collective's title needs (Ibé, 18/11/2026, § 3.4): one
   // step in the title's group, a reminder in the Plan d'action.
   titleContracts: {

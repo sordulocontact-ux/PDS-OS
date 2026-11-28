@@ -26,11 +26,13 @@ import {
   awaitingNames,
   type TitleContractNeeds,
 } from "@/lib/legal/title-contracts-rules";
+import { routes } from "@/lib/auth/redirects";
 import { titleHue, type Hue } from "@/lib/ui/category-hues";
-import type { JourneyStep } from "@/lib/ui/journey";
+import type { JourneyPerson, JourneyStep } from "@/lib/ui/journey";
 import {
   legalAttachHref,
   legalAttachKey,
+  legalStepHref,
   legalTitleContractsHref,
   legalTitleContractsKey,
   type LegalDemarcheKind,
@@ -174,16 +176,17 @@ export function scopeOfStep(
   );
 }
 
-/** Where a scope opens: the step that waits for the viewer, else the first
- * not done, else its first. */
+/** Where a scope opens: among its steps still open, the one that waits for
+ * the viewer, else the first; all finished, its first. */
 export function scopeEntry(scope: LegalScope): JourneyStep | null {
-  return (
-    scope.steps.find((s) => s.actor?.viewer) ??
-    scope.steps.find((s) => s.status !== "done") ??
-    scope.steps[0] ??
-    null
-  );
+  const open = scope.steps.filter((s) => !stepFinished(s));
+  return open.find((s) => s.actor?.viewer) ?? open[0] ?? scope.steps[0] ?? null;
 }
+
+/** A step that asks nothing more: done, or struck out (obsolete). The
+ * scopes' list, the trail's switcher and their entry read it alike. */
+export const stepFinished = (step: Pick<JourneyStep, "status">) =>
+  step.status === "done" || step.status === "obsolete";
 
 /** A step inside its title's group: the title is not said again, neither
  * in its title (« Répartition de l'édition », not « … « Néons » ») nor in
@@ -206,7 +209,11 @@ function inTitle(kind: LegalDemarcheKind, step: JourneyStep): JourneyStep {
 /** « Rattacher au Catalogue »: a step of the spine only (Travail
  * and the project's journey never list it), open while the title has no
  * master. */
-function attachStep(projectId: string, title: LegalTitle): JourneyStep {
+function attachStep(
+  projectId: string,
+  title: LegalTitle,
+  owner: JourneyPerson | null,
+): JourneyStep {
   return {
     key: legalAttachKey(title.id),
     href: legalAttachHref(projectId, title.id),
@@ -217,7 +224,7 @@ function attachStep(projectId: string, title: LegalTitle): JourneyStep {
     validator: null,
     prereq: [],
     next: [],
-    actor: null,
+    actor: owner ? { ...owner, todo: t.attach.title } : null,
     summary: null,
   };
 }
@@ -232,6 +239,7 @@ export function titleContractsStep(
   title: LegalTitle,
   needs: TitleContractNeeds,
   awaiting: readonly string[],
+  owner: JourneyPerson | null = null,
 ): JourneyStep {
   const tc = t.titleContracts;
   return {
@@ -244,7 +252,7 @@ export function titleContractsStep(
     validator: null,
     prereq: [],
     next: [],
-    actor: null,
+    actor: !needs.confirmed && owner ? { ...owner, todo: tc.confirm } : null,
     summary:
       awaiting.length > 0
         ? fr.legalContracts.agreements.awaitingOf(awaitingNames(awaiting))
@@ -254,6 +262,58 @@ export function titleContractsStep(
             : tc.none
           : null,
   };
+}
+
+/**
+ * What a title in the Catalogue still needs before its démarches exist
+ * (Sacha, 28/11/2026: once attached, its Juridique read « Terminé »): its
+ * authors credited in the Catalogue (no split nor SACEM is proposed without
+ * a composer, an author or an arranger), else, when the plan was launched
+ * before it, its split and SACEM « Ajouter au plan » (the Plan d'action's
+ * gesture). Steps of the spine only, current while they last, gone once
+ * the démarches they bring are in the journey.
+ */
+export function titlePendingSteps(
+  projectId: string,
+  title: LegalTitle,
+  {
+    credited,
+    added,
+    owner,
+  }: { credited: boolean; added: boolean; owner: JourneyPerson | null },
+): JourneyStep[] {
+  if (!title.masterId || title.abandoned) return [];
+  const base = {
+    why: "",
+    status: "current" as const,
+    owner: null,
+    validator: null,
+    prereq: [],
+    next: [],
+  };
+  const actor = (todo: string) => (owner ? { ...owner, todo } : null);
+  if (!credited)
+    return [
+      {
+        ...base,
+        key: `credits:${title.id}`,
+        href: routes.masterCredits(title.masterId),
+        title: t.titleCredits.title,
+        summary: t.titleCredits.summary,
+        actor: actor(t.titleCredits.title),
+      },
+    ];
+  if (!added) return [];
+  return [
+    {
+      ...base,
+      key: `addplan:${title.id}`,
+      href: legalStepHref(projectId, "plan"),
+      title: t.titlePlan.title,
+      summary: t.titlePlan.summary,
+      actor: actor(t.titlePlan.title),
+    },
+  ];
 }
 
 /**
@@ -272,6 +332,9 @@ export function layoutByTitle(input: {
   anchors: DemarcheAnchor[];
   titles: LegalTitle[];
   extra?: Record<string, JourneyStep[]>;
+  // The project's owner, who acts on a title's own steps (attach,
+  // contracts, authors, plan): « À vous » for them, else whom we wait for.
+  owner?: JourneyPerson | null;
 }): TitleLayout {
   const anchorOf = new Map(input.anchors.map((a) => [a.key, a]));
   const project: JourneyStep[] = [];
@@ -296,7 +359,7 @@ export function layoutByTitle(input: {
     const own = [
       ...(title.masterId || title.abandoned
         ? []
-        : [attachStep(input.projectId, title)]),
+        : [attachStep(input.projectId, title, input.owner ?? null)]),
       ...(input.extra?.[title.id] ?? []),
       ...(byTitle.get(title.id) ?? []),
     ];

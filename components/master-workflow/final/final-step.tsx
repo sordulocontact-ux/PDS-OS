@@ -151,7 +151,8 @@ function TitleFinal({
               source={t.unlocksSource}
               side={
                 <Link
-                  href={routes.projectRelease(view.projectId)}
+                  // The title's release (its own, or the compilation).
+                  href={`${routes.projectRelease(view.projectId)}?titre=${title.id}`}
                   className={buttonVariants({ variant: "outline", size: "sm" })}
                 >
                   <ButtonRoll>{t.toDistribution}</ButtonRoll>

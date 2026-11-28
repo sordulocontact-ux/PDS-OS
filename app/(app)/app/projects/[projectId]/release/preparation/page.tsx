@@ -55,7 +55,9 @@ export default async function DistributionPreparationPage({
                   : t.legalReady.restricted,
               source: ctx.legalReady.source ?? "",
               done: ctx.legalReady.done,
-              href: routes.projectLegalStep(projectId, LEGAL_READY_KEY),
+              href: ctx.legal.allowed
+                ? routes.projectLegalStep(projectId, LEGAL_READY_KEY)
+                : null,
             }}
           />
         </DistributionStep>

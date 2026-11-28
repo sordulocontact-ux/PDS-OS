@@ -19,6 +19,7 @@ import { legalJourneyContext } from "@/lib/legal/journey-context";
 import {
   scopeEntry,
   scopeOfStep,
+  stepFinished,
   type LegalScope,
   type TitleLayout,
 } from "@/lib/legal/title-groups";
@@ -173,7 +174,7 @@ function scopeCrumb(
           label: s.label,
           href: entry.href,
           current: s.key === scope.key,
-          done: s.steps.every((step) => step.status === "done"),
+          done: s.steps.every(stepFinished),
           ...(mine > 0 && { mine }),
         },
       ];

@@ -318,7 +318,11 @@ async function readContext(projectId: string, releaseId: string | null) {
     validator,
     proposedValidator: proposed,
     members,
-    steps,
+    // A release archived or its title abandoned is read only (lot 15): no
+    // one is « À vous » on it, its actions being hidden.
+    steps: release?.readOnly
+      ? steps.map((s) => ({ ...s, actor: null }))
+      : steps,
   };
 }
 

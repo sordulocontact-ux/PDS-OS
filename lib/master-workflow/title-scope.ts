@@ -1,5 +1,7 @@
 import "server-only";
 
+import { redirect } from "next/navigation";
+
 import { routes } from "@/lib/auth/redirects";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import type { JourneyFileRequest } from "@/lib/master-workflow/journey-facts";
@@ -133,6 +135,11 @@ export const loadMasterTitleScope = trackedCache(
       ];
     });
     if (choices.length === 0) return null;
+    // A title named that is not in the Master (abandoned since, or named by
+    // its project title): its entry resolves it or lists the titles, never
+    // another title shown in its place.
+    if (titre && !choices.some((choice) => choice.masterId === titre))
+      redirect(`${routes.projectMaster(projectId)}?titre=${titre}`);
     const round = step === "mix" || step === "mastering";
     const active =
       choices.find((choice) => choice.masterId === titre) ??

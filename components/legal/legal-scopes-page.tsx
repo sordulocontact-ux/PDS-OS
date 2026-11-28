@@ -6,6 +6,7 @@ import {
 import { shell } from "@/lib/i18n/fr/shell";
 import {
   scopeEntry,
+  stepFinished,
   type LegalScope,
   type TitleLayout,
 } from "@/lib/legal/title-groups";
@@ -34,7 +35,9 @@ export function LegalScopesPage({
     return [
       {
         key: scope.key,
-        label: scope.label,
+        // A title with its guests (« Néons · Jay »), « (abandonné) » after an
+        // abandoned one: its group's heading.
+        label: scope.heading,
         href: entry.href,
         card: cardOf(scope, entry.href, entry.title),
       },
@@ -59,10 +62,8 @@ function cardOf(
   href: string,
   stepTitle: string,
 ): WorkflowCard {
-  const finished = (status: string) =>
-    status === "done" || status === "obsolete";
-  const done = scope.steps.filter((s) => finished(s.status)).length;
-  const mine = scope.steps.find((s) => s.actor?.viewer && !finished(s.status));
+  const done = scope.steps.filter(stepFinished).length;
+  const mine = scope.steps.find((s) => s.actor?.viewer && !stepFinished(s));
   return {
     workflow: "legal",
     restricted: false,

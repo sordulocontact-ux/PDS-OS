@@ -498,6 +498,9 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       // « Source confirmée », not the Source step done: anticipating with a
       // working version opens the Brief.
       (key !== "brief" || sourceConfirmed || nothingToDo) &&
+      // A collective's title added after the Brief: its Mixage waits for
+      // its own source (the Brief, shared, is already done).
+      (key !== "mix" || sourceConfirmed || nothingToDo) &&
       // Waiting for the final vocals keeps the Mixage closed.
       (key !== "mix" || !waitForVocals);
     const actor = actorOf(actionsOf[key], key);

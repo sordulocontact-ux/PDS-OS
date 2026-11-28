@@ -11,7 +11,7 @@ const fr = { legal };
 
 // Roles that make someone a creator of the work (the SACEM bulletin lists
 // authors, composers and arrangers).
-const CREATOR_ROLES: readonly ContributorRole[] = [
+export const CREATOR_ROLES: readonly ContributorRole[] = [
   "composer",
   "lyricist",
   "arranger",

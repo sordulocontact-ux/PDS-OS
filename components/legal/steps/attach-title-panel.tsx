@@ -9,6 +9,7 @@ import { AttachCatalogTitleForm } from "@/components/projects/titles/title-forms
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { toast } from "@/components/ui/toast";
+import { routes } from "@/lib/auth/redirects";
 import { AUDIO_ACCEPT, AUDIO_FORMAT_LIST } from "@/lib/catalog/file-rules";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { startTitleWork } from "@/lib/projects/title-actions";
@@ -25,8 +26,10 @@ type Way = "catalog" | "audio";
  * title of the Catalogue chosen as it is. « Non, pas encore »: its audio
  * dropped here; the title is then created in the Catalogue under a
  * provisional name (startTitleWork) and the audio asks its state in the
- * same dialog as on the title's page (AddFilesDialog). Either way the page
- * is read again and opens the title's next step.
+ * same dialog as on the title's page (AddFilesDialog). Either way the
+ * Juridique then opens on the title's next step (its entry with `?titre=`):
+ * the attach step leaves its journey, which goes on with what the title
+ * needs now (its authors, « Ajouter au plan », its démarches).
  */
 export function AttachTitlePanel({
   projectId,
@@ -50,9 +53,9 @@ export function AttachTitlePanel({
     files: File[];
   } | null>(null);
   const [pending, startTransition] = useTransition();
-  const refresh = () => {
+  const next = () => {
     setUpload(null);
-    router.refresh();
+    router.push(`${routes.projectLegal(projectId)}?titre=${titleId}`);
   };
   return (
     <div className="flex flex-col gap-5">
@@ -76,7 +79,7 @@ export function AttachTitlePanel({
           inline
           onDone={() => {
             setRound((n) => n + 1);
-            router.refresh();
+            next();
           }}
         />
       )}
@@ -105,8 +108,8 @@ export function AttachTitlePanel({
         files={upload?.files ?? null}
         mode={{ kind: "audio", defaultState: "demo" }}
         // The title is in the Catalogue now, its audio or not.
-        onClose={refresh}
-        onAdded={refresh}
+        onClose={next}
+        onAdded={next}
       />
     </div>
   );

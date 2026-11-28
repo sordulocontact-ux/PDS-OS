@@ -5702,7 +5702,10 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   - **M10** : `defaultCollectiveRelease` (`lib/distribution/default-release.ts`) : sans `?sortie=`, une **étape** de
     la Distribution d'un collectif ouvre sa seule sortie, sinon celle où une étape attend le lecteur, sinon une non
     finie ; le fil propose les autres sorties sur la même étape. **L'entrée** `/release` (28/11/2026) : la sortie du
-    titre nommé (`?titre=`), sinon la seule sortie (`onlyCollectiveRelease`), sinon « Sorties ».
+    titre nommé (`?titre=`, « Sorties » s'il n'en a pas, jamais celle d'un autre titre), sinon la seule sortie
+    (`onlyCollectiveRelease`), sinon « Sorties ». Depuis l'audit du 28/11, une **étape** sans `?sortie=` renvoie aussi à
+    cette entrée (`DistributionFrame`, `/release/tracking`) : `defaultCollectiveRelease` est supprimé. Une sortie en
+    lecture seule (archivée, titre abandonné) n'a plus d'acteur. Plus de bouton « Sorties » dans l'en-tête.
   - **M12** : `distributionJourneys` rend un parcours par sortie active d'un collectif (`part` `release:<id>`,
     `RELEASE_PART`) : `countMine` compte ses « À vous » dans le menu ; `workflowCards` en fait une carte, celle de la
     sortie de l'action en cours, sinon la première non finie (`scope` = nom de la sortie).
@@ -5805,6 +5808,17 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   `carryHref` ajoutent `?titre=` / `?sortie=` aux entrées **des deux autres** modules du menu (bureau et puces du
   téléphone) ; le module où l'on est garde son entrée (sa liste). Chaque entrée résout le titre par
   `carriedTitle` (`lib/projects/title-carry.ts`, serveur) : un titre abandonné ou la compilation donnent la liste.
+- **Audit des parcours d'un collectif** (28/11/2026, trois revues Master, Juridique, Distribution/Titres) : étapes
+  propres d'un titre au Juridique avec un acteur (le responsable : « Rattacher au Catalogue », « Contrats du titre »,
+  « Créditer les auteurs » s'il manque compositeur/auteur/arrangeur, « Ajouter au plan » si sa répartition ou sa SACEM
+  manque au plan lancé : `titlePendingSteps`, `tracking.addedMasters`) ; rattacher un titre ajoute ses actions au plan
+  (`addLegalPlanItems(projectId, masterId)`) puis ouvre la suite du titre (`/legal?titre=`), comme la première
+  confirmation des contrats du titre et « Ajouter au plan » ; `stepFinished` (fait ou obsolète) partagé par la liste,
+  le sélecteur et `scopeEntry` ; liste du Juridique sur l'intitulé du groupe (invités, « (abandonné) ») ; pastilles
+  Fiche et Contrat de « Titres » avec `?titre=`. Master : liens des points bloquants, des voix et « Vers la
+  Distribution » avec le titre ; une étape au titre inconnu renvoie à `/master?titre=` ; le Mixage d'un titre attend
+  sa propre source ; messages de l'ingénieur et factures hors du parcours d'un titre (dits une fois, par le projet).
+  « Voir » (Prêt pour la sortie) sans lien pour qui n'a pas `manage_legal`.
 - **Source** (`source-step.ts`, `components/master-workflow/source/`, migration `20261019080101`) :
   versions candidates = maquettes et mises à plat, **la plus récente détectée** (proto, ticket § 1) ; un
   mix trouvé au Catalogue se propose comme mix final avec motif **obligatoire** (`declare_mix_final`

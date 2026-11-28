@@ -112,14 +112,19 @@ export async function launchLegalPlan(
 /**
  * « Ajouter au plan »: the actions the dossier asks for now that the plan
  * does not hold (a person or a title added since the launch), each with its
- * task, given to the project's owner, on the project's date.
+ * task, given to the project's owner, on the project's date. `masterId`:
+ * only those of this title (its split, SACEM, borrowings), as attaching a
+ * collective's title to the Catalogue does (Sacha, 28/11/2026). Nothing to
+ * do before the launch: the plan proposes everything then.
  */
 export async function addLegalPlanItems(
   projectId: string,
+  masterId?: string,
 ): Promise<LaunchResult> {
   const id = catalogIdSchema.safeParse(projectId);
+  const only = catalogIdSchema.optional().safeParse(masterId);
   const access = await requireApproved();
-  if (!id.success || !can(access, "manage_legal"))
+  if (!id.success || !only.success || !can(access, "manage_legal"))
     return { ok: false, error: fr.auth.errors.forbidden };
   const project = await getProject(id.data);
   if (!project) return { ok: false, error: fr.auth.errors.forbidden };
@@ -133,7 +138,7 @@ export async function addLegalPlanItems(
       .eq("project_id", project.id),
     supabase
       .from("legal_plans")
-      .select("dismissed_keys")
+      .select("dismissed_keys, launched_at")
       .eq("project_id", project.id)
       .maybeSingle(),
     access.organizationId
@@ -147,7 +152,11 @@ export async function addLegalPlanItems(
     ...(existing.data ?? []).map((row) => row.item_key),
     ...(plan.data?.dismissed_keys ?? []),
   ]);
-  const fresh = proposal.filter((item) => !known.has(item.key));
+  if (!plan.data?.launched_at) return { ok: true };
+  const fresh = proposal.filter(
+    (item) =>
+      !known.has(item.key) && (!only.data || item.masterId === only.data),
+  );
   if (fresh.length === 0) return { ok: true };
   const owner = (people.data ?? []).some(
     (p) => p.person_id === project.ownerPersonId,

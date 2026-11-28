@@ -1,12 +1,16 @@
 import "server-only";
 
+import { can } from "@/lib/auth/access";
 import type { Demarche } from "@/lib/legal/demarches/build";
+import { readInventoryRows } from "@/lib/legal/inventory-rows";
+import { CREATOR_ROLES } from "@/lib/legal/plan/proposal-titles";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import {
   layoutByTitle,
   legalTitlesOf,
   titleContractsStep,
+  titlePendingSteps,
   type DemarcheAnchor,
   type TitleLayout,
 } from "@/lib/legal/title-groups";
@@ -34,12 +38,36 @@ export const legalTitleLayout = trackedCache(
   async (projectId: string): Promise<TitleLayout | null> => {
     const ctx = await legalJourneyContext(projectId);
     if (!ctx.project.collective) return null;
-    const [titles, clearances, needs, awaiting] = await Promise.all([
+    const [titles, clearances, needs, awaiting, rows] = await Promise.all([
       legalProjectTitles(projectId),
       legalClearanceRows(projectId),
       loadTitleContractNeeds(projectId),
       loadAwaitingAgreements(projectId),
+      // The titles' credits (memoised per request, the plan reads them).
+      readInventoryRows(
+        projectId,
+        ctx.project.masters,
+        can(ctx.access, "manage_catalog"),
+      ),
     ]);
+    // A title with a composer, an author or an arranger: its split and its
+    // SACEM can be proposed.
+    const credited = (masterId: string | null) =>
+      Boolean(masterId) &&
+      (rows.creditsOf.get(masterId ?? "") ?? []).some((c) =>
+        CREATOR_ROLES.includes(c.role),
+      );
+    // The project's owner acts on a title's own steps.
+    const owner = ctx.project.ownerPersonId
+      ? {
+          name: ctx.project.ownerName ?? "—",
+          viewer: ctx.project.ownerPersonId === ctx.access.personId,
+          viaLink: false,
+        }
+      : null;
+    const added = new Set(
+      ctx.tracking.state === "tracking" ? ctx.tracking.addedMasters : [],
+    );
     if (clearances.error)
       console.error("legalTitleLayout clearances:", clearances.error.message);
     const legalTitles = legalTitlesOf(
@@ -90,7 +118,13 @@ export const legalTitleLayout = trackedCache(
               title,
               needs.get(title.id) ?? { confirmed: false, kinds: [] },
               awaitingOnTitle(awaiting.guests, title.id),
+              owner,
             ),
+            ...titlePendingSteps(projectId, title, {
+              credited: credited(title.masterId),
+              added: Boolean(title.masterId && added.has(title.masterId)),
+              owner,
+            }),
           ],
         ]),
     );
@@ -100,6 +134,7 @@ export const legalTitleLayout = trackedCache(
       anchors,
       titles: legalTitles,
       extra,
+      owner,
     });
   },
 );

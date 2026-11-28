@@ -68,8 +68,11 @@ async function journeyOf(
 
 /** A collective's facts for one title (its master): its audio and
  * sources, its versions, what was received for it, its file requests. The
- * Brief, the transmissions, the engineers' messages, questions, rates and
- * invoices stay the project's (one Brief, one engineer per round). */
+ * Brief, the transmissions, questions and rates stay the project's (one
+ * Brief, one engineer per round). The engineers' messages and the invoices
+ * are gestures of the whole project: left out of a title's journey, they
+ * are said once, by the project's (Travail), not on every title's line and
+ * page (audit du 28/11/2026). */
 export function titleFacts(
   facts: MasterJourneyFacts,
   masterId: string,
@@ -81,6 +84,8 @@ export function titleFacts(
     received: facts.received.filter((r) => r.masterId === masterId),
     fileRequests: facts.fileRequests.filter((r) => r.masterId === masterId),
     fileRequestLog: facts.fileRequestLog.filter((r) => r.masterId === masterId),
+    messages: [],
+    invoices: [],
   };
 }
 
