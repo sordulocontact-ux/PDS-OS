@@ -339,3 +339,16 @@ qui a été fait.
   titre n'est plus qu'au fil d'Ariane.
 - **À retenir** : deux façons de faire la même chose = une question avec ses vraies réponses, jamais deux formulaires
   empilés ; pas d'« Annuler » hors d'une modale quand rien n'est saisi ; un geste ne fait pas quitter le parcours.
+
+---
+
+## 28/11/2026 : Master › Source, « Ce que PDS OS a vérifié »
+
+- **Ce que Sacha a dit** : « est-ce que ça sert à quelque chose ? » (bloc « Où en est le mix · Mix à faire · aucun mix
+  au Catalogue » et « Pistes séparées · Aucune piste séparée au Catalogue », pastilles « À faire »). Mon avis : non ;
+  « oui » pour le retirer.
+- **Fait** : bloc retiré de l'étape Source (`SourceChecked` supprimé). Le mix « à faire » redisait l'étape (un mix
+  existant a déjà son propre formulaire), les pistes séparées restent demandées avant l'envoi au mixeur, où elles
+  bloquent, les voix définitives redisaient la réponse que la personne venait de donner.
+- **À retenir** : un fait n'a sa place que s'il change ce que la personne fait à cette étape ; pas de bloc « ce que la
+  machine a vérifié » qui redit l'étape, une réponse déjà donnée ou une vérification faite plus loin.

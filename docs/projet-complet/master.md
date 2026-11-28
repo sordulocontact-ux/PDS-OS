@@ -108,7 +108,8 @@ L (> 2 j). « Migr. » = migration SQL nécessaire.
   ajoutée par Claire Morel le 02/10 · la plus récente », v2, v1 ; **bouton Écouter** (lecteur + barre d'onde) sur
   chaque version. Sous la liste : « Les versions audio du titre au Catalogue. Un master final ne peut pas être une
   source. »
-- **Ce que PDS OS a vérifié** (faits avec source et pastille) : « Où en est le mix » = « Mix à faire · aucun mix au
+- ~~**Ce que PDS OS a vérifié**~~ (retiré de l'app le 28/11/2026, Sacha : « Mix à faire » redit l'étape, les pistes séparées
+  sont demandées avant l'envoi au mixeur, les voix redisent la réponse du formulaire) (faits avec source et pastille) : « Où en est le mix » = « Mix à faire · aucun mix au
   Catalogue » (Lu au Catalogue, `À faire`) ; « Production définitive » = Oui, source « Call de cadrage du 16/10 · « la
   prod est finie, on ne touche plus à l'instru » » (`Prête`) ; « Pistes séparées » = « 12 pistes sur 12 » (Lu par le
   code · Stems_Neons_v3.zip, `Prêtes`) ou « 0 sur 12 » (`Manquantes`) ; « Voix définitives » = « Non · le 2e couplet est

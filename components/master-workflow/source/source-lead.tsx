@@ -6,7 +6,6 @@ import type {
 } from "@/lib/master-workflow/source-step";
 import { masterStepHref } from "@/lib/ui/master-steps";
 
-import { SourceChecked } from "./source-checked";
 import { SourceChooser } from "./source-chooser";
 import { SourceImport } from "./source-import";
 
@@ -90,11 +89,6 @@ export function SourceLead({
           projectId={view.projectId}
           title={title}
           mixV1Due={view.mixV1Due}
-          checked={
-            title.candidates.length > 0 ? (
-              <SourceChecked view={view} title={title} />
-            ) : null
-          }
           imports={
             <SourceImport
               organizationId={view.organizationId}

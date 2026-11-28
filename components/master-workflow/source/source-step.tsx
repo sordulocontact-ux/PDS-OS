@@ -12,7 +12,6 @@ import { formatShortDay } from "@/lib/utils/day";
 
 import { ReplaceSourceButton } from "./newer-source";
 import { SourceAudioFile } from "./source-audio";
-import { SourceChecked } from "./source-checked";
 import { SourceChooser } from "./source-chooser";
 import { SourceImport } from "./source-import";
 import {
@@ -27,8 +26,7 @@ const t = fr.masterSource;
 
 /**
  * The Source step's content (proto `master-v2.html`): one title at a time
- * (pills when the project has several), what PDS OS checked, the source in
- * force, the final vocals awaited or arrived. The owner's gesture on a title
+ * (pills when the project has several), the source in force, the final vocals awaited or arrived. The owner's gesture on a title
  * still to confirm heads the step instead (SourceLead, the page's `lead`).
  */
 export function SourceStep({
@@ -40,11 +38,7 @@ export function SourceStep({
 }) {
   const title = pickSourceTitle(view, titleId);
   if (!title) return <ToneCallout tone="info">{t.noTitle}</ToneCallout>;
-  if (sourceGestureFirst(view, title))
-    // Its checks sit inside the form when there are versions to choose.
-    return title.candidates.length > 0 ? null : (
-      <SourceChecked view={view} title={title} />
-    );
+  if (sourceGestureFirst(view, title)) return null;
   return (
     <div className="flex flex-col gap-5">
       <SourceTitlePills view={view} title={title} />
@@ -73,7 +67,6 @@ function TitleSource({
     );
   const current = title.current;
   const working = current?.vocalsFinal === false;
-  const checked = <SourceChecked view={view} title={title} />;
   return (
     <>
       {title.newer && (
@@ -154,8 +147,6 @@ function TitleSource({
           )}
         </DocumentCard>
       )}
-
-      {checked}
 
       {/* Who else waits is said once, by the step (« En attente de … »,
           StepPanel), never again here (Sacha, 27/11/2026). */}

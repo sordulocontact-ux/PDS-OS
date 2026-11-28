@@ -21,15 +21,12 @@ export function SourceChooser({
   title,
   mixV1Due,
   imports,
-  checked,
 }: {
   projectId: string;
   title: SourceTitle;
   mixV1Due: string | null;
   // « Importer une version », from the server.
   imports?: React.ReactNode;
-  // « Ce que PDS OS a vérifié », shown inside the form.
-  checked?: React.ReactNode;
 }) {
   const [editing, setEditing] = useState(false);
   const [redo, setRedo] = useState(false);
@@ -63,7 +60,6 @@ export function SourceChooser({
               projectId={projectId}
               title={title}
               mixV1Due={mixV1Due}
-              checked={checked}
               imports={imports}
               onCancel={confirmed ? () => setEditing(false) : undefined}
             />

@@ -28,15 +28,12 @@ export function SourceForm({
   projectId,
   title,
   mixV1Due,
-  checked,
   imports,
   onCancel,
 }: {
   projectId: string;
   title: SourceTitle;
   mixV1Due: string | null;
-  // « Ce que PDS OS a vérifié », between the versions and the vocals.
-  checked?: React.ReactNode;
   // « Importer une version », under the version (Sacha, 09/11/2026).
   imports?: React.ReactNode;
   // « Annuler » when the form reopens a confirmed source.
@@ -99,7 +96,6 @@ export function SourceForm({
           <FieldError id="source-version-error">{errors.version}</FieldError>
         )}
       </div>
-      {checked}
 
       <div className="flex flex-col gap-1.5">
         <ChoiceCards

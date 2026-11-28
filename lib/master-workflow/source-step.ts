@@ -59,8 +59,6 @@ export type SourceTitle = {
     at: string;
     reason: string | null;
   } | null;
-  // Where the mix stands (proto « Où en est le mix »).
-  mix: "todo" | "running" | "done";
   stems: { count: number; latest: string | null };
 };
 
@@ -78,9 +76,9 @@ export type SourceStepView = {
 
 /**
  * The Source step (proto `master-v2.html`, ticket § 1 and § 2): for each
- * title, the versions a source may be (listened to before choosing), what
- * PDS OS checked (the mix, the stems, the vocals as declared), the current
- * source and whether newer vocals arrived. Read with the viewer's session.
+ * title, the versions a source may be (listened to before choosing), the
+ * stems count, the current source and whether newer vocals arrived. Read
+ * with the viewer's session.
  */
 export async function loadSourceStep(
   projectId: string,
@@ -152,10 +150,12 @@ export async function loadSourceStep(
     const all = versionsOf(title.id);
     const candidates = sourceCandidates(all);
     const source = title.sources[0] ?? null;
-    const mixVersions = facts.versions.filter(
-      (v) => v.masterId === title.id && v.stage === "mix",
+    const approved = facts.versions.find(
+      (v) =>
+        v.masterId === title.id &&
+        v.stage === "mix" &&
+        v.decision === "approved",
     );
-    const approved = mixVersions.find((v) => v.decision === "approved");
     const stemSeries = new Map<string, string>();
     for (const f of rows)
       if (
@@ -201,7 +201,6 @@ export async function loadSourceStep(
                   ?.decision_note ?? null,
             }
           : null,
-      mix: approved ? "done" : mixVersions.length > 0 ? "running" : "todo",
       stems: {
         count: stemSeries.size,
         latest: [...stemSeries.values()][0] ?? null,

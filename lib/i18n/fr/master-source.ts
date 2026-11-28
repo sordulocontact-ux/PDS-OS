@@ -1,6 +1,6 @@
 // The Source step of the Master (proto `master-v2.html`, ticket « Workflow
-// Master » § 1 and § 2): the version a mix starts from, what PDS OS checked,
-// the final vocals awaited or anticipated.
+// Master » § 1 and § 2): the version a mix starts from, the final vocals
+// awaited or anticipated.
 
 export const masterSource = {
   titles: "Titres du projet",
@@ -34,36 +34,13 @@ export const masterSource = {
   // The step's gesture when the title has no audio (Akili, 02/11/2026): the
   // button says it, no paragraph before it (Sacha, 27/11/2026).
   importFirst: "Importer la maquette ou la mise à plat",
-  checked: "Ce que PDS OS a vérifié",
-  mix: {
-    label: "Où en est le mix",
-    source: "Lu au Catalogue",
-    value: {
-      todo: "Mix à faire · aucun mix au Catalogue",
-      found: (file: string) => `Mix trouvé au Catalogue · ${file}`,
-      running: "Mix en cours · des versions sont arrivées",
-      done: "Mix final validé",
-    },
-    state: { todo: "À faire", running: "En cours", done: "Fait" },
-  },
   stems: {
-    label: "Pistes séparées",
     value: (n: number, latest: string | null) =>
       n === 0
         ? "Aucune piste séparée au Catalogue"
         : `${n > 1 ? `${n} fichiers` : "1 fichier"}${latest ? ` · ${latest}` : ""}`,
-    source: "Lu par le code · fichiers du titre",
-    ready: "Prêtes",
-    missing: "À faire",
   },
   vocals: {
-    label: "Voix définitives",
-    yes: "Oui",
-    no: (pending: string | null) => (pending ? `Non · ${pending}` : "Non"),
-    source: (by: string | null, day: string) =>
-      by ? `Déclaré par ${by} ${day}` : `Déclaré ${day}`,
-    ready: "Prêtes",
-    notYet: "Pas encore",
     question: "Les voix de cette version sont-elles définitives ?",
     yesChoice: "Oui, les voix sont définitives",
     yesHint: "Le mix pourra devenir le mix final sur cette version.",
