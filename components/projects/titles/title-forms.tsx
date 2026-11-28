@@ -112,11 +112,15 @@ export function AttachCatalogTitleForm({
   titleId,
   masterOptions,
   onDone,
+  inline = false,
 }: {
   projectId: string;
   titleId: string;
   masterOptions: Record<string, string>;
   onDone: () => void;
+  // In a page (the Juridique's « Rattacher au Catalogue »), not a dialog:
+  // the main button alone, nothing to cancel, the field at a form's width.
+  inline?: boolean;
 }) {
   const t = fr.projectTitles;
   const [masterId, setMasterId] = useState("");
@@ -125,7 +129,9 @@ export function AttachCatalogTitleForm({
   return (
     <form
       noValidate
-      className="flex flex-col gap-4"
+      className={
+        inline ? "flex max-w-md flex-col gap-4" : "flex flex-col gap-4"
+      }
       onSubmit={(event) => {
         event.preventDefault();
         if (!masterId) return setMissing(true);
@@ -155,11 +161,23 @@ export function AttachCatalogTitleForm({
         </FieldError>
       </div>
       {error && <FormMessage kind="error">{error}</FormMessage>}
-      <DialogFormActions
-        pending={pending}
-        submitLabel={t.catalogAttach.submit}
-        onCancel={onDone}
-      />
+      {inline ? (
+        <Button
+          type="submit"
+          size="lg"
+          className="self-start"
+          disabled={pending}
+          aria-busy={pending || undefined}
+        >
+          {pending ? fr.dialogs.saving : t.catalogAttach.submit}
+        </Button>
+      ) : (
+        <DialogFormActions
+          pending={pending}
+          submitLabel={t.catalogAttach.submit}
+          onCancel={onDone}
+        />
+      )}
     </form>
   );
 }

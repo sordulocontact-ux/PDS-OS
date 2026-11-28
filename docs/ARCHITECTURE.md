@@ -5729,8 +5729,10 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
   calcule sous RLS `loadAwaitingAgreements` (participations en jeu sans accord validé, personne via
   `network_contacts.artist_id`), `awaitingAgreement` sur `AgreementRow`, filtre de `generateReadyAgreements` (le saut
   est attendu), erreur traduite au geste manuel.
-- **Rattacher au Catalogue** : `AttachTitleStep` / `AttachTitlePanel` (`components/legal/steps/`), titre courant en
-  pastille avant le h1 (`ModuleHeader media`) et dans le fil d'Ariane.
+- **Rattacher au Catalogue** : `AttachTitleStep` / `AttachTitlePanel` (`components/legal/steps/`), titre courant
+  dans le fil d'Ariane seulement (la pastille avant le h1 des étapes d'un titre est retirée le 28/11/2026, comme au
+  Master). Depuis le 28/11 : une question à deux réponses (`ChoiceCards`), le titre du Catalogue choisi sur place ou
+  l'audio déposé sur place (titre créé par `startTitleWork`, état demandé par `AddFilesDialog`).
 - **Récap des titres** : `loadTitleRecap` (`lib/projects/recap.ts`, règles dans `recap-rules.ts`), lu par la page Titres
   et par la Vue d'ensemble (`planCalls: false` pour la Vue d'ensemble). Contact retenu : celui de la participation, sinon
   le manager principal de l'artiste au Catalogue ; lu sous RLS, un contact privé est masqué (aucune fonction

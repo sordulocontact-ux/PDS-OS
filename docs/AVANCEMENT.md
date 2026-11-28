@@ -3488,3 +3488,8 @@ et que je vais sur Juridique, je reste sur ce titre ». Sans migration.
 - **Même jour, « Son attendu »** (Sacha : « je dois faire quoi pour son attendu ? ») : un titre pas encore au
   Catalogue dit maintenant son geste dans la liste du Master, « Rattacher au Catalogue » (« À vous » pour le
   responsable), et son nom ouvre cette étape du Juridique.
+- **Même jour, « Rattacher au Catalogue » refait** (Sacha : « il est vraiment moche ») : une question, « Ce titre
+  est-il déjà au Catalogue ? », deux cartes ; « Oui » ouvre le choix du titre (bouton seul, plus d'« Annuler »),
+  « Non » le dépôt de l'audio sur place (plus de sortie vers la fiche du Catalogue). Plus de pastille du titre avant
+  le h1 des étapes d'un titre au Juridique : le fil d'Ariane le nomme. « Contrats du titre » reste en cours à côté :
+  la confirmation des contrats nécessaires (§ 3.4 d'Ibé) ne dépend pas du master.

@@ -326,3 +326,16 @@ qui a été fait.
   modules sur ce titre, le fil d'Ariane le nomme et le crumb du module revient à la liste.
 - **À retenir** : ne jamais ouvrir un objet parmi plusieurs à la place de la personne ; une liste d'abord, l'objet
   ensuite ; le contexte choisi (un titre) suit la personne d'un module à l'autre, par l'adresse, et se voit toujours.
+
+---
+
+## 28/11/2026 : « Rattacher au Catalogue », une question et ses deux réponses
+
+- **Ce que Sacha a dit** : « c'est quoi ce design ? il est vraiment moche » (deux sections à gros titres « Déjà au
+  Catalogue » / « Pas encore au Catalogue », un champ de 1 400 px, « Annuler » sans rien à annuler, pastille du titre
+  avant le h1, « Déposer un audio » qui sortait du projet).
+- **Fait** : `ChoiceCards` « Ce titre est-il déjà au Catalogue ? » (Oui, il y est / Non, pas encore) ; le choix ouvre
+  le seul formulaire utile, à la largeur d'un formulaire, bouton principal seul ; l'audio se dépose sur place ; le
+  titre n'est plus qu'au fil d'Ariane.
+- **À retenir** : deux façons de faire la même chose = une question avec ses vraies réponses, jamais deux formulaires
+  empilés ; pas d'« Annuler » hors d'une modale quand rien n'est saisi ; un geste ne fait pas quitter le parcours.

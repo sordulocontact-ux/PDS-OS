@@ -3,7 +3,6 @@ import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import {
   StepBlockers,
@@ -43,9 +42,9 @@ const fr = { legalJourney, legalParticipations };
  * son »): one journey at a time (lib/legal/title-layout.ts), « Projet » or
  * a title, chosen in the trail (Juridique ▸ Néons ▸ step) as the Master
  * does; `titre` keeps the title of a step two titles share (a guest of
- * both). A title's step names its title in a tag before its h1 (the hue of
- * its tags in the État des lieux) and no longer repeats it in its own
- * title. A step of the spine only (« Rattacher au Catalogue »,
+ * both). A title's step is named by the trail only, never again in a tag
+ * before its h1 nor in its own title (Sacha, 28/11/2026, as the Master's).
+ * A step of the spine only (« Rattacher au Catalogue »,
  * `attach:<id>`) has no tools: nothing to report or note on it.
  * « Participations et contrats » is a button of the head, on every step of
  * a collective's Juridique.
@@ -71,7 +70,6 @@ export async function LegalStepFrame({
   const step = spine.find((s) => s.key === stepKey);
   if (!step) return null;
   const own = steps.find((s) => s.key === stepKey);
-  const title = scope?.titleId ? scope : null;
   // The viewer's gesture comes first (« À vous », JUR-08): the step's content
   // is its lead, the grid folded under it (StepPanel), unless the page gives
   // its own lead.
@@ -94,18 +92,6 @@ export async function LegalStepFrame({
             projectId={projectId}
             steps={spine}
             head={step}
-            media={
-              title ? (
-                // Narrow on a phone: the h1 keeps the width of the line.
-                <StatusBadge
-                  tone={title.hue ?? "neutral"}
-                  title={title.heading}
-                  className="max-w-36 shrink-0 truncate sm:max-w-64"
-                >
-                  {title.heading}
-                </StatusBadge>
-              ) : undefined
-            }
             extraCrumbs={
               layout && scope
                 ? [scopeCrumb(projectId, layout, scope)]

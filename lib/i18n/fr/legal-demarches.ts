@@ -48,8 +48,16 @@ export const legalDemarches = {
   attach: {
     // « le titre » goes without saying in a title's row (Sacha, 27/11/2026).
     title: "Rattacher au Catalogue",
-    inCatalogue: "Déjà au Catalogue",
-    audio: "Pas encore au Catalogue",
+    // One question, its two real answers (Sacha, 28/11/2026: two stacked
+    // forms read as two things to fill).
+    question: "Ce titre est-il déjà au Catalogue ?",
+    inCatalogue: "Oui, il y est",
+    inCatalogueHint: "Vous le choisissez dans le Catalogue.",
+    audio: "Non, pas encore",
+    audioHint:
+      "Vous déposez son audio : le titre est créé au Catalogue sous un nom provisoire.",
+    drop: "Déposer l'audio du titre",
+    creating: "Création du titre…",
     onlyOwner: (name: string) =>
       `${name}, responsable du projet, peut rattacher ce titre.`,
   },

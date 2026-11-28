@@ -47,10 +47,11 @@ export async function AttachTitleStep({
   );
   return (
     <LegalStepFrame projectId={projectId} stepKey={key} titre={titleId}>
-      {canManage ? (
+      {canManage && ctx.access.organizationId ? (
         <AttachTitlePanel
           projectId={projectId}
           titleId={titleId}
+          organizationId={ctx.access.organizationId}
           masterOptions={masterOptions}
         />
       ) : (
