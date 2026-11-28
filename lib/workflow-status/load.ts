@@ -273,7 +273,7 @@ async function distributionFacts(projectId: string) {
       .is("archived_at", null),
     supabase
       .from("project_titles")
-      .select("id")
+      .select("id, release_decision")
       .eq("project_id", projectId)
       .neq("status", "abandoned"),
   ]);
@@ -282,8 +282,11 @@ async function distributionFacts(projectId: string) {
   );
   const singles = project.collective_release_mode !== "compilation";
   const released = new Set(live.map((r) => r.project_title_id));
+  // A title « Sortie : Non » does not come out: none of its own expected.
   const unreleased = singles
-    ? (titles ?? []).filter((t) => !released.has(t.id)).length
+    ? (titles ?? []).filter(
+        (t) => !released.has(t.id) && t.release_decision !== false,
+      ).length
     : 0;
   if (live.length === 0) return distributionFactsOf(projectId, null);
   const all = await Promise.all(

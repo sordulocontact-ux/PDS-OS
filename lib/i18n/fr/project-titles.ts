@@ -591,6 +591,9 @@ export const projectTitles = {
       phonePrivate:
         "Coordonnées privées : seuls la personne qui suit ce contact et la direction peuvent changer son numéro.",
       releaseUnchanged: "La sortie de ce titre est déjà enregistrée ainsi.",
+      // « Non » once its release was submitted to the distributor.
+      releaseStarted:
+        "Sa sortie est déjà soumise au distributeur : elle ne peut plus être retirée d'ici.",
     },
     // The project's Activité (lib/overview/activity.ts).
     events: {

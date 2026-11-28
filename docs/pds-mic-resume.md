@@ -458,3 +458,7 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
   fixes en plus du nom ; au-delà, regrouper plutôt que faire défiler. Seule exception :
   « Titres et artistes » (22/11/2026), qui reprend l'Excel entier, défile dans son cadre avec la
   colonne Artiste fixe (jamais la page).
+
+- **« Sortie : Non »** (colonne du récap, Ibé 18/11 ; décidé le 28/11/2026 faute de règle) : le titre ne sort pas
+  seul. Sa sortie est archivée et revient avec « Oui » ou « À décider », il n'entre pas dans la compilation ni dans
+  « reste à sortir », et « Non » est refusé une fois sa sortie soumise au distributeur. Master et Juridique inchangés.

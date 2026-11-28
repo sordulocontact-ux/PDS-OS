@@ -64,6 +64,13 @@ export async function loadCollectiveReleases(
     );
   if (releases.error)
     throw new Error(`loadCollectiveReleases: ${releases.error.message}`);
+  // « Sortie : Non » (28/11/2026): no release of its own, not waited for.
+  const { data: notOut } = await supabase
+    .from("project_titles")
+    .select("id")
+    .eq("project_id", project.id)
+    .eq("release_decision", false);
+  const staysIn = new Set((notOut ?? []).map((t) => t.id));
   const masterIds = titles.flatMap((t) => (t.master ? [t.master.id] : []));
   const isrcs = masterIds.length
     ? await supabase.from("masters").select("id, isrc").in("id", masterIds)
@@ -141,7 +148,7 @@ export async function loadCollectiveReleases(
     releases: rows.sort((a, b) => a.position - b.position),
     // Live titles a single would cover but not yet in the Catalogue.
     waiting: live
-      .filter((t) => !t.master && !withRelease.has(t.id))
+      .filter((t) => !t.master && !withRelease.has(t.id) && !staysIn.has(t.id))
       .map((t) => ({ id: t.id, label: labelOf(t) })),
     // Who writes the titles writes the mode (the database decides again).
     canEdit:
@@ -175,7 +182,7 @@ export async function loadTitleDeposits(
       .is("archived_at", null),
     supabase
       .from("project_titles")
-      .select("id, status, master_id")
+      .select("id, status, master_id, release_decision")
       .eq("project_id", projectId),
     supabase.rpc("release_distribution_states", { p_project_id: projectId }),
     supabase
@@ -205,7 +212,9 @@ export async function loadTitleDeposits(
       compilation &&
       compilationOnly &&
       title.master_id &&
-      title.status !== "abandoned"
+      title.status !== "abandoned" &&
+      // « Sortie : Non »: out of the compilation too.
+      title.release_decision !== false
     )
       out[title.id] = {
         releaseId: compilation.id,

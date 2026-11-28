@@ -3538,7 +3538,10 @@ Sacha : « fais tout ce qui est le plus logique pour toi ». Migrations `2026112
   mode compilation, pour un titre au Catalogue ; une clôture avec réserves ouvertes n'est plus « Clôturée » ni
   « Terminé » ; l'entrée « Distribution » d'un collectif ouvre « Sorties » et s'allume dessus (l'entrée « Sorties »
   est fondue dedans) ; les titres pas encore au Catalogue y mènent à leur page.
-- **Reste à trancher** : « Sortie : Non » (aucun ticket ne dit ce qu'il retire).
+- **« Sortie : Non » décidé le 28/11 (Sacha : « prends la décision la plus logique »)**, migration
+  `20261128140101_title_release_no` : le titre ne sort pas seul. Sa sortie est archivée (lecture seule, rendue par
+  « Oui » ou « À décider »), il sort de la compilation et des comptes « reste à sortir » ; « Non » est refusé une fois
+  sa sortie soumise au distributeur (« release_started »). Il reste dans le Master et le Juridique.
 - **Même jour** : migrations `20261128090101` et `20261128090201` poussées sur la base de pré-prod (pas la prod) ;
   le contrat d'une personne créditée seulement sur des titres abandonnés n'est plus généré, ni automatiquement ni
   par le bouton (`AgreementRow.onlyAbandoned`).

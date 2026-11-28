@@ -254,6 +254,11 @@ export async function setTitleRelease(input: {
         ok: false,
         error: fr.projectTitles.recap.errors.releaseUnchanged,
       };
+    if (error.message.includes("release_started"))
+      return {
+        ok: false,
+        error: fr.projectTitles.recap.errors.releaseStarted,
+      };
     return { ok: false, error: titleError("setTitleRelease", error) };
   }
   refresh(projectId.data);
