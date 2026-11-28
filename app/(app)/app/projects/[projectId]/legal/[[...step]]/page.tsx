@@ -7,6 +7,7 @@ import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
+import { LegalScopesPage } from "@/components/legal/legal-scopes-page";
 import { AttachTitleStep } from "@/components/legal/steps/attach-title-step";
 import { ConfirmationStep } from "@/components/legal/steps/confirmation-step";
 import { DemarcheStep } from "@/components/legal/steps/demarche-step";
@@ -17,10 +18,15 @@ import { ReadyStep } from "@/components/legal/steps/ready-step";
 import { TitleContractsStep } from "@/components/legal/steps/title-contracts-step";
 import { demarcheTarget, entryHref } from "@/lib/legal/demarches/where";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
+import { scopeEntry } from "@/lib/legal/title-groups";
+import { legalTitleLayout } from "@/lib/legal/title-layout";
+import { carriedTitle } from "@/lib/projects/title-carry";
 import { legalParticipationsHref, legalRouteOf } from "@/lib/ui/legal-steps";
 
 // The Juridique as a journey (docs/VISION-UX.md § 4, proto « Projet
-// complet »): /legal redirects to the step that awaits the viewer; the
+// complet »): /legal redirects to the step that awaits the viewer (a
+// collective: the list of its scopes, « Projet » and each title, or the
+// scope of the title named in the address — Sacha, 28/11/2026); the
 // Dossier's steps (/legal/inventory, /framing, /confirmation, /plan), one
 // step per démarche (/legal/person/<ref>, /clearance/<id>, /split/<title>,
 // /sacem/<title>), a collective's title to attach to the Catalogue
@@ -45,6 +51,31 @@ async function legalLock(projectId: string) {
   return gate ? <WorkflowLocked projectId={projectId} gate={gate} /> : null;
 }
 
+/** A collective's entry (Sacha, 28/11/2026): the scope of the title named
+ * in the address (from another workflow of the same title,
+ * lib/projects/title-carry-rules.ts), else the list of its scopes when it
+ * has more than « Projet »; null: the journey's own entry (a simple project,
+ * a question or a state named, « Projet » alone). */
+async function collectiveEntry(
+  projectId: string,
+  query: Record<string, string | string[] | undefined>,
+) {
+  if (typeof query.question === "string" || typeof query.state === "string")
+    return null;
+  const layout = await legalTitleLayout(projectId);
+  if (!layout) return null;
+  const named = await carriedTitle(projectId, query);
+  const scope = named
+    ? layout.scopes.find((s) => s.titleId === named.id)
+    : undefined;
+  const entry = scope ? scopeEntry(scope) : null;
+  if (entry) redirect(entry.href);
+  const open = layout.scopes.filter((s) => scopeEntry(s) !== null);
+  return open.length > 1 ? (
+    <LegalScopesPage projectId={projectId} layout={layout} />
+  ) : null;
+}
+
 export default async function ProjectLegalPage({
   params,
   searchParams,
@@ -63,6 +94,8 @@ export default async function ProjectLegalPage({
   }
   if (!step || step.length === 0) {
     const { steps } = await legalJourneyContext(projectId);
+    const scopes = await collectiveEntry(projectId, query);
+    if (scopes) return scopes;
     redirect(entryHref(projectId, steps, query));
   }
   const route = legalRouteOf(step);

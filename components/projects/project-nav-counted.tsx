@@ -83,7 +83,9 @@ async function navOf({ access, project }: NavSource): Promise<ProjectNavProps> {
 
 async function CountedSidebar(props: ProjectNavProps) {
   const all = await loadShellJourneys(props.projectId);
-  const entries = moduleEntries(props.projectId, all.journeys);
+  const entries = moduleEntries(props.projectId, all.journeys, {
+    collective: props.collective,
+  });
   return (
     <>
       <ProjectSidebar {...props} counts={countMine(all)} entries={entries} />
@@ -99,7 +101,9 @@ async function CountedSidebar(props: ProjectNavProps) {
 
 async function CountedSidebarMobile(props: ProjectNavProps) {
   const all = await loadShellJourneys(props.projectId);
-  const entries = moduleEntries(props.projectId, all.journeys);
+  const entries = moduleEntries(props.projectId, all.journeys, {
+    collective: props.collective,
+  });
   return (
     <>
       <ProjectSidebarMobile

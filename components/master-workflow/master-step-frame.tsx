@@ -9,7 +9,6 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
-import { TitlesOverview } from "@/components/master-workflow/titles-overview";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import {
@@ -104,7 +103,8 @@ async function loadTitleRelease(
  * The frame of a Master step (docs/VISION-UX.md § 4, JourneyLayout): the
  * journey on the left with « Historique du master » at its foot, on its
  * right the head (h1 = the step's title, its why, « Qui fait quoi », the
- * Master's facts) then the step's content, a collective's titles last.
+ * Master's facts) then the step's content. A collective's titles are
+ * listed at the Master's entry (MasterTitlesPage), not under each step.
  */
 export async function MasterStepFrame({
   projectId,
@@ -125,7 +125,6 @@ export async function MasterStepFrame({
     steps: own,
     facts: rows,
     project,
-    access,
   } = await masterJourneyContext(projectId);
   // A collective: the journey of the title shown, its states its own
   // (Maël 23/11/2026, « 1 par son »), each step keeping the title.
@@ -188,18 +187,6 @@ export async function MasterStepFrame({
       <StepPanel step={step} steps={titled} blockedLabel={t.blocked} {...slots}>
         <StepBlockers stepRef={stepRef} steps={choices} />
         {children}
-        {/* A collective: where its titles stand (lot 9), under the step it
-            is not part of. */}
-        {titleScope && (
-          <TitlesOverview
-            projectId={projectId}
-            scope={titleScope}
-            canRequest={
-              project.ownerPersonId !== null &&
-              project.ownerPersonId === access.personId
-            }
-          />
-        )}
         <StepToolsBlock
           stepRef={stepRef}
           steps={choices}

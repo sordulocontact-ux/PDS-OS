@@ -312,3 +312,17 @@ qui a été fait.
   responsable) avec « Nommer le titre », qui ouvre le champ dans une modale (`NameTitleMenu`).
 - **À retenir** : un geste sur une ligne de tableau va dans son « ⋯ » en dernière colonne, jamais en bouton dans une
   case ; le tableau se lit, le menu agit (comme « Par artiste »).
+
+---
+
+## 28/11/2026 : un module d'un collectif s'ouvre sur la liste de ses titres, et le titre suit
+
+- **Ce que Sacha a dit** : « quand on clique sur une partie master, on sélectionne directement un titre ? Est-ce que
+  c'est la meilleure manière de faire ? » (mon avis : non, on agit sur un titre qu'on n'a pas choisi ; proto à deux
+  variantes, « Liste des titres » retenue), puis « ça va changer pour toutes les pages » et « quand je vais sur
+  juridique, je ne resterai pas sur [le même titre] ? … pour que ce soit plus fluide ».
+- **Fait** : Master, Juridique, Distribution d'un collectif s'ouvrent sur leur liste (titres, étape, « À vous ») ; un
+  seul titre ou une entrée qui porte le titre mènent droit à l'étape ; depuis un titre, le menu ouvre les autres
+  modules sur ce titre, le fil d'Ariane le nomme et le crumb du module revient à la liste.
+- **À retenir** : ne jamais ouvrir un objet parmi plusieurs à la place de la personne ; une liste d'abord, l'objet
+  ensuite ; le contexte choisi (un titre) suit la personne d'un module à l'autre, par l'adresse, et se voit toujours.

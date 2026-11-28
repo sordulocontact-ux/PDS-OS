@@ -3466,3 +3466,22 @@ chasse fixe, pas d'icône d'en-tête. Sans migration.
 - Icônes de colonne sur les 53 tableaux qui n'en avaient pas (Sacha, 27/11) : chaque `DataTableHead` à libellé porte sa clé de
   `columnIcons` (même clé pour la même sorte de colonne) ; clés ajoutées `amount`, `metric`, `target`, `link`, `item` ; seule
   `AnswerTable` de PO (en-têtes écrits par le modèle) n'en a pas.
+
+## Collectif : entrée des modules par la liste des titres, titre gardé d'un module à l'autre (28/11/2026, branche `pre-prod`)
+
+Sacha, après le proto « Entrée du Master » (artefact, variante « Liste des titres » retenue) : cliquer « Master »
+dans un collectif ouvrait une étape d'un titre choisi par le code ; puis « quand je suis sur un titre dans le Master
+et que je vais sur Juridique, je reste sur ce titre ». Sans migration.
+
+- **Entrée par la liste** : `/master` d'un collectif = `MasterTitlesPage` (titres, étape, « À vous », Brief et
+  « Demander des fichiers » en tête) ; `/legal` = `LegalScopesPage` (« Projet » puis chaque titre) ; `/release` =
+  la sortie du titre nommé, sinon la seule, sinon « Sorties ». Un seul titre : directement son étape. Le menu du
+  projet pointe sur ces pages pour un collectif ; le crumb du module y revient.
+- **« Où en sont les titres » sous chaque étape du Master retiré** (`TitlesOverview` supprimé) : la liste d'entrée le
+  remplace ; « Demander des fichiers » y passe.
+- **Titre gardé** : depuis l'étape d'un titre (ou sa page « Titres › X »), « Master », « Juridique », « Distribution »
+  du menu ouvrent ce titre (`?titre=` / `?sortie=` dans le lien, `title-carry-rules.ts`) ; titre abandonné ou
+  compilation : la liste.
+- Guide de PO (`workflows.ts`), `docs/VISION-UX.md` (nouvelle règle), `DESIGN.md`, `ARCHITECTURE.md`, `COMPOSANTS.md`.
+- **Reste** : passage navigateur (l'extension Chrome ne chargeait pas le serveur local) ; la Distribution allume
+  l'entrée « Sorties » du menu quand elle ouvre la liste des sorties.

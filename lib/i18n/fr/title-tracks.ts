@@ -9,6 +9,8 @@ export const titleTracks = {
       master: "Master",
       legal: "Juridique",
       distribution: "Distribution",
+      // The step column of a module's list of titles (Master, Juridique).
+      step: "Étape",
     },
     groups: { abandoned: "Abandonnés" },
     // Under a workflow's step when its next action is the viewer's.

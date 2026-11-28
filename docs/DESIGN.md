@@ -500,8 +500,10 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
      la Vue d'ensemble, qui garde son nom seul. Sur l'étape d'un **titre d'un collectif**, la sortie
      est **celle du titre** (sinon de la compilation), jamais l'échéance du projet, et le titre n'est
      pas répété (le fil le nomme) (Sacha, 27/11/2026, Master d'« Assurance 30 »). **Rien d'autre que
-     l'étape entre son titre et son contenu** : une vue de plusieurs objets (« Où en sont les titres »
-     du Master d'un collectif) va en bas de l'étape, sous son propre titre, sans les tuiles à 0.
+     l'étape entre son titre et son contenu** : une vue de plusieurs objets n'y va pas. Dans un
+     collectif, la vue des titres d'un module est **son entrée** (Sacha, 28/11/2026, proto « Entrée du
+     Master ») : « Master », « Juridique » ouvrent la liste de leurs titres (`ModuleScopesList`), plus
+     « Où en sont les titres » en bas de chaque étape.
   Le **Master et la Distribution n'ont plus de chevrons** (leurs étapes sont dans le parcours),
   ni le Juridique ni le Cadrage. Le layout du projet rend un en-tête par défaut, tiré de l'URL ;
   une section qui a ses propres faits ou actions rend son `ModuleHeader` en tête de page, et

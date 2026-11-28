@@ -206,34 +206,3 @@ function waitingOf(
         : { kind: state.round, round: state.round };
   }
 }
-
-/** The Master's overview of a collective (lot 9): how many titles wait for
- * a source, a mix, a mastering, a validation; each count opens the first
- * of them on its step. The abandoned titles are not counted. */
-export function titleWaitings(projectId: string, scope: MasterTitleScope) {
-  return MASTER_TITLE_WAITINGS.map((kind) => {
-    const titles = scope.choices.filter((c) => c.waiting?.kind === kind);
-    // A title without any audio waits for its source too; it has no step of
-    // the Master to open yet, its page says where it stands.
-    const silent = kind === "source" ? scope.withoutAudio : [];
-    const first = titles[0];
-    const step: MasterStepKey =
-      kind === "source"
-        ? "source"
-        : kind === "validation"
-          ? (first?.waiting?.round ?? "mix")
-          : kind;
-    return {
-      kind,
-      count: titles.length + silent.length,
-      // Among them, the titles whose files are asked for (lot 9 bis).
-      requested: titles.filter((c) => c.request).length,
-      names: [...titles.map((c) => c.label), ...silent.map((s) => s.label)],
-      href: first
-        ? `${masterStepHref(projectId, step)}?titre=${first.masterId}`
-        : silent[0]
-          ? routes.projectTrack(projectId, silent[0].titleId)
-          : null,
-    };
-  });
-}

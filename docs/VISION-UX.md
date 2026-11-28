@@ -87,6 +87,17 @@ de livrable de la Production ou de partie du Marketing **par le double chevron d
 Créer une activation ouvre sa page. *(Sacha, 10/11/2026, remplace la page unique liste à gauche +
 activation à droite du 18-19/10)*
 
+**Un module travaillé titre par titre s'ouvre sur ses titres, jamais sur un titre choisi par le code.**
+Dans un projet collectif, le Master, le Juridique et la Distribution se font titre par titre. Ouvrir l'un
+d'eux depuis le menu du projet montre **la liste** : une ligne par titre (« Projet » en tête du Juridique ;
+les sorties pour la Distribution, page « Sorties »), l'étape où il en est, « À vous » en bleu ; un clic
+ouvre son parcours, sur l'étape qui attend la personne. Un seul titre : on y va directement. Une entrée qui
+porte déjà le titre (Travail, une notification, la page d'un titre) mène droit à l'étape. **Le titre suit
+d'un module à l'autre** : depuis l'étape d'un titre, « Juridique » dans le menu ouvre le Juridique de ce
+titre (par son adresse, jamais une mémoire cachée), le fil d'Ariane le nomme, son chevron change de titre
+et le crumb du module revient à la liste. *(Sacha, 28/11/2026, proto « Entrée du Master » : on agissait
+sur un titre qu'on n'avait pas choisi.)*
+
 ## 4. Le patron d'écran unique
 
 Tous les modules (Lancement, Cadrage, Master, Juridique, chaque chevron du Marketing,

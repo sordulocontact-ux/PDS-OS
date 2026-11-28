@@ -30,6 +30,7 @@ export const workflowsTopics: GuideTopic[] = [
       "Un tarif peut être accepté ou refusé avec un motif ; il alimente le Budget.",
       "Un mix validé ne change plus. Le mastering s'ouvre quand le mix final est validé.",
       "Master final : le master validé devient celui du titre dans le Catalogue ; la Distribution et le Juridique le lisent directement.",
+      "Projet collectif : « Master » ouvre la liste de ses titres, chacun avec l'étape où il en est et « À vous » quand le geste est le vôtre ; le Brief, commun à tous, est en haut. Un clic sur un titre ouvre son parcours ; « Master » dans le fil d'Ariane revient à la liste. Depuis un titre du Juridique ou de la Distribution, « Master » dans le menu du projet ouvre directement ce titre.",
     ],
     faq: [
       {
@@ -74,6 +75,7 @@ export const workflowsTopics: GuideTopic[] = [
       "Suivi : chaque démarche se fait depuis sa ligne. Les pages de démarche sont les fiches de renseignements, les contrats, les répartitions, les autorisations et la SACEM.",
       "Une œuvre existante non autorisée (un sample par exemple) bloque la sortie.",
       "PO n'écrit jamais de clause ni de modèle de contrat. Le Juridique n'est visible que de la direction et des chefs de projet.",
+      "Projet collectif : « Juridique » ouvre la liste « Projet » (le dossier et les démarches de tout le projet) puis chaque titre, avec l'étape où chacun en est et « À vous » ; depuis un titre du Master ou de la Distribution, il ouvre directement ce titre.",
     ],
     faq: [
       {
@@ -133,6 +135,7 @@ export const workflowsTopics: GuideTopic[] = [
       "Plateformes : le lien officiel de chaque plateforme, puis ce qu'une personne a constaté en l'ouvrant.",
       "Clôture : on ferme le suivi, normalement quand tout est déclaré et vérifié, sinon avec des réserves.",
       "Les écoutes et statistiques de streaming ne sont pas branchées.",
+      "Projet collectif : la Distribution se fait sortie par sortie. « Distribution » ouvre la seule sortie, sinon la page « Sorties » qui les liste ; depuis un titre du Master ou du Juridique, il ouvre la sortie de ce titre (ou la compilation avec laquelle il sort).",
     ],
     faq: [
       {

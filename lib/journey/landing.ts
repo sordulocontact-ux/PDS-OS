@@ -89,10 +89,14 @@ function activationsEntry(projectId: string, steps: JourneyStep[]) {
 
 /** Where each entry of the project's navigation and each Marketing pill
  * opens, keyed like them; an entry left out keeps its own page, which
- * redirects (a module without a journey for this viewer yet). */
+ * redirects (a module without a journey for this viewer yet). A
+ * collective's Master, Juridique and Distribution keep their own page: it
+ * lists their titles, or opens the only one (Sacha, 28/11/2026, never a
+ * title chosen by the code). */
 export function moduleEntries(
   projectId: string,
   journeys: ModuleJourney[],
+  { collective = false }: { collective?: boolean } = {},
 ): Record<string, string> {
   const stepsOf = (module: string, part?: string) =>
     journeys.find((j) => j.module === module && j.part?.key === part)?.steps;
@@ -103,11 +107,11 @@ export function moduleEntries(
       projectId,
       framingLanding(framing),
     );
-  const master = stepsOf("master");
+  const master = collective ? undefined : stepsOf("master");
   if (master?.length) entries.master = masterEntry(projectId, master);
-  const legal = stepsOf("legal");
+  const legal = collective ? undefined : stepsOf("legal");
   if (legal) entries.legal = legalEntryHref(projectId, legal, {});
-  const distribution = stepsOf("distribution");
+  const distribution = collective ? undefined : stepsOf("distribution");
   if (distribution?.length)
     entries.distribution = distributionEntry(projectId, distribution);
   const strategy = stepsOf("marketing", "strategy");

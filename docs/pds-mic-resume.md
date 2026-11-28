@@ -166,7 +166,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   et de la Distribution ; `getProject().masters` reste complet (formulaire d'édition). Facture de
   l'ingénieur : `request_project_master_invoices`, aussi appelée par `abandon_project_title`
   (l'abandon du dernier titre en attente l'envoie). Sélecteur du Master sans les abandonnés. Vue
-  consolidée `TitlesOverview` (source, mix, mastering, validation). Depuis le 26/11/2026, un titre actif sans
+  consolidée des titres : depuis le 28/11/2026, c'est l'entrée du Master (`MasterTitlesPage`, la liste des titres),
+  plus `TitlesOverview` sous chaque étape. Depuis le 26/11/2026, un titre actif sans
   master compte parmi « Attendent leur source » (`MasterTitleScope.withoutAudio`), et ni le Master ni la
   Distribution (titre actif sans sortie, mode avec sorties de titres) ne sont « Terminé » tant qu'il en reste.
 - **Lot 9 bis** (`20261114100101_master_file_requests`) : « Demander des fichiers » (décision du

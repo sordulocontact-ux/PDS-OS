@@ -7,8 +7,10 @@ import {
   type ProjectNavState,
 } from "@/components/projects/project-nav-list";
 import { ProjectSwitcher } from "@/components/projects/project-switcher";
+import { useCarriedTitle } from "@/components/projects/use-carried-title";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shell } from "@/lib/i18n/fr/shell";
+import { carryHref, type CarriedTitle } from "@/lib/projects/title-carry-rules";
 import { projectSections } from "@/lib/ui/project-sections";
 
 const fr = { shell };
@@ -27,15 +29,20 @@ export type ProjectNavProps = ProjectNavState & {
 };
 
 // The entries of the navigation: the hidden sections (Équipe, Planning,
-// Livrables, Fichiers) keep their routes, not an entry (decision C0).
-const navItems = ({
-  projectId,
-  canSeeLegal,
-  canSeeBudget = true,
-  workflows,
-  collective = false,
-  entries = {},
-}: ProjectNavProps) =>
+// Livrables, Fichiers) keep their routes, not an entry (decision C0). Inside
+// a collective's title, the other workflows worked by title open on it
+// (`carried`, lib/projects/title-carry-rules.ts).
+const navItems = (
+  {
+    projectId,
+    canSeeLegal,
+    canSeeBudget = true,
+    workflows,
+    collective = false,
+    entries = {},
+  }: ProjectNavProps,
+  carried: CarriedTitle | null,
+) =>
   projectSections(projectId, {
     legal: canSeeLegal,
     budget: canSeeBudget,
@@ -45,7 +52,11 @@ const navItems = ({
     .filter((section) => !section.hidden)
     .map((section) => ({
       ...section,
-      href: entries[section.key] ?? section.href,
+      href: carryHref(
+        section.key,
+        entries[section.key] ?? section.href,
+        carried,
+      ),
     }));
 
 // Contextual sidebar of a launched project, desktop only (proto « Projet
@@ -53,6 +64,7 @@ const navItems = ({
 // project switcher on a hairline, Vue d'ensemble and Cadrage, Workflows,
 // Pilotage. Same sticky geometry as the main Sidebar, right against it.
 export function ProjectSidebar(props: ProjectNavProps) {
+  const carried = useCarriedTitle(props.projectId, Boolean(props.collective));
   return (
     <ContextSidebar
       label={fr.shell.project.sidebar.label}
@@ -64,7 +76,7 @@ export function ProjectSidebar(props: ProjectNavProps) {
       }
     >
       <ProjectNavList
-        items={navItems(props)}
+        items={navItems(props, carried)}
         statuses={props.statuses}
         counts={props.counts}
         reasons={props.reasons}
@@ -113,9 +125,10 @@ export function ProjectSidebarMobileSkeleton() {
 
 // Small screens: the same entries as a row of chips above the content.
 export function ProjectSidebarMobile(props: ProjectNavProps) {
+  const carried = useCarriedTitle(props.projectId, Boolean(props.collective));
   return (
     <ProjectNavChips
-      items={navItems(props)}
+      items={navItems(props, carried)}
       statuses={props.statuses}
       counts={props.counts}
       reasons={props.reasons}

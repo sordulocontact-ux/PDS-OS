@@ -5699,9 +5699,10 @@ Ticket `PDSMIC-retours-ibe-18-11.md`. Migrations `20261121200101_collective_reca
     sur la page de contact `/c/`) et la modale le disent à la place du projet. Un dossier déjà transmis n'a pas
     `subject` : il nomme encore le projet. L'en-tête de la page de contact nomme toujours le projet
     (`get_contact_page`, SQL).
-  - **M10** : `defaultCollectiveRelease` (`lib/distribution/default-release.ts`) : sans `?sortie=`, la Distribution
-    d'un collectif ouvre sa seule sortie, sinon celle où une étape attend le lecteur, sinon une non finie ; le fil
-    propose les autres sorties sur la même étape. « Sorties » seulement sans aucune sortie.
+  - **M10** : `defaultCollectiveRelease` (`lib/distribution/default-release.ts`) : sans `?sortie=`, une **étape** de
+    la Distribution d'un collectif ouvre sa seule sortie, sinon celle où une étape attend le lecteur, sinon une non
+    finie ; le fil propose les autres sorties sur la même étape. **L'entrée** `/release` (28/11/2026) : la sortie du
+    titre nommé (`?titre=`), sinon la seule sortie (`onlyCollectiveRelease`), sinon « Sorties ».
   - **M12** : `distributionJourneys` rend un parcours par sortie active d'un collectif (`part` `release:<id>`,
     `RELEASE_PART`) : `countMine` compte ses « À vous » dans le menu ; `workflowCards` en fait une carte, celle de la
     sortie de l'action en cours, sinon la première non finie (`scope` = nom de la sortie).
@@ -5784,6 +5785,22 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   `/mastering`, `/final`, `/history` (filtre `?par=`, CSV). Historique reconstruit des tables
   (`lib/master-workflow/history.ts`), sans journal à part.
 - **Projet collectif, titre par titre** (lot 8 de `docs/pds-mic-plan.md`, 13/11/2026, sans migration) : pour un collectif seulement, chaque étape montre **un titre à la fois** (`?titre=<master>`), choisi dans le fil d'Ariane « Master ▸ titre ▸ étape » (`CrumbSwitcher` : les titres du Master dans l'ordre du projet, leur état Master en gris, coche du Master final, « Abandonné » ; recherche au-delà de 9) et gardé d'étape en étape (chevrons et `StepPanel` reçoivent l'URL avec `?titre`). `loadMasterTitleScope` (`lib/master-workflow/title-scope.ts`, nul pour tout autre projet) : titre de l'URL, sinon le premier dont une version attend une décision (Mixage, Mastering), la règle de la Source (`pickSourceTitle`), ou le premier titre vivant ; nom du titre dans le projet (jamais un nom provisoire). Filtré au titre actif : sources (Source), versions, retours, commentaires et décisions (`loadRoundStep(…, masterId)`, « Mix non nécessaire »), Master final et ses livrables (`FinalStep` avec `whole` pour le bilan de tous les titres). Restent ceux du projet : le Brief (décision 4), le paquet, le lien, le tarif, l'ingénieur, le fil, la facture, l'Historique ; « tout est validé » (`RoundStepView.finished`) compte tous les titres du tour. `/master?titre=` garde le titre jusqu'à l'étape ; la ligne d'un titre de « Titres et artistes » y mène. Un collectif de type Contenu a son Master dès qu'il a un titre au Catalogue (`applicableWorkflows`, inchangé). Projet simple : rien ne change (pas de segment de titre, pastilles de la Source). Test : `collective-master.test.sql`.
+- **Entrée des modules d'un collectif et titre gardé** (Sacha, 28/11/2026, proto « Entrée du Master », sans
+  migration ; remplace l'ouverture sur un titre choisi par le code et « Où en sont les titres » sous chaque étape,
+  `TitlesOverview` supprimé). `/master` d'un collectif rend `MasterTitlesPage` : en-tête « Master » (faits, « Brief »
+  avec son « À vous », « Demander des fichiers » du lot 9 bis pour le responsable, « Qui fait quoi »), puis
+  `ModuleScopesList` (`components/projects/tracks/`) : une ligne par titre vivant, sa carte Master de
+  `loadTitlesProgress` (`WorkflowProgress` : anneau, étape, « À vous »), le nom ouvrant l'étape du titre ; sans
+  audio, « Son attendu » sans lien. `/legal` d'un collectif (`collectiveEntry`) rend `LegalScopesPage` : « Projet »
+  puis chaque portée de `legalTitleLayout`, ouverte par `scopeEntry` ; avec « Projet » seul, l'entrée du parcours
+  comme avant. `/release` : voir M10. Un seul titre (ou une seule sortie) : redirection directe. Le menu du projet
+  ne précalcule plus l'entrée de ces trois modules pour un collectif (`moduleEntries(…, { collective })`) : il pointe
+  sur leur page, et le crumb du module revient à la liste. **Titre gardé d'un module à l'autre** :
+  `lib/projects/title-carry-rules.ts` (pur) lit le titre de l'adresse (`?titre=` d'un titre du projet ou de son
+  master, `?sortie=`, `/tracks/<id>`, `/legal/attach|title-contracts/<id>`) ; `useCarriedTitle` (client) et
+  `carryHref` ajoutent `?titre=` / `?sortie=` aux entrées **des deux autres** modules du menu (bureau et puces du
+  téléphone) ; le module où l'on est garde son entrée (sa liste). Chaque entrée résout le titre par
+  `carriedTitle` (`lib/projects/title-carry.ts`, serveur) : un titre abandonné ou la compilation donnent la liste.
 - **Source** (`source-step.ts`, `components/master-workflow/source/`, migration `20261019080101`) :
   versions candidates = maquettes et mises à plat, **la plus récente détectée** (proto, ticket § 1) ; un
   mix trouvé au Catalogue se propose comme mix final avec motif **obligatoire** (`declare_mix_final`
